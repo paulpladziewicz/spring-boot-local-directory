@@ -1,33 +1,32 @@
 package com.paulpladziewicz.fremontmi.models;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "Events")
+@Document
 public class Event {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    private String id;
     private String title;
+    private String start_time;
+    private String end_time;
+    private String place;
+    private String address;
     private String description;
-    private String location;
+    private String category;
+    private String recommended_category;
+    private String icon;
+    private String cancelled;
+    private String published;
+    private String url;
+    private String created;
+    private String updated;
 
-    @Column(name = "start_datetime")
-    private LocalDateTime startDateTime;
-
-    @Column(name = "end_datetime")
-    private LocalDateTime endDateTime;
-
-    private Integer priceRange;
-
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -39,6 +38,38 @@ public class Event {
         this.title = title;
     }
 
+    public String getStart_time() {
+        return start_time;
+    }
+
+    public void setStart_time(String start_time) {
+        this.start_time = start_time;
+    }
+
+    public String getEnd_time() {
+        return end_time;
+    }
+
+    public void setEnd_time(String end_time) {
+        this.end_time = end_time;
+    }
+
+    public String getPlace() {
+        return place;
+    }
+
+    public void setPlace(String place) {
+        this.place = place;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -47,35 +78,68 @@ public class Event {
         this.description = description;
     }
 
-    public String getLocation() {
-        return location;
+    public String getCategory() {
+        return category;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
-    public LocalDateTime getStartDateTime() {
-        return startDateTime;
+    public String getRecommended_category() {
+        return recommended_category;
     }
 
-    public void setStartDateTime(LocalDateTime startDateTime) {
-        this.startDateTime = startDateTime;
+    public void setRecommended_category(String recommended_category) {
+        this.recommended_category = recommended_category;
     }
 
-    public LocalDateTime getEndDateTime() {
-        return endDateTime;
+    public String getIcon() {
+        return icon;
     }
 
-    public void setEndDateTime(LocalDateTime endDateTime) {
-        this.endDateTime = endDateTime;
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 
-    public Integer getPriceRange() {
-        return priceRange;
+    public String getCancelled() {
+        return cancelled;
     }
 
-    public void setPriceRange(Integer priceRange) {
-        this.priceRange = priceRange;
+    public void setCancelled(String cancelled) {
+        this.cancelled = cancelled;
+    }
+
+    public String getPublished() {
+        return published;
+    }
+
+    public void setPublished(String published) {
+        this.published = published;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getCreated() {
+        return created;
+    }
+
+    public void setCreated(String created) {
+        this.created = created;
+    }
+
+    public String getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(String updated) {
+        this.updated = updated;
     }
 }
+
