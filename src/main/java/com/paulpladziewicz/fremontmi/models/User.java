@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Document(collation = "user")
+@Document(collection = "users")
 public class User implements UserDetails {
     @Id
     private String id;
