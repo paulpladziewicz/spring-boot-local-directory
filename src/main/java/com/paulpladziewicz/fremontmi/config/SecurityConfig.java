@@ -26,24 +26,14 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
-                        .requestMatchers("/", "/register", "/events", "/css/**", "/js/**", "/images/**").permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
-                        .loginProcessingUrl("/login")
-                        .usernameParameter("username")
-                        .passwordParameter("password")
-                        .defaultSuccessUrl("/my-events", true)
+                        .defaultSuccessUrl("/events", true)
                         .permitAll()
-                )
-                .logout(httpSecurityLogoutConfigurer -> httpSecurityLogoutConfigurer
-                        .logoutUrl("/logout")
-                        .permitAll()
-                        .clearAuthentication(true)
                 )
                 .csrf(AbstractHttpConfigurer::disable);
-
         return http.build();
     }
 

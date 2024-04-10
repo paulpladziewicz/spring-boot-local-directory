@@ -33,19 +33,14 @@ public class UserController {
     @RequestMapping(value="/register", method= RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String handleRegistration (@RequestBody MultiValueMap<String, String> formData) {
         UserRegistrationDto user = new UserRegistrationDto();
-        user.setPassword(formData.getFirst("firstName"));
-        user.setPassword(formData.getFirst("lastName"));
-        user.setPassword(formData.getFirst("email"));
+        user.setFirstName(formData.getFirst("firstName"));
+        user.setLastName(formData.getFirst("lastName"));
+        user.setEmail(formData.getFirst("email"));
         user.setPassword(formData.getFirst("password"));
-        logger.info("Received the following values {}", user.getPassword());
 
         userService.registerNewUserAccount(user);
-        return "my-events";
-    }
 
-    @GetMapping("/login")
-    public String loginView () {
-        return "login";
+        return "events";
     }
 
     @GetMapping("/forgotPassword")

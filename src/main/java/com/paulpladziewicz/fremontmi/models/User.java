@@ -26,11 +26,31 @@ public class User implements UserDetails {
     @NotEmpty
     private String password;
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    private String firstName;
+
+    private String lastName;
+
     private String created;
 
     private String updated;
 
-    private final Set<UserRole> userRoles = new HashSet<>();
+    private Set<UserRole> userRoles = new HashSet<>();
 
     public User () {
         userRoles.add(UserRole.valueOf("USER"));
@@ -111,7 +131,11 @@ public class User implements UserDetails {
     }
 
     public Set<UserRole> getUserRoles() {
-        return userRoles;
+        return this.userRoles;
+    }
+    public void setUserRoles(Set<UserRole> userRoles) {
+        this.userRoles = userRoles;
+
     }
 }
 

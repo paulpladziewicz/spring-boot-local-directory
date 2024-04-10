@@ -12,24 +12,4 @@ public class EventController {
     public String getAllEvents(Model model) {
         return "events";
     }
-
-    @GetMapping("/my-events")
-    public String getUserEvents(Model model) {
-        return "my-events";
-    }
-
-    @GetMapping("/create-event")
-    public String createEvent(Model model) {
-        return "events";
-    }
-
-    @GetMapping("/edit-event")
-    public String editEvent(Model model) {
-        return "events";
-    }
-
-    @PostMapping("/delete-event")
-    public String deleteEvent(Model model) {
-        return "events";
-    }
 }

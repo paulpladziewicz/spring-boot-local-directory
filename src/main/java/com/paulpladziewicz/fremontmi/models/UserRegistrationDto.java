@@ -15,6 +15,9 @@ public class UserRegistrationDto {
     @NotNull
     @NotEmpty
     private String password;
+
+    @NotNull
+    @NotEmpty
     private String matchingPassword;
 
     @NotNull

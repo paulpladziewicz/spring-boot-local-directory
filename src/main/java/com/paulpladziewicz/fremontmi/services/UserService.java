@@ -26,7 +26,8 @@ public class UserService {
         User user = new User();
         user.setUsername(registrationDto.getEmail());
         user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-        logger.info("About to call userRepository {} {}", user.getUsername(), user.getPassword());
+        user.setFirstName(registrationDto.getFirstName());
+        user.setLastName(registrationDto.getLastName());
 
         userRepository.save(user);
     }
