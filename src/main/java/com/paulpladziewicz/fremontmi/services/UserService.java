@@ -20,9 +20,9 @@ public class UserService {
     }
 
     public void registerNewUserAccount(UserRegistrationDto registrationDto) {
-//        if (userRepository.findByUsername(registrationDto.getEmail()) != null) {
-//            throw new RuntimeException("There is an account with that email address: " + registrationDto.getEmail());
-//        }
+        if (userRepository.findByUsername(registrationDto.getEmail()) != null) {
+            throw new RuntimeException("There is an account with that email address: " + registrationDto.getEmail());
+        }
         User user = new User();
         user.setUsername(registrationDto.getEmail());
         user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
