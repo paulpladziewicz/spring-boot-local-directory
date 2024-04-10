@@ -15,7 +15,7 @@ public class EventController {
 
     @GetMapping("/my-events")
     public String getUserEvents(Model model) {
-        return "events";
+        return "my-events";
     }
 
     @GetMapping("/create-event")
