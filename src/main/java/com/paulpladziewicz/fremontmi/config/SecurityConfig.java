@@ -1,8 +1,7 @@
-
 package com.paulpladziewicz.fremontmi.config;
 
 import com.paulpladziewicz.fremontmi.repositories.UserRepository;
-import com.paulpladziewicz.fremontmi.services.CustomUserDetailsService;
+import com.paulpladziewicz.fremontmi.services.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -47,8 +46,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(UserRepository userRepository) {
-        return new CustomUserDetailsService(userRepository);
+    public UserDetailsService userDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        return new UserService(userRepository, passwordEncoder);
     }
 
     @Bean

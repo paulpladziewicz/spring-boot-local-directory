@@ -1,28 +1,23 @@
 package com.paulpladziewicz.fremontmi.models;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public class UserRegistrationDto {
-    @NotNull
-    @NotEmpty
+
+    @NotBlank(message = "First name is required.")
     private String firstName;
 
-    @NotNull
-    @NotEmpty
+    @NotBlank(message = "Last name is required.")
     private String lastName;
 
-    @NotNull
-    @NotEmpty
+    @NotBlank(message = "Email is required.")
+    private String email;
+
+    @NotBlank(message = "Password is required.")
     private String password;
 
-    @NotNull
-    @NotEmpty
+    @NotBlank(message = "Matching password is required.")
     private String matchingPassword;
-
-    @NotNull
-    @NotEmpty
-    private String email;
 
     public String getFirstName() {
         return firstName;
@@ -40,6 +35,14 @@ public class UserRegistrationDto {
         this.lastName = lastName;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -54,13 +57,5 @@ public class UserRegistrationDto {
 
     public void setMatchingPassword(String matchingPassword) {
         this.matchingPassword = matchingPassword;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 }
