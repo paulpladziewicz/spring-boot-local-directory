@@ -74,4 +74,10 @@ public class UserController {
 
         return "forgot-password";
     }
+
+    @GetMapping("/reset-password")
+    public String resetPassword (Model model) {
+        model.addAttribute("resetPasswordDto", new EmailDto());
+        return "reset-password";
+    }
 }
