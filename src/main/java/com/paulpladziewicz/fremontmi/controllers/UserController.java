@@ -1,8 +1,13 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
+import com.paulpladziewicz.fremontmi.models.EmailDto;
 import com.paulpladziewicz.fremontmi.models.UserRegistrationDto;
 import com.paulpladziewicz.fremontmi.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -28,19 +33,45 @@ public class UserController {
     }
 
     @GetMapping("/register")
-    public String register () {
+    public String register (Model model) {
+        model.addAttribute("userRegistrationDto", new UserRegistrationDto());
         return "register";
     }
 
     @PostMapping("/register")
-    public String handleRegistration (@ModelAttribute UserRegistrationDto userRegistrationDto, BindingResult result) {
+    public String handleRegistration (@ModelAttribute("userRegistrationDto") @Valid UserRegistrationDto userRegistrationDto, BindingResult result, Model model, HttpServletRequest request) {
         if (result.hasErrors()) {
-            // Handle errors
+            model.addAttribute("userRegistrationDto", userRegistrationDto);
             return "register";
         }
 
-        userService.createUser(userRegistrationDto);
+        try {
+            userService.createUser(userRegistrationDto);
+        } catch (ValidationException e) {
+            result.rejectValue("matchingPassword", "Match", e.getMessage());
+            return "register";
+        }
 
-        return "redirect:/events";
+        return "redirect:/login";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPassword (Model model) {
+        model.addAttribute("emailDto", new EmailDto());
+        return "forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String handleForgotPassword (@ModelAttribute("emailDto") @Valid EmailDto emailDto, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("emailDto", emailDto);
+            return "forgot-password";
+        }
+
+        userService.forgotPassword(emailDto.getEmail());
+
+        model.addAttribute("tokenSent", true);
+
+        return "forgot-password";
     }
 }

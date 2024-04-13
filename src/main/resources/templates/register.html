@@ -3,29 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <title>Registration</title>
+    <link th:href="@{/css/styles.min.css}" rel="stylesheet">
 </head>
 <body>
 
-<h2>Registration</h2>
+<h2 class="display-4">Registration</h2>
 
-<form action="/register" method="post">
+<form th:action="@{/register}" th:object="${userRegistrationDto}" method="post">
     <label for="firstName">First Name:</label>
-    <input type="text" id="firstName" name="firstName" required><br>
+    <input type="text" id="firstName" name="firstName" th:field="*{firstName}" required><br>
+    <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
 
     <label for="lastName">Last Name:</label>
-    <input type="text" id="lastName" name="lastName" required><br>
+    <input type="text" id="lastName" name="lastName" th:field="*{lastName}" required><br>
+    <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
 
 
     <label for="email">Email:</label>
-    <input type="text" id="email" name="email" required><br>
+    <input type="text" id="email" name="email" th:field="*{email}" required><br>
+    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Password Error</span>
 
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" required><br>
+    <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password Error</span>
+
 
     <label for="matchingPassword">Confirm Password:</label>
     <input type="password" id="matchingPassword" name="matchingPassword" required><br>
+    <span th:if="${#fields.hasErrors('matchingPassword')}" th:errors="*{matchingPassword}">Matching Password Error</span>
 
-    <button type="submit">Register</button>
+
+    <button class="btn btn-primary" type="submit">Register</button>
 
 </form>
 

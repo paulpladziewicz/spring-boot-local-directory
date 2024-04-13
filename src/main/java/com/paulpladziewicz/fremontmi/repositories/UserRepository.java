@@ -8,4 +8,6 @@ public interface UserRepository extends MongoRepository<UserDto, String> {
 
     @Query("{username:'?0'}")
     UserDto findByUsername(String username);
+
+    UserDto findByResetPasswordToken(String token);
 }

@@ -3,6 +3,8 @@ package com.paulpladziewicz.fremontmi.models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.UUID;
+
 @Document(collection = "users")
 public class UserDto {
 
@@ -16,6 +18,8 @@ public class UserDto {
     private String username;
 
     private String password;
+
+    private String resetPasswordToken = UUID.randomUUID().toString();
 
     public String getId() {
         return id;
@@ -55,5 +59,13 @@ public class UserDto {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getResetPasswordToken() {
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String resetPasswordToken) {
+        this.resetPasswordToken = resetPasswordToken;
     }
 }
