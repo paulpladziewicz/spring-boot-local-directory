@@ -4,6 +4,7 @@ import com.paulpladziewicz.fremontmi.models.UserDto;
 import com.paulpladziewicz.fremontmi.models.UserRegistrationDto;
 import com.paulpladziewicz.fremontmi.repositories.UserRepository;
 import jakarta.validation.ValidationException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -67,6 +68,15 @@ public class UserService {
         Authentication authentication = authenticationManager.authenticate(authToken);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    public String getSignedInUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            return auth.getName();
+        }
+
+        return null;
     }
 
     private void validatePasswords(String password, String matchingPassword) throws ValidationException {
