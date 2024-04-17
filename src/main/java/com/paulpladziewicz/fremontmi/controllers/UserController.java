@@ -1,6 +1,7 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.EmailDto;
+import com.paulpladziewicz.fremontmi.models.ResetPasswordDto;
 import com.paulpladziewicz.fremontmi.models.UserRegistrationDto;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,7 +53,11 @@ public class UserController {
             return "register";
         }
 
-        return "redirect:/login";
+        model.addAttribute("autoLogin", true);
+        model.addAttribute("username", userRegistrationDto.getEmail());
+        model.addAttribute("password", userRegistrationDto.getPassword());
+
+        return "login";
     }
 
     @GetMapping("/forgot-password")
@@ -77,7 +82,13 @@ public class UserController {
 
     @GetMapping("/reset-password")
     public String resetPassword (Model model) {
-        model.addAttribute("resetPasswordDto", new EmailDto());
+        model.addAttribute("resetPasswordDto", new ResetPasswordDto());
+        return "reset-password";
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPasswordConfirmation (Model model) {
+        model.addAttribute("resetPasswordDto", new ResetPasswordDto());
         return "reset-password";
     }
 }
