@@ -1,0 +1,4 @@
+POST http://localhost:8080/login
+Content-Type: application/x-www-form-urlencoded
+
+username=ppladziewicz@gmail.com&password=Life@312
