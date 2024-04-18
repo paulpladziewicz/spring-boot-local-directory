@@ -13,20 +13,19 @@
 <body>
 <header th:insert="~{partials/header}"></header>
 <main class="container">
-    <h1>Upcoming Events</h1>
+    <h1>Groups</h1>
     <div class="container mt-4">
         <div class="row">
-            <div th:each="event : ${events}" class="col-md-4 mb-4">
+            <div th:each="group : ${groups}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title" th:text="${event.name}">Event Title</h5>
-                        <p class="card-text" th:text="${event.description}">Event Description</p>
+                        <h5 class="card-title" th:text="${group.name}">Event Title</h5>
+                        <p class="card-text" th:text="${group.description}">Event Description</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </main>
-
 </body>
 </html>

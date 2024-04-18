@@ -1,0 +1,12 @@
+### Retrieve all events created
+GET http://localhost:8080/api/events
+
+
+### Create a new event using authenticated session
+POST http://localhost:8080/api/events
+Content-Type: application/json
+
+{
+  "name": "Community Art Fair",
+  "description": "Join us for a day full of art, creativity, and community spirit! Local artists will display their works, and workshops will be available for all ages."
+}
