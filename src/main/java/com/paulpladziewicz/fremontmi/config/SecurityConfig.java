@@ -28,13 +28,13 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(HttpMethod.POST, "/register").permitAll()
-                        .requestMatchers("/groups", "/events", "/register", "/forgot-password","/reset-password", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/api/events","/api/groups","/groups", "/events", "/register", "/forgot-password","/reset-password", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
                         .permitAll()
-                        .defaultSuccessUrl("/", true)
+                        .defaultSuccessUrl("/dashboard/overview", true)
 
                 )
                 .logout(logout -> logout
