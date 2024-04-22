@@ -6,11 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -39,6 +35,19 @@ public class GroupController {
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     public Group createGroup(@Valid @RequestBody Group group) {
-        return groupService.createGroup(group);
+        return groupService.addGroup(group);
+    }
+
+    @PutMapping("/api/groups")
+    @ResponseBody
+    public Group updateGroup(@Valid @RequestBody Group group) {
+        return groupService.updateGroup(group);
+    }
+
+    @DeleteMapping("/api/groups/{id}")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteGroup(@PathVariable String id) {
+        groupService.deleteGroup(id);
     }
 }

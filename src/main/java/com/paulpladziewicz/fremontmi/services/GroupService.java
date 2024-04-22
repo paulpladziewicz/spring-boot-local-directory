@@ -19,7 +19,15 @@ public class GroupService {
         return groupRepository.findAll();
     }
 
-    public Group createGroup(Group group) {
+    public Group addGroup(Group group) {
         return groupRepository.save(group);
+    }
+
+    public Group updateGroup(Group group) {
+        return groupRepository.save(group);
+    }
+
+    public void deleteGroup(String id) {
+        groupRepository.deleteById(id);
     }
 }
