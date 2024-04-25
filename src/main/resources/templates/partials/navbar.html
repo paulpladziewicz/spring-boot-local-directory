@@ -31,9 +31,14 @@
                 </a>
             </div>
             <div sec:authorize="isAuthenticated()">
-                <a href="/dashboard/overview" class="btn btn-outline-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
-                    <i class="-login me-2 ms-n1"></i>
+                <a href="/dashboard/overview" class="btn btn-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
+                    <i class="ai-login me-2 ms-n1"></i>
                     My Dashboard
+                </a>
+
+                <a href="/logout" class="btn btn-outline-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
+                    <i class="ai-logout me-2 ms-n1"></i>
+                    Sign out
                 </a>
             </div>
         </nav>
