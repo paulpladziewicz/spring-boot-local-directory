@@ -1,25 +1,21 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-    <link th:href="@{/css/styles.min.css}" rel="stylesheet">
-    <link th:href="@{/css/around-icons.min.css}" rel="stylesheet">
-</head>
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="partials/head :: head('FremontMI - Home')"><title>Placeholder Title</title></head>
 <body>
-
 <main class="page-wrapper">
     <div class="d-lg-flex position-relative h-100">
 
-        <a class="text-nav btn btn-icon bg-light border rounded-circle position-absolute top-0 end-0 p-0 mt-3 me-3 mt-sm-4 me-sm-4" href="/" data-bs-toggle="tooltip" data-bs-placement="left" aria-label="Back to home" data-bs-original-title="Back to home">
+        <!-- Home button -->
+        <a class="text-nav btn btn-icon bg-light border rounded-circle position-absolute top-0 end-0 p-0 mt-3 me-3 mt-sm-4 me-sm-4" href="index.html" data-bs-toggle="tooltip" data-bs-placement="left" title="Back to home" aria-label="Back to home">
             <i class="ai-home"></i>
         </a>
 
+        <!-- Sign in form -->
         <div class="d-flex flex-column align-items-center w-lg-50 h-100 px-3 px-lg-5 pt-5">
             <div class="w-100 mt-auto" style="max-width: 526px;">
-                <h1>Sign In</h1>
+                <h1>Sign in to Around</h1>
                 <p class="pb-3 mb-3 mb-lg-4">Don't have an account yet?&nbsp;&nbsp;<a href="/register">Register here!</a></p>
-                <form class="needs-validation" novalidate="" th:action="@{/login}" method="post">
+                <form th:action="@{/login}" method="post">
                     <div class="pb-3 mb-3">
                         <div class="position-relative">
                             <i class="ai-mail fs-lg position-absolute top-50 start-0 translate-middle-y ms-3"></i>
@@ -37,18 +33,26 @@
                             </div>
                         </div>
                     </div>
-                    <div class="pb-4">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between pb-4">
+<!--                        <div class="form-check my-1">-->
+<!--                            <input class="form-check-input" type="checkbox" id="keep-signedin">-->
+<!--                            <label class="form-check-label ms-1" for="keep-signedin">Keep me signed in</label>-->
+<!--                        </div>-->
                         <a class="fs-sm fw-semibold text-decoration-none my-1" href="/forgot-password">Forgot password?</a>
                     </div>
                     <button class="btn btn-lg btn-primary w-100 mb-4" type="submit">Sign in</button>
                 </form>
             </div>
 
+            <!-- Copyright -->
+            <p class="nav w-100 fs-sm pt-5 mt-auto mb-5" style="max-width: 526px;"></p>
         </div>
 
-        <div class="w-50 bg-size-cover bg-repeat-0 bg-position-center" style="background-image: url(/images/cover.jpg);"></div>
+
+        <!-- Cover image -->
+        <div class="w-50 bg-size-cover bg-repeat-0 bg-position-center" style="background-image: url(images/cover.jpg);"></div>
     </div>
 </main>
-
+<script th:replace="partials/theme-js"></script>
 </body>
 </html>

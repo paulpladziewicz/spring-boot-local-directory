@@ -1,0 +1,41 @@
+<header th:fragment="headerFragment" class="navbar navbar-expand-lg bg-light"
+        xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+    <div class="container">
+        <a href="/" class="navbar-brand">
+            FremontMI
+        </a>
+        <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse1"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <nav class="collapse navbar-collapse" id="navbarCollapse1">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a href="/#things-to-do" class="nav-link">Things to do</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/groups" class="nav-link">Groups</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/events" class="nav-link">Events</a>
+                </li>
+            </ul>
+            <div sec:authorize="!isAuthenticated()">
+                <a href="/register" class="btn btn-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
+                    <i class="ai-user me-2 ms-n1"></i>
+                    Register
+                </a>
+                <a href="/login" class="btn btn-outline-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
+                    <i class="ai-login me-2 ms-n1"></i>
+                    Sign in
+                </a>
+            </div>
+            <div sec:authorize="isAuthenticated()">
+                <a href="/dashboard/overview" class="btn btn-outline-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
+                    <i class="-login me-2 ms-n1"></i>
+                    My Dashboard
+                </a>
+            </div>
+        </nav>
+    </div>
+</header>

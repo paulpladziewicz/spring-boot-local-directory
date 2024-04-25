@@ -1,5 +1,8 @@
 package com.paulpladziewicz.fremontmi.models;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,39 +14,35 @@ public class Event {
     @Id
     private String id;
 
+    @NotBlank(message = "Event name must not be null")
+    @Size(min = 3, max = 100, message = "Event name must be between 3 and 100 characters")
     private String name;
 
+    @NotBlank(message = "Description must not be null")
+    @Size(max = 500, message = "Description can't be longer than 500 characters")
     private String description;
 
     private List<String> tags;
+
+    private String locationName;
+
+    private String address;
 
     private LocalDateTime startTime;
 
     private LocalDateTime endTime;
 
-    private boolean isAllDay;
-
-    private boolean isFree;
-
-    private Double cost;
-
-    private int capacity;
-
-    private boolean registrationRequired;
-
     private LocalDateTime registrationStart;
 
     private LocalDateTime registrationEnd;
 
-    private String location;
+    private Double cost;
 
-    private String address;
+    private String status = "active";
 
-    private String status;
+    private String visibility = "public";
 
-    private String visibility;
-
-    private boolean cancelled;
+    private String joinPolicy = "open";
 
     private String organizerId;
 
@@ -85,6 +84,22 @@ public class Event {
         this.tags = tags;
     }
 
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public LocalDateTime getStartTime() {
         return startTime;
     }
@@ -99,46 +114,6 @@ public class Event {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
-    }
-
-    public boolean isAllDay() {
-        return isAllDay;
-    }
-
-    public void setAllDay(boolean allDay) {
-        isAllDay = allDay;
-    }
-
-    public boolean isFree() {
-        return isFree;
-    }
-
-    public void setFree(boolean free) {
-        isFree = free;
-    }
-
-    public Double getCost() {
-        return cost;
-    }
-
-    public void setCost(Double cost) {
-        this.cost = cost;
-    }
-
-    public int getCapacity() {
-        return capacity;
-    }
-
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
-    }
-
-    public boolean isRegistrationRequired() {
-        return registrationRequired;
-    }
-
-    public void setRegistrationRequired(boolean registrationRequired) {
-        this.registrationRequired = registrationRequired;
     }
 
     public LocalDateTime getRegistrationStart() {
@@ -157,20 +132,12 @@ public class Event {
         this.registrationEnd = registrationEnd;
     }
 
-    public String getLocation() {
-        return location;
+    public Double getCost() {
+        return cost;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public void setCost(Double cost) {
+        this.cost = cost;
     }
 
     public String getStatus() {
@@ -189,12 +156,12 @@ public class Event {
         this.visibility = visibility;
     }
 
-    public boolean isCancelled() {
-        return cancelled;
+    public String getJoinPolicy() {
+        return joinPolicy;
     }
 
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
+    public void setJoinPolicy(String joinPolicy) {
+        this.joinPolicy = joinPolicy;
     }
 
     public String getOrganizerId() {
