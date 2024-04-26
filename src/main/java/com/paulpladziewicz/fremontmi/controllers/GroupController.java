@@ -25,6 +25,12 @@ public class GroupController {
         return "groups";
     }
 
+    @GetMapping("/groups/{id}")
+    public String displayGroup(@PathVariable String id, Model model) {
+        model.addAttribute("id", id);
+        return "group-page";
+    }
+
     @GetMapping("/api/groups")
     @ResponseBody
     public List<Group> getAllGroups() {

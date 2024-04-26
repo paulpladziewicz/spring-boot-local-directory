@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
                 .requestMatchers(HttpMethod.PUT).permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/api/**").permitAll()
-                .requestMatchers("/api/events", "/api/groups", "/groups", "/events", "/register", "/forgot-password", "/reset-password", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/api/events", "/api/groups", "/groups", "/groups/**","/events", "/register", "/forgot-password", "/reset-password", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
         );
         http.formLogin(formLogin -> formLogin

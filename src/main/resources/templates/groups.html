@@ -13,13 +13,7 @@
                     <div class="card-body">
                         <h4 class="card-title" th:text="${group.name}">Card title</h4>
                         <p class="card-text text-body-secondary" th:text="${group.description}">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                        <div sec:authorize="!isAuthenticated()">
-                            <a href="/register">Register to join
-                            </a>
-                        </div>
-                        <div sec:authorize="isAuthenticated()">
-                            <a href="#" class="btn btn-primary">Join</a>
-                        </div>
+                        <a th:href="'/groups/' + ${group.id}" class="btn btn-primary">View</a>
                     </div>
                 </div>
             </div>
@@ -28,6 +22,7 @@
     </div>
 </main>
 <footer th:replace="partials/footer"></footer>
+<script th:replace="partials/theme-js"></script>
 </body>
 </html>
 
