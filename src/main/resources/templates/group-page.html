@@ -10,19 +10,17 @@
             <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores aut beatae blanditiis consectetur cupiditate dicta, dolores eius et eum expedita fugit itaque laborum minus mollitia natus neque nisi nobis nostrum obcaecati odit perferendis placeat porro quam quasi repellat, repellendus, rerum saepe sed sint soluta tempore unde velit voluptate. A assumenda blanditiis labore laboriosam mollitia natus non, veniam! Animi, aspernatur cum eius eligendi eum fugiat inventore quaerat quam qui sequi. Dolores enim expedita libero perferendis perspiciatis praesentium quibusdam velit? Ad, aliquid debitis deleniti dicta facilis fugit magnam obcaecati tempora. Accusantium aperiam cum cupiditate delectus doloribus error libero, odio pariatur perferendis qui.</p>
             <p>3 Administrators - 20 Members</p>
             <button class="btn btn-primary" sec:authorize="isAuthenticated()">Join Group</button>
-            <a class="link-primary" href="/register" sec:authorize="!isAuthenticated()">Register to join</a>
+            <p sec:authorize="!isAuthenticated()"><a class="link-primary" href="/register">Register</a> or <a
+                    href="/login">Login</a> to join.</p>
         </section>
         <section class="mb-4">
             <h2>Events</h2>
-            <p>There are currently no events scheduled with this group.</p>
+            <p>There are currently no public events scheduled with this group.</p>
         </section>
         <section class="mb-4">
-            <h2>Announcements</h2>
-            <p>No current announcements.</p>
-        </section>
-        <section class="mb-4">
-            <h2>Messages</h2>
-            <p>No current messages.</p>
+            <h2>Announcements & Posts</h2>
+            <p>Please navigate to the member view to see announcements and posts.</p>
+            <a th:href="'/my/groups/' + ${id}" class="btn btn-outline-primary">Member View</a>
         </section>
 
     </div>

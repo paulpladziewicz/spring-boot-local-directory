@@ -19,7 +19,7 @@ public class Group {
     private String name;
 
     @NotNull(message = "Description must not be null")
-    @Size(max = 500, message = "Description can't be longer than 500 characters")
+    @Size(max = 5000, message = "Description can't be longer than 5000 characters")
     private String description;
 
     private String imageUrl;
