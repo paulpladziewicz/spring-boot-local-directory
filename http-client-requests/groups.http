@@ -10,3 +10,6 @@ Content-Type: application/json
   "name": "Example Group",
   "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores aut beatae blanditiis consectetur cupiditate dicta, dolores eius et eum expedita fugit itaque laborum minus mollitia natus neque nisi nobis nostrum obcaecati odit perferendis placeat porro quam quasi repellat, repellendus, rerum saepe sed sint soluta tempore unde velit voluptate. A assumenda blanditiis labore laboriosam mollitia natus non, veniam! Animi, aspernatur cum eius eligendi eum fugiat inventore quaerat quam qui sequi. Dolores enim expedita libero perferendis perspiciatis praesentium quibusdam velit? Ad, aliquid debitis deleniti dicta facilis fugit magnam obcaecati tempora. Accusantium aperiam cum cupiditate delectus doloribus error libero, odio pariatur perferendis qui."
 }
+
+###
+GET http://localhost:8080/api/groups/user

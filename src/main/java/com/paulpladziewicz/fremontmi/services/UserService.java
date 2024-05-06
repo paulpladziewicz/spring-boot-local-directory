@@ -1,7 +1,9 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.models.UserDetailsDto;
 import com.paulpladziewicz.fremontmi.models.UserDto;
 import com.paulpladziewicz.fremontmi.models.UserRegistrationDto;
+import com.paulpladziewicz.fremontmi.repositories.UserDetailsRepository;
 import com.paulpladziewicz.fremontmi.repositories.UserRepository;
 import jakarta.validation.ValidationException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -12,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -19,17 +22,17 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    private final PasswordEncoder passwordEncoder;
+    private final UserDetailsRepository userDetailsRepository;
 
-    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
     private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService, UserDetailsRepository userDetailsRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
         this.emailService = emailService;
+        this.userDetailsRepository = userDetailsRepository;
     }
 
     public void createUser(UserRegistrationDto userRegistrationDto) {
@@ -39,35 +42,31 @@ public class UserService {
 
         validatePasswords(userRegistrationDto.getPassword(), userRegistrationDto.getMatchingPassword());
 
-        UserDto newUser = new UserDto();
-        newUser.setFirstName(userRegistrationDto.getFirstName());
-        newUser.setLastName(userRegistrationDto.getLastName());
-        newUser.setUsername(userRegistrationDto.getEmail());
-        newUser.setPassword(passwordEncoder.encode(userRegistrationDto.getPassword()));
+        UserDto newUserDto = new UserDto();
+        newUserDto.setUsername(userRegistrationDto.getEmail());
+        newUserDto.setPassword(passwordEncoder.encode(userRegistrationDto.getPassword()));
 
-        userRepository.save(newUser);
+        UserDto savedUser = userRepository.save(newUserDto);
 
-        authenticateUser(newUser.getUsername(), newUser.getPassword());
+        UserDetailsDto userDetails = new UserDetailsDto();
+        userDetails.setUsername(savedUser.getUsername());
+        userDetails.setEmail(userRegistrationDto.getEmail());
+        userDetails.setFirstName(userRegistrationDto.getFirstName());
+        userDetails.setLastName(userRegistrationDto.getLastName());
+
+        userDetailsRepository.save(userDetails);
     }
 
     public void forgotPassword(String email) {
-        UserDto user = userRepository.findByUsername(email);
+        UserDto userDto = userRepository.findByUsername(email);
 
-        if (user != null) {
+        if (userDto != null) {
             String token = UUID.randomUUID().toString();
-            user.setResetPasswordToken(token);
-            userRepository.save(user);
+            userDto.setResetPasswordToken(token);
+            userRepository.save(userDto);
 
-            emailService.sendSimpleMessage(user.getUsername(), "Reset your password", "To reset your password, click here: " + "http://localhost:8080/reset-password?token=" + token);
+            emailService.sendSimpleMessage(userDto.getUsername(), "Reset your password", "To reset your password, click here: " + "http://localhost:8080/reset-password?token=" + token);
         }
-    }
-
-    private void authenticateUser(String username, String password) {
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password);
-
-        Authentication authentication = authenticationManager.authenticate(authToken);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     public String getSignedInUser() {
@@ -77,6 +76,11 @@ public class UserService {
         }
 
         return null;
+    }
+
+    public Optional<UserDetailsDto> getUserDetails() {
+        String username = getSignedInUser();
+        return userDetailsRepository.findById(username);
     }
 
     private void validatePasswords(String password, String matchingPassword) throws ValidationException {

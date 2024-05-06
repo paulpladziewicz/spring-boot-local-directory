@@ -22,7 +22,7 @@
             </ul>
             <div sec:authorize="!isAuthenticated()">
                 <a href="/register" class="btn btn-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
-                    <i class="ai-user me-2 ms-n1"></i>
+                    <i class="ai-userDto me-2 ms-n1"></i>
                     Register
                 </a>
                 <a href="/login" class="btn btn-outline-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
@@ -31,7 +31,7 @@
                 </a>
             </div>
             <div sec:authorize="isAuthenticated()">
-                <a href="/dashboard/overview" class="btn btn-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
+                <a href="/my/overview" class="btn btn-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
                     <i class="ai-login me-2 ms-n1"></i>
                     My Dashboard
                 </a>

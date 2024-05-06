@@ -1,10 +1,7 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.models.EmailDto;
-import com.paulpladziewicz.fremontmi.models.ResetPasswordDto;
-import com.paulpladziewicz.fremontmi.models.UserRegistrationDto;
+import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import org.springframework.stereotype.Controller;
@@ -13,6 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Optional;
 
 @Controller
 public class UserController {
@@ -40,7 +40,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String handleRegistration (@ModelAttribute("userRegistrationDto") @Valid UserRegistrationDto userRegistrationDto, BindingResult result, Model model, HttpServletRequest request) {
+    public String handleRegistration (@ModelAttribute("userRegistrationDto") @Valid UserRegistrationDto userRegistrationDto, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("userRegistrationDto", userRegistrationDto);
             return "register";
@@ -52,12 +52,7 @@ public class UserController {
             result.rejectValue("matchingPassword", "Match", e.getMessage());
             return "register";
         }
-
-        model.addAttribute("autoLogin", true);
-        model.addAttribute("username", userRegistrationDto.getEmail());
-        model.addAttribute("password", userRegistrationDto.getPassword());
-
-        return "login";
+        return "redirect:login";
     }
 
     @GetMapping("/forgot-password")
@@ -90,5 +85,11 @@ public class UserController {
     public String resetPasswordConfirmation (Model model) {
         model.addAttribute("resetPasswordDto", new ResetPasswordDto());
         return "reset-password";
+    }
+
+    @GetMapping("/api/user")
+    @ResponseBody
+    public Optional<UserDetailsDto> getUserDetails() {
+        return userService.getUserDetails();
     }
 }

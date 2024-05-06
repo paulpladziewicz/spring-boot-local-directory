@@ -1,34 +1,5 @@
-<head th:replace="partials/head :: head('FremontMI - Register')"><title>d</title></head>
+<head th:replace="~{partials/head :: head('FremontMI - Register')}"><title>d</title></head>
 <body>
-
-<h2 class="display-4">Registration</h2>
-
-<form th:action="@{/register}" th:object="${userRegistrationDto}" method="post">
-    <label for="firstName">First Name:</label>
-    <input type="text" id="firstName" name="firstName" th:field="*{firstName}" required><br>
-    <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
-
-    <label for="lastName">Last Name:</label>
-    <input type="text" id="lastName" name="lastName" th:field="*{lastName}" required><br>
-    <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
-
-
-
-
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required><br>
-    <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password Error</span>
-
-
-    <label for="matchingPassword">Confirm Password:</label>
-    <input type="password" id="matchingPassword" name="matchingPassword" required><br>
-    <span th:if="${#fields.hasErrors('matchingPassword')}" th:errors="*{matchingPassword}">Matching Password Error</span>
-
-
-    <button class="btn btn-primary" type="submit">Register</button>
-
-</form>
-
 <div class="d-lg-flex position-relative h-100">
 
     <!-- Home button -->
@@ -43,11 +14,13 @@
             <p class="pb-3 mb-3 mb-lg-4">Have an account already?&nbsp;&nbsp;<a href="account-signin.html">Sign in here!</a></p>
             <form th:action="@{/register}" th:object="${userRegistrationDto}" method="post">
                 <div class="row row-cols-1 row-cols-sm-2">
-                    <div class="col mb-4">
-                        <input class="form-control form-control-lg" type="text" placeholder="First name" required>
+                    <div class="col">
+                        <input class="form-control form-control-lg" type="text" name="firstName" th:field="*{firstName}" placeholder="First name" required><br>
+                        <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
                     </div>
-                    <div class="col mb-4">
-                        <input class="form-control form-control-lg" type="email" placeholder="Last Name" required>
+                    <div class="col">
+                        <input class="form-control form-control-lg" type="text" id="lastName" name="lastName" th:field="*{lastName}" placeholder="Last name" required><br>
+                        <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
                     </div>
                 </div>
                 <div>
@@ -55,18 +28,20 @@
                     <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Password Error</span>
                 </div>
                 <div class="password-toggle mb-4">
-                    <input class="form-control form-control-lg" type="password" placeholder="Password" required>
+                    <input class="form-control form-control-lg" type="password" name="password" placeholder="Password" required>
                     <label class="password-toggle-btn" aria-label="Show/hide password">
                         <input class="password-toggle-check" type="checkbox">
                         <span class="password-toggle-indicator"></span>
                     </label>
+                    <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password Error</span>
                 </div>
                 <div class="password-toggle mb-4">
-                    <input class="form-control form-control-lg" type="password" placeholder="Confirm password" required>
+                    <input class="form-control form-control-lg" type="password" name="matchingPassword" placeholder="Confirm password" required>
                     <label class="password-toggle-btn" aria-label="Show/hide password">
                         <input class="password-toggle-check" type="checkbox">
                         <span class="password-toggle-indicator"></span>
                     </label>
+                    <span th:if="${#fields.hasErrors('matchingPassword')}" th:errors="*{matchingPassword}">Matching Password Error</span>
                 </div>
                 <div class="pb-4">
                     <div class="form-check my-2">
@@ -87,6 +62,6 @@
     <!-- Cover image -->
     <div class="w-50 bg-size-cover bg-repeat-0 bg-position-center" style="background-image: url(images/cover.jpg);"></div>
 </div>
-<script th:replace="partials/theme-js"></script>
+<script th:replace="~{partials/theme-js}"></script>
 </body>
 </html>
