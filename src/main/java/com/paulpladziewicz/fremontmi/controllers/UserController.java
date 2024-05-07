@@ -55,6 +55,24 @@ public class UserController {
         return "redirect:login";
     }
 
+    @GetMapping("/my/settings")
+    public String settings (Model model) {
+        model.addAttribute("userDetails", userService.getUserDetails());
+        return "dashboard-settings";
+    }
+
+    @PostMapping("/my/settings")
+    public String updateSettings (@ModelAttribute("settingsDto") @Valid SettingsDto settingsDto, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("userDetails", settingsDto);
+            return "dashboard-settings";
+        }
+        UserDetailsDto updatedUserDetails = userService.updateUserDetails(settingsDto);
+        model.addAttribute("userDetails", updatedUserDetails);
+        model.addAttribute("isSuccess", true);
+        return "dashboard-settings";
+    }
+
     @GetMapping("/forgot-password")
     public String forgotPassword (Model model) {
         model.addAttribute("emailDto", new EmailDto());

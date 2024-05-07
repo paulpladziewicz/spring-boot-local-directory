@@ -22,6 +22,10 @@ public class GroupService {
         return groupRepository.findAll();
     }
 
+    public Group findGroupById(String id) {
+        return groupRepository.findById(id).orElse(null);
+    }
+
     public List<GroupDetailsDto> findGroupsForUser(List<String> memberGroupIds, List<String> adminGroupIds) {
         List<String> allGroupIds = new ArrayList<>(memberGroupIds);
         allGroupIds.addAll(adminGroupIds);

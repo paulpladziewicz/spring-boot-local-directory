@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - My Dashboard')}"><title>Placeholder Title</title></head>
+<body class="bg-secondary">
+<header th:insert="~{partials/navbar}"></header>
+
+<div class="container mt-4">
+    <div class="row flex-column flex-md-row">
+        <aside th:replace="~{partials/dashboard-nav :: nav}"></aside>
+        <aside class="col-md-10 px-md-4">
+            <h1 class="display-3 mb-0">Overview</h1>
+            <p class="fs-3">Welcome to your FremontMI Dashboard!</p>
+
+            <h2>Create Content</h2>
+            <p>You'll primarily be using this space to create content that will be displayed on the community
+                platform.</p>
+            <div class="alert alert-primary" role="alert">
+                Please only create content (Groups, Events, etc.) related to Fremont, MI.
+            </div>
+
+            <h2>Update Settings</h2>
+            <p>You'll primarily be using this space to create content that will be displayed on the community
+                platform.</p>
+
+            <h2>We're Just Getting Started</h2>
+            <p>You'll continue to see new features here as we grow the platform.</p>
+            <p>Thank you for your support!</p>
+        </aside>
+    </div>
+</div>
+
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>
+
+
+

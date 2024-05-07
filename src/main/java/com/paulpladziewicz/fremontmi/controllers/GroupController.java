@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,16 +29,46 @@ public class GroupController {
         return "groups";
     }
 
+    @GetMapping("/my/groups")
+    public String groups(Model model) {
+        model.addAttribute("groups", groupService.findAll());
+        return "dashboard-groups";
+    }
+
+    @GetMapping("/my/groups/create")
+    public String createGroup(Model model) {
+        model.addAttribute("group", new Group());
+        return "dashboard/create-group";
+    }
+
+    @PostMapping("/my/groups/create")
+    public String submitCreateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "dashboard/create-group";
+        }
+
+        Group savedGroup = groupService.addGroup(group);
+
+        model.addAttribute("successMessage", "Group created successfully!");
+        return "redirect:/my/groups/" + savedGroup.getId();
+    }
+
+
+    @GetMapping("/my/groups/{id}")
+    public String memberGroupView(@PathVariable String id, Model model) {
+        model.addAttribute("groups", groupService.findGroupById(id));
+        return "dashboard-group-member";
+    }
+
+    @GetMapping("/my/groups/admin/{id}")
+    public String adminGroupView(@PathVariable String id) {
+        return "dashboard-angular";
+    }
+
     @GetMapping("/groups/{id}")
     public String displayGroup(@PathVariable String id, Model model) {
         model.addAttribute("id", id);
         return "group-page";
-    }
-
-    @GetMapping("/my/groups/{id}")
-    public String displayMyGroup(@PathVariable String id, Model model) {
-        model.addAttribute("id", id);
-        return "dashboard";
     }
 
     @GetMapping("/api/groups")

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - My Dashboard')}"><title>Placeholder Title</title></head>
+<body class="bg-secondary">
+<header th:insert="~{partials/navbar}"></header>
+
+<div class="container mt-4">
+    <div class="row flex-column flex-md-row">
+        <aside th:replace="~{partials/dashboard-nav :: nav}"></aside>
+        <aside class="col-md-10 px-md-4">
+            <div >
+                <section>
+                    <h1 class="display-4" th:text="${groups.name}">Group Name</h1>
+                    <p th:text="${groups.description}">Group description here...</p>
+                    <p th:text="'Status: ' + ${groups.status}">Status</p>
+                    <p th:text="'Visibility: ' + ${groups.visibility}">Visibility</p>
+                    <p th:text="'Join Policy: ' + ${groups.joinPolicy}">Join Policy</p>
+                </section>
+                <section class="mb-4">
+                    <h2>Events</h2>
+                    <p>Check out the upcoming events related to this group.</p>
+                </section>
+                <section class="mb-4">
+                    <h2>Announcements & Posts</h2>
+                </section>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>

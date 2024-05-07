@@ -13,10 +13,8 @@ public class DashboardController {
         this.userService = userService;
     }
 
-    @GetMapping("/my/**")
-    public String dashboard() {
-        String user = userService.getSignedInUser();
-        System.out.println(user);
-        return "dashboard";
+    @GetMapping("/my/overview")
+    public String overview() {
+        return "dashboard/overview";
     }
 }
