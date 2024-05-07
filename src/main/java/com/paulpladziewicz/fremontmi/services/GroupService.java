@@ -59,7 +59,7 @@ public class GroupService {
                 .collect(Collectors.toList());
     }
 
-    public Group addGroup(Group group) {
+    public Group addGroup (Group group) {
         Optional<UserDetailsDto> userDetailsOpt = userService.getUserDetails();
 
         if (!userDetailsOpt.isPresent()) {
@@ -97,11 +97,38 @@ public class GroupService {
         return savedGroup;
     }
 
-    public Group updateGroup(Group group) {
+    public void joinGroup (String groupId) {
+        Optional<UserDetailsDto> userDetailsOpt = userService.getUserDetails();
+        Group group = findGroupById(groupId);
+
+        if (!userDetailsOpt.isPresent()) {
+            throw new IllegalStateException("User details not found");
+        }
+
+        UserDetailsDto userDetails = userDetailsOpt.get();
+
+        List<String> members = new ArrayList<>(group.getMembers());
+
+        members.add(userDetails.getUsername());
+
+        group.setMembers(members);
+
+        Group savedGroup = groupRepository.save(group);
+
+        List<String> groupIds = new ArrayList<>(userDetails.getGroupIds());
+
+        groupIds.add(savedGroup.getId());
+
+        userDetails.setGroupIds(groupIds);
+
+        userService.saveUserDetails(userDetails);
+    }
+
+    public Group updateGroup (Group group) {
         return groupRepository.save(group);
     }
 
-    public void deleteGroup(String id) {
+    public void deleteGroup (String id) {
         groupRepository.deleteById(id);
     }
 }

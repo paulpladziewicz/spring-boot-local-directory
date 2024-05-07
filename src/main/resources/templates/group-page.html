@@ -1,15 +1,20 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
-<head th:replace="partials/head :: head('FremontMI - Groups')"><title>Placeholder Title</title></head>
-<body>
+<head th:replace="~{partials/head :: head('FremontMI - My Dashboard')}"><title>Placeholder Title</title></head>
+<body class="bg-secondary">
 <header th:insert="~{partials/navbar}"></header>
+
 <main class="bg-secondary">
     <div class="container mt-4">
-        <section class="mb-4">
-            <h1 class="display-3">Group Name</h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores aut beatae blanditiis consectetur cupiditate dicta, dolores eius et eum expedita fugit itaque laborum minus mollitia natus neque nisi nobis nostrum obcaecati odit perferendis placeat porro quam quasi repellat, repellendus, rerum saepe sed sint soluta tempore unde velit voluptate. A assumenda blanditiis labore laboriosam mollitia natus non, veniam! Animi, aspernatur cum eius eligendi eum fugiat inventore quaerat quam qui sequi. Dolores enim expedita libero perferendis perspiciatis praesentium quibusdam velit? Ad, aliquid debitis deleniti dicta facilis fugit magnam obcaecati tempora. Accusantium aperiam cum cupiditate delectus doloribus error libero, odio pariatur perferendis qui.</p>
+        <section>
+            <h1 class="display-4" th:text="${group.name}">Group Name</h1>
+            <p th:text="${group.description}">Group description here...</p>
+            <p th:text="'Status: ' + ${group.status}">Status</p>
             <p>3 Administrators - 20 Members</p>
-            <button class="btn btn-primary" sec:authorize="isAuthenticated()">Join Group</button>
+            <form th:action="@{/groups/join}" method="post">
+                <input type="hidden" name="groupId" th:value="${group.id}" />
+                <button type="submit" class="btn btn-primary" sec:authorize="isAuthenticated()">Join Group</button>
+            </form>
             <p sec:authorize="!isAuthenticated()"><a class="link-primary" href="/register">Register</a> or <a
                     href="/login">Login</a> to join.</p>
         </section>
@@ -20,12 +25,11 @@
         <section class="mb-4">
             <h2>Announcements & Posts</h2>
             <p>Please navigate to the member view to see announcements and posts.</p>
-            <a th:href="'/my/groups/' + ${id}" class="btn btn-outline-primary">Member View</a>
+            <a th:href="'/my/groups/' + ${group.id}" class="btn btn-outline-primary">Member View</a>
         </section>
-
     </div>
 </main>
-<footer th:replace="~{partials/footer}"></footer>
+
 <script th:replace="~{partials/theme-js}"></script>
 </body>
 </html>

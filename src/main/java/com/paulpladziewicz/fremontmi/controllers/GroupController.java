@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class GroupController {
 
     private final GroupService groupService;
 
-    public GroupController(GroupService groupService, UserDetailsService userDetailsService) {
+    public GroupController(GroupService groupService) {
         this.groupService = groupService;
     }
 
@@ -25,6 +26,21 @@ public class GroupController {
     public String displayGroups(Model model) {
         model.addAttribute("groups", groupService.findAll());
         return "groups";
+    }
+
+    @GetMapping("/groups/{id}")
+    public String displayGroup(@PathVariable String id, Model model) {
+        model.addAttribute("group", groupService.findGroupById(id));
+        return "group-page";
+    }
+
+    @PostMapping("/groups/join")
+    public String joinGroup(@RequestParam("groupId") String groupId, RedirectAttributes redirectAttributes) {
+        groupService.joinGroup(groupId);
+        redirectAttributes.addFlashAttribute("successMessage", "You have successfully joined the group!");
+
+
+        return "redirect:/groups/" + groupId;
     }
 
     @GetMapping("/my/groups")
@@ -38,6 +54,7 @@ public class GroupController {
             return "home";
         }
     }
+
 
     @GetMapping("/my/groups/create")
     public String createGroup(Model model) {
@@ -68,11 +85,4 @@ public class GroupController {
     public String adminGroupView(@PathVariable String id) {
         return "dashboard-angular";
     }
-
-    @GetMapping("/groups/{id}")
-    public String displayGroup(@PathVariable String id, Model model) {
-        model.addAttribute("id", id);
-        return "group-page";
-    }
-
 }
