@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="partials/head :: head('FremontMI - Groups')"><title>Placeholder Title</title></head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
@@ -21,8 +21,8 @@
     </div>
     </div>
 </main>
-<footer th:replace="partials/footer"></footer>
-<script th:replace="partials/theme-js"></script>
+<footer th:replace="`{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
 </body>
 </html>
 

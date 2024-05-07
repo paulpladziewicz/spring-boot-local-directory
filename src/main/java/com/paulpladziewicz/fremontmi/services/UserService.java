@@ -1,6 +1,5 @@
 package com.paulpladziewicz.fremontmi.services;
 
-import com.paulpladziewicz.fremontmi.models.SettingsDto;
 import com.paulpladziewicz.fremontmi.models.UserDetailsDto;
 import com.paulpladziewicz.fremontmi.models.UserDto;
 import com.paulpladziewicz.fremontmi.models.UserRegistrationDto;
@@ -82,13 +81,17 @@ public class UserService {
         return userDetailsRepository.findById(username);
     }
 
+    public void saveUserDetails(UserDetailsDto userDetails) {
+        userDetailsRepository.save(userDetails);
+    }
+
     private void validatePasswords(String password, String matchingPassword) throws ValidationException {
         if (password == null || !password.equals(matchingPassword)) {
             throw new ValidationException("Passwords must match.");
         }
     }
 
-    public UserDetailsDto updateUserDetails(SettingsDto newDetails) {
+    public UserDetailsDto updateUserDetails(UserDetailsDto newDetails) {
         String username = getSignedInUser();
         Optional<UserDetailsDto> existingDetails = userDetailsRepository.findById(username);
         if (existingDetails.isPresent()) {

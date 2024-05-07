@@ -62,12 +62,12 @@ public class UserController {
     }
 
     @PostMapping("/my/settings")
-    public String updateSettings (@ModelAttribute("settingsDto") @Valid SettingsDto settingsDto, BindingResult result, Model model) {
+    public String updateSettings (@ModelAttribute("userDetails") @Valid UserDetailsDto userDetailsDto, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            model.addAttribute("userDetails", settingsDto);
+            model.addAttribute("userDetails", userDetailsDto);
             return "dashboard-settings";
         }
-        UserDetailsDto updatedUserDetails = userService.updateUserDetails(settingsDto);
+        UserDetailsDto updatedUserDetails = userService.updateUserDetails(userDetailsDto);
         model.addAttribute("userDetails", updatedUserDetails);
         model.addAttribute("isSuccess", true);
         return "dashboard-settings";

@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,9 +35,9 @@ public class Group {
 
     private String joinPolicy = "open";
 
-    private List<String> administrators;
+    private List<String> administrators = new ArrayList<>();
 
-    private List<String> members;
+    private List<String> members = new ArrayList<>();
 
     private Date creationDate = new Date();
 }

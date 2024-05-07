@@ -13,14 +13,16 @@
                     <h1 class="display-4">My Groups</h1>
                     <a href="/my/groups/create" class="btn btn-outline-primary">Create Group</a>
                 </div>
-                <th:block th:each="group : ${groups}">
+                <th:block th:each="details : ${groups}">
                     <div class="col-md-6 my-4">
                         <div class="card">
                             <div class="card-body">
-                                <h3 th:text="${group.name}">Group Name</h3>
-                                <p th:text="${group.description}">Group Description</p>
-                                <a th:href="@{/my/groups/{id}(id=${group.id})}" class="btn btn-sm btn-primary me-2 mb-2">Member View</a>
-                                <a th:href="@{/my/groups/admin/{id}(id=${group.id})}" class="btn btn-sm btn-outline-primary mb-2">Admin View</a>
+                                <h3 th:text="${details.group.name}">Group Name</h3>
+                                <p th:text="${details.group.description}">Group Description</p>
+                                <a th:href="@{/my/groups/{id}(id=${details.group.id})}" class="btn btn-sm btn-primary me-2 mb-2">Member View</a>
+                                <div th:if="${details.userRole == 'admin'}">
+                                    <a th:href="@{/my/groups/admin/{id}(id=${details.group.id})}" class="btn btn-sm btn-outline-primary mb-2">Admin View</a>
+                                </div>
                             </div>
                         </div>
                     </div>

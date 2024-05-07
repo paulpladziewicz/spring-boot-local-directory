@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="partials/head :: head('FremontMI - Home')"><title>Placeholder Title</title></head>
+<head th:replace="~{partials/head :: head('FremontMI - Home')}"><title>Placeholder Title</title></head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 
@@ -397,7 +397,7 @@
     </a>
 </main>
 
-<script th:replace="partials/theme-js"></script>
-<footer th:replace="partials/footer"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+<footer th:replace="~{partials/footer}"></footer>
 </body>
 </html>
