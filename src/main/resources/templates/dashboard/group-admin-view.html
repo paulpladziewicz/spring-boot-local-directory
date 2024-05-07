@@ -8,17 +8,17 @@
     <div class="row flex-column flex-md-row">
         <aside th:replace="~{partials/dashboard-nav :: nav}"></aside>
         <aside class="col-md-10 px-md-4">
-            <form [formGroup]="groupForm" (ngSubmit)="onSubmit()">
+            <form th:action="@{/my/groups/admin/{id}(id=${group.id})}" th:object="${group}" method="post">
                 <section class="card border-0 my-4">
                     <div class="card-body">
                         <h3>Basic Information</h3>
                         <div class="mb-2">
                             <label class="form-label" for="name">Name</label>
-                            <input class="form-control" formControlName="name" id="name" type="text">
+                            <input class="form-control" id="name" type="text" th:field="*{name}">
                         </div>
                         <div class="mb-4">
                             <label class="form-label" for="description">Description</label>
-                            <textarea class="form-control" formControlName="description" id="description"></textarea>
+                            <textarea class="form-control" id="description" th:field="*{description}"></textarea>
                         </div>
                         <button class="btn btn-primary" type="submit">Update Core Information</button>
                     </div>
@@ -46,7 +46,10 @@
                 <div class="card-body">
                     <h3>Delete Group</h3>
                     <p>The action is not reversible. All administrators and members will be emailed when the group is deleted.</p>
-                    <button class="btn btn-danger" (click)="onDelete()">Delete Group</button>
+                    <form method="post" action="/my/groups/admin/delete"> <!-- Update the action URL accordingly -->
+                        <!-- CSRF token if needed for security -->
+                        <button type="submit" class="btn btn-danger">Delete Group</button>
+                    </form>
                 </div>
             </section>
         </aside>

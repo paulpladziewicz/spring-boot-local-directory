@@ -85,7 +85,18 @@ public class GroupController {
     }
 
     @GetMapping("/my/groups/admin/{id}")
-    public String adminGroupView(@PathVariable String id) {
+    public String adminGroupView(@PathVariable String id, Model model) {
+        model.addAttribute("group", groupService.findGroupById(id));
+        return "dashboard/group-admin-view";
+    }
+
+    @PostMapping("/my/groups/admin/{id}")
+    public String updateGroup(@PathVariable String id) {
+        return "dashboard/group-admin-view";
+    }
+
+    @PostMapping("/my/groups/admin/delete")
+    public String deleteGroup(@PathVariable String id) {
         return "dashboard/group-admin-view";
     }
 }
