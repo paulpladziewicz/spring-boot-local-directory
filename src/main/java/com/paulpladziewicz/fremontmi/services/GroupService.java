@@ -4,13 +4,11 @@ import com.paulpladziewicz.fremontmi.models.Group;
 import com.paulpladziewicz.fremontmi.models.GroupDetailsDto;
 import com.paulpladziewicz.fremontmi.models.UserDetailsDto;
 import com.paulpladziewicz.fremontmi.repositories.GroupRepository;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,7 +18,7 @@ public class GroupService {
 
     private final UserService userService;
 
-    public GroupService(GroupRepository groupRepository, UserService userService, UserDetailsService userDetailsService) {
+    public GroupService(GroupRepository groupRepository, UserService userService) {
         this.groupRepository = groupRepository;
         this.userService = userService;
     }
@@ -33,23 +31,16 @@ public class GroupService {
         return groupRepository.findById(id).orElse(null);
     }
 
-    public List<GroupDetailsDto> findGroupsForUser() {
-        Optional<UserDetailsDto> userDetails = userService.getUserDetails();
+    public List<GroupDetailsDto> findGroupsByUser() {
+        UserDetailsDto userDetails = userService.getUserDetails();
 
-        if (userDetails.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        System.out.println("Fetching groups for IDs: " + userDetails.get().getGroupIds());
-
-        List<Group> groups = groupRepository.findAllById(userDetails.get().getGroupIds());
-        System.out.println("Groups found: " + groups.size());
+        List<Group> groups = groupRepository.findAllById(userDetails.getGroupIds());
 
         return groups.stream()
                 .map(group -> {
                     GroupDetailsDto dto = new GroupDetailsDto();
                     dto.setGroup(group);
-                    if (userDetails.get().getGroupAdminIds().contains(group.getId())) {
+                    if (userDetails.getGroupAdminIds().contains(group.getId())) {
                         dto.setUserRole("admin");
                     } else {
                         dto.setUserRole("member");
@@ -59,68 +50,61 @@ public class GroupService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Group addGroup (Group group) {
-        Optional<UserDetailsDto> userDetailsOpt = userService.getUserDetails();
+        UserDetailsDto userDetails = userService.getUserDetails();
 
-        if (!userDetailsOpt.isPresent()) {
-            throw new IllegalStateException("User details not found");
-        }
-
-        UserDetailsDto userDetails = userDetailsOpt.get();
-
-        // Ensure administrators and members are initialized to avoid NullPointerException
         List<String> administrators = new ArrayList<>(group.getAdministrators());
         List<String> members = new ArrayList<>(group.getMembers());
-
-        // Add the current user's username to administrators and members of the group
         administrators.add(userDetails.getUsername());
         members.add(userDetails.getUsername());
-
         group.setAdministrators(administrators);
         group.setMembers(members);
-
-        // Save the group and get the updated instance with ID populated
         Group savedGroup = groupRepository.save(group);
 
-        // Update user details with the new group ID
         List<String> groupIds = new ArrayList<>(userDetails.getGroupIds());
         List<String> adminGroupIds = new ArrayList<>(userDetails.getGroupAdminIds());
-
         groupIds.add(savedGroup.getId());
         adminGroupIds.add(savedGroup.getId());
-
         userDetails.setGroupIds(groupIds);
         userDetails.setGroupAdminIds(adminGroupIds);
-
-        userService.saveUserDetails(userDetails);
 
         return savedGroup;
     }
 
+    @Transactional
     public void joinGroup (String groupId) {
-        Optional<UserDetailsDto> userDetailsOpt = userService.getUserDetails();
+        UserDetailsDto userDetails = userService.getUserDetails();
         Group group = findGroupById(groupId);
 
-        if (!userDetailsOpt.isPresent()) {
-            throw new IllegalStateException("User details not found");
+        List<String> members = group.getMembers();
+        if (!members.contains(userDetails.getUsername())) {
+            members.add(userDetails.getUsername());
+            group.setMembers(members);
+            groupRepository.save(group);
         }
 
-        UserDetailsDto userDetails = userDetailsOpt.get();
+        List<String> groupIds = userDetails.getGroupIds();
+        if (!groupIds.contains(groupId)) {
+            groupIds.add(groupId);
+            userDetails.setGroupIds(groupIds);
+            userService.saveUserDetails(userDetails);
+        }
+    }
+
+    @Transactional
+    public void leaveGroup (String groupId) {
+        UserDetailsDto userDetails = userService.getUserDetails();
+        Group group = findGroupById(groupId);
 
         List<String> members = new ArrayList<>(group.getMembers());
-
-        members.add(userDetails.getUsername());
-
+        members.remove(userDetails.getUsername());
         group.setMembers(members);
-
         Group savedGroup = groupRepository.save(group);
 
         List<String> groupIds = new ArrayList<>(userDetails.getGroupIds());
-
-        groupIds.add(savedGroup.getId());
-
+        groupIds.remove(savedGroup.getId());
         userDetails.setGroupIds(groupIds);
-
         userService.saveUserDetails(userDetails);
     }
 

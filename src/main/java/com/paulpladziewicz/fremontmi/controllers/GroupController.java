@@ -4,12 +4,10 @@ import com.paulpladziewicz.fremontmi.models.Group;
 import com.paulpladziewicz.fremontmi.models.GroupDetailsDto;
 import com.paulpladziewicz.fremontmi.services.GroupService;
 import jakarta.validation.Valid;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -35,18 +33,23 @@ public class GroupController {
     }
 
     @PostMapping("/groups/join")
-    public String joinGroup(@RequestParam("groupId") String groupId, RedirectAttributes redirectAttributes) {
+    public String joinGroup(@RequestParam("groupId") String groupId) {
         groupService.joinGroup(groupId);
-        redirectAttributes.addFlashAttribute("successMessage", "You have successfully joined the group!");
 
+        return "redirect:/my/groups/" + groupId;
+    }
 
-        return "redirect:/groups/" + groupId;
+    @PostMapping("/groups/leave")
+    public String leaveGroup(@RequestParam("groupId") String groupId) {
+        groupService.leaveGroup(groupId);
+
+        return "redirect:/my/groups";
     }
 
     @GetMapping("/my/groups")
     public String groups(Model model) {
         try {
-            List<GroupDetailsDto> groupDetails = groupService.findGroupsForUser();
+            List<GroupDetailsDto> groupDetails = groupService.findGroupsByUser();
             model.addAttribute("groups", groupDetails);
             return "dashboard-groups";
         } catch (Exception e) {
@@ -83,6 +86,6 @@ public class GroupController {
 
     @GetMapping("/my/groups/admin/{id}")
     public String adminGroupView(@PathVariable String id) {
-        return "dashboard-angular";
+        return "dashboard/group-admin-view";
     }
 }

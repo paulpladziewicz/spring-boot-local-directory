@@ -10,9 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.Optional;
 
 @Controller
 public class UserController {
@@ -25,11 +22,6 @@ public class UserController {
 
     @GetMapping("/login")
     public String login () {
-        return "login";
-    }
-
-    @GetMapping("/logout")
-    public String logout () {
         return "login";
     }
 
@@ -103,11 +95,5 @@ public class UserController {
     public String resetPasswordConfirmation (Model model) {
         model.addAttribute("resetPasswordDto", new ResetPasswordDto());
         return "reset-password";
-    }
-
-    @GetMapping("/api/user")
-    @ResponseBody
-    public Optional<UserDetailsDto> getUserDetails() {
-        return userService.getUserDetails();
     }
 }

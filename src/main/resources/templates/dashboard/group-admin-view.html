@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - My Dashboard')}"><title>Placeholder Title</title></head>
+<body class="bg-secondary">
+<header th:insert="~{partials/navbar}"></header>
+
+<div class="container mt-4">
+    <div class="row flex-column flex-md-row">
+        <aside th:replace="~{partials/dashboard-nav :: nav}"></aside>
+        <aside class="col-md-10 px-md-4">
+            <form [formGroup]="groupForm" (ngSubmit)="onSubmit()">
+                <section class="card border-0 my-4">
+                    <div class="card-body">
+                        <h3>Basic Information</h3>
+                        <div class="mb-2">
+                            <label class="form-label" for="name">Name</label>
+                            <input class="form-control" formControlName="name" id="name" type="text">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label" for="description">Description</label>
+                            <textarea class="form-control" formControlName="description" id="description"></textarea>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Update Core Information</button>
+                    </div>
+                </section>
+            </form>
+            <section class="card border-0 my-4">
+                <div class="card-body">
+                    <h3>Events</h3>
+                    <p>The group does not have any scheduled events linked on the platform.</p>
+                </div>
+            </section>
+            <section class="card border-0 my-4">
+                <div class="card-body">
+                    <h3>Announcements</h3>
+                    <p>The group does not have any recent announcements.</p>
+                </div>
+            </section>
+            <section class="card border-0 my-4">
+                <div class="card-body">
+                    <h3>Posts</h3>
+                    <p>The group does not have any posts.</p>
+                </div>
+            </section>
+            <section class="card border-0 my-4">
+                <div class="card-body">
+                    <h3>Delete Group</h3>
+                    <p>The action is not reversible. All administrators and members will be emailed when the group is deleted.</p>
+                    <button class="btn btn-danger" (click)="onDelete()">Delete Group</button>
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>

@@ -76,9 +76,13 @@ public class UserService {
         return null;
     }
 
-    public Optional<UserDetailsDto> getUserDetails() {
+    public UserDetailsDto getUserDetails() {
         String username = getSignedInUser();
-        return userDetailsRepository.findById(username);
+        Optional<UserDetailsDto> userDetailsOpt = userDetailsRepository.findById(username);
+        if (userDetailsOpt.isEmpty()) {
+            throw new IllegalStateException("User details not found for username: " + username);
+        }
+        return userDetailsOpt.get();
     }
 
     public void saveUserDetails(UserDetailsDto userDetails) {

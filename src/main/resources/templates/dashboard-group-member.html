@@ -15,6 +15,10 @@
                     <p th:text="'Status: ' + ${groups.status}">Status</p>
                     <p th:text="'Visibility: ' + ${groups.visibility}">Visibility</p>
                     <p th:text="'Join Policy: ' + ${groups.joinPolicy}">Join Policy</p>
+                    <form th:action="@{/groups/leave}" method="post">
+                        <input type="hidden" name="groupId" th:value="${groups.id}" />
+                        <button type="submit" class="btn btn-danger" >Leave Group</button>
+                    </form>
                 </section>
                 <section class="mb-4">
                     <h2>Events</h2>
