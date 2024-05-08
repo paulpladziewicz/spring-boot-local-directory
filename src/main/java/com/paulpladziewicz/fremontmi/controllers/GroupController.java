@@ -4,6 +4,7 @@ import com.paulpladziewicz.fremontmi.models.Group;
 import com.paulpladziewicz.fremontmi.models.GroupDetailsDto;
 import com.paulpladziewicz.fremontmi.services.GroupService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -80,7 +81,7 @@ public class GroupController {
 
     @GetMapping("/my/groups/{id}")
     public String memberGroupView(@PathVariable String id, Model model) {
-        model.addAttribute("groups", groupService.findGroupById(id));
+        model.addAttribute("group", groupService.findGroupById(id));
         return "dashboard-group-member";
     }
 
@@ -90,13 +91,21 @@ public class GroupController {
         return "dashboard/group-admin-view";
     }
 
-    @PostMapping("/my/groups/admin/{id}")
-    public String updateGroup(@PathVariable String id) {
+    @PostMapping("/my/groups/admin")
+    public String updateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "dashboard/group-admin-view";
+        }
+        Group updatedGroup = groupService.updateGroup(group);
+        model.addAttribute("group", updatedGroup);
+        model.addAttribute("isSuccess", true);
         return "dashboard/group-admin-view";
     }
 
     @PostMapping("/my/groups/admin/delete")
-    public String deleteGroup(@PathVariable String id) {
-        return "dashboard/group-admin-view";
+    public String deleteGroup(@NotNull @RequestParam("groupId") String groupId) {
+        System.out.println(groupId);
+        groupService.deleteGroup(groupId);
+        return "redirect:/my/groups";
     }
 }

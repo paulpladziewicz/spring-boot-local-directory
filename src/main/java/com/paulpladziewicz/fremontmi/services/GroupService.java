@@ -1,9 +1,13 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
 import com.paulpladziewicz.fremontmi.models.GroupDetailsDto;
 import com.paulpladziewicz.fremontmi.models.UserDetailsDto;
 import com.paulpladziewicz.fremontmi.repositories.GroupRepository;
+import com.paulpladziewicz.fremontmi.repositories.UserDetailsRepository;
+import com.paulpladziewicz.fremontmi.repositories.UserRepository;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +21,14 @@ public class GroupService {
     private final GroupRepository groupRepository;
 
     private final UserService userService;
+    private final UserRepository userRepository;
+    private final UserDetailsRepository userDetailsRepository;
 
-    public GroupService(GroupRepository groupRepository, UserService userService) {
+    public GroupService(GroupRepository groupRepository, UserService userService, UserRepository userRepository, UserDetailsRepository userDetailsRepository) {
         this.groupRepository = groupRepository;
         this.userService = userService;
+        this.userRepository = userRepository;
+        this.userDetailsRepository = userDetailsRepository;
     }
 
     public List<Group> findAll() {
@@ -68,6 +76,7 @@ public class GroupService {
         adminGroupIds.add(savedGroup.getId());
         userDetails.setGroupIds(groupIds);
         userDetails.setGroupAdminIds(adminGroupIds);
+        userDetailsRepository.save(userDetails);
 
         return savedGroup;
     }
@@ -109,10 +118,24 @@ public class GroupService {
     }
 
     public Group updateGroup (Group group) {
+        Group groupDocument = findGroupById(group.getId());
+        groupDocument.setName(group.getName());
+        groupDocument.setDescription(group.getDescription());
         return groupRepository.save(group);
     }
 
-    public void deleteGroup (String id) {
-        groupRepository.deleteById(id);
+    public void deleteGroup (String groupId) {
+        groupRepository.deleteById(groupId);
+    }
+
+    public List<Announcement> addAnnouncement(String groupId, Announcement announcement) {
+        System.out.println(groupId);
+        Group group = findGroupById(groupId);
+        announcement.setId(group.getAnnouncements().size() + 1);
+        List<Announcement> announcements = new ArrayList<>(group.getAnnouncements());
+        announcements.add(announcement);
+        group.setAnnouncements(announcements);
+        groupRepository.save(group);
+        return announcements;
     }
 }

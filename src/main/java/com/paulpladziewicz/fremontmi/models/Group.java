@@ -39,5 +39,7 @@ public class Group {
 
     private List<String> members = new ArrayList<>();
 
+    private List<Announcement> announcements = new ArrayList<>();
+
     private Date creationDate = new Date();
 }

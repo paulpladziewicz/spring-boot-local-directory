@@ -8,7 +8,8 @@
     <div class="row flex-column flex-md-row">
         <aside th:replace="~{partials/dashboard-nav :: nav}"></aside>
         <aside class="col-md-10 px-md-4">
-            <form th:action="@{/my/groups/admin/{id}(id=${group.id})}" th:object="${group}" method="post">
+            <form th:action="@{/my/groups/admin}" th:object="${group}" method="post">
+                <input type="hidden" name="Id" th:value="${group.id}" />
                 <section class="card border-0 my-4">
                     <div class="card-body">
                         <h3>Basic Information</h3>
@@ -26,28 +27,82 @@
             </form>
             <section class="card border-0 my-4">
                 <div class="card-body">
-                    <h3>Events</h3>
-                    <p>The group does not have any scheduled events linked on the platform.</p>
-                </div>
-            </section>
-            <section class="card border-0 my-4">
-                <div class="card-body">
                     <h3>Announcements</h3>
-                    <p>The group does not have any recent announcements.</p>
-                </div>
-            </section>
-            <section class="card border-0 my-4">
-                <div class="card-body">
-                    <h3>Posts</h3>
-                    <p>The group does not have any posts.</p>
+                    <ul id="announcementList">
+                        <li th:each="announcement : ${group.announcements}">
+                            <strong th:text="${announcement.title}">Announcement Title</strong>
+                            <p th:text="${announcement.content}">Announcement Content</p>
+                        </li>
+                    </ul>
+                    <form class="d-none" id="announcementForm">
+                        <input type="text" id="title" placeholder="Title" required>
+                        <textarea id="content" placeholder="Content" required></textarea>
+                        <button type="submit">Add Announcement</button>
+                    </form>
+                    <button id="editAnnouncements">Edit</button>
+                    <button class="d-none" id="saveAnnouncements">Save</button>
+
+                    <script>
+                        const editAnnouncementsButton = document.querySelector('#editAnnouncements');
+                        const saveAnnouncementsButton = document.querySelector('#saveAnnouncements');
+                        const announcementForm = document.querySelector('#announcementForm');
+                        const announcementList = document.querySelector('#announcementList');
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                        editAnnouncementsButton.addEventListener('click', function () {
+                            showEditFunctionality();
+                        })
+
+                        function showEditFunctionality() {
+                            saveAnnouncementsButton.classList.remove('d-none');
+                            announcementForm.classList.remove('d-none');
+                            editAnnouncementsButton.classList.add('d-none');
+                        }
+
+                        function hideEditFunctionality() {
+                            saveAnnouncementsButton.classList.add('d-none');
+                            announcementForm.classList.add('d-none');
+                            editAnnouncementsButton.classList.remove('d-none');
+                        }
+
+                        announcementForm.addEventListener('submit', function (event) {
+                            event.preventDefault();
+
+                            const title = document.querySelector('#title').value;
+                            const content = document.querySelector('#content').value;
+                            const groupId = '663bbe9f10c0420110668644';
+
+                            fetch(`/api/announcements/${groupId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken
+                                },
+                                body: JSON.stringify({ title, content })
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    addAnnouncementToList(title, content);
+                                    hideEditFunctionality();
+                                    announcementForm.reset();
+                                })
+                                .catch(error => console.error('Error:', error));
+                        });
+
+                        function addAnnouncementToList(title, content) {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `${title}: ${content}`;
+                            announcementList.appendChild(listItem);
+                        }
+                    </script>
                 </div>
             </section>
             <section class="card border-0 my-4">
                 <div class="card-body">
                     <h3>Delete Group</h3>
                     <p>The action is not reversible. All administrators and members will be emailed when the group is deleted.</p>
-                    <form method="post" action="/my/groups/admin/delete"> <!-- Update the action URL accordingly -->
-                        <!-- CSRF token if needed for security -->
+                    <form method="post" th:action="@{/my/groups/admin/delete}">
+                        <input type="hidden" name="groupId" th:value="${group.id}" />
                         <button type="submit" class="btn btn-danger">Delete Group</button>
                     </form>
                 </div>

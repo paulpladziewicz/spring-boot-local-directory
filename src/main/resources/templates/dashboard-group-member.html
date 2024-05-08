@@ -10,13 +10,13 @@
         <aside class="col-md-10 px-md-4">
             <div >
                 <section>
-                    <h1 class="display-4" th:text="${groups.name}">Group Name</h1>
-                    <p th:text="${groups.description}">Group description here...</p>
-                    <p th:text="'Status: ' + ${groups.status}">Status</p>
-                    <p th:text="'Visibility: ' + ${groups.visibility}">Visibility</p>
-                    <p th:text="'Join Policy: ' + ${groups.joinPolicy}">Join Policy</p>
-                    <form th:action="@{/groups/leave}" method="post">
-                        <input type="hidden" name="groupId" th:value="${groups.id}" />
+                    <h1 class="display-4" th:text="${group.name}">Group Name</h1>
+                    <p th:text="${group.description}">Group description here...</p>
+                    <p th:text="'Status: ' + ${group.status}">Status</p>
+                    <p th:text="'Visibility: ' + ${group.visibility}">Visibility</p>
+                    <p th:text="'Join Policy: ' + ${group.joinPolicy}">Join Policy</p>
+                    <form th:action="@{/group/leave}" method="post">
+                        <input type="hidden" name="groupId" th:value="${group.id}" />
                         <button type="submit" class="btn btn-danger" >Leave Group</button>
                     </form>
                 </section>
@@ -25,7 +25,13 @@
                     <p>Check out the upcoming events related to this group.</p>
                 </section>
                 <section class="mb-4">
-                    <h2>Announcements & Posts</h2>
+                    <h2>Announcements</h2>
+                    <ul>
+                        <li th:each="announcement : ${group.announcements}">
+                            <strong th:text="${announcement.title}">Announcement Title</strong>
+                            <p th:text="${announcement.content}">Announcement Content</p>
+                        </li>
+                    </ul>
                 </section>
             </div>
         </aside>
