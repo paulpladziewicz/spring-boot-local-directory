@@ -104,7 +104,6 @@ public class GroupController {
 
     @PostMapping("/my/groups/admin/delete")
     public String deleteGroup(@NotNull @RequestParam("groupId") String groupId) {
-        System.out.println(groupId);
         groupService.deleteGroup(groupId);
         return "redirect:/my/groups";
     }

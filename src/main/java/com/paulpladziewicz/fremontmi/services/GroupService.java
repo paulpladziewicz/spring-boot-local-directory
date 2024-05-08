@@ -7,7 +7,6 @@ import com.paulpladziewicz.fremontmi.models.UserDetailsDto;
 import com.paulpladziewicz.fremontmi.repositories.GroupRepository;
 import com.paulpladziewicz.fremontmi.repositories.UserDetailsRepository;
 import com.paulpladziewicz.fremontmi.repositories.UserRepository;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +20,11 @@ public class GroupService {
     private final GroupRepository groupRepository;
 
     private final UserService userService;
-    private final UserRepository userRepository;
     private final UserDetailsRepository userDetailsRepository;
 
-    public GroupService(GroupRepository groupRepository, UserService userService, UserRepository userRepository, UserDetailsRepository userDetailsRepository) {
+    public GroupService(GroupRepository groupRepository, UserService userService, UserDetailsRepository userDetailsRepository) {
         this.groupRepository = groupRepository;
         this.userService = userService;
-        this.userRepository = userRepository;
         this.userDetailsRepository = userDetailsRepository;
     }
 
@@ -121,7 +118,7 @@ public class GroupService {
         Group groupDocument = findGroupById(group.getId());
         groupDocument.setName(group.getName());
         groupDocument.setDescription(group.getDescription());
-        return groupRepository.save(group);
+        return groupRepository.save(groupDocument);
     }
 
     public void deleteGroup (String groupId) {
@@ -129,7 +126,6 @@ public class GroupService {
     }
 
     public List<Announcement> addAnnouncement(String groupId, Announcement announcement) {
-        System.out.println(groupId);
         Group group = findGroupById(groupId);
         announcement.setId(group.getAnnouncements().size() + 1);
         List<Announcement> announcements = new ArrayList<>(group.getAnnouncements());
@@ -137,5 +133,62 @@ public class GroupService {
         group.setAnnouncements(announcements);
         groupRepository.save(group);
         return announcements;
+    }
+
+    public List<Announcement> updateAnnouncement(String groupId, Announcement announcement) {
+        Group group = findGroupById(groupId);
+        List<Announcement> announcements = new ArrayList<>(group.getAnnouncements());
+
+        boolean isUpdated = false;
+
+        for (int i = 0; i < announcements.size(); i++) {
+            Announcement currentAnnouncement = announcements.get(i);
+            if (currentAnnouncement.getId() == i) {
+                currentAnnouncement.setTitle(announcement.getTitle());
+                currentAnnouncement.setContent(announcement.getContent());
+                isUpdated = true;
+                break;
+            }
+        }
+
+        if (!isUpdated) {
+            throw new IllegalArgumentException("Announcement not found with ID: " + announcement.getId());
+        }
+
+        groupRepository.save(group);
+
+        return new ArrayList<>(group.getAnnouncements());
+    }
+
+    public List<Announcement> updateAllAnnouncements(String groupId, List<Announcement> announcements) {
+        Group group = findGroupById(groupId);
+        List<Announcement> newAnnouncementsArray = new ArrayList<>(announcements);
+        group.setAnnouncements(newAnnouncementsArray);
+        groupRepository.save(group);
+        return announcements;
+    }
+
+    public boolean deleteAnnouncement(String groupId, int announcementId) {
+        Group group = findGroupById(groupId);
+        List<Announcement> announcements = new ArrayList<>(group.getAnnouncements());
+
+        boolean isDeleted = false;
+
+        for (int i = 0; i < announcements.size(); i++) {
+            Announcement currentAnnouncement = announcements.get(i);
+            if (currentAnnouncement.getId() == i) {
+                announcements.remove(i);
+                isDeleted = true;
+                break;
+            }
+        }
+
+        if (!isDeleted) {
+            return false;
+        }
+
+        groupRepository.save(group);
+
+        return true;
     }
 }

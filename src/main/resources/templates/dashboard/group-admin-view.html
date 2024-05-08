@@ -35,6 +35,7 @@
                         </li>
                     </ul>
                     <form class="d-none" id="announcementForm">
+                        <input type="hidden" id="groupId" th:value="${group.id}" />
                         <input type="text" id="title" placeholder="Title" required>
                         <textarea id="content" placeholder="Content" required></textarea>
                         <button type="submit">Add Announcement</button>
@@ -42,7 +43,7 @@
                     <button id="editAnnouncements">Edit</button>
                     <button class="d-none" id="saveAnnouncements">Save</button>
 
-                    <script>
+                    <script defer>
                         const editAnnouncementsButton = document.querySelector('#editAnnouncements');
                         const saveAnnouncementsButton = document.querySelector('#saveAnnouncements');
                         const announcementForm = document.querySelector('#announcementForm');
@@ -70,7 +71,7 @@
 
                             const title = document.querySelector('#title').value;
                             const content = document.querySelector('#content').value;
-                            const groupId = '663bbe9f10c0420110668644';
+                            const groupId = document.querySelector('#groupId').value;
 
                             fetch(`/api/announcements/${groupId}`, {
                                 method: 'POST',
