@@ -1,8 +1,8 @@
 <header th:fragment="headerFragment" class="navbar navbar-expand-lg bg-light"
         xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
     <div class="container">
-        <a href="/" class="navbar-brand">
-            FremontMI
+        <a href="/" class="navbar-brand" style="font-size: 24px; font-weight: bold;">
+            <span>Fremont<span style="color: rgba(var(--ar-primary-rgb), var(--ar-bg-opacity));">MI</span></span>
         </a>
         <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse1"
                 aria-label="Toggle navigation">
@@ -10,34 +10,34 @@
         </button>
         <nav class="collapse navbar-collapse" id="navbarCollapse1">
             <ul class="navbar-nav me-auto">
+<!--                <li class="nav-item">-->
+<!--                    <a href="/things-to-do" class="nav-link"><strong>Things to do</strong></a>-->
+<!--                </li>-->
                 <li class="nav-item">
-                    <a href="/things-to-do" class="nav-link">Things to do</a>
+                    <a href="/groups" class="nav-link"><strong>Groups</strong></a>
                 </li>
                 <li class="nav-item">
-                    <a href="/groups" class="nav-link">Groups</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/events" class="nav-link">Events</a>
+                    <a href="/events" class="nav-link"><strong>Events</strong></a>
                 </li>
             </ul>
             <div sec:authorize="!isAuthenticated()">
-                <a href="/register" class="btn btn-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
+                <a href="/register" class="btn btn-primary btn-sm fs-sm me-1 mb-4 mb-lg-0">
                     <i class="ai-userDto me-2 ms-n1"></i>
                     Register
                 </a>
-                <a href="/login" class="btn btn-outline-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
+                <a href="/login" class="btn btn-outline-primary btn-sm fs-sm mb-4 mb-lg-0">
                     <i class="ai-login me-2 ms-n1"></i>
                     Sign in
                 </a>
             </div>
             <div sec:authorize="isAuthenticated()">
-                <a href="/my/overview" class="btn btn-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
+                <a href="/my/overview" class="btn btn-primary btn-sm fs-sm me-1 mb-4 mb-lg-0">
                     <i class="ai-login me-2 ms-n1"></i>
                     My Dashboard
                 </a>
 
                 <form class="d-inline" th:action="@{/logout}" method="post">
-                    <button type="submit" class="btn btn-outline-primary btn-sm fs-sm ms-3 mb-4 mb-lg-0">
+                    <button type="submit" class="btn btn-outline-primary btn-sm fs-sm mb-4 mb-lg-0">
                         <i class="ai-logout me-2 ms-n1"></i>
                         Sign out
                     </button>

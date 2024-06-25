@@ -1,0 +1,1 @@
+2024-06-25T12:34:43.965-04:00  INFO 46404 --- [SpringApplicationShutdownHook] org.mongodb.driver.cluster               : Cluster closed with id ClusterId{value='667479a125a49c4d40948746', description='FremontMI'}

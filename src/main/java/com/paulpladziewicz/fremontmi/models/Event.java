@@ -1,8 +1,6 @@
 package com.paulpladziewicz.fremontmi.models;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -27,18 +25,27 @@ public class Event {
 
     private List<String> tags;
 
+    @Size(max = 256, message = "Location name can't be longer than 256 characters")
     private String locationName;
 
     private String address;
 
-    private LocalDateTime startTime;
+    private List<DayEvent> days;
 
-    private LocalDateTime endTime;
+    @NotNull(message = "Registration start time cannot be null")
+    @Future(message = "Registration start time must be in the future")
+    private LocalDateTime registrationStartTime;
 
-    private LocalDateTime registrationStart;
+    private LocalDateTime registrationEndTime;
 
-    private LocalDateTime registrationEnd;
+    @NotNull(message = "Registration end time cannot be null")
+    @Future(message = "Registration end time must be in the future")
+    @AssertTrue(message = "Registration end time must be after registration start time")
+    private boolean isRegistrationEndTimeValid() {
+        return registrationEndTime.isAfter(registrationStartTime);
+    }
 
+    @PositiveOrZero(message = "Cost must be non-negative")
     private Double cost;
 
     private String status = "active";
@@ -49,10 +56,13 @@ public class Event {
 
     private String organizerId;
 
+    @NotBlank(message = "Contact name is required")
     private String contactName;
 
+    @Email(message = "Invalid email format")
     private String contactEmail;
 
+    @Pattern(regexp = "^\\+?\\d{1,15}$", message = "Invalid phone number")
     private String contactPhone;
 }
 

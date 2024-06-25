@@ -25,16 +25,22 @@ public class EventController {
         return "events";
     }
 
-    @GetMapping("/api/events")
-    @ResponseBody
-    public List<Event> getAllEvents() {
-        return eventService.findAll();
+    @GetMapping("/my/events")
+    public String displayMyEvents(Model model) {
+        model.addAttribute("event", new Event());
+        return "dashboard/event-create";
     }
 
-    @PostMapping("/api/events")
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CREATED)
-    public Event createGroup(@Valid @RequestBody Event event) {
-        return eventService.createEvent(event);
+    @GetMapping("/my/events/create")
+    public String displayCreateForm(Model model) {
+        model.addAttribute("event", new Event());
+        return "dashboard/event-create";
+    }
+
+    @PostMapping("/my/events/create")
+    public String createEvent(@Valid @ModelAttribute Event event, Model model) {
+        eventService.createEvent(event);
+
+        return "redirect:/my/events";
     }
 }

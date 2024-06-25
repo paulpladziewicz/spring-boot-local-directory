@@ -1,19 +1,16 @@
 package com.paulpladziewicz.fremontmi.models;
 
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Data
-@Document(collection = "groups")
-public class Group {
+public class NeighborService {
     @Id
     private String id;
 
@@ -37,13 +34,18 @@ public class Group {
 
     private String visibility = "public";
 
-    private String joinPolicy = "open";
-
-    private List<String> administrators = new ArrayList<>();
-
-    private List<String> members = new ArrayList<>();
-
     private List<Announcement> announcements = new ArrayList<>();
+
+    private String organizerId;
+
+    @NotBlank(message = "Contact name is required")
+    private String contactName;
+
+    @Email(message = "Invalid email format")
+    private String contactEmail;
+
+    @Pattern(regexp = "^\\+?\\d{1,15}$", message = "Invalid phone number")
+    private String contactPhone;
 
     private Date creationDate = new Date();
 }
