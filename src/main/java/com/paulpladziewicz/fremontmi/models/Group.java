@@ -25,8 +25,6 @@ public class Group {
     @Size(max = 5000, message = "Description can't be longer than 5000 characters")
     private String description;
 
-    private String imageUrl;
-
     @Indexed
     private List<String> category;
 
@@ -34,10 +32,6 @@ public class Group {
     private List<String> tags;
 
     private String status = "active";
-
-    private String visibility = "public";
-
-    private String joinPolicy = "open";
 
     private List<String> administrators = new ArrayList<>();
 

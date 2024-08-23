@@ -11,11 +11,6 @@ public class HomeController {
         return "home";
     }
 
-    @GetMapping("/things-to-do")
-    public String thingsToDo () {
-        return "things-to-do";
-    }
-
     @GetMapping("/error")
     public String error () {
         return "error";

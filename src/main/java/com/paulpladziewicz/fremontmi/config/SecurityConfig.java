@@ -29,15 +29,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/**").authenticated()
-                .requestMatchers("/groups", "/groups/**","/events/**", "/things-to-do/**", "/register", "/forgot-password", "/reset-password", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/groups/","/groups/**","/events","/events/**", "/register", "/forgot-password", "/reset-password", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
         );
         http.formLogin(formLogin -> formLogin
                 .loginPage("/login")
                 .permitAll()
-                .defaultSuccessUrl("/my/overview", true)
-                .successHandler(savedRequestAwareAuthenticationSuccessHandler())
+                .defaultSuccessUrl("/my/settings", true)
         );
         http.logout(logout -> logout
                 .logoutSuccessUrl("/")
@@ -45,7 +43,6 @@ public class SecurityConfig {
                 .deleteCookies("JSESSIONID")
                 .permitAll()
         );
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         return http.build();
     }
 
@@ -64,26 +61,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowCredentials(true);
-        configuration.addAllowedOriginPattern("*"); // Allow all origins
-        configuration.addAllowedHeader("*"); // Allow all headers
-        configuration.addAllowedMethod("*"); // Allow all methods
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationSuccessHandler savedRequestAwareAuthenticationSuccessHandler() {
-        SavedRequestAwareAuthenticationSuccessHandler authSuccessHandler = new SavedRequestAwareAuthenticationSuccessHandler();
-        authSuccessHandler.setTargetUrlParameter("redirect");
-        return authSuccessHandler;
     }
 }

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - Groups')}"></head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+<main class="bg-secondary">
+
+    <div class="container">
+
+        <div class="d-flex justify-content-between align-items-center my-4">
+            <div>
+                <h1 class="display-4">My Groups</h1>
+                <p>You're a member or administrator of these groups.</p>
+            </div>
+            <div>
+                <a href="/groups" class="btn btn-outline-primary">View All Groups</a>
+                <a href="/create/group" class="btn btn-outline-primary">Create Group</a>
+            </div>
+        </div>
+        <th:block th:each="details : ${groups}">
+            <div class="col-md-6 my-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 th:text="${details.group.name}">Group Name</h3>
+                        <p th:text="${details.group.description}">Group Description</p>
+                        <a th:href="@{/groups/{id}(id=${details.group.id})}" class="btn btn-sm btn-primary me-2 mb-2">View</a>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+        <p th:if="${#lists.isEmpty(groups)}">You are currently not a part of any groups.</p>
+
+    </div>
+
+</main>
+<footer th:replace="~{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>
+
+
+
+
+
+
