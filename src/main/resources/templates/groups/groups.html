@@ -1,12 +1,20 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - Groups')}"><title>Placeholder Title</title></head>
+<head th:replace="~{partials/head :: head('FremontMI - Groups')}"></head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 <main class="bg-secondary">
+
     <div class="container">
-    <h1 class="display-3 mt-4">Groups</h1>
-    <div class="container mt-4">
+
+        <div class="d-flex justify-content-between align-items-center my-4">
+            <h1 class="display-3 mb-0">Groups</h1>
+            <div>
+                <a href="/my/groups" class="btn btn-outline-primary">View My Groups</a>
+                <a href="/create/group" class="btn btn-outline-primary">Create Group</a>
+            </div>
+        </div>
+
         <div class="row">
             <div th:each="group : ${groups}" class="col-md-4 mb-4">
                 <div class="card">
@@ -18,7 +26,7 @@
                 </div>
             </div>
         </div>
-    </div>
+
     </div>
 </main>
 <footer th:replace="~{partials/footer}"></footer>

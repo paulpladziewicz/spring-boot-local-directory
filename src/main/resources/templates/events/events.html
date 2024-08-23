@@ -7,19 +7,25 @@
     <div class="container">
 
 
-    <h1 class="display-3 mt-4">Upcoming Events</h1>
-    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center my-4">
+            <h1 class="display-3 mb-0">Events</h1>
+            <div>
+                <a href="/my/events" class="btn btn-outline-primary">View My Events</a>
+                <a href="/create/event" class="btn btn-outline-primary">Create Event</a>
+            </div>
+        </div>
+
         <div class="row">
             <div th:each="event : ${events}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title" th:text="${event.name}">Event Title</h5>
                         <p class="card-text" th:text="${event.description}">Event Description</p>
+                        <a th:href="'/events/' + ${event.id}" class="btn btn-outline-primary btn-sm">View</a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 </main>
 <footer th:replace="~{partials/footer}"></footer>

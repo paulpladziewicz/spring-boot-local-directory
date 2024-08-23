@@ -3,9 +3,9 @@ package com.paulpladziewicz.fremontmi.models;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -23,6 +23,10 @@ public class Event {
     @Size(max = 500, message = "Description can't be longer than 500 characters")
     private String description;
 
+    @Indexed
+    private List<String> category;
+
+    @Indexed
     private List<String> tags;
 
     @Size(max = 256, message = "Location name can't be longer than 256 characters")
@@ -32,37 +36,8 @@ public class Event {
 
     private List<DayEvent> days;
 
-    @NotNull(message = "Registration start time cannot be null")
-    @Future(message = "Registration start time must be in the future")
-    private LocalDateTime registrationStartTime;
-
-    private LocalDateTime registrationEndTime;
-
-    @NotNull(message = "Registration end time cannot be null")
-    @Future(message = "Registration end time must be in the future")
-    @AssertTrue(message = "Registration end time must be after registration start time")
-    private boolean isRegistrationEndTimeValid() {
-        return registrationEndTime.isAfter(registrationStartTime);
-    }
-
-    @PositiveOrZero(message = "Cost must be non-negative")
-    private Double cost;
-
     private String status = "active";
 
-    private String visibility = "public";
-
-    private String joinPolicy = "open";
-
     private String organizerId;
-
-    @NotBlank(message = "Contact name is required")
-    private String contactName;
-
-    @Email(message = "Invalid email format")
-    private String contactEmail;
-
-    @Pattern(regexp = "^\\+?\\d{1,15}$", message = "Invalid phone number")
-    private String contactPhone;
 }
 

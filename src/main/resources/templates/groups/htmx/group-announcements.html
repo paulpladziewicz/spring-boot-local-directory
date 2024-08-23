@@ -1,0 +1,4 @@
+<li th:each="announcement : ${group.announcements}">
+    <strong th:text="${announcement.title}">Announcement Title</strong>
+    <p th:text="${announcement.content}">Announcement Content</p>
+</li>

@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
+import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
 import com.paulpladziewicz.fremontmi.models.GroupDetailsDto;
 import com.paulpladziewicz.fremontmi.services.GroupService;
@@ -24,27 +25,29 @@ public class GroupController {
     @GetMapping("/groups")
     public String displayGroups(Model model) {
         model.addAttribute("groups", groupService.findAll());
-        return "groups";
+        return "groups/groups";
     }
 
     @GetMapping("/groups/{id}")
     public String displayGroup(@PathVariable String id, Model model) {
         model.addAttribute("group", groupService.findGroupById(id));
-        return "group-page";
+        return "groups/group-page";
     }
 
     @PostMapping("/groups/join")
     public String joinGroup(@RequestParam("groupId") String groupId) {
         groupService.joinGroup(groupId);
 
-        return "redirect:/my/groups/" + groupId;
+        // return htmx
+        return "redirect:/groups/";
     }
 
     @PostMapping("/groups/leave")
     public String leaveGroup(@RequestParam("groupId") String groupId) {
         groupService.leaveGroup(groupId);
 
-        return "redirect:/my/groups";
+        // return htmx
+        return "redirect:/groups";
     }
 
     @GetMapping("/my/groups")
@@ -52,7 +55,7 @@ public class GroupController {
         try {
             List<GroupDetailsDto> groupDetails = groupService.findGroupsByUser();
             model.addAttribute("groups", groupDetails);
-            return "dashboard-groups";
+            return "groups/my-groups";
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return "home";
@@ -60,22 +63,22 @@ public class GroupController {
     }
 
 
-    @GetMapping("/my/groups/create")
-    public String createGroup(Model model) {
+    @GetMapping("/create/group")
+    public String displayCreateForm(Model model) {
         model.addAttribute("group", new Group());
-        return "dashboard/create-group";
+        return "groups/create-group";
     }
 
     @PostMapping("/my/groups/create")
-    public String submitCreateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model) {
+    public String createGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return "dashboard/create-group";
+            return "groups/create-group";
         }
 
         Group savedGroup = groupService.addGroup(group);
 
         model.addAttribute("successMessage", "Group created successfully!");
-        return "redirect:/my/groups/" + savedGroup.getId();
+        return "redirect:/groups/" + savedGroup.getId();
     }
 
 
@@ -106,5 +109,32 @@ public class GroupController {
     public String deleteGroup(@NotNull @RequestParam("groupId") String groupId) {
         groupService.deleteGroup(groupId);
         return "redirect:/my/groups";
+    }
+
+    @GetMapping("/announcements/group/{groupId}")
+    public String getGroupAnnouncementHtml(@NotNull @PathVariable String groupId, Model model) {
+        Group group = groupService.findGroupById(groupId);
+        model.addAttribute("group", group);
+        return "group-announcements.html";
+    }
+
+    @GetMapping("/announcements/group/form/{groupId}")
+    public String getGroupAnnouncementForm(@NotNull @PathVariable String groupId, Model model) {
+        model.addAttribute("groupId", groupId);
+        return "group-announcements-form.html";
+    }
+
+    @PostMapping("/announcements/group/{groupId}")
+    public String addGroupAnnouncement(@NotNull @PathVariable String groupId, @Valid Announcement announcement, Model model) {
+        groupService.addAnnouncement(groupId, announcement);
+        model.addAttribute("group", groupService.findGroupById(groupId));
+        return "group-announcements";
+    }
+
+    @PutMapping("/announcements/group/{groupId}")
+    public String updateGroupAnnouncement(@NotNull @PathVariable String groupId, @Valid Announcement announcement, BindingResult result, Model model) {
+        groupService.updateAnnouncement(groupId, announcement);
+        model.addAttribute("group", groupService.findGroupById(groupId));
+        return "group-announcements";
     }
 }

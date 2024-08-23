@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - Event')}"></head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<main class="bg-secondary">
+    <div class="container mt-4">
+        <section>
+            <h1 class="display-4" th:text="${event.name}">Event Name</h1>
+            <p th:text="${event.description}">Event description here...</p>
+
+            <p>
+                <strong>Status:</strong> <span th:text="${event.status}">Status</span>
+            </p>
+
+            <p th:if="${event.locationName}">
+                <strong>Location:</strong> <span th:text="${event.locationName}">Location Name</span>
+            </p>
+
+            <p th:if="${event.address}">
+                <strong>Address:</strong> <span th:text="${event.address}">Event Address</span>
+            </p>
+
+            <p th:if="${event.category}">
+                <strong>Category:</strong>
+                <span th:each="cat : ${event.category}" th:text="${cat}">Category</span>
+            </p>
+
+            <p th:if="${event.tags}">
+                <strong>Tags:</strong>
+                <span th:each="tag : ${event.tags}" th:text="${tag}" th:utext="'&nbsp;'">Tag</span>
+            </p>
+
+            <h4>Event Dates and Times:</h4>
+            <div th:each="dayEvent : ${event.days}">
+                <p>
+                    <strong>Start Time:</strong> <span th:text="${#temporals.format(dayEvent.eventStartTime, 'yyyy-MM-dd hh:mm a')}">Event Start Time</span>
+                </p>
+                <p th:if="${dayEvent.eventEndTime}">
+                    <strong>End Time:</strong> <span th:text="${#temporals.format(dayEvent.eventEndTime, 'yyyy-MM-dd hh:mm a')}">Event End Time</span>
+                </p>
+            </div>
+
+            <div th:if="${isEventAdmin}">
+                <a href="#" class="btn btn-primary">Edit Event</a>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>
