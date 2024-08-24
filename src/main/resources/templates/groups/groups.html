@@ -19,7 +19,11 @@
             <div th:each="group : ${groups}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title" th:text="${group.name}">Card title</h4>
+                        <h4 class="card-title mb-1" th:text="${group.name}">Card title</h4>
+                        <p class="card-text mb-2">
+                            <span th:text="${group.members.size()}"></span>
+                            <span th:text="${group.members.size() == 1 ? 'Member' : 'Members'}"></span>
+                        </p>
                         <p class="card-text text-body-secondary" th:text="${#strings.length(group.description) > 120 ? #strings.substring(group.description, 0, 120) + '...' : group.description}"></p>
                         <a th:href="'/groups/' + ${group.id}" class="btn btn-outline-primary btn-sm">View</a>
                     </div>

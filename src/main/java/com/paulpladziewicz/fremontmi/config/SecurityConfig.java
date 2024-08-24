@@ -35,7 +35,7 @@ public class SecurityConfig {
         http.formLogin(formLogin -> formLogin
                 .loginPage("/login")
                 .permitAll()
-                .defaultSuccessUrl("/my/settings", true)
+                .successHandler(savedRequestAwareAuthenticationSuccessHandler())
         );
         http.logout(logout -> logout
                 .logoutSuccessUrl("/")
@@ -44,6 +44,14 @@ public class SecurityConfig {
                 .permitAll()
         );
         return http.build();
+    }
+
+    @Bean
+    public SavedRequestAwareAuthenticationSuccessHandler savedRequestAwareAuthenticationSuccessHandler() {
+        SavedRequestAwareAuthenticationSuccessHandler handler = new SavedRequestAwareAuthenticationSuccessHandler();
+        handler.setDefaultTargetUrl("/");
+        handler.setAlwaysUseDefaultTargetUrl(false);
+        return handler;
     }
 
     @Bean

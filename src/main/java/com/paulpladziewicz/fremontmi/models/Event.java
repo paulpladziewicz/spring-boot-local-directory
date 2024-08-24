@@ -37,6 +37,8 @@ public class Event {
     @NotEmpty(message = "Event must have at least one date and time.")
     private List<DayEvent> days;
 
+    private List<String> formattedTimes;
+
     private String status = "active";
 
     private String organizerId;

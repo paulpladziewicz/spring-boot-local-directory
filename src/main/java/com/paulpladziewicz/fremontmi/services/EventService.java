@@ -5,14 +5,12 @@ import com.paulpladziewicz.fremontmi.repositories.EventRepository;
 import com.paulpladziewicz.fremontmi.repositories.UserDetailsRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class EventService {
@@ -61,6 +59,7 @@ public class EventService {
         var username = userDetails.getUsername();
 
         event.setOrganizerId(username);
+        populateFormattedTimes(event);
         var savedEvent = eventRepository.save(event);
 
         List<String> eventAdminIds = new ArrayList<>(userDetails.getEventAdminIds());
@@ -75,16 +74,33 @@ public class EventService {
         eventRepository.deleteById(groupId);
     }
 
-    protected String formatAsEasternTime(Instant utcTime) {
-        ZonedDateTime easternTime = utcTime.atZone(ZoneId.of("America/New_York"));
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a z");
-        return easternTime.format(formatter);
+    public void populateFormattedTimes(Event event) {
+        List<String> formattedTimes = event.getDays().stream()
+                .flatMap(dayEvent -> Stream.of(
+                        formatDateTime(dayEvent.getStartTime()),
+                        formatDateTime(dayEvent.getEndTime())
+                ))
+                .collect(Collectors.toList());
+        event.setFormattedTimes(formattedTimes);
     }
 
-    protected void formatAsSimpleTime(Instant utcTime) {
-        Instant now = Instant.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneOffset.UTC);
-        String simplifiedTime = formatter.format(now);
-        System.out.println("Simplified Time: " + simplifiedTime);
+    private String formatDateTime(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d h:mm a");
+        String formattedDate = dateTime.format(formatter);
+        int day = dateTime.getDayOfMonth();
+        String suffix = getDayOfMonthSuffix(day);
+        return formattedDate.replaceFirst("\\d+", day + suffix);
+    }
+
+    private String getDayOfMonthSuffix(int day) {
+        if (day >= 11 && day <= 13) {
+            return "th";
+        }
+        switch (day % 10) {
+            case 1:  return "st";
+            case 2:  return "nd";
+            case 3:  return "rd";
+            default: return "th";
+        }
     }
 }

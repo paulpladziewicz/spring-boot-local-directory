@@ -8,6 +8,7 @@
     <div class="container mt-4">
         <h1 class="display-4">Edit Event</h1>
         <form th:action="@{/edit/event/{id}(id=${event.id})}" th:object="${event}" method="post">
+            <input type="hidden" name="id" th:value="${event.id}" />
 
             <div class="form-group">
                 <label for="name">Event Name</label>

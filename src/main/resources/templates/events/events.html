@@ -21,6 +21,10 @@
                     <div class="card-body">
                         <h5 class="card-title" th:text="${event.name}">Event Title</h5>
                         <p class="card-text" th:text="${event.description}">Event Description</p>
+                        <p th:if="${event.formattedTimes != null and !event.formattedTimes.isEmpty()}"
+                           th:text="${event.formattedTimes[0]}">
+                            Event Start Time
+                        </p>
                         <a th:href="'/events/' + ${event.id}" class="btn btn-outline-primary btn-sm">View</a>
                     </div>
                 </div>

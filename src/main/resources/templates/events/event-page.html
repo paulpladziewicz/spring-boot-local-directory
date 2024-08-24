@@ -30,12 +30,11 @@
             </p>
 
             <h4>Event Dates and Times:</h4>
-            <div th:each="dayEvent : ${event.days}">
+            <div th:each="dayEvent, iterStat : ${event.days}">
                 <p>
-                    <strong>Start Time:</strong> <span th:text="${#temporals.format(dayEvent.startTime, 'yyyy-MM-dd hh:mm a')}">Event Start Time</span>
-                </p>
-                <p th:if="${dayEvent.endTime}">
-                    <strong>End Time:</strong> <span th:text="${#temporals.format(dayEvent.endTime, 'yyyy-MM-dd hh:mm a')}">Event End Time</span>
+                    <span th:text="${event.formattedTimes[iterStat.index * 2]}"></span>
+                    <span th:text="' - '"></span>
+                    <span th:text="${event.formattedTimes[iterStat.index * 2 + 1]}"></span>
                 </p>
             </div>
 

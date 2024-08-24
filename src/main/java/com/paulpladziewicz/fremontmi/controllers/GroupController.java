@@ -80,15 +80,21 @@ public class GroupController {
         return "redirect:/groups/" + savedGroup.getId();
     }
 
-    @PostMapping("/my/groups/admin")
+    @GetMapping("/edit/group/{id}")
+    public String getEditGroupForm(@NotNull @PathVariable String id, Model model) {
+        model.addAttribute("group", groupService.findGroupById(id));
+        return "groups/edit-group";
+    }
+
+    @PostMapping("/edit/group")
     public String updateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return "dashboard/group-admin-view";
+            return "groups/edit-group";
         }
         Group updatedGroup = groupService.updateGroup(group);
         model.addAttribute("group", updatedGroup);
         model.addAttribute("isSuccess", true);
-        return "dashboard/group-admin-view";
+        return "redirect:/groups/" + updatedGroup.getId();
     }
 
     @PostMapping("/delete/group")

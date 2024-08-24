@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class Announcement {
 
@@ -16,4 +18,6 @@ public class Announcement {
     @NotBlank(message = "Content is required.")
     @Size(max = 2000, message = "Content should be less than 2000 characters.")
     private String content;
+
+    private Date creationDate = new Date();
 }
