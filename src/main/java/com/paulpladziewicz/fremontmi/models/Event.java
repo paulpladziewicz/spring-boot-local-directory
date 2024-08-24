@@ -34,6 +34,7 @@ public class Event {
 
     private String address;
 
+    @NotEmpty(message = "Event must have at least one date and time.")
     private List<DayEvent> days;
 
     private String status = "active";

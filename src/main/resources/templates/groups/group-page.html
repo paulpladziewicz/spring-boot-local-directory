@@ -7,25 +7,53 @@
 <main class="bg-secondary">
     <div class="container mt-4">
         <section>
-            <h1 class="display-4" th:text="${group.name}">Group Name</h1>
-            <p th:text="${group.description}">Group description here...</p>
-            <p th:text="'Status: ' + ${group.status}">Status</p>
-            <p>3 Administrators - 20 Members</p>
-            <form th:action="@{/groups/join}" method="post">
-                <input type="hidden" name="groupId" th:value="${group.id}" />
-                <button type="submit" class="btn btn-primary" sec:authorize="isAuthenticated()">Join Group</button>
-            </form>
+            <div class="d-flex justify-content-between align-items-center my-4">
+                <div>
+                    <h1 class="display-4" th:text="${group.name}">Group Name</h1>
+                    <p>You are an admin of this group. You'll see additional options to update this page.</p>
+                    <p>Please contact us if you'd like to add or change who will be administering the group.</p>
+                </div>
+                <form th:action="@{/groups/join}" method="post">
+                    <input type="hidden" name="groupId" th:value="${group.id}" />
+                    <button type="submit" class="btn btn-primary" sec:authorize="isAuthenticated()">Join Group</button>
+                </form>
+            </div>
+
             <p sec:authorize="!isAuthenticated()"><a class="link-primary" href="/register">Register</a> or <a
                     href="/login">Login</a> to join.</p>
-        </section>
-        <section class="mb-4">
-            <h2>Events</h2>
-            <p>There are currently no public events scheduled with this group.</p>
+            <p th:text="${group.description}">Group description here...</p>
+            <p>3 Administrators - 20 Members</p>
+
         </section>
         <section class="mb-4">
             <h2>Announcements</h2>
-            <p>Please navigate to the member view to see announcements and posts.</p>
-            <a th:href="'/my/groups/' + ${group.id}" class="btn btn-outline-primary">Member View</a>
+            <ul id="announcementList">
+                <li th:each="announcement : ${group.announcements}">
+                    <strong th:text="${announcement.title}">Announcement Title</strong>
+                    <p th:text="${announcement.content}">Announcement Content</p>
+                    <form method="post" th:action="@{/delete/group/announcement}">
+                        <input type="hidden" name="groupId" th:value="${group.id}" />
+                        <input type="hidden" name="announcementId" th:value="${announcement.id}" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </li>
+            </ul>
+            <button th:attr="hx-get='/announcements/group/form/' + ${group.id}"
+                    hx-target="#announcementList"
+                    hx-swap="innerHTML">
+                Add
+            </button>
+        </section>
+
+        <section class="card border-0 my-4">
+            <div class="card-body">
+                <h3>Delete Group</h3>
+                <p>The action is not reversible. All administrators and members will be emailed when the group is deleted.</p>
+                <form method="post" th:action="@{/delete/group}">
+                    <input type="hidden" name="groupId" th:value="${group.id}" />
+                    <button type="submit" class="btn btn-danger">Delete Group</button>
+                </form>
+            </div>
         </section>
     </div>
 </main>

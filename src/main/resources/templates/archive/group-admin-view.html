@@ -38,16 +38,7 @@
                             <p th:text="${announcement.content}">Announcement Content</p>
                         </li>
                     </ul>
-                    <button th:attr="hx-get='/announcements/group/form/' + ${group.id}"
-                            hx-target="#announcementList"
-                            hx-swap="innerHTML">
-                        Edit
-                    </button>
-                    <button th:attr="hx-get='/announcements/group/' + ${group.id}"
-                            hx-target="#announcementList"
-                            hx-swap="innerHTML">
-                        Cancel
-                    </button>
+
                 </div>
             </section>
             <section class="card border-0 my-4">

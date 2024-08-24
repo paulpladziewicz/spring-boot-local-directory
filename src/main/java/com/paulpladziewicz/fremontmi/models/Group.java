@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.models;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -17,12 +18,12 @@ public class Group {
     @Id
     private String id;
 
-    @NotNull(message = "Group name must not be null")
-    @Size(min = 3, max = 100, message = "Group name must be between 3 and 100 characters")
+    @NotBlank(message = "Please provide a group name.")
+    @Size(max = 100, message = "Name should not be longer than 100 characters.")
     private String name;
 
-    @NotNull(message = "Description must not be null")
-    @Size(max = 5000, message = "Description can't be longer than 5000 characters")
+    @NotBlank(message = "Please provide a group description.")
+    @Size(max = 1000, message = "Description should not be longer than 2,500 characters.")
     private String description;
 
     @Indexed

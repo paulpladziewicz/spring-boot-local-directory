@@ -20,6 +20,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
 
     private final UserService userService;
+
     private final UserDetailsRepository userDetailsRepository;
 
     public GroupService(GroupRepository groupRepository, UserService userService, UserDetailsRepository userDetailsRepository) {
@@ -176,7 +177,7 @@ public class GroupService {
 
         for (int i = 0; i < announcements.size(); i++) {
             Announcement currentAnnouncement = announcements.get(i);
-            if (currentAnnouncement.getId() == i) {
+            if (currentAnnouncement.getId() == announcementId) {
                 announcements.remove(i);
                 isDeleted = true;
                 break;
@@ -186,6 +187,8 @@ public class GroupService {
         if (!isDeleted) {
             return false;
         }
+
+        group.setAnnouncements(announcements);
 
         groupRepository.save(group);
 

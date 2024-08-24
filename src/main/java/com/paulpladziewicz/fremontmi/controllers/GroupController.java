@@ -62,14 +62,13 @@ public class GroupController {
         }
     }
 
-
     @GetMapping("/create/group")
     public String displayCreateForm(Model model) {
         model.addAttribute("group", new Group());
         return "groups/create-group";
     }
 
-    @PostMapping("/my/groups/create")
+    @PostMapping("/create/group")
     public String createGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model) {
         if (result.hasErrors()) {
             return "groups/create-group";
@@ -79,19 +78,6 @@ public class GroupController {
 
         model.addAttribute("successMessage", "Group created successfully!");
         return "redirect:/groups/" + savedGroup.getId();
-    }
-
-
-    @GetMapping("/my/groups/{id}")
-    public String memberGroupView(@PathVariable String id, Model model) {
-        model.addAttribute("group", groupService.findGroupById(id));
-        return "dashboard-group-member";
-    }
-
-    @GetMapping("/my/groups/admin/{id}")
-    public String adminGroupView(@PathVariable String id, Model model) {
-        model.addAttribute("group", groupService.findGroupById(id));
-        return "dashboard/group-admin-view";
     }
 
     @PostMapping("/my/groups/admin")
@@ -105,36 +91,42 @@ public class GroupController {
         return "dashboard/group-admin-view";
     }
 
-    @PostMapping("/my/groups/admin/delete")
+    @PostMapping("/delete/group")
     public String deleteGroup(@NotNull @RequestParam("groupId") String groupId) {
         groupService.deleteGroup(groupId);
-        return "redirect:/my/groups";
+        return "redirect:/groups";
     }
 
     @GetMapping("/announcements/group/{groupId}")
     public String getGroupAnnouncementHtml(@NotNull @PathVariable String groupId, Model model) {
         Group group = groupService.findGroupById(groupId);
         model.addAttribute("group", group);
-        return "group-announcements.html";
+        return "groups/htmx/group-announcements";
     }
 
     @GetMapping("/announcements/group/form/{groupId}")
     public String getGroupAnnouncementForm(@NotNull @PathVariable String groupId, Model model) {
         model.addAttribute("groupId", groupId);
-        return "group-announcements-form.html";
+        return "groups/htmx/group-announcements-form";
     }
 
     @PostMapping("/announcements/group/{groupId}")
     public String addGroupAnnouncement(@NotNull @PathVariable String groupId, @Valid Announcement announcement, Model model) {
         groupService.addAnnouncement(groupId, announcement);
         model.addAttribute("group", groupService.findGroupById(groupId));
-        return "group-announcements";
+        return "groups/htmx/group-announcements";
     }
 
     @PutMapping("/announcements/group/{groupId}")
     public String updateGroupAnnouncement(@NotNull @PathVariable String groupId, @Valid Announcement announcement, BindingResult result, Model model) {
         groupService.updateAnnouncement(groupId, announcement);
         model.addAttribute("group", groupService.findGroupById(groupId));
-        return "group-announcements";
+        return "groups/htmx/group-announcements-form";
+    }
+
+    @PostMapping("/delete/group/announcement")
+    public String deleteGroupAnnouncement(@NotNull @RequestParam("groupId") String groupId, @NotNull @RequestParam("announcementId") String announcementId) {
+        groupService.deleteAnnouncement(groupId, Integer.parseInt(announcementId));
+        return "redirect:/groups";
     }
 }

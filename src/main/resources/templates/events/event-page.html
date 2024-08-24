@@ -10,9 +10,6 @@
             <h1 class="display-4" th:text="${event.name}">Event Name</h1>
             <p th:text="${event.description}">Event description here...</p>
 
-            <p>
-                <strong>Status:</strong> <span th:text="${event.status}">Status</span>
-            </p>
 
             <p th:if="${event.locationName}">
                 <strong>Location:</strong> <span th:text="${event.locationName}">Location Name</span>
@@ -35,16 +32,27 @@
             <h4>Event Dates and Times:</h4>
             <div th:each="dayEvent : ${event.days}">
                 <p>
-                    <strong>Start Time:</strong> <span th:text="${#temporals.format(dayEvent.eventStartTime, 'yyyy-MM-dd hh:mm a')}">Event Start Time</span>
+                    <strong>Start Time:</strong> <span th:text="${#temporals.format(dayEvent.startTime, 'yyyy-MM-dd hh:mm a')}">Event Start Time</span>
                 </p>
-                <p th:if="${dayEvent.eventEndTime}">
-                    <strong>End Time:</strong> <span th:text="${#temporals.format(dayEvent.eventEndTime, 'yyyy-MM-dd hh:mm a')}">Event End Time</span>
+                <p th:if="${dayEvent.endTime}">
+                    <strong>End Time:</strong> <span th:text="${#temporals.format(dayEvent.endTime, 'yyyy-MM-dd hh:mm a')}">Event End Time</span>
                 </p>
             </div>
 
             <div th:if="${isEventAdmin}">
-                <a href="#" class="btn btn-primary">Edit Event</a>
+                <a th:href="'/edit/event/' + ${event.id}" class="btn btn-primary">Edit Event</a>
             </div>
+
+            <section th:if="${isEventAdmin}" class="card border-0 my-4">
+                <div class="card-body">
+                    <h3>Delete Event</h3>
+                    <p>The action is not reversible. All administrators and members will be emailed when the group is deleted.</p>
+                    <form method="post" th:action="@{/delete/event}">
+                        <input type="hidden" name="eventId" th:value="${event.id}" />
+                        <button type="submit" class="btn btn-danger">Delete Event</button>
+                    </form>
+                </div>
+            </section>
         </section>
     </div>
 </main>

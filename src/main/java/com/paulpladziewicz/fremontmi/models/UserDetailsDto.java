@@ -32,4 +32,6 @@ public class UserDetailsDto {
     private List<String> groupIds = new ArrayList<>();
 
     private List<String> groupAdminIds = new ArrayList<>();
+
+    private List<String> eventAdminIds = new ArrayList<>();
 }

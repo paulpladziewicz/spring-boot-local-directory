@@ -10,25 +10,28 @@
         <div class="d-flex justify-content-between align-items-center my-4">
             <div>
                 <h1 class="display-4">My Groups</h1>
-                <p>You're a member or administrator of these groups.</p>
             </div>
             <div>
                 <a href="/groups" class="btn btn-outline-primary">View All Groups</a>
                 <a href="/create/group" class="btn btn-outline-primary">Create Group</a>
             </div>
         </div>
-        <th:block th:each="details : ${groups}">
-            <div class="col-md-6 my-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h3 th:text="${details.group.name}">Group Name</h3>
-                        <p th:text="${details.group.description}">Group Description</p>
-                        <a th:href="@{/groups/{id}(id=${details.group.id})}" class="btn btn-sm btn-primary me-2 mb-2">View</a>
+
+        <div class="row">
+            <th:block th:each="details : ${groups}">
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title" th:text="${details.group.name}">Card title</h4>
+                            <p class="card-text text-body-secondary" th:text="${#strings.length(details.group.description) > 120 ? #strings.substring(details.group.description, 0, 120) + '...' : details.group.description}"></p>
+                            <a th:href="'/groups/' + ${details.group.id}" class="btn btn-outline-primary btn-sm">View</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </th:block>
-        <p th:if="${#lists.isEmpty(groups)}">You are currently not a part of any groups.</p>
+            </th:block>
+        </div>
+
+        <p class="my-4" th:if="${#lists.isEmpty(groups)}">You are currently not a part of any groups.</p>
 
     </div>
 
