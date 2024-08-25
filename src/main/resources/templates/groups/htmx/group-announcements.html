@@ -1,4 +1,11 @@
-<li th:each="announcement : ${group.announcements}">
-    <strong th:text="${announcement.title}">Announcement Title</strong>
-    <p th:text="${announcement.content}">Announcement Content</p>
-</li>
+<ul id="announcementList">
+    <li th:each="announcement : ${group.announcements}">
+        <strong th:text="${announcement.title}">Announcement Title</strong>
+        <p th:text="${announcement.content}">Announcement Content</p>
+        <form method="post" th:action="@{/delete/group/announcement}">
+            <input type="hidden" name="groupId" th:value="${group.id}" />
+            <input type="hidden" name="announcementId" th:value="${announcement.id}" />
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    </li>
+</ul>

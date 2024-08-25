@@ -130,7 +130,7 @@ public class GroupService {
         Group group = findGroupById(groupId);
         announcement.setId(group.getAnnouncements().size() + 1);
         List<Announcement> announcements = new ArrayList<>(group.getAnnouncements());
-        announcements.add(announcement);
+        announcements.addFirst(announcement);
         group.setAnnouncements(announcements);
         groupRepository.save(group);
         return announcements;

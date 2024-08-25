@@ -21,7 +21,18 @@
             <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></p>
         </div>
         <button type="submit" class="btn btn-primary">Edit Group</button>
+        <a class="btn btn-secondary" th:href="'/groups/' + ${group.id}">Cancel</a>
     </form>
+
+    <section class="my-4">
+        <h3>Delete Group</h3>
+        <p>The action is not reversible. All administrators and members will be emailed when the group is deleted.</p>
+        <form hx-delete="/delete/group" hx-prompt="Are you sure you'd like to delete this group?">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" name="groupId" th:value="${group.id}" />
+            <button type="submit" class="btn btn-danger">Delete Group</button>
+        </form>
+    </section>
 </div>
 
 <script th:replace="~{partials/theme-js}"></script>

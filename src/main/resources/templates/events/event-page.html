@@ -6,6 +6,12 @@
 
 <main class="bg-secondary">
     <div class="container mt-4">
+        <section th:if="${true}" class="alert alert-secondary" role="alert">
+            <h4 class="mb-1">You're an administrator of this event.</h4>
+            <p class="mb-1">Additional options to update the event are available.</p>
+            <p class="mb-1">Please <a href="/contact-us" class="alert-link">contact us</a> if you'd like to add an administrator or change who will be administering this event.</p>
+        </section>
+
         <section>
             <h1 class="display-4" th:text="${event.name}">Event Name</h1>
             <p th:text="${event.description}">Event description here...</p>
@@ -42,16 +48,7 @@
                 <a th:href="'/edit/event/' + ${event.id}" class="btn btn-primary">Edit Event</a>
             </div>
 
-            <section th:if="${isEventAdmin}" class="card border-0 my-4">
-                <div class="card-body">
-                    <h3>Delete Event</h3>
-                    <p>The action is not reversible. All administrators and members will be emailed when the group is deleted.</p>
-                    <form method="post" th:action="@{/delete/event}">
-                        <input type="hidden" name="eventId" th:value="${event.id}" />
-                        <button type="submit" class="btn btn-danger">Delete Event</button>
-                    </form>
-                </div>
-            </section>
+
         </section>
     </div>
 </main>

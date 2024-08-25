@@ -70,6 +70,15 @@
                 <a href="#" th:href="@{/events/{id}(id=${event.id})}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
+
+        <section class="my-4">
+            <h3>Delete Event</h3>
+            <p>The action is not reversible.</p>
+            <form method="post" th:action="@{/delete/event}">
+                <input type="hidden" name="eventId" th:value="${event.id}" />
+                <button type="submit" class="btn btn-danger">Delete Event</button>
+            </form>
+        </section>
     </div>
 </main>
 

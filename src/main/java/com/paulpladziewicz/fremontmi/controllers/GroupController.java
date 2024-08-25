@@ -113,6 +113,7 @@ public class GroupController {
     @GetMapping("/announcements/group/form/{groupId}")
     public String getGroupAnnouncementForm(@NotNull @PathVariable String groupId, Model model) {
         model.addAttribute("groupId", groupId);
+        model.addAttribute("announcement", new Announcement());
         return "groups/htmx/group-announcements-form";
     }
 
@@ -121,13 +122,6 @@ public class GroupController {
         groupService.addAnnouncement(groupId, announcement);
         model.addAttribute("group", groupService.findGroupById(groupId));
         return "groups/htmx/group-announcements";
-    }
-
-    @PutMapping("/announcements/group/{groupId}")
-    public String updateGroupAnnouncement(@NotNull @PathVariable String groupId, @Valid Announcement announcement, BindingResult result, Model model) {
-        groupService.updateAnnouncement(groupId, announcement);
-        model.addAttribute("group", groupService.findGroupById(groupId));
-        return "groups/htmx/group-announcements-form";
     }
 
     @PostMapping("/delete/group/announcement")
