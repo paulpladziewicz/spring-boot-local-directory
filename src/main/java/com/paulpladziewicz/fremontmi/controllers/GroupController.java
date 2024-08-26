@@ -6,11 +6,13 @@ import com.paulpladziewicz.fremontmi.models.GroupDetailsDto;
 import com.paulpladziewicz.fremontmi.services.GroupService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 
 @Controller
@@ -119,6 +121,7 @@ public class GroupController {
 
     @PostMapping("/announcements/group/{groupId}")
     public String addGroupAnnouncement(@NotNull @PathVariable String groupId, @Valid Announcement announcement, Model model) {
+        announcement.setCreationDate(Instant.now());
         groupService.addAnnouncement(groupId, announcement);
         model.addAttribute("group", groupService.findGroupById(groupId));
         return "groups/htmx/group-announcements";

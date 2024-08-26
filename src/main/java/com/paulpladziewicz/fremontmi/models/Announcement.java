@@ -4,6 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Data
@@ -19,5 +23,29 @@ public class Announcement {
     @Size(max = 2000, message = "Content should be less than 2000 characters.")
     private String content;
 
-    private Date creationDate = new Date();
+    private Instant creationDate;
+
+    public String getTimeAgo() {
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.systemDefault());
+        ZonedDateTime creationTime = creationDate.atZone(ZoneId.systemDefault());
+
+        long seconds = ChronoUnit.SECONDS.between(creationTime, now);
+
+        if (seconds < 60) {
+            return seconds + " seconds ago";
+        }
+
+        long minutes = ChronoUnit.MINUTES.between(creationTime, now);
+        if (minutes < 60) {
+            return minutes + " minutes ago";
+        }
+
+        long hours = ChronoUnit.HOURS.between(creationTime, now);
+        if (hours < 24) {
+            return hours + " hours ago";
+        }
+
+        long days = ChronoUnit.DAYS.between(creationTime, now);
+        return days + " days ago";
+    }
 }

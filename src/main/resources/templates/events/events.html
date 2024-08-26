@@ -16,6 +16,11 @@
         </div>
 
         <div class="row">
+            <div th:if="${#lists.isEmpty(events)}" class="my-4">
+                <div>
+                    There are no events available at the moment.
+                </div>
+            </div>
             <div th:each="event : ${events}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">

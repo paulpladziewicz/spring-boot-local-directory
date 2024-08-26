@@ -27,8 +27,7 @@
     <section class="my-4">
         <h3>Delete Group</h3>
         <p>The action is not reversible. All administrators and members will be emailed when the group is deleted.</p>
-        <form hx-delete="/delete/group" hx-prompt="Are you sure you'd like to delete this group?">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <form method="post" th:action="@{/delete/group}">
             <input type="hidden" name="groupId" th:value="${group.id}" />
             <button type="submit" class="btn btn-danger">Delete Group</button>
         </form>

@@ -12,6 +12,8 @@
             <p class="mb-1">Please <a href="/contact-us" class="alert-link">contact us</a> if you'd like to add an administrator or change who will be administering this group.</p>
         </section>
 
+        <section th:text="${id}"></section>
+
         <section>
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h1 class="display-4 mb-0" th:text="${group.name}">Group Name</h1>
@@ -21,7 +23,7 @@
                         <input type="hidden" name="groupId" th:value="${group.id}" />
                         <button type="submit" class="btn btn-primary" sec:authorize="isAuthenticated()">Join Group</button>
                     </form>
-                    <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.id}" class="btn btn-outline-primary">Edit Group</a>
+                    <a th:if="${true}" th:href="'/edit/group/' + ${group.id}" class="btn btn-outline-primary">Edit Group</a>
                 </div>
             </div>
 
@@ -36,7 +38,7 @@
         <section class="mb-4">
             <div class="d-flex align-items-center mb-2">
                 <h2 class="mb-0 me-2">Announcements</h2>
-                <button th:if="${false}" class="btn btn-outline-primary btn-sm" th:attr="hx-get='/announcements/group/form/' + ${group.id}"
+                <button th:if="${true}" class="btn btn-outline-primary btn-sm" th:attr="hx-get='/announcements/group/form/' + ${group.id}"
                         hx-target="#add-announcement-form"
                         hx-swap="innerHTML"
                 >
@@ -45,17 +47,21 @@
             </div>
             <div id="add-announcement-form"></div>
             <ul id="announcementList" class="list-unstyled">
-                <li th:each="announcement : ${group.announcements}">
-                    <strong th:text="${announcement.title}">Announcement Title</strong>
-                    <p th:text="${announcement.content}">Announcement Content</p>
-                    <form method="post" th:action="@{/delete/group/announcement}">
-                        <input type="hidden" name="groupId" th:value="${group.id}" />
-                        <input type="hidden" name="announcementId" th:value="${announcement.id}" />
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                    </form>
-                </li>
-                <li th:if="${#lists.isEmpty(group.announcements)}">
-                    <p>No announcements are available at the moment.</p>
+                <li th:each="announcement : ${group.announcements}" class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1" th:text="${announcement.title}">Announcement Title</h5>
+                                    <p class="mb-1" th:text="${announcement.content}">Announcement Content</p>
+                                    <small class="text-muted" th:text="${announcement.getTimeAgo()}"></small>
+                                </div>
+                                <div>
+                                    <form method="post" th:action="@{/delete/group/announcement}">
+                                        <input type="hidden" name="groupId" th:value="${group.id}" />
+                                        <input type="hidden" name="announcementId" th:value="${announcement.id}" />
+                                        <button type="submit" class="btn btn-danger btn-sm"><i class="ai-trash"></i></button>
+                                    </form>
+                                </div>
+                    </div>
                 </li>
             </ul>
 
