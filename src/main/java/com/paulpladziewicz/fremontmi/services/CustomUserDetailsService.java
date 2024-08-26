@@ -1,15 +1,12 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.models.SecurityContext;
 import com.paulpladziewicz.fremontmi.models.UserDto;
 import com.paulpladziewicz.fremontmi.repositories.UserRepository;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -28,6 +25,6 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("UserDto not found");
         }
 
-        return new User(userFromDb.getUsername(), userFromDb.getPassword(), Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        return new SecurityContext("abc123", userFromDb.getUsername(), userFromDb.getPassword(), userFromDb.isEnabled(), userFromDb.isAccountNonExpired(), userFromDb.isCredentialsNonExpired(), userFromDb.isAccountNonLocked(), userFromDb.getAuthorities());
     }
 }

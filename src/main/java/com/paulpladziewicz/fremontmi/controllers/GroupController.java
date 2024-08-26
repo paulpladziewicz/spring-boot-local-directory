@@ -3,10 +3,13 @@ package com.paulpladziewicz.fremontmi.controllers;
 import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
 import com.paulpladziewicz.fremontmi.models.GroupDetailsDto;
+import com.paulpladziewicz.fremontmi.models.SecurityContext;
 import com.paulpladziewicz.fremontmi.services.GroupService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -32,6 +35,11 @@ public class GroupController {
 
     @GetMapping("/groups/{id}")
     public String displayGroup(@PathVariable String id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof SecurityContext) {
+            SecurityContext securityContext = (SecurityContext) authentication.getPrincipal();
+            model.addAttribute("userId", securityContext.getUserId());
+        }
         model.addAttribute("group", groupService.findGroupById(id));
         return "groups/group-page";
     }
