@@ -56,9 +56,9 @@ public class EventService {
 
     public Event createEvent(Event event) {
         UserDetailsDto userDetails = userService.getUserDetails();
-        var username = userDetails.getUsername();
+        var userId = userDetails.getUserId();
 
-        event.setOrganizerId(username);
+        event.setOrganizerId(userId);
         populateFormattedTimes(event);
         var savedEvent = eventRepository.save(event);
 

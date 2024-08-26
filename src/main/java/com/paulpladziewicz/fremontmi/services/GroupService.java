@@ -62,8 +62,8 @@ public class GroupService {
 
         List<String> administrators = new ArrayList<>(group.getAdministrators());
         List<String> members = new ArrayList<>(group.getMembers());
-        administrators.add(userDetails.getUsername());
-        members.add(userDetails.getUsername());
+        administrators.add(userDetails.getUserId());
+        members.add(userDetails.getUserId());
         group.setAdministrators(administrators);
         group.setMembers(members);
         Group savedGroup = groupRepository.save(group);
@@ -85,8 +85,8 @@ public class GroupService {
         Group group = findGroupById(groupId);
 
         List<String> members = group.getMembers();
-        if (!members.contains(userDetails.getUsername())) {
-            members.add(userDetails.getUsername());
+        if (!members.contains(userDetails.getUserId())) {
+            members.add(userDetails.getUserId());
             group.setMembers(members);
             groupRepository.save(group);
         }
@@ -105,7 +105,7 @@ public class GroupService {
         Group group = findGroupById(groupId);
 
         List<String> members = new ArrayList<>(group.getMembers());
-        members.remove(userDetails.getUsername());
+        members.remove(userDetails.getUserId());
         group.setMembers(members);
         Group savedGroup = groupRepository.save(group);
 

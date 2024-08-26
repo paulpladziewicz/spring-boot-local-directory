@@ -34,20 +34,20 @@ public class UserService {
     }
 
     public void createUser(UserRegistrationDto userRegistrationDto) {
-        if (userRepository.findByUsername(userRegistrationDto.getEmail()) != null) {
-            throw new RuntimeException("There is an account with that email address: " + userRegistrationDto.getEmail());
+        if (userRepository.findByUsername(userRegistrationDto.getUsername()) != null) {
+            throw new RuntimeException("There is an account with that username: " + userRegistrationDto.getUsername());
         }
 
         validatePasswords(userRegistrationDto.getPassword(), userRegistrationDto.getMatchingPassword());
 
         UserDto newUserDto = new UserDto();
-        newUserDto.setUsername(userRegistrationDto.getEmail());
+        newUserDto.setUsername(userRegistrationDto.getUsername());
         newUserDto.setPassword(passwordEncoder.encode(userRegistrationDto.getPassword()));
 
         UserDto savedUser = userRepository.save(newUserDto);
 
         UserDetailsDto userDetails = new UserDetailsDto();
-        userDetails.setUsername(savedUser.getUsername());
+        userDetails.setUserId(savedUser.getUserId());
         userDetails.setEmail(userRegistrationDto.getEmail());
         userDetails.setFirstName(userRegistrationDto.getFirstName());
         userDetails.setLastName(userRegistrationDto.getLastName());

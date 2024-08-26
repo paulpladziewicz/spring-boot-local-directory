@@ -13,7 +13,7 @@ import java.util.Collections;
 @Document(collection = "users")
 public class UserDto {
     @Id
-    private String id;
+    private String userId;
 
     private String username;
 
@@ -21,13 +21,13 @@ public class UserDto {
 
     private String resetPasswordToken;
 
-    private final Collection<? extends GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+    private Collection<? extends GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
-    private final boolean accountNonExpired = true;
+    private boolean accountNonExpired = true;
 
-    private final boolean accountNonLocked = true;
+    private boolean accountNonLocked = true;
 
-    private final boolean credentialsNonExpired = true;
+    private boolean credentialsNonExpired = true;
 
-    private final boolean enabled = true;
+    private boolean enabled = true;
 }

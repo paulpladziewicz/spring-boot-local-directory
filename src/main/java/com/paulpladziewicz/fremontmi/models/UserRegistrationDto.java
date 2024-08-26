@@ -16,6 +16,10 @@ public class UserRegistrationDto {
     @Size(max = 30, message = "Last name should be less than 30 characters.")
     private String lastName;
 
+    @NotBlank(message = "Username is required.")
+    @Size(max = 100, message = "Username must not be longer than 100 characters.")
+    private String username;
+
     @NotBlank(message = "Email is required.")
     @Email(message = "Invalid email format.")
     @Size(max = 100, message = "Email must not be longer than 100 characters.")
