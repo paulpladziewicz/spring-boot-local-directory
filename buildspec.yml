@@ -7,3 +7,8 @@ phases:
     commands:
       - echo Installing Maven
       - mvn clean install -DskipTests
+artifacts:
+  files:
+    - target/my-app-*.jar
+  discard-paths: yes
+  base-directory: target
