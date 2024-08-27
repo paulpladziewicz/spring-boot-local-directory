@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      java: corretto-21
+      java: corretto-17
     commands:
       - echo Installing Maven
       - mvn clean install -DskipTests
