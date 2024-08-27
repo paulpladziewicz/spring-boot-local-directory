@@ -9,6 +9,6 @@ phases:
       - mvn clean install -DskipTests
 artifacts:
   files:
-    - target/my-app-*.jar
+    - target/fremontmi-*.jar
   discard-paths: yes
   base-directory: target
