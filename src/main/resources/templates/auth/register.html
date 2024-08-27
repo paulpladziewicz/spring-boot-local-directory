@@ -24,7 +24,7 @@
                     </div>
                 </div>
                 <div>
-                    <input class="form-control form-control-lg" type="text" id="username" name="username" th:field="*{username}" placeholder="Email address" required><br>
+                    <input class="form-control form-control-lg" type="text" id="username" name="username" th:field="*{username}" placeholder="Username" required><br>
                     <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Password Error</span>
                 </div>
                 <div>

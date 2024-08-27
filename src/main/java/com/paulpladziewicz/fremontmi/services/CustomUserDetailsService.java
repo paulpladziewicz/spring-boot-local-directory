@@ -25,6 +25,6 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("UserDto not found");
         }
 
-        return new SecurityContext("abc123", userFromDb.getUsername(), userFromDb.getPassword(), userFromDb.isEnabled(), userFromDb.isAccountNonExpired(), userFromDb.isCredentialsNonExpired(), userFromDb.isAccountNonLocked(), userFromDb.getAuthorities());
+        return new SecurityContext(userFromDb.getUserId(), userFromDb.getUsername(), userFromDb.getPassword(), userFromDb.isEnabled(), userFromDb.isAccountNonExpired(), userFromDb.isCredentialsNonExpired(), userFromDb.isAccountNonLocked(), userFromDb.getAuthorities());
     }
 }

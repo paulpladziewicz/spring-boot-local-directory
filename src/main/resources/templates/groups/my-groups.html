@@ -18,13 +18,13 @@
         </div>
 
         <div class="row">
-            <th:block th:each="details : ${groups}">
+            <th:block th:each="group : ${groups}">
                 <div class="col-md-4 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title" th:text="${details.group.name}">Card title</h4>
-                            <p class="card-text text-body-secondary" th:text="${#strings.length(details.group.description) > 120 ? #strings.substring(details.group.description, 0, 120) + '...' : details.group.description}"></p>
-                            <a th:href="'/groups/' + ${details.group.id}" class="btn btn-outline-primary btn-sm">View</a>
+                            <h4 class="card-title" th:text="${group.name}">Card title</h4>
+                            <p class="card-text text-body-secondary" th:text="${#strings.length(group.description) > 120 ? #strings.substring(group.description, 0, 120) + '...' : group.description}"></p>
+                            <a th:href="'/groups/' + ${group.id}" class="btn btn-outline-primary btn-sm">View</a>
                         </div>
                     </div>
                 </div>

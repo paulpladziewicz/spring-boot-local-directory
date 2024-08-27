@@ -2,17 +2,14 @@ package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
-import com.paulpladziewicz.fremontmi.models.GroupDetailsDto;
 import com.paulpladziewicz.fremontmi.models.UserDetailsDto;
 import com.paulpladziewicz.fremontmi.repositories.GroupRepository;
 import com.paulpladziewicz.fremontmi.repositories.UserDetailsRepository;
-import com.paulpladziewicz.fremontmi.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class GroupService {
@@ -37,23 +34,10 @@ public class GroupService {
         return groupRepository.findById(id).orElse(null);
     }
 
-    public List<GroupDetailsDto> findGroupsByUser() {
+    public List<Group> findGroupsByUser() {
         UserDetailsDto userDetails = userService.getUserDetails();
 
-        List<Group> groups = groupRepository.findAllById(userDetails.getGroupIds());
-
-        return groups.stream()
-                .map(group -> {
-                    GroupDetailsDto dto = new GroupDetailsDto();
-                    dto.setGroup(group);
-                    if (userDetails.getGroupAdminIds().contains(group.getId())) {
-                        dto.setUserRole("admin");
-                    } else {
-                        dto.setUserRole("member");
-                    }
-                    return dto;
-                })
-                .collect(Collectors.toList());
+        return groupRepository.findAllById(userDetails.getGroupIds());
     }
 
     @Transactional

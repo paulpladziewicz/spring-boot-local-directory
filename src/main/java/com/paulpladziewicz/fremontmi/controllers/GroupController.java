@@ -2,14 +2,11 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
-import com.paulpladziewicz.fremontmi.models.GroupDetailsDto;
-import com.paulpladziewicz.fremontmi.models.SecurityContext;
 import com.paulpladziewicz.fremontmi.services.GroupService;
+import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,9 +19,11 @@ import java.util.List;
 public class GroupController {
 
     private final GroupService groupService;
+    private final UserService userService;
 
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService, UserService userService) {
         this.groupService = groupService;
+        this.userService = userService;
     }
 
     @GetMapping("/groups")
@@ -35,36 +34,34 @@ public class GroupController {
 
     @GetMapping("/groups/{id}")
     public String displayGroup(@PathVariable String id, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof SecurityContext) {
-            SecurityContext securityContext = (SecurityContext) authentication.getPrincipal();
-            model.addAttribute("userId", securityContext.getUserId());
-        }
-        model.addAttribute("group", groupService.findGroupById(id));
+        Group group = groupService.findGroupById(id);
+        String userId = userService.getUserId();
+        model.addAttribute("group", group);
+        model.addAttribute("isMember", group.getMembers().contains(userId));
+        model.addAttribute("isAdmin", group.getAdministrators().contains(userId));
+        model.addAttribute("adminCount", group.getAdministrators().size());
+        model.addAttribute("memberCount", group.getMembers().size());
         return "groups/group-page";
     }
 
     @PostMapping("/groups/join")
-    public String joinGroup(@RequestParam("groupId") String groupId) {
+    public String joinGroup(@ModelAttribute("groupId") @RequestParam("groupId") String groupId) {
         groupService.joinGroup(groupId);
 
-        // return htmx
-        return "redirect:/groups/";
+        return "groups/htmx/joined-group";
     }
 
     @PostMapping("/groups/leave")
     public String leaveGroup(@RequestParam("groupId") String groupId) {
         groupService.leaveGroup(groupId);
-
-        // return htmx
-        return "redirect:/groups";
+        return "redirect:/groups/" + groupId;
     }
 
     @GetMapping("/my/groups")
     public String groups(Model model) {
         try {
-            List<GroupDetailsDto> groupDetails = groupService.findGroupsByUser();
-            model.addAttribute("groups", groupDetails);
+            List<Group> groups = groupService.findGroupsByUser();
+            model.addAttribute("groups", groups);
             return "groups/my-groups";
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -128,7 +125,7 @@ public class GroupController {
     }
 
     @PostMapping("/announcements/group/{groupId}")
-    public String addGroupAnnouncement(@NotNull @PathVariable String groupId, @Valid Announcement announcement, Model model) {
+    public String addGroupAnnouncement(@NotNull @PathVariable  String groupId, @Valid Announcement announcement, Model model) {
         announcement.setCreationDate(Instant.now());
         groupService.addAnnouncement(groupId, announcement);
         model.addAttribute("group", groupService.findGroupById(groupId));
@@ -138,6 +135,6 @@ public class GroupController {
     @PostMapping("/delete/group/announcement")
     public String deleteGroupAnnouncement(@NotNull @RequestParam("groupId") String groupId, @NotNull @RequestParam("announcementId") String announcementId) {
         groupService.deleteAnnouncement(groupId, Integer.parseInt(announcementId));
-        return "redirect:/groups";
+        return "groups/htmx/delete";
     }
 }

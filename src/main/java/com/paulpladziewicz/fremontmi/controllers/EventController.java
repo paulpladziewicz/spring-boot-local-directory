@@ -3,7 +3,6 @@ package com.paulpladziewicz.fremontmi.controllers;
 import com.paulpladziewicz.fremontmi.models.DayEvent;
 import com.paulpladziewicz.fremontmi.models.Event;
 import com.paulpladziewicz.fremontmi.models.EventDetailsDto;
-import com.paulpladziewicz.fremontmi.models.GroupDetailsDto;
 import com.paulpladziewicz.fremontmi.services.EventService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

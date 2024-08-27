@@ -1,11 +1,18 @@
-<ul id="announcementList">
-    <li th:each="announcement : ${group.announcements}">
-        <strong th:text="${announcement.title}">Announcement Title</strong>
-        <p th:text="${announcement.content}">Announcement Content</p>
-        <form method="post" th:action="@{/delete/group/announcement}">
-            <input type="hidden" name="groupId" th:value="${group.id}" />
-            <input type="hidden" name="announcementId" th:value="${announcement.id}" />
-            <button type="submit" class="btn btn-danger">Delete</button>
-        </form>
+<ul id="announcementList" class="list-unstyled">
+    <li th:each="announcement : ${group.announcements}" class="mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-1" th:text="${announcement.title}">Announcement Title</h5>
+                <p class="mb-1" th:text="${announcement.content}">Announcement Content</p>
+                <small class="text-muted" th:text="${announcement.getTimeAgo()}"></small>
+            </div>
+            <div>
+                <form method="post" th:action="@{/delete/group/announcement}">
+                    <input type="hidden" name="groupId" th:value="${group.id}" />
+                    <input type="hidden" name="announcementId" th:value="${announcement.id}" />
+                    <button type="submit" class="btn btn-danger btn-sm"><i class="ai-trash"></i></button>
+                </form>
+            </div>
+        </div>
     </li>
 </ul>

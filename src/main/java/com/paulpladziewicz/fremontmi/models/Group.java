@@ -23,7 +23,7 @@ public class Group {
     private String name;
 
     @NotBlank(message = "Please provide a group description.")
-    @Size(max = 1000, message = "Description should not be longer than 2,500 characters.")
+    @Size(max = 3000, message = "Description should not be longer than 3,000 characters, which is about 500 words.")
     private String description;
 
     @Indexed

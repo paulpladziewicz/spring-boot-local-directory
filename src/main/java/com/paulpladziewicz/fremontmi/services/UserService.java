@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.models.SecurityContext;
 import com.paulpladziewicz.fremontmi.models.UserDetailsDto;
 import com.paulpladziewicz.fremontmi.models.UserDto;
 import com.paulpladziewicz.fremontmi.models.UserRegistrationDto;
@@ -67,20 +68,21 @@ public class UserService {
         }
     }
 
-    public String getSignedInUser() {
+    public String getUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-            return auth.getName();
+            SecurityContext securityContext = (SecurityContext) auth.getPrincipal();
+            return securityContext.getUserId();
         }
 
         return null;
     }
 
     public UserDetailsDto getUserDetails() {
-        String username = getSignedInUser();
-        Optional<UserDetailsDto> userDetailsOpt = userDetailsRepository.findById(username);
+        String userId = getUserId();
+        Optional<UserDetailsDto> userDetailsOpt = userDetailsRepository.findById(userId);
         if (userDetailsOpt.isEmpty()) {
-            throw new IllegalStateException("User details not found for username: " + username);
+            throw new IllegalStateException("User details not found for userId: " + userId);
         }
         return userDetailsOpt.get();
     }
@@ -96,8 +98,8 @@ public class UserService {
     }
 
     public UserDetailsDto updateUserDetails(UserDetailsDto newDetails) {
-        String username = getSignedInUser();
-        Optional<UserDetailsDto> existingDetails = userDetailsRepository.findById(username);
+        String userId = getUserId();
+        Optional<UserDetailsDto> existingDetails = userDetailsRepository.findById(userId);
         if (existingDetails.isPresent()) {
             UserDetailsDto updatedDetails = existingDetails.get();
             updatedDetails.setFirstName(newDetails.getFirstName());
