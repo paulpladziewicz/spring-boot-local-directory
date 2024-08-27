@@ -9,5 +9,4 @@ phases:
       - mvn clean install -DskipTests
 artifacts:
   files:
-    - fremontmi-*.jar
-  discard-paths: yes
+    - '**/*'
