@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - Home')}"></head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<div class="container mt-5">
+    <h1>Privacy Policy</h1>
+    <p>Your privacy is important to us. This privacy policy explains:</p>
+    <ul>
+        <li>What information we collect</li>
+        <li>How we collect it (e.g., directly from users, through cookies)</li>
+        <li>How we use and share that information</li>
+        <li>How users can access and control their information</li>
+        <li>Your data retention practices</li>
+        <li>How we protect users' data</li>
+        <li>Contact information for privacy concerns</li>
+    </ul>
+    <h2>Information Collection</h2>
+    <p>We collect various types of information in connection with the services we provide, including:</p>
+    <!-- Add more detailed content as required -->
+
+    <h2>How We Use Your Information</h2>
+    <p>We may use the information we collect for various purposes, including:</p>
+    <p>Cookies and Session Storage:
+        We use cookies solely for the purpose of authenticating users and maintaining session information. These cookies are essential for the operation of our platform, allowing users to stay logged in and access their accounts securely. These cookies do not collect personal data for advertising purposes and are not used to track your browsing activity.
+    </p>
+
+    <!-- Additional sections as needed -->
+</div>
+<script th:replace="~{partials/theme-js}"></script>
+<footer th:replace="~{partials/footer}"></footer>
+</body>
+</html>
+
