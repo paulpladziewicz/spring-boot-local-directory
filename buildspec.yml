@@ -1,0 +1,12 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing Maven
+      - mvn clean install -DskipTests
+
+artifacts:
+  files:
+    - target/my-app-*.jar
+  discard-paths: yes
