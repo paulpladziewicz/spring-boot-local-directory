@@ -30,7 +30,7 @@
                            th:text="${event.formattedTimes[0]}">
                             Event Start Time
                         </p>
-                        <a th:href="'/events/' + ${event.id}" class="btn btn-outline-primary btn-sm">View</a>
+                        <a hx-boost="true" th:href="'/events/' + ${event.id}" class="btn btn-outline-primary btn-sm">View</a>
                     </div>
                 </div>
             </div>

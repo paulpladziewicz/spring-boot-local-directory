@@ -9,7 +9,7 @@
 
         <div class="d-flex justify-content-between align-items-center my-4">
             <h1 class="display-3 mb-0">Groups</h1>
-            <div>
+            <div hx-boost="true">
                 <a href="/my/groups" class="btn btn-outline-primary">View My Groups</a>
                 <a href="/create/group" class="btn btn-primary">Create Group</a>
             </div>
@@ -30,7 +30,7 @@
                             <span th:text="${group.members.size() == 1 ? 'Member' : 'Members'}"></span>
                         </p>
                         <p class="card-text text-body-secondary" th:text="${#strings.length(group.description) > 120 ? #strings.substring(group.description, 0, 120) + '...' : group.description}"></p>
-                        <a th:href="'/groups/' + ${group.id}" class="btn btn-outline-primary btn-sm">View</a>
+                        <a hx-boost="true" th:href="'/groups/' + ${group.id}" class="btn btn-outline-primary btn-sm">View</a>
                     </div>
                 </div>
             </div>
