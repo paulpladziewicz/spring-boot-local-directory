@@ -25,16 +25,6 @@
                 <strong>Address:</strong> <span th:text="${event.address}">Event Address</span>
             </p>
 
-            <p th:if="${event.category}">
-                <strong>Category:</strong>
-                <span th:each="cat : ${event.category}" th:text="${cat}">Category</span>
-            </p>
-
-            <p th:if="${event.tags}">
-                <strong>Tags:</strong>
-                <span th:each="tag : ${event.tags}" th:text="${tag}" th:utext="'&nbsp;'">Tag</span>
-            </p>
-
             <h4>Event Dates and Times:</h4>
             <div th:each="dayEvent, iterStat : ${event.days}">
                 <p>
