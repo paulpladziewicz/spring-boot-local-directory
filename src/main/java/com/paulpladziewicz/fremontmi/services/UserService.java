@@ -39,6 +39,10 @@ public class UserService {
             throw new RuntimeException("There is an account with that username: " + userRegistrationDto.getUsername());
         }
 
+        if (userDetailsRepository.findByEmail(userRegistrationDto.getEmail()) != null) {
+            throw new RuntimeException("There is an account with that email: " + userRegistrationDto.getEmail());
+        }
+
         validatePasswords(userRegistrationDto.getPassword(), userRegistrationDto.getMatchingPassword());
 
         UserDto newUserDto = new UserDto();

@@ -40,10 +40,17 @@ public class UserController {
 
         try {
             userService.createUser(userRegistrationDto);
-        } catch (ValidationException e) {
-            result.rejectValue("matchingPassword", "Match", e.getMessage());
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("username")) {
+                result.rejectValue("username", "error.userRegistrationDto", e.getMessage());
+            } else if (e.getMessage().contains("email")) {
+                result.rejectValue("email", "error.userRegistrationDto", e.getMessage());
+            } else {
+                result.rejectValue("matchingPassword", "error.userRegistrationDto", e.getMessage());
+            }
             return "auth/register";
         }
+
         return "redirect:login";
     }
 
