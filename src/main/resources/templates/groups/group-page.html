@@ -81,5 +81,18 @@
 
 <footer th:replace="~{partials/footer}"></footer>
 <script th:replace="~{partials/theme-js}"></script>
+<form id="logoutForm" th:action="@{/logout}" method="post" style="display: none;">
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+</form>
+
+<script th:inline="javascript">
+    window.onload = function() {
+        const timeUntilLogout = (19 * 60 + 59) * 60 * 1000; // 19 hours 59 minutes
+
+        setTimeout(function() {
+            document.getElementById('logoutForm').submit();
+        }, timeUntilLogout);
+    };
+</script>
 </body>
 </html>
