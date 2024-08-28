@@ -59,6 +59,8 @@ public class UserService {
         userDetails.setTermsAcceptedAt(userRegistrationDto.getTermsAcceptedAt());
 
         userDetailsRepository.save(userDetails);
+
+        emailService.sendSimpleMessage(userDetails.getEmail(), "Welcome to FremontMI!", "not used");
     }
 
     public void forgotPassword(String email) {

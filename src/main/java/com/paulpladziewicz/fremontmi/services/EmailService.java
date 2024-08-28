@@ -28,7 +28,7 @@ public class EmailService {
             Context context = new Context();
             context.setVariable("name", "Paul");
 
-            String html = templateEngine.process("email/reset-password", context);
+            String html = templateEngine.process("auth/email/reset-password", context);
 
             message.setFrom("no-reply@fremontmi.com");
             message.setRecipients(MimeMessage.RecipientType.TO, to);
