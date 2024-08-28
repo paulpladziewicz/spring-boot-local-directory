@@ -11,5 +11,3 @@ artifacts:
   files:
     - 'target/fremontmi-*.jar'
   discard-paths: yes
-  base-directory: target
-
