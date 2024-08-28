@@ -65,8 +65,12 @@ public class EventService {
         return savedEvent;
     }
 
-    public void deleteEvent (String groupId) {
-        eventRepository.deleteById(groupId);
+    public void deleteEvent (String eventId) {
+        UserDetailsDto userDetails = userService.getUserDetails();
+        if (!userDetails.getEventAdminIds().contains(eventId)) {
+            throw new RuntimeException("User doesn't have permission to delete this event");
+        }
+        eventRepository.deleteById(eventId);
     }
 
     public void populateFormattedTimes(Event event) {

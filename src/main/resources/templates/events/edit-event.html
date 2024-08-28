@@ -8,7 +8,7 @@
     <div class="container mt-4">
         <h1 class="display-4">Edit Event</h1>
         <form th:action="@{/edit/event/{id}(id=${event.id})}" th:object="${event}" method="post">
-            <input type="hidden" name="id" th:value="${event.id}" />
+            <input type="hidden" name="id" th:value="${event.id}"/>
 
             <div class="form-group">
                 <label for="name">Event Name</label>
@@ -18,14 +18,18 @@
 
             <div class="form-group">
                 <label for="description">Description</label>
-                <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Enter event description"></textarea>
-                <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="alert alert-danger"></div>
+                <textarea class="form-control" id="description" th:field="*{description}" rows="3"
+                          placeholder="Enter event description"></textarea>
+                <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"
+                     class="alert alert-danger"></div>
             </div>
 
             <div class="form-group">
                 <label for="locationName">Location Name</label>
-                <input type="text" class="form-control" id="locationName" th:field="*{locationName}" placeholder="Enter location name">
-                <div th:if="${#fields.hasErrors('locationName')}" th:errors="*{locationName}" class="alert alert-danger"></div>
+                <input type="text" class="form-control" id="locationName" th:field="*{locationName}"
+                       placeholder="Enter location name">
+                <div th:if="${#fields.hasErrors('locationName')}" th:errors="*{locationName}"
+                     class="alert alert-danger"></div>
             </div>
 
             <div class="form-group">
@@ -34,108 +38,37 @@
                 <div th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="alert alert-danger"></div>
             </div>
 
-            <div class="form-group">
-                <label for="status">Status</label>
-                <select class="form-control" id="status" th:field="*{status}">
-                    <option value="active" th:selected="${event.status == 'active'}">Active</option>
-                    <option value="inactive" th:selected="${event.status == 'inactive'}">Inactive</option>
-                    <option value="cancelled" th:selected="${event.status == 'cancelled'}">Cancelled</option>
-                </select>
-                <div th:if="${#fields.hasErrors('status')}" th:errors="*{status}" class="alert alert-danger"></div>
-            </div>
+            <!--            <div class="form-group">-->
+            <!--                <label for="status">Status</label>-->
+            <!--                <select class="form-control" id="status" th:field="*{status}">-->
+            <!--                    <option value="active" th:selected="${event.status == 'active'}">Active</option>-->
+            <!--                    <option value="inactive" th:selected="${event.status == 'inactive'}">Inactive</option>-->
+            <!--                    <option value="cancelled" th:selected="${event.status == 'cancelled'}">Cancelled</option>-->
+            <!--                </select>-->
+            <!--                <div th:if="${#fields.hasErrors('status')}" th:errors="*{status}" class="alert alert-danger"></div>-->
+            <!--            </div>-->
 
             <h4>Event Dates and Times</h4>
-            <div id="dayEvents">
-                <div th:each="dayEvent, iterStat : *{days}">
-                    <div class="form-group">
-                        <label for="startTime">Start Time</label>
-                        <input id="startTime" type="datetime-local" class="form-control" th:field="*{days[__${iterStat.index}__].startTime}" placeholder="Enter start time">
-                        <div th:if="${#fields.hasErrors('days[__${iterStat.index}__].startTime')}" th:errors="*{days[__${iterStat.index}__].startTime}" class="alert alert-danger"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="endTime">End Time (Optional)</label>
-                        <input id="endTime" type="datetime-local" class="form-control" th:field="*{days[__${iterStat.index}__].endTime}" placeholder="Enter end time (optional)">
-                        <div th:if="${#fields.hasErrors('days[__${iterStat.index}__].endTime')}" th:errors="*{days[__${iterStat.index}__].endTime}" class="alert alert-danger"></div>
-                    </div>
-
-                    <button type="button" class="btn btn-danger" th:onclick="|removeDayEvent(${iterStat.index})|">Remove</button>
-                </div>
-            </div>
-
-            <button type="button" class="btn btn-secondary" onclick="addDayEvent()">Add Another Date</button>
 
             <div class="mt-4">
                 <button class="btn btn-primary" type="submit">Save Changes</button>
                 <a href="#" th:href="@{/events/{id}(id=${event.id})}" class="btn btn-secondary">Cancel</a>
             </div>
-        </form>
 
-        <section class="my-4">
-            <h3>Delete Event</h3>
-            <p>The action is not reversible.</p>
-            <form method="post" th:action="@{/delete/event}">
-                <input type="hidden" name="eventId" th:value="${event.id}" />
-                <button type="submit" class="btn btn-danger">Delete Event</button>
-            </form>
-        </section>
+
+            <section class="my-4">
+                <h3>Delete Event</h3>
+                <p>The action is not reversible.</p>
+                <form method="post" th:action="@{/delete/event}">
+                    <input type="hidden" name="eventId" th:value="${event.id}"/>
+                    <button type="submit" class="btn btn-danger">Delete Event</button>
+                </form>
+            </section>
+        </form>
     </div>
 </main>
 
 <footer th:replace="~{partials/footer}"></footer>
-
-<script>
-    // JavaScript function to add a new DayEvent entry
-    function addDayEvent() {
-        const dayEventsDiv = document.getElementById('dayEvents');
-        const index = dayEventsDiv.children.length;
-
-        const dayEventTemplate = `
-            <div class="form-group">
-                <label for="startTime">Start Time</label>
-                <input type="datetime-local" class="form-control" name="days[${index}].startTime" placeholder="Enter start time">
-            </div>
-
-            <div class="form-group">
-                <label for="endTime">End Time (Optional)</label>
-                <input type="datetime-local" class="form-control" name="days[${index}].endTime" placeholder="Enter end time (optional)">
-            </div>
-
-            <button type="button" class="btn btn-danger" onclick="removeDayEvent(${index})">Remove</button>
-        `;
-
-        const newDayEventDiv = document.createElement('div');
-        newDayEventDiv.innerHTML = dayEventTemplate;
-        dayEventsDiv.appendChild(newDayEventDiv);
-
-        updateRemoveButtons();
-    }
-
-    // JavaScript function to remove a DayEvent entry
-    function removeDayEvent(index) {
-        const dayEventsDiv = document.getElementById('dayEvents');
-        const dayEventDiv = dayEventsDiv.children[index];
-        dayEventsDiv.removeChild(dayEventDiv);
-
-        updateRemoveButtons();
-    }
-
-    // Update the visibility of remove buttons based on the number of day events
-    function updateRemoveButtons() {
-        const dayEventsDiv = document.getElementById('dayEvents');
-        const removeButtons = dayEventsDiv.querySelectorAll('button.btn-danger');
-
-        // If there is only one day event, disable its remove button
-        if (removeButtons.length === 1) {
-            removeButtons[0].disabled = true;
-        } else {
-            removeButtons.forEach(button => button.disabled = false);
-        }
-    }
-
-    // Initialize the form with the correct state
-    document.addEventListener('DOMContentLoaded', updateRemoveButtons);
-</script>
 
 <script th:src="@{/js/flatpickr.min.js}"></script>
 <script th:replace="~{partials/theme-js}"></script>

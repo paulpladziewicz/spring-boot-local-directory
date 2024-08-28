@@ -60,7 +60,7 @@ public class UserService {
 
         userDetailsRepository.save(userDetails);
 
-        emailService.sendSimpleMessage(userDetails.getEmail(), "Welcome to FremontMI!", "not used");
+        emailService.sendWelcomeEmail(userDetails.getEmail());
     }
 
     public void forgotPassword(String email) {

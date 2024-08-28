@@ -40,4 +40,24 @@ public class EmailService {
             throw new RuntimeException(e);
         }
     }
+
+    public void sendWelcomeEmail(String to) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+
+            Context context = new Context();
+            context.setVariable("name", "Paul");
+
+            String html = templateEngine.process("auth/email/welcome-email", context);
+
+            message.setFrom("no-reply@fremontmi.com");
+            message.setRecipients(MimeMessage.RecipientType.TO, to);
+            message.setSubject("Welcome to FremontMI.com");
+            message.setContent(html, "text/html; charset=utf-8");
+
+            mailSender.send(message);
+        } catch (MessagingException | MailException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
