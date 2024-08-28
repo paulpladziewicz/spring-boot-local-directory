@@ -100,6 +100,10 @@ public class GroupService {
     }
 
     public Group updateGroup (Group group) {
+        UserDetailsDto userDetails = userService.getUserDetails();
+        if (!userDetails.getGroupAdminIds().contains(group.getId())) {
+            throw new RuntimeException("User doesn't have permission to update group");
+        }
         Group groupDocument = findGroupById(group.getId());
         groupDocument.setName(group.getName());
         groupDocument.setDescription(group.getDescription());
@@ -107,10 +111,19 @@ public class GroupService {
     }
 
     public void deleteGroup (String groupId) {
+        UserDetailsDto userDetails = userService.getUserDetails();
+        if (!userDetails.getGroupAdminIds().contains(groupId)) {
+            throw new RuntimeException("User doesn't have permission to delete group");
+        }
         groupRepository.deleteById(groupId);
     }
 
     public List<Announcement> addAnnouncement(String groupId, Announcement announcement) {
+        UserDetailsDto userDetails = userService.getUserDetails();
+        if (!userDetails.getGroupAdminIds().contains(groupId)) {
+            throw new RuntimeException("User doesn't have permission to add an announcement to this group");
+        }
+
         Group group = findGroupById(groupId);
         announcement.setId(group.getAnnouncements().size() + 1);
         List<Announcement> announcements = new ArrayList<>(group.getAnnouncements());
@@ -120,40 +133,12 @@ public class GroupService {
         return announcements;
     }
 
-    public List<Announcement> updateAnnouncement(String groupId, Announcement announcement) {
-        Group group = findGroupById(groupId);
-        List<Announcement> announcements = new ArrayList<>(group.getAnnouncements());
-
-        boolean isUpdated = false;
-
-        for (int i = 0; i < announcements.size(); i++) {
-            Announcement currentAnnouncement = announcements.get(i);
-            if (currentAnnouncement.getId() == i) {
-                currentAnnouncement.setTitle(announcement.getTitle());
-                currentAnnouncement.setContent(announcement.getContent());
-                isUpdated = true;
-                break;
-            }
-        }
-
-        if (!isUpdated) {
-            throw new IllegalArgumentException("Announcement not found with ID: " + announcement.getId());
-        }
-
-        groupRepository.save(group);
-
-        return new ArrayList<>(group.getAnnouncements());
-    }
-
-    public List<Announcement> updateAllAnnouncements(String groupId, List<Announcement> announcements) {
-        Group group = findGroupById(groupId);
-        List<Announcement> newAnnouncementsArray = new ArrayList<>(announcements);
-        group.setAnnouncements(newAnnouncementsArray);
-        groupRepository.save(group);
-        return announcements;
-    }
-
     public boolean deleteAnnouncement(String groupId, int announcementId) {
+        UserDetailsDto userDetails = userService.getUserDetails();
+        if (!userDetails.getGroupAdminIds().contains(groupId)) {
+            throw new RuntimeException("User doesn't have permission to delete an announcement from this group");
+        }
+
         Group group = findGroupById(groupId);
         List<Announcement> announcements = new ArrayList<>(group.getAnnouncements());
 
