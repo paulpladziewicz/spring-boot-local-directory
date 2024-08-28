@@ -28,35 +28,30 @@ public class EventService {
     }
 
     public List<Event> findAll() {
-        return eventRepository.findAll();
+        LocalDateTime now = LocalDateTime.now();
+
+        return eventRepository.findBySoonestStartTimeAfterOrderBySoonestStartTimeAsc(now);
     }
 
     public Event findEventById(String id) {
         return eventRepository.findById(id).orElse(null);
     }
 
-    public List<EventDetailsDto> findEventsByUser() {
+    public List<Event> findEventsByUser() {
         UserDetailsDto userDetails = userService.getUserDetails();
 
-        List<Event> events = eventRepository.findAllById(userDetails.getEventAdminIds());
-
-        return events.stream()
-                .map(event -> {
-                    EventDetailsDto dto = new EventDetailsDto();
-                    dto.setEvent(event);
-                    if (userDetails.getEventAdminIds().contains(event.getId())) {
-                        dto.setUserRole("admin");
-                    } else {
-                        dto.setUserRole("member");
-                    }
-                    return dto;
-                })
-                .collect(Collectors.toList());
+        return eventRepository.findAllById(userDetails.getEventAdminIds());
     }
 
     public Event createEvent(Event event) {
         UserDetailsDto userDetails = userService.getUserDetails();
         var userId = userDetails.getUserId();
+
+        LocalDateTime soonestStartTime = event.getDays().stream()
+                .map(DayEvent::getStartTime)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
+        event.setSoonestStartTime(soonestStartTime);
 
         event.setOrganizerId(userId);
         populateFormattedTimes(event);

@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -23,16 +24,13 @@ public class Event {
     @Size(max = 500, message = "Description can't be longer than 500 characters")
     private String description;
 
-    @Indexed
-    private List<String> category;
-
-    @Indexed
-    private List<String> tags;
-
     @Size(max = 256, message = "Location name can't be longer than 256 characters")
     private String locationName;
 
     private String address;
+
+    @Indexed
+    private LocalDateTime soonestStartTime;
 
     @NotEmpty(message = "Event must have at least one date and time.")
     private List<DayEvent> days;

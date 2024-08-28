@@ -18,13 +18,13 @@
         </div>
 
         <div class="row">
-            <th:block th:each="details : ${events}">
+            <th:block th:each="event : ${events}">
                 <div class="col-md-4 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h3 th:text="${details.event.name}">Group Name</h3>
-                            <p th:text="${details.event.description}">Group Description</p>
-                            <a th:href="@{/events/{id}(id=${details.event.id})}" class="btn btn-sm btn-primary me-2 mb-2">View</a>
+                            <h3 th:text="${event.name}">Group Name</h3>
+                            <p th:text="${event.description}">Group Description</p>
+                            <a th:href="'/events/' + ${event.id}" class="btn btn-sm btn-primary me-2 mb-2">View</a>
                         </div>
                     </div>
                 </div>

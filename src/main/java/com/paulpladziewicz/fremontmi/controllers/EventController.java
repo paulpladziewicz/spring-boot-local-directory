@@ -2,7 +2,6 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.DayEvent;
 import com.paulpladziewicz.fremontmi.models.Event;
-import com.paulpladziewicz.fremontmi.models.EventDetailsDto;
 import com.paulpladziewicz.fremontmi.services.EventService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -53,7 +52,7 @@ public class EventController {
     @GetMapping("/my/events")
     public String displayMyEvents(Model model) {
         try {
-            List<EventDetailsDto> eventDetails = eventService.findEventsByUser();
+            List<Event> eventDetails = eventService.findEventsByUser();
             model.addAttribute("events", eventDetails);
             return "events/my-events";
         } catch (Exception e) {

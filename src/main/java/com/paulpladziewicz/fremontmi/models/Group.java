@@ -3,9 +3,7 @@ package com.paulpladziewicz.fremontmi.models;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
@@ -25,12 +23,6 @@ public class Group {
     @NotBlank(message = "Please provide a group description.")
     @Size(max = 3000, message = "Description should not be longer than 3,000 characters, which is about 500 words.")
     private String description;
-
-    @Indexed
-    private List<String> category;
-
-    @Indexed
-    private List<String> tags;
 
     private String status = "active";
 
