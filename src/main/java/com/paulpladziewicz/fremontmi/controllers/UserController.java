@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
 
+import java.time.LocalDateTime;
+
 @Controller
 public class UserController {
 
@@ -37,6 +39,8 @@ public class UserController {
             model.addAttribute("userRegistrationDto", userRegistrationDto);
             return "auth/register";
         }
+
+        userRegistrationDto.setTermsAcceptedAt(LocalDateTime.now());
 
         try {
             userService.createUser(userRegistrationDto);

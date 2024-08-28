@@ -1,9 +1,12 @@
 package com.paulpladziewicz.fremontmi.models;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 public class UserRegistrationDto {
@@ -30,4 +33,9 @@ public class UserRegistrationDto {
 
     @NotBlank(message = "Matching password is required.")
     private String matchingPassword;
+
+    @AssertTrue
+    private boolean termsAccepted;
+
+    private LocalDateTime termsAcceptedAt;
 }

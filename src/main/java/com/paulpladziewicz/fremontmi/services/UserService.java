@@ -56,6 +56,7 @@ public class UserService {
         userDetails.setEmail(userRegistrationDto.getEmail());
         userDetails.setFirstName(userRegistrationDto.getFirstName());
         userDetails.setLastName(userRegistrationDto.getLastName());
+        userDetails.setTermsAcceptedAt(userRegistrationDto.getTermsAcceptedAt());
 
         userDetailsRepository.save(userDetails);
     }
