@@ -45,14 +45,15 @@ public class GroupController {
     }
 
     @PostMapping("/groups/join")
-    public String joinGroup(@ModelAttribute("groupId") @RequestParam("groupId") String groupId) {
+    public String joinGroup(@RequestParam("groupId") String groupId, Model model) {
         groupService.joinGroup(groupId);
-
+        model.addAttribute("groupId", groupId);
         return "groups/htmx/joined-group";
     }
 
     @PostMapping("/groups/leave")
     public String leaveGroup(@RequestParam("groupId") String groupId) {
+        System.out.println(groupId);
         groupService.leaveGroup(groupId);
         return "redirect:/groups/" + groupId;
     }
