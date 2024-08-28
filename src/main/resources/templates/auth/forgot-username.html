@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Forgot Username</title>
+    <!-- Assuming you removed th:replace for testing -->
+</head>
+<body>
+<h1>Forgot your username?</h1>
+<form th:action="@{/forgot-username}" method="post">
+    <input type="email" name="email" placeholder="Email address" required>
+    <button type="submit">Receive email with username</button>
+</form>
+</body>
+</html>

@@ -1,9 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
-import com.paulpladziewicz.fremontmi.models.SecurityContext;
-import com.paulpladziewicz.fremontmi.models.UserDetailsDto;
-import com.paulpladziewicz.fremontmi.models.UserDto;
-import com.paulpladziewicz.fremontmi.models.UserRegistrationDto;
+import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.UserDetailsRepository;
 import com.paulpladziewicz.fremontmi.repositories.UserRepository;
 import jakarta.validation.ValidationException;
@@ -63,16 +60,45 @@ public class UserService {
         emailService.sendWelcomeEmail(userDetails.getEmail());
     }
 
-    public void forgotPassword(String email) {
-        UserDto userDto = userRepository.findByUsername(email);
+    public void forgotPassword(String username) {
+        UserDto user = userRepository.findByUsername(username);
 
-        if (userDto != null) {
-            String token = UUID.randomUUID().toString();
-            userDto.setResetPasswordToken(token);
-            userRepository.save(userDto);
-
-            emailService.sendSimpleMessage(userDto.getUsername(), "Reset your password", "To reset your password, click here: " + "http://localhost:8080/reset-password?token=" + token);
+        if (user == null) {
+            return;
         }
+
+        UserDetailsDto userDetails = userDetailsRepository.findById(user.getUserId()).orElseThrow();
+
+
+        String token = UUID.randomUUID().toString();
+        user.setResetPasswordToken(token);
+        userRepository.save(user);
+
+        emailService.sendResetPasswordEmail(userDetails.getEmail(), "http://localhost:8080/reset-password?token=" + token);
+    }
+
+    public void forgotUsername(String email) {
+        UserDetailsDto userDetails = userDetailsRepository.findByEmail(email);
+        if (userDetails == null) {
+            return;
+        }
+        UserDto user = userRepository.findById(userDetails.getUserId()).orElseThrow();
+
+        emailService.sendForgotUsernameEmail(userDetails.getEmail(), user.getUsername());
+    }
+
+    public void resetPassword(ResetPasswordDto resetPasswordDto) {
+        String token = resetPasswordDto.getToken();
+        String newPassword = resetPasswordDto.getPassword();
+        String confirmPassword = resetPasswordDto.getConfirmPassword();
+
+        validatePasswords(newPassword, confirmPassword);
+
+        UserDto user = userRepository.findByResetPasswordToken(token);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetPasswordToken(null);
+        userRepository.save(user);
+
     }
 
     public String getUserId() {
