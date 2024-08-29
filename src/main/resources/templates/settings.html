@@ -28,7 +28,6 @@
                     <label class="form-label" for="email">Email address</label>
                     <input class="form-control" type="email" id="email" th:field="*{email}">
                     <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="form-text text-danger"></div>
-                    <div class="form-text">If your username is an email address, this field will only update the email we'll contact you at.</div>
                 </div>
 
                 <div th:if="${isSuccess != null}" class="alert alert-success col-12" role="alert">
@@ -44,6 +43,7 @@
 </div>
 
 <script th:replace="~{partials/theme-js}"></script>
+<footer th:replace="~{partials/footer}"></footer>
 </body>
 </html>
 
