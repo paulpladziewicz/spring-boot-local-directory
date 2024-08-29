@@ -18,7 +18,7 @@
                 </li>
             </ul>
             <div sec:authorize="!isAuthenticated()">
-                <a href="/register" class="btn btn-primary btn-sm fs-sm me-1 mb-4 mb-lg-0">
+                <a href="/register" class="btn btn-primary btn-sm fs-sm me-1 ms-3 mb-4 mb-lg-0">
                     Register
                 </a>
                 <a href="/login" class="btn btn-outline-primary btn-sm fs-sm mb-4 mb-lg-0">
@@ -26,7 +26,7 @@
                 </a>
             </div>
             <div sec:authorize="isAuthenticated()">
-                <a href="/my/settings" class="btn btn-secondary btn-sm fs-sm me-1 mb-4 mb-lg-0">
+                <a href="/my/settings" class="btn btn-secondary btn-sm fs-sm me-1 ms-3 mb-4 mb-lg-0">
                     <i class="ai-settings"></i>
                 </a>
 

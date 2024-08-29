@@ -1,14 +1,37 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Forgot Username</title>
-    <!-- Assuming you removed th:replace for testing -->
-</head>
+<head th:replace="~{partials/head :: head('FremontMI - Home')}"><title>Placeholder Title</title></head>
 <body>
-<h1>Forgot your username?</h1>
-<form th:action="@{/forgot-username}" method="post">
-    <input type="email" name="email" placeholder="Email address" required>
-    <button type="submit">Receive email with username</button>
-</form>
+<header th:insert="~{partials/navbar}"></header>
+
+<main style="margin: 16px 0 60px 0">
+    <div class="mx-auto px-3" style="max-width: 700px;">
+        <h1 class="pt-3 pb-2 pb-lg-3">Forgot your username?</h1>
+        <p class="pb-2">Receive your username in two easy steps.</p>
+        <ul class="list-unstyled pb-2 pb-lg-0 mb-3 mb-lg-4">
+            <li class="d-flex mb-2">
+                <span class="text-primary fw-semibold me-2">1.</span>
+                Fill in your email address below.
+            </li>
+            <li class="d-flex mb-2">
+                <span class="text-primary fw-semibold me-2">2.</span>
+                We'll send you an email with your username.
+            </li>
+        </ul>
+        <div class="card border-0 bg-primary" data-bs-theme="dark">
+            <form class="card-body" th:action="@{/forgot-username}" method="post">
+                <div class="mb-4">
+                    <div class="position-relative">
+                        <i class="ai-mail fs-lg position-absolute top-50 start-0 translate-middle-y text-light opacity-80 ms-3"></i>
+                        <input class="form-control form-control-lg ps-5" type="email" name="email" placeholder="Email address" required>
+                    </div>
+                </div>
+                <button class="btn btn-light" type="submit">Get Username via Email</button>
+            </form>
+        </div>
+    </div>
+</main>
+<script th:src="@{/js/theme.min.js}"></script>
+<footer th:replace="~{partials/footer}"></footer>
 </body>
 </html>
