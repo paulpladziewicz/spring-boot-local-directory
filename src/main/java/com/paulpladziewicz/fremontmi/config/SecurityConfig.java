@@ -2,6 +2,10 @@ package com.paulpladziewicz.fremontmi.config;
 
 import com.paulpladziewicz.fremontmi.repositories.UserRepository;
 import com.paulpladziewicz.fremontmi.services.CustomUserDetailsService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,15 +15,22 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.servlet.DispatcherServlet;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -48,10 +59,27 @@ public class SecurityConfig {
 
     @Bean
     public SavedRequestAwareAuthenticationSuccessHandler savedRequestAwareAuthenticationSuccessHandler() {
-        SavedRequestAwareAuthenticationSuccessHandler handler = new SavedRequestAwareAuthenticationSuccessHandler();
-        handler.setDefaultTargetUrl("/");
-        handler.setAlwaysUseDefaultTargetUrl(false);
-        return handler;
+        return new SavedRequestAwareAuthenticationSuccessHandler() {
+            @Override
+            protected void handle(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                RequestCache requestCache = new HttpSessionRequestCache();
+                SavedRequest savedRequest = requestCache.getRequest(request, response);
+
+                // If the session has expired or no saved request is found
+                if (savedRequest == null) {
+                    // Log this scenario for debugging purposes
+                    System.out.println("Session expired or no saved request found; redirecting to default target URL.");
+
+                    // Redirect to the default URL
+                    clearAuthenticationAttributes(request);
+                    getRedirectStrategy().sendRedirect(request, response, getDefaultTargetUrl());
+                    return;
+                }
+
+                // Otherwise, proceed as usual
+                super.handle(request, response, authentication);
+            }
+        };
     }
 
     @Bean
