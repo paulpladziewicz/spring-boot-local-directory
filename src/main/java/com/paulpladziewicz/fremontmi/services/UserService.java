@@ -126,7 +126,7 @@ public class UserService {
 
     private void validatePasswords(String password, String matchingPassword) throws ValidationException {
         if (password == null || !password.equals(matchingPassword)) {
-            throw new ValidationException("Passwords must match.");
+            throw new ValidationException("Passwords entered don't match.");
         }
     }
 

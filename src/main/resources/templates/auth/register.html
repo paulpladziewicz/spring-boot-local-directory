@@ -14,44 +14,54 @@
             <p class="pb-3 mb-3 mb-lg-4">Have an account already?&nbsp;&nbsp;<a href="/login">Sign in here!</a></p>
             <form th:action="@{/register}" th:object="${userRegistrationDto}" method="post">
                 <div class="row row-cols-1 row-cols-sm-2">
-                    <div class="col">
-                        <input class="form-control form-control-lg" type="text" name="firstName" th:field="*{firstName}" placeholder="First name" required><br>
-                        <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+                    <div class="col mb-4">
+                        <label class="form-label fs-base" for="firstName">First Name</label>
+                        <input class="form-control form-control-lg" type="text" name="firstName" id="firstName" th:field="*{firstName}" placeholder="First name" required>
+                        <span class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
                     </div>
-                    <div class="col">
-                        <input class="form-control form-control-lg" type="text" id="lastName" name="lastName" th:field="*{lastName}" placeholder="Last name" required><br>
-                        <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+                    <div class="col mb-4">
+                        <label class="form-label fs-base" for="lastName">Last Name</label>
+                        <input class="form-control form-control-lg" type="text" id="lastName" name="lastName" th:field="*{lastName}" placeholder="Last name" required>
+                        <span class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
                     </div>
                 </div>
-                <div>
-                    <input class="form-control form-control-lg" type="text" id="username" name="username" th:field="*{username}" placeholder="Username" required><br>
-                    <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Password Error</span>
+                <div class="mb-4">
+                    <label class="form-label fs-base" for="username">Username</label>
+                    <input class="form-control form-control-lg" type="text" id="username" name="username" th:field="*{username}" placeholder="Username" required>
+                    <span class="text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Password Error</span>
                 </div>
-                <div>
-                    <input class="form-control form-control-lg" type="text" id="email" name="email" th:field="*{email}" placeholder="Email address" required><br>
-                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Password Error</span>
+                <div class="mb-4">
+                    <label class="form-label fs-base" for="email">Email Address</label>
+                    <input class="form-control form-control-lg" type="email" id="email" name="email" th:field="*{email}" placeholder="Email address" required>
+                    <span class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Password Error</span>
                 </div>
-                <div class="password-toggle mb-4">
-                    <input class="form-control form-control-lg" type="password" name="password" placeholder="Password" required>
-                    <label class="password-toggle-btn" aria-label="Show/hide password">
-                        <input class="password-toggle-check" type="checkbox">
-                        <span class="password-toggle-indicator"></span>
-                    </label>
-                    <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password Error</span>
+                <div class="mb-3">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="password-toggle">
+                        <input class="form-control form-control-lg" type="password" id="password" name="password" placeholder="Password" required>
+                        <label class="password-toggle-btn" aria-label="Show/hide password">
+                            <input class="password-toggle-check" type="checkbox">
+                            <span class="password-toggle-indicator"></span>
+                        </label>
+                    </div>
+                    <span class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password Error</span>
                 </div>
-                <div class="password-toggle mb-4">
-                    <input class="form-control form-control-lg" type="password" name="matchingPassword" placeholder="Confirm password" required>
-                    <label class="password-toggle-btn" aria-label="Show/hide password">
-                        <input class="password-toggle-check" type="checkbox">
-                        <span class="password-toggle-indicator"></span>
-                    </label>
-                    <span th:if="${#fields.hasErrors('matchingPassword')}" th:errors="*{matchingPassword}">Matching Password Error</span>
+                <div class="mb-3">
+                    <label class="form-label" for="matchingPassword">Confirm Password</label>
+                    <div class="password-toggle">
+                        <input class="form-control form-control-lg" type="password" id="matchingPassword" name="matchingPassword" placeholder="Confirm password" required>
+                        <label class="password-toggle-btn" aria-label="Show/hide password">
+                            <input class="password-toggle-check" type="checkbox">
+                            <span class="password-toggle-indicator"></span>
+                        </label>
+                    </div>
+                    <span class="text-danger" th:if="${#fields.hasErrors('matchingPassword')}" th:errors="*{matchingPassword}">Matching Password Error</span>
                 </div>
                 <div class="pb-4">
                     <div class="form-check my-2">
                         <input class="form-check-input" type="checkbox" id="terms" name="termsAccepted" required>
                         <label class="form-check-label ms-1" for="terms">Check this box to confirm you are at least 18 years old and agree to our <a href="/terms-of-service" target="_blank">terms of service</a> and <a href="/privacy-policy" target="_blank">privacy policy</a>.</label>
-                        <span th:if="${#fields.hasErrors('termsAccepted')}" th:errors="*{termsAccepted}">You must agree to the terms to register.</span>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('termsAccepted')}" th:errors="*{termsAccepted}">You must agree to the terms to register.</div>
                     </div>
                 </div>
                 <button class="btn btn-lg btn-primary w-100 mb-4" type="submit">Register</button>

@@ -14,15 +14,20 @@
         <div class="d-flex flex-column align-items-center w-lg-50 h-100 px-3 px-lg-5 pt-5">
             <div class="w-100 mt-auto" style="max-width: 526px;">
                 <h1>Sign in</h1>
-                <p class="pb-3 mb-3 mb-lg-4">Don't have an account yet?&nbsp;&nbsp;<a href="/register">Register here!</a></p>
+                <p class="pb-3 mb-3">Don't have an account yet?&nbsp;&nbsp;<a href="/register">Register here!</a></p>
+
+                <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                    Invalid username or password. Please try again.
+                </div>
+
                 <form th:action="@{/login}" method="post">
-                    <div class="pb-3 mb-3">
+                    <div class="mb-3">
                         <div class="position-relative">
-                            <i class="ai-mail fs-lg position-absolute top-50 start-0 translate-middle-y ms-3"></i>
-                            <input class="form-control form-control-lg ps-5" type="text" id="username" name="username" placeholder="Email address" required>
+                            <i class="ai-user fs-lg position-absolute top-50 start-0 translate-middle-y ms-3"></i>
+                            <input class="form-control form-control-lg ps-5" type="text" id="username" name="username" placeholder="Username" required>
                         </div>
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <div class="position-relative">
                             <i class="ai-lock-closed fs-lg position-absolute top-50 start-0 translate-middle-y ms-3"></i>
                             <div class="password-toggle">
@@ -33,10 +38,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex flex-wrap align-items-center justify-content-between pb-4">
-                        <a class="fs-sm fw-semibold text-decoration-none my-1" href="/forgot-username">Forgot username?</a>
-                    </div>
-                    <div class="d-flex flex-wrap align-items-center justify-content-between pb-4">
+                    <div class="d-flex flex-wrap align-items-center pb-4">
+                        <a class="fs-sm fw-semibold text-decoration-none my-1 mx-2" href="/forgot-username">Forgot username?</a>
                         <a class="fs-sm fw-semibold text-decoration-none my-1" href="/forgot-password">Forgot password?</a>
                     </div>
                     <button class="btn btn-lg btn-primary w-100 mb-4" type="submit">Sign in</button>
