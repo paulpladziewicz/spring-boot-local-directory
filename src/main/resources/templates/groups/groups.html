@@ -24,13 +24,13 @@
             <div th:each="group : ${groups}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title mb-1" th:text="${group.name}">Card title</h4>
-                        <p class="card-text mb-2">
+                        <h4 class="h3 mb-1" th:text="${group.name}">Card title</h4>
+                        <p class="text-muted fw-semibold mb-2">
                             <span th:text="${group.members.size()}"></span>
                             <span th:text="${group.members.size() == 1 ? 'Member' : 'Members'}"></span>
                         </p>
-                        <p class="card-text text-body-secondary" th:text="${#strings.length(group.description) > 120 ? #strings.substring(group.description, 0, 120) + '...' : group.description}"></p>
-                        <a hx-boost="true" th:href="'/groups/' + ${group.id}" class="btn btn-outline-primary btn-sm">View</a>
+                        <p th:text="${#strings.length(group.description) > 120 ? #strings.substring(group.description, 0, 120) + '...' : group.description}"></p>
+                        <a hx-boost="true" th:href="'/groups/' + ${group.id}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>

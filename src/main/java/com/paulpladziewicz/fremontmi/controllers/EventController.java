@@ -75,6 +75,26 @@ public class EventController {
         return "events/create-event";
     }
 
+    @PostMapping("/create/event/add-day")
+    public String addDayToCreateForm(@ModelAttribute("event") Event event, Model model) {
+        event.getDays().add(new DayEvent());
+
+        model.addAttribute("event", event);
+        return "events/htmx/adjust-days";
+    }
+
+    @PostMapping("/create/event/remove-day")
+    public String removeDayToCreateForm(@ModelAttribute("event") Event event, Model model) {
+        if (event.getDays().isEmpty()) {
+            model.addAttribute("event", event);
+            return "events/htmx/adjust-days";
+        }
+
+        event.getDays().removeLast();
+        model.addAttribute("event", event);
+        return "events/htmx/adjust-days";
+    }
+
     @PostMapping("/create/event")
     public String createEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
         event.getDays().forEach(dayEvent -> {

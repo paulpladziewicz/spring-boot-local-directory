@@ -1,7 +1,7 @@
 <!DOCTYPE html >
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>FremontMI</title>
+    <title>Welcome to FremontMI</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -47,9 +47,20 @@
             line-height: inherit;
         }
 
-        /* Universal styles for links and stuff */
+        /* Universal styles for links and buttons */
         a { color: #229efd; font-weight: bold; }
         a:hover { color: #fd6350; text-decoration: none; }
+        a.button {
+            display: inline-block;
+            background-color: #229efd;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+        }
         a.button:hover { background-color: #fd6350 !important; }
 
         /* Responsive styles */
@@ -64,7 +75,7 @@
 <!-- Preview text for the inbox -->
 <!-- This will be displayed underneath the subject line. Use it wisely. -->
 <div style="display: none; max-height: 0; overflow: hidden;">
-
+    Welcome to FremontMI! We're glad you're here.
 </div>
 
 <!--[if (gte mso 9)|(IE)]>
@@ -73,7 +84,39 @@
 
 <div style="background-color: white; color: #000000; font-family: sans-serif; font-size: 18px; line-height: 36px; margin: 0 auto; max-width: 600px; padding: 40px 20px 40px 20px;">
 
+    <h1 style="font-size: 28px; margin-bottom: 20px; color: #333333; text-align: center;">Welcome to FremontMI!</h1>
+
+    <p style="margin-bottom: 20px; text-align: center;">
+        Thank you for joining FremontMI. We are thrilled to have you on board!
+    </p>
+
+    <p style="margin-bottom: 30px; text-align: center;">
+        To help you get started, here are a few quick links:
+    </p>
+
+    <p style="text-align: center; margin-bottom: 30px;">
+        <a href="#" th:href="${welcomeLink}" class="button">Get Started</a>
+    </p>
+
+    <p style="margin-bottom: 20px; text-align: center;">
+        You can also visit our <a href="#" th:href="${supportLink}" style="color: #229efd;">Support Center</a> if you have any questions.
+    </p>
+
+    <p style="margin-bottom: 20px; text-align: center;">
+        We hope you enjoy your experience with FremontMI. If you need any help, don't hesitate to reach out.
+    </p>
+
+    <p style="text-align: center; margin-bottom: 40px;">
+        Happy exploring!
+    </p>
+
+    <p style="text-align: center; font-size: 14px; color: #666666;">
+        Best regards,<br>
+        The FremontMI Team
+    </p>
+
 </div>
+
 <!--[if (gte mso 9)|(IE)]>
 </td></tr></table>
 <![endif]-->

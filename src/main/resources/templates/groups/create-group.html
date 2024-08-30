@@ -7,21 +7,25 @@
 <header th:replace="~{partials/navbar}"></header>
 
 <div class="container mt-4">
-    <h1>Create New Group</h1>
-    <p>Please only create groups that will organize in Fremont, MI. Content on this platform it does not relate to Fremont, Michigan can be removed at any time.</p>
-    <form th:action="@{/create/group}" th:object="${group}" method="post">
-        <div class="form-group mb-2">
-            <label for="name" class="mb-1">Group Name</label>
-            <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter group name">
-            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="mt-1 text-danger"></p>
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <h1>Create New Group</h1>
+            <p>Please only create groups that will organize in Fremont, MI. Content on this platform that does not relate to Fremont, Michigan can be removed at any time.</p>
+            <form th:action="@{/create/group}" th:object="${group}" method="post">
+                <div class="form-group mb-2">
+                    <label for="name" class="mb-1 form-label fw-semibold fs-base">Group Name</label>
+                    <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter group name" required>
+                    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="mt-1 text-danger"></p>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="description" class="mb-1 form-label fw-semibold fs-base">Description</label>
+                    <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Group description" required></textarea>
+                    <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></p>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Group</button>
+            </form>
         </div>
-        <div class="form-group mb-3">
-            <label for="description" class="mb-1">Description</label>
-            <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Group description"></textarea>
-            <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></p>
-        </div>
-        <button type="submit" class="btn btn-primary">Create Group</button>
-    </form>
+    </div>
 </div>
 
 <script th:replace="~{partials/theme-js}"></script>
