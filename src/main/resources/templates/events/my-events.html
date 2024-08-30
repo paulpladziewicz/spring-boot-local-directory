@@ -8,9 +8,7 @@
     <div class="container">
 
         <div class="d-flex justify-content-between align-items-center my-4">
-            <div>
-                <h1 class="display-3">My Events</h1>
-            </div>
+            <h1 class="display-3 mb-0">My Events</h1>
             <div>
                 <a href="/events" class="btn btn-outline-primary">View All Events</a>
                 <a href="/create/event" class="btn btn-primary">Create Event</a>
@@ -18,17 +16,18 @@
         </div>
 
         <div class="row">
-            <th:block th:each="event : ${events}">
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h3 th:text="${event.name}">Group Name</h3>
-                            <p th:text="${event.description}">Group Description</p>
-                            <a th:href="'/events/' + ${event.id}" class="btn btn-sm btn-primary me-2 mb-2">View</a>
-                        </div>
+            <div th:each="event : ${events}" class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="h3 mb-1" th:text="${event.name}">Event Title</h4>
+                        <p class="text-muted fw-semibold mb-2" th:if="${event.formattedTimes != null and !event.formattedTimes.isEmpty()}" th:text="${event.formattedTimes[0]}">
+                            Event Start Time
+                        </p>
+                        <p th:text="${#strings.length(event.description) > 120 ? #strings.substring(event.description, 0, 120) + '...' : event.description}">Event Description</p>
+                        <a hx-boost="true" th:href="'/events/' + ${event.id}" class="btn btn-lg btn-link p-0">View Event<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>
-            </th:block>
+            </div>
         </div>
 
         <p th:if="${#lists.isEmpty(events)}">You are currently not administering any events.</p>
