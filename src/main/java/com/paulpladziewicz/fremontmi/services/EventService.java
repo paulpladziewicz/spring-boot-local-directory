@@ -47,11 +47,19 @@ public class EventService {
         UserDetailsDto userDetails = userService.getUserDetails();
         var userId = userDetails.getUserId();
 
+        // Find the soonest start time
         LocalDateTime soonestStartTime = event.getDays().stream()
                 .map(DayEvent::getStartTime)
                 .min(LocalDateTime::compareTo)
                 .orElse(null);
         event.setSoonestStartTime(soonestStartTime);
+
+        // Optionally handle the end time logic if needed
+        event.getDays().forEach(dayEvent -> {
+            if (dayEvent.getEndTime() != null && dayEvent.getEndTime().isBefore(dayEvent.getStartTime())) {
+                throw new IllegalArgumentException("End time must be after start time");
+            }
+        });
 
         event.setOrganizerId(userId);
         populateFormattedTimes(event);
@@ -75,11 +83,15 @@ public class EventService {
 
     public void populateFormattedTimes(Event event) {
         List<String> formattedTimes = event.getDays().stream()
-                .flatMap(dayEvent -> Stream.of(
-                        formatDateTime(dayEvent.getStartTime()),
-                        formatDateTime(dayEvent.getEndTime())
-                ))
+                .flatMap(dayEvent -> {
+                    String formattedStartTime = formatDateTime(dayEvent.getStartTime());
+                    String formattedEndTime = dayEvent.getEndTime() != null
+                            ? formatDateTime(dayEvent.getEndTime())
+                            : "No End Time"; // or use "N/A" or any other placeholder
+                    return Stream.of(formattedStartTime, formattedEndTime);
+                })
                 .collect(Collectors.toList());
+
         event.setFormattedTimes(formattedTimes);
     }
 

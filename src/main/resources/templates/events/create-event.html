@@ -63,8 +63,8 @@
                 </div>
 
                 <div class="col-12 d-flex flex-column">
-                    <a th:if="${event.getDays().size() > 1}" class="d-block text-end btn btn-link text-danger" hx-post="/create/event/remove-day" hx-swap="outerHTML" hx-target="#create-event-form">Remove</a>
-                    <a class="d-block btn btn-link" hx-post="/create/event/add-day" hx-swap="outerHTML" hx-target="#create-event-form">+ Add Another Day and Time</a>
+                    <a th:if="${event.getDays().size() > 1}" class="d-block text-end btn btn-link text-danger p-1" hx-post="/create/event/remove-day" hx-swap="outerHTML" hx-target="#create-event-form">Remove</a>
+                    <a class="d-block text-start btn btn-link p-1" hx-post="/create/event/add-day" hx-swap="outerHTML" hx-target="#create-event-form">+ Add Another Day and Time</a>
                 </div>
 
                 <div>

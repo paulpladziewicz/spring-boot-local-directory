@@ -97,15 +97,9 @@ public class EventController {
 
     @PostMapping("/create/event")
     public String createEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
-        event.getDays().forEach(dayEvent -> {
-            System.out.println("Start Time: " + dayEvent.getStartTime());
-            System.out.println("End Time: " + dayEvent.getEndTime());
-        });
-
         if (result.hasErrors()) {
             return "events/create-event";
         }
-
 
         Event savedEvent = eventService.createEvent(event);
 
