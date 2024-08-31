@@ -3,6 +3,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 import com.paulpladziewicz.fremontmi.models.DayEvent;
 import com.paulpladziewicz.fremontmi.models.Event;
 import com.paulpladziewicz.fremontmi.services.EventService;
+import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
@@ -17,9 +18,11 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+    private final UserService userService;
 
-    public EventController(EventService eventService) {
+    public EventController(EventService eventService, UserService userService) {
         this.eventService = eventService;
+        this.userService = userService;
     }
 
     @GetMapping("/events")
@@ -31,8 +34,9 @@ public class EventController {
     @GetMapping("/events/{id}")
     public String displayEvent(@PathVariable String id, Model model) {
         Event event = eventService.findEventById(id);
+        String userId = userService.getUserId();
         model.addAttribute("event", event);
-        model.addAttribute("isEventAdmin", true);
+        model.addAttribute("isAdmin", event.getOrganizerId().equals(userId));
         return "events/event-page";
     }
 

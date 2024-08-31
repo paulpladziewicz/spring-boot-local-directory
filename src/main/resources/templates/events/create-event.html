@@ -13,25 +13,25 @@
             <form id="create-event-form" th:action="@{/create/event}" th:object="${event}" method="post">
 
                 <div class="form-group mb-2">
-                    <label class="mb-1" for="name">Group Name</label>
+                    <label class="mb-1 form-label fw-semibold fs-base" for="name">Group Name</label>
                     <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter group name">
                     <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="alert alert-danger"></div>
                 </div>
 
                 <div class="form-group mb-2">
-                    <label class="mb-1" for="description">Description</label>
+                    <label class="mb-1 form-label fw-semibold fs-base" for="description">Description</label>
                     <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Group description"></textarea>
                     <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="alert alert-danger"></div>
                 </div>
 
                 <div class="form-group mb-2">
-                    <label class="mb-1" for="locationName">Location Name</label>
+                    <label class="mb-1 form-label fw-semibold fs-base" for="locationName">Location Name</label>
                     <input type="text" class="form-control" id="locationName" th:field="*{locationName}" placeholder="Enter location">
                     <div th:if="${#fields.hasErrors('locationName')}" th:errors="*{locationName}" class="alert alert-danger"></div>
                 </div>
 
                 <div class="form-group mb-2">
-                    <label class="mb-1" for="address">Address</label>
+                    <label class="mb-1 form-label fw-semibold fs-base" for="address">Address</label>
                     <input type="text" class="form-control" id="address" th:field="*{address}" placeholder="Enter location">
                 </div>
 
@@ -40,7 +40,7 @@
                         <div class="row">
                             <div class="col-12 col-md-6">
                                 <div class="form-group">
-                                    <label for="startTime" class="form-label">Start Day & Time</label>
+                                    <label for="startTime" class="mb-1 form-label fw-semibold fs-base">Start Day & Time</label>
                                     <div class="position-relative">
                                         <input id="startTime" class="form-control date-picker pe-5" type="datetime-local" th:field="*{days[__${iterStat.index}__].startTime}" placeholder="Choose date and time" data-datepicker-options='{"enableTime": true, "altInput": true, "altFormat": "F j, Y h:i K", "dateFormat": "Y-m-d h:i K"}'>
                                         <i class="ai-calendar position-absolute top-50 end-0 translate-middle-y me-3"></i>
@@ -50,7 +50,7 @@
                             </div>
                             <div class="col-12 col-md-6">
                                 <div class="form-group">
-                                    <label for="endTime" class="form-label">End Day & Time <span class="text-muted">(optional)</span></label>
+                                    <label for="endTime" class="mb-1 form-label fw-semibold fs-base">End Day & Time <span class="text-muted">(optional)</span></label>
                                     <div class="position-relative">
                                         <input id="endTime" class="form-control date-picker pe-5" type="datetime-local" th:field="*{days[__${iterStat.index}__].endTime}" placeholder="Choose date and time" data-datepicker-options='{"enableTime": true, "altInput": true, "altFormat": "F j, Y h:i K", "dateFormat": "Y-m-d h:i K"}'>
                                         <i class="ai-calendar position-absolute top-50 end-0 translate-middle-y me-3"></i>
@@ -74,6 +74,17 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('htmx:afterSwap', function(event) {
+        flatpickr('.date-picker', {
+            enableTime: true,
+            altInput: true,
+            altFormat: "F j, Y h:i K",
+            dateFormat: "Y-m-d h:i K"
+        });
+    });
+</script>
 
 <script th:src="@{/js/flatpickr.min.js}"></script>
 <script th:replace="~{partials/theme-js}"></script>

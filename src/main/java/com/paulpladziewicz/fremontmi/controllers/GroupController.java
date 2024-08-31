@@ -48,7 +48,7 @@ public class GroupController {
     public String joinGroup(@RequestParam("groupId") String groupId, Model model) {
         groupService.joinGroup(groupId);
         model.addAttribute("groupId", groupId);
-        return "groups/htmx/joined-group";
+        return "redirect:/groups/" + groupId;
     }
 
     @PostMapping("/groups/leave")

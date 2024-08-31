@@ -13,24 +13,24 @@
             <form th:action="@{/edit/group}" th:object="${group}" method="post">
                 <input type="hidden" name="id" th:value="${group.id}" />
                 <div class="form-group mb-2">
-                    <label for="name" class="mb-1">Group Name</label>
+                    <label for="name" class="mb-1 form-label opacity-75 fw-semibold fs-base">Group Name</label>
                     <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter group name">
                     <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="mt-1 text-danger"></p>
                 </div>
                 <div class="form-group mb-3">
-                    <label for="description" class="mb-1">Description</label>
+                    <label for="description" class="mb-1 form-label opacity-75 fw-semibold fs-base">Description</label>
                     <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Group description"></textarea>
                     <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></p>
                 </div>
-                <div class="d-flex justify-content-between">
-                    <button type="submit" class="btn btn-primary">Edit Group</button>
+                <div class="d-flex">
+                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
                     <a class="btn btn-secondary" th:href="'/groups/' + ${group.id}">Cancel</a>
                 </div>
             </form>
 
-            <section class="my-4">
+            <section class="my-5">
                 <h3>Delete Group</h3>
-                <p>The action is not reversible. All administrators and members will be emailed when the group is deleted.</p>
+                <p>The action is not reversible.</p>
                 <form method="post" th:action="@{/delete/group}">
                     <input type="hidden" name="groupId" th:value="${group.id}" />
                     <button type="submit" class="btn btn-danger">Delete Group</button>

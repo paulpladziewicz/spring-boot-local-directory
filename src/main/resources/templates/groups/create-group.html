@@ -13,12 +13,12 @@
             <p>Please only create groups that will organize in Fremont, MI. Content on this platform that does not relate to Fremont, Michigan can be removed at any time.</p>
             <form th:action="@{/create/group}" th:object="${group}" method="post">
                 <div class="form-group mb-2">
-                    <label for="name" class="mb-1 form-label fw-semibold fs-base">Group Name</label>
+                    <label for="name" class="mb-1 form-label opacity-75 fw-semibold fs-base">Group Name</label>
                     <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter group name" required>
                     <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="mt-1 text-danger"></p>
                 </div>
                 <div class="form-group mb-3">
-                    <label for="description" class="mb-1 form-label fw-semibold fs-base">Description</label>
+                    <label for="description" class="mb-1 form-label opacity-75 fw-semibold fs-base">Description</label>
                     <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Group description" required></textarea>
                     <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></p>
                 </div>

@@ -5,19 +5,19 @@
 <header th:insert="~{partials/navbar}"></header>
 
 <main class="bg-secondary">
-    <div class="container mt-4">
+    <div class="container my-4">
         <h1 class="display-4">Edit Event</h1>
         <form id="edit-event-form" th:action="@{/edit/event/{id}(id=${event.id})}" th:object="${event}" method="post">
             <input type="hidden" name="id" th:value="${event.id}"/>
 
             <div class="form-group mb-2">
-                <label class="mb-1" for="name">Event Name</label>
+                <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="name">Event Name</label>
                 <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter event name">
                 <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="alert alert-danger"></div>
             </div>
 
             <div class="form-group mb-2">
-                <label class="mb-1" for="description">Description</label>
+                <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="description">Description</label>
                 <textarea class="form-control" id="description" th:field="*{description}" rows="3"
                           placeholder="Enter event description"></textarea>
                 <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"
@@ -25,7 +25,7 @@
             </div>
 
             <div class="form-group mb-2">
-                <label class="mb-1" for="locationName">Location Name</label>
+                <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="locationName">Location Name</label>
                 <input type="text" class="form-control" id="locationName" th:field="*{locationName}"
                        placeholder="Enter location name">
                 <div th:if="${#fields.hasErrors('locationName')}" th:errors="*{locationName}"
@@ -33,76 +33,97 @@
             </div>
 
             <div class="form-group mb-2">
-                <label class="mb-1" for="address">Address</label>
+                <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="address">Address</label>
                 <input type="text" class="form-control" id="address" th:field="*{address}" placeholder="Enter address">
                 <div th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="alert alert-danger"></div>
             </div>
 
-            <h4>Event Dates and Times</h4>
-            <div id="dayEvents">
-                <div th:each="dayEvent, iterStat : *{days}">
-                    <div class="row">
-                        <div class="col-12 col-md-6">
-                            <div class="form-group">
-                                <label for="startTime" class="form-label">Start Day & Time</label>
-                                <div class="position-relative">
-                                    <input id="startTime" class="form-control date-picker pe-5" type="datetime-local"
-                                           th:field="*{days[__${iterStat.index}__].startTime}"
-                                           placeholder="Choose date and time"
-                                           data-datepicker-options='{"enableTime": true, "altInput": true, "altFormat": "F j, Y h:i K", "dateFormat": "Y-m-d h:i K"}'>
-                                    <i class="ai-calendar position-absolute top-50 end-0 translate-middle-y me-3"></i>
+            <div class="mt-4">
+                <h4>Event Dates and Times</h4>
+                <div id="dayEvents">
+                    <div th:each="dayEvent, iterStat : *{days}">
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label for="startTime" class="mb-1 form-label opacity-75 fw-semibold fs-base">Start Day & Time</label>
+                                    <div class="position-relative">
+                                        <input id="startTime" class="form-control date-picker pe-5" type="datetime-local"
+                                               th:field="*{days[__${iterStat.index}__].startTime}"
+                                               placeholder="Choose date and time"
+                                               data-datepicker-options='{"enableTime": true, "altInput": true, "altFormat": "F j, Y h:i K", "dateFormat": "Y-m-d h:i K"}'>
+                                        <i class="ai-calendar position-absolute top-50 end-0 translate-middle-y me-3"></i>
+                                    </div>
+                                    <div th:if="${#fields.hasErrors('days[__${iterStat.index}__].startTime')}"
+                                         th:errors="*{days[__${iterStat.index}__].startTime}"
+                                         class="alert alert-danger"></div>
                                 </div>
-                                <div th:if="${#fields.hasErrors('days[__${iterStat.index}__].startTime')}"
-                                     th:errors="*{days[__${iterStat.index}__].startTime}"
-                                     class="alert alert-danger"></div>
                             </div>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <div class="form-group">
-                                <label for="endTime" class="form-label">End Day & Time <span class="text-muted">(optional)</span></label>
-                                <div class="position-relative">
-                                    <input id="endTime" class="form-control date-picker pe-5" type="datetime-local"
-                                           th:field="*{days[__${iterStat.index}__].endTime}"
-                                           placeholder="Choose date and time"
-                                           data-datepicker-options='{"enableTime": true, "altInput": true, "altFormat": "F j, Y h:i K", "dateFormat": "Y-m-d h:i K"}'>
-                                    <i class="ai-calendar position-absolute top-50 end-0 translate-middle-y me-3"></i>
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label for="endTime" class="mb-1 form-label opacity-75 fw-semibold fs-base">End Day & Time <span class="text-muted">(optional)</span></label>
+                                    <div class="position-relative">
+                                        <input id="endTime" class="form-control date-picker pe-5" type="datetime-local"
+                                               th:field="*{days[__${iterStat.index}__].endTime}"
+                                               placeholder="Choose date and time"
+                                               data-datepicker-options='{"enableTime": true, "altInput": true, "altFormat": "F j, Y h:i K", "dateFormat": "Y-m-d h:i K"}'>
+                                        <i class="ai-calendar position-absolute top-50 end-0 translate-middle-y me-3"></i>
+                                    </div>
+                                    <div th:if="${#fields.hasErrors('days[__${iterStat.index}__].endTime')}"
+                                         th:errors="*{days[__${iterStat.index}__].endTime}"
+                                         class="alert alert-danger"></div>
                                 </div>
-                                <div th:if="${#fields.hasErrors('days[__${iterStat.index}__].endTime')}"
-                                     th:errors="*{days[__${iterStat.index}__].endTime}"
-                                     class="alert alert-danger"></div>
+                            </div>
+                            <div class="col-12 d-flex flex-column">
+                                <a th:if="${event.getDays().size() > 1}" class="d-block text-end btn btn-link text-danger p-1"
+                                   hx-post="/edit/event/remove-day"
+                                   hx-swap="outerHTML"
+                                   hx-target="#edit-event-form">Remove</a>
+                                <a class="d-block text-start btn btn-link p-1"
+                                   hx-post="/edit/event/add-day"
+                                   hx-swap="outerHTML"
+                                   hx-target="#edit-event-form">+ Add Another Day and Time</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 d-flex flex-column">
-                <a th:if="${event.getDays().size() > 1}" class="d-block text-end btn btn-link text-danger p-1"
-                   hx-post="/edit/event/remove-day"
-                   hx-swap="outerHTML"
-                   hx-target="#edit-event-form">Remove</a>
-                <a class="d-block text-start btn btn-link p-1"
-                   hx-post="/edit/event/add-day"
-                   hx-swap="outerHTML"
-                   hx-target="#edit-event-form">+ Add Another Day and Time</a>
-            </div>
+
 
             <div class="mt-4">
                 <button class="btn btn-primary" type="submit">Save Changes</button>
                 <a href="#" th:href="@{/events/{id}(id=${event.id})}" class="btn btn-secondary">Cancel</a>
             </div>
-
-            <section class="my-4">
-                <h3>Delete Event</h3>
-                <p>The action is not reversible.</p>
-                <form method="post" th:action="@{/delete/event}">
-                    <input type="hidden" name="eventId" th:value="${event.id}"/>
-                    <button type="submit" class="btn btn-danger">Delete Event</button>
-                </form>
-            </section>
         </form>
+
+        <section class="my-4">
+            <h3>Removing An Event</h3>
+            <p>If you no longer need this event, you can delete it permanently. If you simply need to cancel it, you may want to consider canceling instead.</p>
+
+            <div class="d-flex">
+                <form method="post" th:action="@{/delete/event}" onsubmit="return confirmDelete();">
+                    <input type="hidden" name="eventId" th:value="${event.id}"/>
+                    <button type="submit" class="btn btn-danger me-2">Delete Event Permanently</button>
+                </form>
+                <form method="post" th:action="@{/cancel/event}" class="mb-3">
+                    <input type="hidden" name="eventId" th:value="${event.id}"/>
+                    <button type="submit" class="btn btn-outline-danger">Cancel Event</button>
+                </form>
+            </div>
+        </section>
     </div>
 </main>
+
+<script>
+    document.addEventListener('htmx:afterSwap', function(event) {
+        flatpickr('.date-picker', {
+            enableTime: true,
+            altInput: true,
+            altFormat: "F j, Y h:i K",
+            dateFormat: "Y-m-d h:i K"
+        });
+    });
+</script>
 
 <script th:src="@{/js/flatpickr.min.js}"></script>
 <script th:replace="~{partials/theme-js}"></script>

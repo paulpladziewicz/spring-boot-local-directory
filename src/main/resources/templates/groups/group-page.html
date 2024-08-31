@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head th:replace="~{partials/head :: head('FremontMI - Group')}"></head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
@@ -11,7 +12,8 @@
                 <section th:if="${isAdmin}" class="alert alert-secondary" role="alert">
                     <h4 class="mb-1">You're an administrator of this group.</h4>
                     <p class="mb-1">Additional options to update this page are available.</p>
-                    <p class="mb-1">Please <a href="/#contact-us" class="alert-link">contact us</a> if you'd like to add an administrator or change who will be administering this group.</p>
+                    <p class="mb-1">Please <a href="/#contact-us" class="alert-link">contact us</a> if you'd like to add
+                        an administrator or change who will be administering this group.</p>
                 </section>
                 <section sec:authorize="!isAuthenticated()">
                     <p><a class="link-primary" href="/register">Register</a> or <a href="/login">Login</a> to join.</p>
@@ -20,16 +22,18 @@
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h1 class="display-4 mb-0" th:text="${group.name}">Group Name</h1>
                         <div class="d-flex">
-                            <form sec:authorize="isAuthenticated()" th:if="${!isMember}" th:attr="hx-post='/groups/join'" hx-swap="outerHTML">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <input type="hidden" name="groupId" th:value="${group.id}" />
-                                <button type="submit" class="btn btn-primary">Join Group</button>
+                            <form sec:authorize="isAuthenticated()" th:if="${!isMember}" th:action="@{/groups/join}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <input type="hidden" name="groupId" th:value="${group.id}"/>
+                                <button type="submit" class="d-none d-sm-block btn btn-primary">Join Group</button>
                             </form>
-                            <form sec:authorize="isAuthenticated()" th:if="${isMember && !isAdmin}" th:action="@{/groups/leave}" method="post">
-                                <input type="hidden" name="groupId" th:value="${group.id}" />
-                                <button type="submit" class="btn btn-primary">Leave Group</button>
+                            <form sec:authorize="isAuthenticated()" th:if="${isMember && !isAdmin}"
+                                  th:action="@{/groups/leave}" method="post">
+                                <input type="hidden" name="groupId" th:value="${group.id}"/>
+                                <button type="submit" class="d-none d-sm-block btn btn-primary">Leave Group</button>
                             </form>
-                            <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.id}" class="btn btn-outline-primary">Edit Group</a>
+                            <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.id}"
+                               class="d-none d-sm-block btn btn-outline-primary">Edit Group</a>
                         </div>
                     </div>
 
@@ -41,15 +45,13 @@
                     </p>
 
                     <p class="fs-lg my-3" th:text="${group.description}">Group description here...</p>
-
-
-
-
                 </section>
+
                 <section class="mb-4">
                     <div class="d-flex align-items-center mb-2">
                         <h2 class="h1 mb-0 me-2">Announcements</h2>
-                        <button th:if="${isAdmin}" class="btn btn-outline-primary btn-sm" th:attr="hx-get='/announcements/group/form/' + ${group.id}"
+                        <button th:if="${isAdmin}" class="btn btn-outline-primary btn-sm"
+                                th:attr="hx-get='/announcements/group/form/' + ${group.id}"
                                 hx-target="#add-announcement-form"
                                 hx-swap="innerHTML"
                         >
@@ -58,7 +60,8 @@
                     </div>
                     <div id="add-announcement-form"></div>
                     <ul id="announcementList" class="list-unstyled">
-                        <li class="my-4" th:each="announcement : ${group.announcements}" th:id="'announcement-' + ${announcement.id}">
+                        <li class="my-4" th:each="announcement : ${group.announcements}"
+                            th:id="'announcement-' + ${announcement.id}">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="mb-1" th:text="${announcement.title}">Announcement Title</h5>
@@ -67,10 +70,12 @@
                                 </div>
                                 <div th:if="${isAdmin}">
                                     <form th:attr="hx-post='/delete/group/announcement', hx-swap='outerHTML', hx-target='#announcement-' + ${announcement.id}">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                        <input type="hidden" name="groupId" th:value="${group.id}" />
-                                        <input type="hidden" name="announcementId" th:value="${announcement.id}" />
-                                        <button type="submit" class="btn btn-danger btn-sm"><i class="ai-trash"></i></button>
+                                        <input type="hidden" th:name="${_csrf.parameterName}"
+                                               th:value="${_csrf.token}"/>
+                                        <input type="hidden" name="groupId" th:value="${group.id}"/>
+                                        <input type="hidden" name="announcementId" th:value="${announcement.id}"/>
+                                        <button type="submit" class="btn btn-danger btn-sm"><i class="ai-trash"></i>
+                                        </button>
                                     </form>
                                 </div>
                             </div>
@@ -78,6 +83,18 @@
                     </ul>
 
                 </section>
+
+                <form sec:authorize="isAuthenticated()" th:if="${!isMember}" th:action="@{/groups/join}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" name="groupId" th:value="${group.id}"/>
+                    <button type="submit" class="d-inline-block d-sm-none btn btn-primary">Join Group</button>
+                </form>
+                <form sec:authorize="isAuthenticated()" th:if="${isMember && !isAdmin}" th:action="@{/groups/leave}" method="post">
+                    <input type="hidden" name="groupId" th:value="${group.id}"/>
+                    <button type="submit" class="d-inline-block d-sm-none btn btn-primary">Leave Group</button>
+                </form>
+                <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.id}" class="d-inline-block d-sm-none btn btn-outline-primary">Edit Group</a>
+
             </div>
         </div>
     </div>
@@ -86,14 +103,14 @@
 <footer th:replace="~{partials/footer}"></footer>
 <script th:replace="~{partials/theme-js}"></script>
 <form id="logoutForm" th:action="@{/logout}" method="post" style="display: none;">
-    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 </form>
 
 <script th:inline="javascript">
-    window.onload = function() {
+    window.onload = function () {
         const timeUntilLogout = (19 * 60 + 59) * 60 * 1000; // 19 hours 59 minutes
 
-        setTimeout(function() {
+        setTimeout(function () {
             document.getElementById('logoutForm').submit();
         }, timeUntilLogout);
     };
