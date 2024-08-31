@@ -73,6 +73,46 @@ public class EventService {
         return savedEvent;
     }
 
+    public void updateEvent(String id, Event updatedEvent) {
+        // Fetch the existing event from the repository
+        Event existingEvent = eventRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("Event not found")
+        );
+
+        // Check if the current user is allowed to update the event
+        UserDetailsDto userDetails = userService.getUserDetails();
+        if (!userDetails.getEventAdminIds().contains(id)) {
+            throw new RuntimeException("User doesn't have permission to update this event");
+        }
+
+        // Update the event's fields with the new data
+        existingEvent.setName(updatedEvent.getName());
+        existingEvent.setDescription(updatedEvent.getDescription());
+        existingEvent.setLocationName(updatedEvent.getLocationName());
+        existingEvent.setAddress(updatedEvent.getAddress());
+        existingEvent.setDays(updatedEvent.getDays());
+
+        // Find the soonest start time in the updated days
+        LocalDateTime soonestStartTime = updatedEvent.getDays().stream()
+                .map(DayEvent::getStartTime)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
+        existingEvent.setSoonestStartTime(soonestStartTime);
+
+        // Optionally handle the end time logic
+        updatedEvent.getDays().forEach(dayEvent -> {
+            if (dayEvent.getEndTime() != null && dayEvent.getEndTime().isBefore(dayEvent.getStartTime())) {
+                throw new IllegalArgumentException("End time must be after start time");
+            }
+        });
+
+        // Populate formatted times for display purposes
+        populateFormattedTimes(existingEvent);
+
+        // Save the updated event to the repository
+        eventRepository.save(existingEvent);
+    }
+
     public void deleteEvent (String eventId) {
         UserDetailsDto userDetails = userService.getUserDetails();
         if (!userDetails.getEventAdminIds().contains(eventId)) {

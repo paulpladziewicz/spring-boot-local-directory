@@ -5,40 +5,44 @@
 <header th:insert="~{partials/navbar}"></header>
 
 <main class="bg-secondary">
-    <div class="container mt-4">
-        <section th:if="${true}" class="alert alert-secondary" role="alert">
-            <h4 class="mb-1">You're an administrator of this event.</h4>
-            <p class="mb-1">Additional options to update the event are available.</p>
-            <p class="mb-1">Please <a href="/contact-us" class="alert-link">contact us</a> if you'd like to add an
-                administrator or change who will be administering this event.</p>
-        </section>
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-md-10 col-lg-8 mx-auto">
+                <section th:if="${true}" class="alert alert-secondary" role="alert">
+                    <h4 class="mb-1">You're an administrator of this event.</h4>
+                    <p class="mb-1">Additional options to update the event are available.</p>
+                    <p class="mb-1">Please <a href="/contact-us" class="alert-link">contact us</a> if you'd like to add an
+                        administrator or change who will be administering this event.</p>
+                </section>
 
-        <section th:if="${event != null}">
-            <h1 class="display-4" th:text="${event.name}">Event Name</h1>
-            <p th:text="${event.description}">Event description here...</p>
+                <section th:if="${event != null}">
+                    <h1 class="display-4" th:text="${event.name}">Event Name</h1>
+                    <p th:text="${event.description}">Event description here...</p>
 
-            <div th:if="${event.locationName != null}">
-                <strong>Location:</strong> <span th:text="${event.locationName}">Location Name</span>
-            </div>
+                    <div th:if="${event.locationName != null}">
+                        <strong>Location:</strong> <span th:text="${event.locationName}">Location Name</span>
+                    </div>
 
-            <div th:if="${event.address != null}">
-                <strong>Address:</strong> <span th:text="${event.address}">Event Address</span>
-            </div>
+                    <div th:if="${event.address != null}">
+                        <strong>Address:</strong> <span th:text="${event.address}">Event Address</span>
+                    </div>
 
-            <h4>Event Dates and Times:</h4>
-            <div th:if="${event.days != null && event.formattedTimes != null}">
-                <div th:each="dayEvent, iterStat : ${event.days}">
-                    <p>
-                        <span th:text="${event.formattedTimes[iterStat.index * 2]}"></span>
-                        <span th:if="${event.formattedTimes[iterStat.index * 2 + 1] != 'No End Time'}">
+                    <h4>Event Dates and Times:</h4>
+                    <div th:if="${event.days != null && event.formattedTimes != null}">
+                        <div th:each="dayEvent, iterStat : ${event.days}">
+                            <p>
+                                <span th:text="${event.formattedTimes[iterStat.index * 2]}"></span>
+                                <span th:if="${event.formattedTimes[iterStat.index * 2 + 1] != 'No End Time'}">
                             <span th:text="' - '"></span>
                             <span th:text="${event.formattedTimes[iterStat.index * 2 + 1]}"></span>
                         </span>
-                    </p>
-                </div>
-            </div>
-        </section>
+                            </p>
+                        </div>
+                    </div>
+                </section>
 
+            </div>
+        </div>
     </div>
 </main>
 

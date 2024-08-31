@@ -39,14 +39,29 @@ public class EventController {
     @GetMapping("/edit/event/{id}")
     public String displayEditForm(@PathVariable String id, Model model) {
         Event event = eventService.findEventById(id);
+        if (event == null) {
+            // Handle case where the event is not found (optional)
+            return "redirect:/events"; // Redirect to event listing or an error page
+        }
         model.addAttribute("event", event);
         return "events/edit-event";
     }
 
     @PostMapping("/edit/event/{id}")
-    public String updateEvent(@PathVariable String id, @ModelAttribute Event event) {
-//        eventService.updateEvent(id, event);
-        return "redirect:/events/" + id;
+    public String updateEvent(@PathVariable String id, @Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "events/edit-event"; // Return to the edit page if there are validation errors
+        }
+
+        try {
+            eventService.updateEvent(id, event);
+        } catch (IllegalArgumentException e) {
+            // Handle any exceptions thrown by the service, e.g., invalid date-time inputs
+            model.addAttribute("errorMessage", e.getMessage());
+            return "events/edit-event";
+        }
+
+        return "redirect:/events/" + id; // Redirect to the event's detail page after a successful update
     }
 
     @GetMapping("/my/events")
