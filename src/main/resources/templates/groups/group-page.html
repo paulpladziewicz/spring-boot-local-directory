@@ -11,7 +11,7 @@
                 <section th:if="${isAdmin}" class="alert alert-secondary" role="alert">
                     <h4 class="mb-1">You're an administrator of this group.</h4>
                     <p class="mb-1">Additional options to update this page are available.</p>
-                    <p class="mb-1">Please <a href="/contact-us" class="alert-link">contact us</a> if you'd like to add an administrator or change who will be administering this group.</p>
+                    <p class="mb-1">Please <a href="/#contact-us" class="alert-link">contact us</a> if you'd like to add an administrator or change who will be administering this group.</p>
                 </section>
                 <section sec:authorize="!isAuthenticated()">
                     <p><a class="link-primary" href="/register">Register</a> or <a href="/login">Login</a> to join.</p>
@@ -33,14 +33,14 @@
                         </div>
                     </div>
 
-                    <p>
+                    <p class="text-muted fw-semibold my-3">
                         <span th:text="${adminCount}"></span>
                         <span th:text="${adminCount == 1 ? 'Administrator' : 'Administrators'}"></span> -
                         <span th:text="${memberCount}"></span>
                         <span th:text="${memberCount == 1 ? 'Member' : 'Members'}"></span>
                     </p>
 
-                    <p th:text="${group.description}">Group description here...</p>
+                    <p class="fs-lg my-3" th:text="${group.description}">Group description here...</p>
 
 
 
@@ -48,7 +48,7 @@
                 </section>
                 <section class="mb-4">
                     <div class="d-flex align-items-center mb-2">
-                        <h2 class="mb-0 me-2">Announcements</h2>
+                        <h2 class="h1 mb-0 me-2">Announcements</h2>
                         <button th:if="${isAdmin}" class="btn btn-outline-primary btn-sm" th:attr="hx-get='/announcements/group/form/' + ${group.id}"
                                 hx-target="#add-announcement-form"
                                 hx-swap="innerHTML"
@@ -58,7 +58,7 @@
                     </div>
                     <div id="add-announcement-form"></div>
                     <ul id="announcementList" class="list-unstyled">
-                        <li class="mb-3" th:each="announcement : ${group.announcements}" th:id="'announcement-' + ${announcement.id}">
+                        <li class="my-4" th:each="announcement : ${group.announcements}" th:id="'announcement-' + ${announcement.id}">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="mb-1" th:text="${announcement.title}">Announcement Title</h5>

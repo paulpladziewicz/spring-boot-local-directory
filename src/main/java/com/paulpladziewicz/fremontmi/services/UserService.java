@@ -74,7 +74,7 @@ public class UserService {
         user.setResetPasswordToken(token);
         userRepository.save(user);
 
-        emailService.sendResetPasswordEmail(userDetails.getEmail(), "http://localhost:8080/reset-password?token=" + token);
+        emailService.sendResetPasswordEmail(userDetails.getEmail(), "https://fremontmi.com/reset-password?token=" + token);
     }
 
     public void forgotUsername(String email) {
