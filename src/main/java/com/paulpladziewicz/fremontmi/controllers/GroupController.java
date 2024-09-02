@@ -146,7 +146,7 @@ public class GroupController {
     public String emailGroup(@NotNull @PathVariable String emailTarget, @NotNull @PathVariable String groupId, Model model) {
         model.addAttribute("emailTarget", emailTarget);
         model.addAttribute("groupId", groupId);
-        return "groups/email";
+        return "groups/email-group";
     }
 
     @PostMapping("/group/email/send")
@@ -165,6 +165,6 @@ public class GroupController {
 
         model.addAttribute("emailTarget", emailTarget);
         model.addAttribute("groupId", groupId);
-        return "groups/email";
+        return "groups/email-group";
     }
 }

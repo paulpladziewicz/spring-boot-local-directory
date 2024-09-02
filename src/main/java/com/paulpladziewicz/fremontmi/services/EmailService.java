@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import jakarta.mail.Address;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -112,17 +113,17 @@ public class EmailService {
     public void sendGroupEmail(List<String> recipients, String subject, String messageBody, String replyTo) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            message.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
+            message.setSubject("Group Message: " + subject);
+            message.setContent(messageBody, "text/html; charset=utf-8");
+            message.setReplyTo(new Address[]{new InternetAddress(replyTo)});
 
             for (String recipient : recipients) {
-                helper.setTo(recipient);
-                helper.setSubject(subject);
-                helper.setText(messageBody, true);
-                helper.setReplyTo(replyTo);
-                helper.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
-
+                message.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress(recipient));
                 mailSender.send(message);
             }
+
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
