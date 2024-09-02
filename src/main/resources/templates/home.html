@@ -179,21 +179,23 @@
                 <div class="col-md-6">
                     <h2 class="h1" id="contact-us">Contact us</h2>
                     <p>We're here to help with any questions, suggestions, or feedback you might have. Whether you're looking for more information or need assistance with our platform, feel free to reach out.</p>
-                    <!-- Contact form -->
-                    <form class="needs-validation row g-4" novalidate="">
+                    <div th:if="${successMessage}" class="alert alert-success" role="alert">
+                        <p class="m-0" th:text="${successMessage}"></p>
+                    </div>
+                    <form th:action="@{/contact}" method="post" class="row g-4">
                         <div class="col-lg-10">
                             <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="name">Name</label>
-                            <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
+                            <input class="form-control form-control-lg" type="text" placeholder="Your name" name="name" required id="name">
                             <div class="invalid-feedback">Please enter your name!</div>
                         </div>
                         <div class="col-lg-10">
                             <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="email">Email</label>
-                            <input class="form-control form-control-lg" type="email" placeholder="Email address" required="" id="email">
+                            <input class="form-control form-control-lg" type="email" placeholder="Email address" name="email" required id="email">
                             <div class="invalid-feedback">Please provide a valid email address!</div>
                         </div>
                         <div class="col-lg-10">
                             <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="message">Message</label>
-                            <textarea class="form-control form-control-lg" placeholder="Your message" rows="4" required="" id="message"></textarea>
+                            <textarea class="form-control form-control-lg" placeholder="Your message" name="message" rows="4" required id="message"></textarea>
                             <div class="invalid-feedback">Please write your message!</div>
                         </div>
                         <div class="col-lg-10">

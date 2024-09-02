@@ -87,6 +87,28 @@ public class EmailService {
         }
     }
 
+    public void sendContactUsEmail(String name, String email, String contactMessage) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+
+            Context context = new Context();
+            context.setVariable("name", name);
+            context.setVariable("email", email);
+            context.setVariable("message", contactMessage);
+
+            String html = templateEngine.process("contact-us-email", context);
+
+            message.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
+            message.setRecipients(MimeMessage.RecipientType.TO, "ppladziewicz@gmail.com");
+            message.setSubject("Contact Form Submission");
+            message.setContent(html, "text/html; charset=utf-8");
+
+            mailSender.send(message);
+        } catch (MessagingException | MailException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void sendGroupEmail(List<String> recipients, String subject, String messageBody, String replyTo) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
