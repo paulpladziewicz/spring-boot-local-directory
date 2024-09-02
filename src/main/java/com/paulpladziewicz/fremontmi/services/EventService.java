@@ -113,6 +113,16 @@ public class EventService {
         eventRepository.save(existingEvent);
     }
 
+    public void cancelEvent(String eventId) {
+        Event event = findEventById(eventId);
+        if (event == null) {
+            throw new IllegalArgumentException("Event not found");
+        }
+        event.setStatus("cancelled");
+        // Save the updated event back to the database (you may have a repository save method here)
+        eventRepository.save(event);
+    }
+
     public void deleteEvent (String eventId) {
         UserDetailsDto userDetails = userService.getUserDetails();
         if (!userDetails.getEventAdminIds().contains(eventId)) {

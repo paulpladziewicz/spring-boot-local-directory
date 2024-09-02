@@ -35,6 +35,11 @@ public class EventController {
     public String displayEvent(@PathVariable String id, Model model) {
         Event event = eventService.findEventById(id);
         String userId = userService.getUserId();
+
+        if ("cancelled".equals(event.getStatus())) {
+            model.addAttribute("cancelled", "This event has been cancelled.");
+        }
+
         model.addAttribute("event", event);
         model.addAttribute("isAdmin", event.getOrganizerId().equals(userId));
         return "events/event-page";
@@ -127,6 +132,12 @@ public class EventController {
             model.addAttribute("errorMessage", e.getMessage());
             return "events/create-event";
         }
+    }
+
+    @PostMapping("/cancel/event")
+    public String cancelEvent(@NotNull @RequestParam("eventId") String eventId) {
+        eventService.cancelEvent(eventId);
+        return "redirect:/events/" + eventId;
     }
 
     @PostMapping("/delete/event")
