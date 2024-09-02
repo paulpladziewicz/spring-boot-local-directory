@@ -57,7 +57,7 @@ public class EventService {
         // Optionally handle the end time logic if needed
         event.getDays().forEach(dayEvent -> {
             if (dayEvent.getEndTime() != null && dayEvent.getEndTime().isBefore(dayEvent.getStartTime())) {
-                throw new IllegalArgumentException("End time must be after start time");
+                throw new IllegalArgumentException("End time(s) must be after the start time.");
             }
         });
 
@@ -102,7 +102,7 @@ public class EventService {
         // Optionally handle the end time logic
         updatedEvent.getDays().forEach(dayEvent -> {
             if (dayEvent.getEndTime() != null && dayEvent.getEndTime().isBefore(dayEvent.getStartTime())) {
-                throw new IllegalArgumentException("End time must be after start time");
+                throw new IllegalArgumentException("End time(s) must be after the start time.");
             }
         });
 

@@ -75,8 +75,10 @@
                         <a th:if="${event.getDays().size() > 1}" class="d-block text-end btn btn-link text-danger p-1" hx-post="/create/event/remove-day" hx-swap="outerHTML" hx-target="#edit-event-form">Remove</a>
                     </div>
 
+                    <p th:if="${errorMessage}" th:text="${errorMessage}" class="text-danger my-3"></p>
+
                     <div class="mt-3">
-                        <button class="btn btn-primary" type="submit">Save Changes</button>
+                        <button class="btn btn-primary me-2" type="submit">Save Changes</button>
                         <a href="#" th:href="@{/events/{id}(id=${event.id})}" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>

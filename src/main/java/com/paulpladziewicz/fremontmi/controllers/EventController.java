@@ -120,9 +120,13 @@ public class EventController {
             return "events/create-event";
         }
 
-        Event savedEvent = eventService.createEvent(event);
-
-        return "redirect:/events/" + savedEvent.getId();
+        try {
+            Event savedEvent = eventService.createEvent(event);
+            return "redirect:/events/" + savedEvent.getId();
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "events/create-event";
+        }
     }
 
     @PostMapping("/delete/event")
