@@ -1,8 +1,6 @@
 package com.paulpladziewicz.fremontmi.repositories;
 
 import com.paulpladziewicz.fremontmi.models.UserDto;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 

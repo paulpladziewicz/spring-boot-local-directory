@@ -1,6 +1,7 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.services.EmailService;
+import com.paulpladziewicz.fremontmi.services.SubscribeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +14,11 @@ public class HomeController {
 
     private final EmailService emailService;
 
-    public HomeController(EmailService emailService) {
+    private final SubscribeService subscribeService;
+
+    public HomeController(EmailService emailService, SubscribeService subscribeService) {
         this.emailService = emailService;
+        this.subscribeService = subscribeService;
     }
 
     @GetMapping("/")
@@ -46,8 +50,10 @@ public class HomeController {
             @RequestParam("email") String email,
             RedirectAttributes redirectAttributes) {
 
-        redirectAttributes.addFlashAttribute("subscribed", "Thank you for subscribing to updates.");
+        subscribeService.subscribe(email);
 
-        return "redirect:/#contact-us";
+        redirectAttributes.addFlashAttribute("subscribedMessage", "Thank you for subscribing to updates.");
+
+        return "redirect:/#subscribe";
     }
 }
