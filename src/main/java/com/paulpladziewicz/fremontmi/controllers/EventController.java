@@ -140,6 +140,12 @@ public class EventController {
         return "redirect:/events/" + eventId;
     }
 
+    @PostMapping("/reactivate/event")
+    public String uncancelEvent(@NotNull @RequestParam("eventId") String eventId) {
+        eventService.reactivateEvent(eventId);
+        return "redirect:/events/" + eventId;
+    }
+
     @PostMapping("/delete/event")
     public String deleteGroup(@NotNull @RequestParam("eventId") String eventId) {
         eventService.deleteEvent(eventId);

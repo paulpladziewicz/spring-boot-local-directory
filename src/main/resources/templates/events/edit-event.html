@@ -92,9 +92,14 @@
                             <input type="hidden" name="eventId" th:value="${event.id}"/>
                             <button type="submit" class="btn btn-danger me-2">Delete Event Permanently</button>
                         </form>
-                        <form method="post" th:action="@{/cancel/event}" class="mb-3">
+                        <form method="post" th:action="@{/cancel/event}" th:if="${event.status == 'active'}" class="mb-3">
                             <input type="hidden" name="eventId" th:value="${event.id}"/>
                             <button type="submit" class="btn btn-outline-danger">Cancel Event</button>
+                        </form>
+
+                        <form method="post" th:action="@{/reactivate/event}" th:if="${event.status == 'cancelled'}" class="mb-3">
+                            <input type="hidden" name="eventId" th:value="${event.id}"/>
+                            <button type="submit" class="btn btn-outline-primary">Reactivate Event</button>
                         </form>
                     </div>
                 </section>

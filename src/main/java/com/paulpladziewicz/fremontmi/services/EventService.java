@@ -119,7 +119,15 @@ public class EventService {
             throw new IllegalArgumentException("Event not found");
         }
         event.setStatus("cancelled");
-        // Save the updated event back to the database (you may have a repository save method here)
+        eventRepository.save(event);
+    }
+
+    public void reactivateEvent(String eventId) {
+        Event event = findEventById(eventId);
+        if (event == null) {
+            throw new IllegalArgumentException("Event not found");
+        }
+        event.setStatus("active");
         eventRepository.save(event);
     }
 
