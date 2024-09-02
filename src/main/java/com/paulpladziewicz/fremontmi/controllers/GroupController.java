@@ -2,6 +2,8 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
+import com.paulpladziewicz.fremontmi.models.SendEmailDto;
+import com.paulpladziewicz.fremontmi.services.EmailService;
 import com.paulpladziewicz.fremontmi.services.GroupService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
@@ -126,7 +128,7 @@ public class GroupController {
     }
 
     @PostMapping("/announcements/group/{groupId}")
-    public String addGroupAnnouncement(@NotNull @PathVariable  String groupId, @Valid Announcement announcement, Model model) {
+    public String addGroupAnnouncement(@NotNull @PathVariable String groupId, @Valid Announcement announcement, Model model) {
         announcement.setCreationDate(Instant.now());
         groupService.addAnnouncement(groupId, announcement);
         model.addAttribute("group", groupService.findGroupById(groupId));
@@ -137,5 +139,33 @@ public class GroupController {
     public String deleteGroupAnnouncement(@NotNull @RequestParam("groupId") String groupId, @NotNull @RequestParam("announcementId") String announcementId) {
         groupService.deleteAnnouncement(groupId, Integer.parseInt(announcementId));
         return "groups/htmx/delete";
+    }
+
+    @GetMapping("/group/email/{emailTarget}/{groupId}")
+    public String emailGroup(@NotNull @PathVariable String emailTarget, @NotNull @PathVariable String groupId, Model model) {
+        model.addAttribute("emailTarget", emailTarget);
+        model.addAttribute("groupId", groupId);
+        model.addAttribute("sendEmail", new SendEmailDto());
+        return "groups/email";
+    }
+
+    @PostMapping("/group/email/{emailTarget}/{groupId}")
+    public String handleEmailGroup(@NotNull @PathVariable String emailTarget,
+                                   @NotNull @PathVariable String groupId,
+                                   @ModelAttribute("sendEmailDto") SendEmailDto sendEmailDto,
+                                   Model model) {
+        boolean emailSent = groupService.emailGroup(emailTarget, groupId, sendEmailDto);
+
+        if (emailSent) {
+            model.addAttribute("successMessage", "Email sent successfully!");
+        } else {
+            model.addAttribute("errorMessage", "Failed to send email. Please try again.");
+        }
+
+        model.addAttribute("emailTarget", emailTarget);
+        model.addAttribute("groupId", groupId);
+        model.addAttribute("sendEmail", new SendEmailDto());  // Reset the form after submission
+
+        return "groups/email";
     }
 }

@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
+import com.paulpladziewicz.fremontmi.models.SendEmailDto;
 import com.paulpladziewicz.fremontmi.models.UserDetailsDto;
 import com.paulpladziewicz.fremontmi.repositories.GroupRepository;
 import com.paulpladziewicz.fremontmi.repositories.UserDetailsRepository;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GroupService {
@@ -20,10 +22,13 @@ public class GroupService {
 
     private final UserDetailsRepository userDetailsRepository;
 
-    public GroupService(GroupRepository groupRepository, UserService userService, UserDetailsRepository userDetailsRepository) {
+    private final EmailService emailService;
+
+    public GroupService(GroupRepository groupRepository, UserService userService, UserDetailsRepository userDetailsRepository, EmailService emailService) {
         this.groupRepository = groupRepository;
         this.userService = userService;
         this.userDetailsRepository = userDetailsRepository;
+        this.emailService = emailService;
     }
 
     public List<Group> findAll() {
@@ -41,7 +46,7 @@ public class GroupService {
     }
 
     @Transactional
-    public Group addGroup (Group group) {
+    public Group addGroup(Group group) {
         UserDetailsDto userDetails = userService.getUserDetails();
 
         List<String> administrators = new ArrayList<>(group.getAdministrators());
@@ -64,7 +69,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void joinGroup (String groupId) {
+    public void joinGroup(String groupId) {
         UserDetailsDto userDetails = userService.getUserDetails();
         Group group = findGroupById(groupId);
 
@@ -84,7 +89,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void leaveGroup (String groupId) {
+    public void leaveGroup(String groupId) {
         UserDetailsDto userDetails = userService.getUserDetails();
         Group group = findGroupById(groupId);
 
@@ -99,7 +104,7 @@ public class GroupService {
         userService.saveUserDetails(userDetails);
     }
 
-    public Group updateGroup (Group group) {
+    public Group updateGroup(Group group) {
         UserDetailsDto userDetails = userService.getUserDetails();
         if (!userDetails.getGroupAdminIds().contains(group.getId())) {
             throw new RuntimeException("User doesn't have permission to update group");
@@ -110,7 +115,7 @@ public class GroupService {
         return groupRepository.save(groupDocument);
     }
 
-    public void deleteGroup (String groupId) {
+    public void deleteGroup(String groupId) {
         UserDetailsDto userDetails = userService.getUserDetails();
         if (!userDetails.getGroupAdminIds().contains(groupId)) {
             throw new RuntimeException("User doesn't have permission to delete group");
@@ -162,5 +167,35 @@ public class GroupService {
         groupRepository.save(group);
 
         return true;
+    }
+
+    public boolean emailGroup(String emailTarget, String groupId, SendEmailDto sendEmailDto) {
+        Group group = findGroupById(groupId);
+
+        if (group == null) {
+            throw new IllegalArgumentException("Group not found");
+        }
+
+        List<String> userIds;
+        if ("administrators".equalsIgnoreCase(emailTarget)) {
+            userIds = group.getAdministrators();
+        } else if ("members".equalsIgnoreCase(emailTarget)) {
+            userIds = group.getMembers();
+        } else {
+            throw new IllegalArgumentException("Invalid email target: " + emailTarget);
+        }
+
+        List<String> emailAddresses = userDetailsRepository.findAllById(userIds).stream()
+                .map(UserDetailsDto::getEmail)
+                .collect(Collectors.toList());
+
+        String replyToEmail = userService.getUserDetails().getEmail();
+
+        try {
+            emailService.sendGroupEmail(emailAddresses, sendEmailDto.getSubject(), sendEmailDto.getMessage(), replyToEmail);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

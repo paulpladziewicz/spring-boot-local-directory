@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('Email Group')}">
+    <title>Create Group</title>
+</head>
+<body>
+<header th:replace="~{partials/navbar}"></header>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <h1 th:if="${emailTarget == 'administrators'}">Email Administrators</h1>
+            <h1 th:if="${emailTarget == 'members'}">Email Members</h1>
+
+            <div th:if="${successMessage != null}" class="alert alert-success" role="alert">
+                <span th:text="${successMessage}"></span>
+            </div>
+            <div th:if="${errorMessage != null}" class="alert alert-danger" role="alert">
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <form th:action="@{/send/email}" th:object="${sendEmail}" method="post">
+                <input type="hidden" name="groupId" th:value="${groupId}"/>
+                <input type="hidden" name="emailTarget" th:value="${emailTarget}"/>
+
+                <div class="form-group mb-2">
+                    <label for="subject" class="mb-1 form-label opacity-75 fw-semibold fs-base">Subject</label>
+                    <input type="text" class="form-control" id="subject" th:field="*{subject}" placeholder="Enter email subject" required>
+                    <p th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}" class="mt-1 text-danger"></p>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="body" class="mb-1 form-label opacity-75 fw-semibold fs-base">Message</label>
+                    <textarea class="form-control" id="body" th:field="*{message}" rows="5" placeholder="Enter the content of the email" required></textarea>
+                    <p th:if="${#fields.hasErrors('message')}" th:errors="*{message}" class="mt-1 text-danger"></p>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Send Email</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:replace="~{partials/theme-js}"></script>
+<footer th:replace="~{partials/footer}"></footer>
+
+</body>
+</html>

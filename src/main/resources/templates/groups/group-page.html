@@ -102,8 +102,8 @@
                         </form>
                         <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.id}" class="d-inline-block d-sm-none btn btn-outline-primary me-2">Edit Group</a>
                     </div>
-                    <button th:if="${!isAdmin}" type="button" class="btn btn-link p-0">Email Administrator</button>
-                    <button th:if="${isAdmin}" type="button" class="btn btn-link p-0">Email Members</button>
+                    <a th:href="'/group/email/administrators/' + ${group.getId()}" th:if="${!isAdmin}" type="button" class="btn btn-link p-0">Email Administrators</a>
+                    <a th:href="'/group/email/members/' + ${group.getId()}" th:if="${isAdmin}" type="button" class="btn btn-link p-0">Email Members</a>
                 </div>
 
             </div>

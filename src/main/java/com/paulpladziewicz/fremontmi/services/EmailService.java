@@ -4,12 +4,14 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 @Service
 public class EmailService {
@@ -80,6 +82,25 @@ public class EmailService {
             message.setContent(html, "text/html; charset=utf-8");
 
             mailSender.send(message);
+        } catch (MessagingException | MailException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendGroupEmail(List<String> recipients, String subject, String messageBody, String replyTo) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            for (String recipient : recipients) {
+                helper.setTo(recipient);
+                helper.setSubject(subject);
+                helper.setText(messageBody, true);
+                helper.setReplyTo(replyTo);
+                helper.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
+
+                mailSender.send(message);
+            }
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
