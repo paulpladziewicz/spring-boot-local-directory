@@ -12,7 +12,7 @@
         <div class="w-100 mt-auto" style="max-width: 526px;">
             <h1>No account? Sign up</h1>
             <p class="pb-3 mb-3 mb-lg-4">Have an account already?&nbsp;&nbsp;<a href="/login">Sign in here!</a></p>
-            <form th:action="@{/register}" th:object="${userRegistrationDto}" method="post">
+            <form th:action="@{/register}" th:object="${userRegistrationDto}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                 <div class="row row-cols-1 row-cols-sm-2">
                     <div class="col mb-4">
                         <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="firstName">First Name</label>

@@ -19,7 +19,7 @@
                 <span th:text="${errorMessage}"></span>
             </div>
 
-            <form th:action="@{/group/email/send}" th:object="${sendEmail}" method="post">
+            <form th:action="@{/group/email/send}" th:object="${sendEmail}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                 <input type="hidden" name="groupId" th:value="${groupId}"/>
                 <input type="hidden" name="emailTarget" th:value="${emailTarget}"/>
 

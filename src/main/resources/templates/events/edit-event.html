@@ -9,7 +9,7 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-10 col-lg-8">
                 <h1 class="display-4">Edit Event</h1>
-                <form id="edit-event-form" th:action="@{/edit/event/{id}(id=${event.id})}" th:object="${event}" method="post">
+                <form id="edit-event-form" th:action="@{/edit/event/{id}(id=${event.id})}" th:object="${event}" onsubmit="disableSubmitButtonWhileSubmitting(this)" method="post">
                     <input type="hidden" name="id" th:value="${event.id}"/>
 
                     <div class="form-group mb-2">
@@ -88,16 +88,16 @@
                     <p>If you no longer need this event, you can delete it permanently. If you simply need to cancel it, you may want to consider canceling instead.</p>
 
                     <div class="d-flex">
-                        <form method="post" th:action="@{/delete/event}" onsubmit="return confirmDelete();">
+                        <form method="post" th:action="@{/delete/event}" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                             <input type="hidden" name="eventId" th:value="${event.id}"/>
                             <button type="submit" class="btn btn-danger me-2">Delete Event Permanently</button>
                         </form>
-                        <form method="post" th:action="@{/cancel/event}" th:if="${event.status == 'active'}" class="mb-3">
+                        <form method="post" th:action="@{/cancel/event}" th:if="${event.status == 'active'}" class="mb-3" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                             <input type="hidden" name="eventId" th:value="${event.id}"/>
                             <button type="submit" class="btn btn-outline-danger">Cancel Event</button>
                         </form>
 
-                        <form method="post" th:action="@{/reactivate/event}" th:if="${event.status == 'cancelled'}" class="mb-3">
+                        <form method="post" th:action="@{/reactivate/event}" th:if="${event.status == 'cancelled'}" class="mb-3" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                             <input type="hidden" name="eventId" th:value="${event.id}"/>
                             <button type="submit" class="btn btn-outline-primary">Reactivate Event</button>
                         </form>

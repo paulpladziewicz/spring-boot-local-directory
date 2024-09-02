@@ -1,4 +1,4 @@
-<form id="create-event-form" th:action="@{/create/event}" th:object="${event}" method="post">
+<form id="create-event-form" th:action="@{/create/event}" th:object="${event}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
 
     <div class="form-group mb-2">
         <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="name">Group Name</label>

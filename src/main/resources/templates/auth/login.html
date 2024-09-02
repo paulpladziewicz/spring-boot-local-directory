@@ -20,7 +20,7 @@
                     Invalid username or password. Please try again.
                 </div>
 
-                <form th:action="@{/login}" method="post">
+                <form th:action="@{/login}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                     <div class="mb-3">
                         <div class="position-relative">
                             <i class="ai-user fs-lg position-absolute top-50 start-0 translate-middle-y ms-3"></i>

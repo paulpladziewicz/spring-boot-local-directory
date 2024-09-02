@@ -229,7 +229,7 @@
                     <div th:if="${successMessage}" class="alert alert-success" role="alert">
                         <p class="m-0" th:text="${successMessage}"></p>
                     </div>
-                    <form th:action="@{/contact}" method="post" class="row g-4">
+                    <form th:action="@{/contact}" method="post" class="row g-4" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                         <div class="col-lg-10">
                             <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="name">Name</label>
                             <input class="form-control form-control-lg" type="text" placeholder="Your name" name="name"
@@ -268,7 +268,7 @@
                         and improvements. Subscribe to our newsletter, and we'll keep you informed so you can make the
                         most of the latest features as soon as they're available.</p>
                     <p class="text-body" th:if="${subscribedMessage}" th:text="${subscribedMessage}"></p>
-                    <form th:action="@{/subscribe}" method="post">
+                    <form th:action="@{/subscribe}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                         <div class="input-group">
                             <span class="input-group-text text-body-secondary">
                               <i class="ai-mail"></i>

@@ -7,7 +7,7 @@
                 <small class="text-muted" th:text="${announcement.getTimeAgo()}"></small>
             </div>
             <div>
-                <form method="post" th:action="@{/delete/group/announcement}">
+                <form method="post" th:action="@{/delete/group/announcement}" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                     <input type="hidden" name="groupId" th:value="${group.id}" />
                     <input type="hidden" name="announcementId" th:value="${announcement.id}" />
                     <button type="submit" class="btn btn-danger btn-sm"><i class="ai-trash"></i></button>
