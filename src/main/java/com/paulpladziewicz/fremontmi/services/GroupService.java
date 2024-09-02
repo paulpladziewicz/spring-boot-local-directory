@@ -169,7 +169,7 @@ public class GroupService {
         return true;
     }
 
-    public boolean emailGroup(String emailTarget, String groupId, SendEmailDto sendEmailDto) {
+    public boolean emailGroup(String emailTarget, String groupId, String subject, String message) {
         Group group = findGroupById(groupId);
 
         if (group == null) {
@@ -192,7 +192,7 @@ public class GroupService {
         String replyToEmail = userService.getUserDetails().getEmail();
 
         try {
-            emailService.sendGroupEmail(emailAddresses, sendEmailDto.getSubject(), sendEmailDto.getMessage(), replyToEmail);
+            emailService.sendGroupEmail(emailAddresses, subject, message, replyToEmail);
             return true;
         } catch (Exception e) {
             return false;

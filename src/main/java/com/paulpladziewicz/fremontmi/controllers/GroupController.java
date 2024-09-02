@@ -7,6 +7,7 @@ import com.paulpladziewicz.fremontmi.services.EmailService;
 import com.paulpladziewicz.fremontmi.services.GroupService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
@@ -145,16 +146,16 @@ public class GroupController {
     public String emailGroup(@NotNull @PathVariable String emailTarget, @NotNull @PathVariable String groupId, Model model) {
         model.addAttribute("emailTarget", emailTarget);
         model.addAttribute("groupId", groupId);
-        model.addAttribute("sendEmail", new SendEmailDto());
         return "groups/email";
     }
 
-    @PostMapping("/group/email/{emailTarget}/{groupId}")
-    public String handleEmailGroup(@NotNull @PathVariable String emailTarget,
-                                   @NotNull @PathVariable String groupId,
-                                   @ModelAttribute("sendEmailDto") SendEmailDto sendEmailDto,
+    @PostMapping("/group/email/send")
+    public String handleEmailGroup(@NotNull @RequestParam("emailTarget") String emailTarget,
+                                   @NotNull @RequestParam("groupId") String groupId,
+                                   @NotBlank @RequestParam("subject") String subject,
+                                   @NotBlank @RequestParam("message") String message,
                                    Model model) {
-        boolean emailSent = groupService.emailGroup(emailTarget, groupId, sendEmailDto);
+        boolean emailSent = groupService.emailGroup(emailTarget, groupId, subject, message);
 
         if (emailSent) {
             model.addAttribute("successMessage", "Email sent successfully!");
@@ -164,8 +165,6 @@ public class GroupController {
 
         model.addAttribute("emailTarget", emailTarget);
         model.addAttribute("groupId", groupId);
-        model.addAttribute("sendEmail", new SendEmailDto());  // Reset the form after submission
-
         return "groups/email";
     }
 }

@@ -19,20 +19,18 @@
                 <span th:text="${errorMessage}"></span>
             </div>
 
-            <form th:action="@{/send/email}" th:object="${sendEmail}" method="post">
+            <form th:action="@{/group/email/send}" th:object="${sendEmail}" method="post">
                 <input type="hidden" name="groupId" th:value="${groupId}"/>
                 <input type="hidden" name="emailTarget" th:value="${emailTarget}"/>
 
                 <div class="form-group mb-2">
                     <label for="subject" class="mb-1 form-label opacity-75 fw-semibold fs-base">Subject</label>
-                    <input type="text" class="form-control" id="subject" th:field="*{subject}" placeholder="Enter email subject" required>
-                    <p th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}" class="mt-1 text-danger"></p>
+                    <input type="text" class="form-control" id="subject" name="subject" placeholder="Enter email subject" required>
                 </div>
 
                 <div class="form-group mb-3">
                     <label for="body" class="mb-1 form-label opacity-75 fw-semibold fs-base">Message</label>
-                    <textarea class="form-control" id="body" th:field="*{message}" rows="5" placeholder="Enter the content of the email" required></textarea>
-                    <p th:if="${#fields.hasErrors('message')}" th:errors="*{message}" class="mt-1 text-danger"></p>
+                    <textarea class="form-control" id="body" name="message" rows="5" placeholder="Enter the content of the email" required></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Send Email</button>
