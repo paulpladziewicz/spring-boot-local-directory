@@ -4,14 +4,14 @@ import jakarta.mail.Address;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -33,7 +33,7 @@ public class EmailService {
     }
 
     @Async
-    public void sendWelcomeEmailAsync(String to) {
+    public void sendWelcomeEmailAsync(String email) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
 
@@ -43,13 +43,13 @@ public class EmailService {
             String html = templateEngine.process("auth/email/welcome-email", context);
 
             message.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
-            message.setRecipients(MimeMessage.RecipientType.TO, to);
+            message.setRecipients(MimeMessage.RecipientType.TO, email);
             message.setSubject("Welcome to FremontMI.com");
             message.setContent(html, "text/html; charset=utf-8");
 
             mailSender.send(message);
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
-            logger.error("Failed to send welcome email to {}", to, e);
+            logger.error("Failed to send welcome email to {}", email, e);
         }
     }
 
@@ -70,7 +70,7 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            logger.error("Failed to send forgot username email to {}", email, e);
         }
     }
 
@@ -91,7 +91,7 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            logger.error("Failed to send reset password email to {}", email, e);
         }
     }
 
@@ -114,7 +114,7 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            logger.error("Failed to send contact us email from {} {} with a message of {}.", name, email, contactMessage, e);
         }
     }
 
@@ -134,7 +134,7 @@ public class EmailService {
             }
 
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            logger.error("Failed to send group email to {} from {} with a subject of {} and message of {}.", recipients, replyTo, subject, messageBody, e);
         }
     }
 }
