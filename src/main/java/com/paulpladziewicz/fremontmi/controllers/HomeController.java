@@ -3,7 +3,6 @@ package com.paulpladziewicz.fremontmi.controllers;
 import com.paulpladziewicz.fremontmi.services.EmailService;
 import com.paulpladziewicz.fremontmi.services.SubscribeService;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,7 +37,7 @@ public class HomeController {
             @RequestParam("message") String message,
             RedirectAttributes redirectAttributes) {
 
-        emailService.sendContactUsEmail(name, email, message);
+        emailService.sendContactUsEmailAsync(name, email, message);
 
         redirectAttributes.addFlashAttribute("successMessage", "Thank you for reaching out. We will get back to you shortly.");
 

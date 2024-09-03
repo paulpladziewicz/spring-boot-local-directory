@@ -1,13 +1,17 @@
 package com.paulpladziewicz.fremontmi.repositories;
 
-import com.paulpladziewicz.fremontmi.models.UserDto;
+import com.paulpladziewicz.fremontmi.models.UserRecord;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
-public interface UserRepository extends MongoRepository<UserDto, String> {
+import java.util.Optional;
+
+public interface UserRepository extends MongoRepository<UserRecord, String> {
 
     @Query("{username:'?0'}")
-    UserDto findByUsername(String username);
+    Optional<UserRecord> findByUsername(String username);
 
-    UserDto findByResetPasswordToken(String token);
+    boolean existsByUsername(String username);
+
+    Optional<UserRecord> findByResetPasswordToken(String token);
 }

@@ -5,11 +5,13 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.MailException;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -17,23 +19,26 @@ import java.util.List;
 @Service
 public class EmailService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
+
     private final String companyName = "FremontMI";
 
     private final JavaMailSender mailSender;
 
-    private SpringTemplateEngine templateEngine;
+    private final SpringTemplateEngine templateEngine;
 
     public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
     }
 
-    public void sendWelcomeEmail(String to) {
+    @Async
+    public void sendWelcomeEmailAsync(String to) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
 
+            // needs to include a confirm account button
             Context context = new Context();
-            context.setVariable("name", "Paul");
 
             String html = templateEngine.process("auth/email/welcome-email", context);
 
@@ -44,16 +49,17 @@ public class EmailService {
 
             mailSender.send(message);
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            logger.error("Failed to send welcome email to {}", to, e);
         }
     }
 
-    public void sendForgotUsernameEmail(String email, String s) {
+    @Async
+    public void sendForgotUsernameEmailAsync(String email, String username) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
 
             Context context = new Context();
-            context.setVariable("username", s);
+            context.setVariable("username", username);
 
             String html = templateEngine.process("auth/email/forgot-username", context);
 
@@ -68,12 +74,13 @@ public class EmailService {
         }
     }
 
-    public void sendResetPasswordEmail(String email, String s) {
+    @Async
+    public void sendResetPasswordEmailAsync(String email, String resetPasswordUrl) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
 
             Context context = new Context();
-            context.setVariable("resetPasswordUrl", s);
+            context.setVariable("resetPasswordUrl", resetPasswordUrl);
 
             String html = templateEngine.process("auth/email/reset-password", context);
 
@@ -88,7 +95,8 @@ public class EmailService {
         }
     }
 
-    public void sendContactUsEmail(String name, String email, String contactMessage) {
+    @Async
+    public void sendContactUsEmailAsync(String name, String email, String contactMessage) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
 
@@ -110,14 +118,15 @@ public class EmailService {
         }
     }
 
-    public void sendGroupEmail(List<String> recipients, String subject, String messageBody, String replyTo) {
+    @Async
+    public void sendGroupEmailAsync(List<String> recipients, String replyTo, String subject, String messageBody) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
 
             message.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
+            message.setReplyTo(new Address[]{new InternetAddress(replyTo)});
             message.setSubject("Group Message: " + subject);
             message.setContent(messageBody, "text/html; charset=utf-8");
-            message.setReplyTo(new Address[]{new InternetAddress(replyTo)});
 
             for (String recipient : recipients) {
                 message.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress(recipient));

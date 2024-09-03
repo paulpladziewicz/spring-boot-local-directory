@@ -2,7 +2,7 @@ package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.EventRepository;
-import com.paulpladziewicz.fremontmi.repositories.UserDetailsRepository;
+import com.paulpladziewicz.fremontmi.repositories.UserProfileRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -19,12 +19,12 @@ public class EventService {
 
     private final UserService userService;
 
-    private final UserDetailsRepository userDetailsRepository;
+    private final UserProfileRepository userProfileRepository;
 
-    public EventService(EventRepository eventRepository, UserService userService, UserDetailsRepository userDetailsRepository) {
+    public EventService(EventRepository eventRepository, UserService userService, UserProfileRepository userProfileRepository) {
         this.eventRepository = eventRepository;
         this.userService = userService;
-        this.userDetailsRepository = userDetailsRepository;
+        this.userProfileRepository = userProfileRepository;
     }
 
     public List<Event> findAll() {
@@ -38,13 +38,13 @@ public class EventService {
     }
 
     public List<Event> findEventsByUser() {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
 
         return eventRepository.findAllById(userDetails.getEventAdminIds());
     }
 
     public Event createEvent(Event event) {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
         var userId = userDetails.getUserId();
 
         // Find the soonest start time
@@ -68,7 +68,7 @@ public class EventService {
         List<String> eventAdminIds = new ArrayList<>(userDetails.getEventAdminIds());
         eventAdminIds.add(savedEvent.getId());
         userDetails.setEventAdminIds(eventAdminIds);
-        userDetailsRepository.save(userDetails);
+        userProfileRepository.save(userDetails);
 
         return savedEvent;
     }
@@ -80,7 +80,7 @@ public class EventService {
         );
 
         // Check if the current user is allowed to update the event
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
         if (!userDetails.getEventAdminIds().contains(id)) {
             throw new RuntimeException("User doesn't have permission to update this event");
         }
@@ -132,7 +132,7 @@ public class EventService {
     }
 
     public void deleteEvent (String eventId) {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
         if (!userDetails.getEventAdminIds().contains(eventId)) {
             throw new RuntimeException("User doesn't have permission to delete this event");
         }

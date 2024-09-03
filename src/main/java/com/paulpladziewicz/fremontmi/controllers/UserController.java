@@ -4,14 +4,13 @@ import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.UserRepository;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.Email;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
@@ -48,35 +47,46 @@ public class UserController {
 
         userRegistrationDto.setTermsAcceptedAt(LocalDateTime.now());
 
-        try {
-            userService.createUser(userRegistrationDto);
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("username")) {
-                result.rejectValue("username", "error.userRegistrationDto", e.getMessage());
-            } else if (e.getMessage().contains("email")) {
-                result.rejectValue("email", "error.userRegistrationDto", e.getMessage());
-            } else {
-                result.rejectValue("matchingPassword", "error.userRegistrationDto", e.getMessage());
+        ServiceResult<Void> serviceResult = userService.createUser(userRegistrationDto);
+
+        if (!serviceResult.isSuccess()) {
+            switch (serviceResult.getErrorCode()) {
+                case "username_exists":
+                    result.rejectValue("username", "error.userRegistrationDto", serviceResult.getMessage());
+                    break;
+                case "email_exists":
+                    result.rejectValue("email", "error.userRegistrationDto", serviceResult.getMessage());
+                    break;
+                case "database_error":
+                    model.addAttribute("databaseError", "There was a problem accessing the database. Please try again later.");
+                    break;
+                case "password_mismatch":
+                    result.rejectValue("matchingPassword", "error.userRegistrationDto", serviceResult.getMessage());
+                    break;
+                default:
+                    model.addAttribute("unexpectedError", "An unexpected error occurred. Please try again later.");
+                    break;
             }
+            model.addAttribute("userRegistrationDto", userRegistrationDto);
             return "auth/register";
         }
 
-        return "redirect:login";
+        return "redirect:/login";
     }
 
     @GetMapping("/my/settings")
     public String settings(Model model) {
-        model.addAttribute("userDetails", userService.getUserDetails());
+        model.addAttribute("userDetails", userService.getUserProfile());
         return "settings";
     }
 
     @PostMapping("/my/settings")
-    public String updateSettings(@ModelAttribute("userDetails") @Valid UserDetailsDto userDetailsDto, BindingResult result, Model model) {
+    public String updateSettings(@ModelAttribute("userDetails") @Valid UserProfile userProfile, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            model.addAttribute("userDetails", userDetailsDto);
+            model.addAttribute("userDetails", userProfile);
             return "settings";
         }
-        UserDetailsDto updatedUserDetails = userService.updateUserDetails(userDetailsDto);
+        UserProfile updatedUserDetails = userService.updateUserDetails(userProfile);
         model.addAttribute("userDetails", updatedUserDetails);
         model.addAttribute("isSuccess", true);
         return "settings";
@@ -99,7 +109,7 @@ public class UserController {
 
         model.addAttribute("tokenSent", true);
 
-        return "auth/forgot-password";
+        return "redirect:/login";
     }
 
     @GetMapping("/reset-password")
@@ -111,7 +121,11 @@ public class UserController {
     }
 
     @PostMapping("/reset-password")
-    public String resetPasswordConfirmation(@ModelAttribute("resetPasswordDto") ResetPasswordDto resetPasswordDto, Model model) {
+    public String resetPasswordConfirmation(@ModelAttribute("resetPasswordDto") ResetPasswordDto resetPasswordDto,BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            return "auth/reset-password";
+        }
+
         userService.resetPassword(resetPasswordDto);
 
         model.addAttribute("message", "Password has been reset successfully");

@@ -2,10 +2,9 @@ package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
-import com.paulpladziewicz.fremontmi.models.SendEmailDto;
-import com.paulpladziewicz.fremontmi.models.UserDetailsDto;
+import com.paulpladziewicz.fremontmi.models.UserProfile;
 import com.paulpladziewicz.fremontmi.repositories.GroupRepository;
-import com.paulpladziewicz.fremontmi.repositories.UserDetailsRepository;
+import com.paulpladziewicz.fremontmi.repositories.UserProfileRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +19,14 @@ public class GroupService {
 
     private final UserService userService;
 
-    private final UserDetailsRepository userDetailsRepository;
+    private final UserProfileRepository userProfileRepository;
 
     private final EmailService emailService;
 
-    public GroupService(GroupRepository groupRepository, UserService userService, UserDetailsRepository userDetailsRepository, EmailService emailService) {
+    public GroupService(GroupRepository groupRepository, UserService userService, UserProfileRepository userProfileRepository, EmailService emailService) {
         this.groupRepository = groupRepository;
         this.userService = userService;
-        this.userDetailsRepository = userDetailsRepository;
+        this.userProfileRepository = userProfileRepository;
         this.emailService = emailService;
     }
 
@@ -40,14 +39,14 @@ public class GroupService {
     }
 
     public List<Group> findGroupsByUser() {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
 
         return groupRepository.findAllById(userDetails.getGroupIds());
     }
 
     @Transactional
     public Group addGroup(Group group) {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
 
         List<String> administrators = new ArrayList<>(group.getAdministrators());
         List<String> members = new ArrayList<>(group.getMembers());
@@ -63,14 +62,14 @@ public class GroupService {
         adminGroupIds.add(savedGroup.getId());
         userDetails.setGroupIds(groupIds);
         userDetails.setGroupAdminIds(adminGroupIds);
-        userDetailsRepository.save(userDetails);
+        userProfileRepository.save(userDetails);
 
         return savedGroup;
     }
 
     @Transactional
     public void joinGroup(String groupId) {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
         Group group = findGroupById(groupId);
 
         List<String> members = group.getMembers();
@@ -90,7 +89,7 @@ public class GroupService {
 
     @Transactional
     public void leaveGroup(String groupId) {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
         Group group = findGroupById(groupId);
 
         List<String> members = new ArrayList<>(group.getMembers());
@@ -105,7 +104,7 @@ public class GroupService {
     }
 
     public Group updateGroup(Group group) {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
         if (!userDetails.getGroupAdminIds().contains(group.getId())) {
             throw new RuntimeException("User doesn't have permission to update group");
         }
@@ -116,7 +115,7 @@ public class GroupService {
     }
 
     public void deleteGroup(String groupId) {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
         if (!userDetails.getGroupAdminIds().contains(groupId)) {
             throw new RuntimeException("User doesn't have permission to delete group");
         }
@@ -124,7 +123,7 @@ public class GroupService {
     }
 
     public List<Announcement> addAnnouncement(String groupId, Announcement announcement) {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
         if (!userDetails.getGroupAdminIds().contains(groupId)) {
             throw new RuntimeException("User doesn't have permission to add an announcement to this group");
         }
@@ -139,7 +138,7 @@ public class GroupService {
     }
 
     public boolean deleteAnnouncement(String groupId, int announcementId) {
-        UserDetailsDto userDetails = userService.getUserDetails();
+        UserProfile userDetails = userService.getUserProfile();
         if (!userDetails.getGroupAdminIds().contains(groupId)) {
             throw new RuntimeException("User doesn't have permission to delete an announcement from this group");
         }
@@ -185,14 +184,14 @@ public class GroupService {
             throw new IllegalArgumentException("Invalid email target: " + emailTarget);
         }
 
-        List<String> emailAddresses = userDetailsRepository.findAllById(userIds).stream()
-                .map(UserDetailsDto::getEmail)
+        List<String> emailAddresses = userProfileRepository.findAllById(userIds).stream()
+                .map(UserProfile::getEmail)
                 .collect(Collectors.toList());
 
-        String replyToEmail = userService.getUserDetails().getEmail();
+        String replyToEmail = userService.getUserProfile().getEmail();
 
         try {
-            emailService.sendGroupEmail(emailAddresses, subject, message, replyToEmail);
+            emailService.sendGroupEmailAsync(emailAddresses, replyToEmail, subject, message);
             return true;
         } catch (Exception e) {
             return false;

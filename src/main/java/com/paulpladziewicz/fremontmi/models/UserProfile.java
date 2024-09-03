@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Document(collection = "user_details")
-public class UserDetailsDto {
+@Document(collection = "user_profiles")
+public class UserProfile {
     @Id
     private String userId;
 

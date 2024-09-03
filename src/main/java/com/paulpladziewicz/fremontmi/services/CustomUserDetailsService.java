@@ -1,8 +1,9 @@
 package com.paulpladziewicz.fremontmi.services;
 
-import com.paulpladziewicz.fremontmi.models.SecurityContext;
-import com.paulpladziewicz.fremontmi.models.UserDto;
+import com.paulpladziewicz.fremontmi.models.CustomUserDetails;
 import com.paulpladziewicz.fremontmi.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
 
     private final UserRepository userRepository;
 
@@ -19,12 +22,23 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDto userFromDb = userRepository.findByUsername(username);
-
-        if (userFromDb == null) {
-            throw new UsernameNotFoundException("UserDto not found");
-        }
-
-        return new SecurityContext(userFromDb.getUserId(), userFromDb.getUsername(), userFromDb.getPassword(), userFromDb.isEnabled(), userFromDb.isAccountNonExpired(), userFromDb.isCredentialsNonExpired(), userFromDb.isAccountNonLocked(), userFromDb.getAuthorities());
+        return userRepository.findByUsername(username)
+                .map(userFromDb -> {
+                    logger.info("User found and successfully authenticated: {}", username);
+                    return new CustomUserDetails(
+                            userFromDb.getUserId(),
+                            userFromDb.getUsername(),
+                            userFromDb.getPassword(),
+                            userFromDb.isEnabled(),
+                            userFromDb.isAccountNonExpired(),
+                            userFromDb.isCredentialsNonExpired(),
+                            userFromDb.isAccountNonLocked(),
+                            userFromDb.getAuthorities()
+                    );
+                })
+                .orElseThrow(() -> {
+                    logger.warn("User not found with username: {}", username);
+                    return new UsernameNotFoundException("User not found with username: " + username);
+                });
     }
 }

@@ -11,7 +11,7 @@ import java.util.Collections;
 
 @Data
 @Document(collection = "users")
-public class UserDto {
+public class UserRecord {
     @Id
     private String userId;
 

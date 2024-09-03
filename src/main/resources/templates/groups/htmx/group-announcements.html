@@ -1,5 +1,6 @@
 <ul id="announcementList" class="list-unstyled">
-    <li th:each="announcement : ${group.announcements}" class="mb-3">
+    <li class="my-4" th:each="announcement : ${group.announcements}"
+        th:id="'announcement-' + ${announcement.id}">
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="mb-1" th:text="${announcement.title}">Announcement Title</h5>
@@ -7,10 +8,13 @@
                 <small class="text-muted" th:text="${announcement.getTimeAgo()}"></small>
             </div>
             <div>
-                <form method="post" th:action="@{/delete/group/announcement}" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                    <input type="hidden" name="groupId" th:value="${group.id}" />
-                    <input type="hidden" name="announcementId" th:value="${announcement.id}" />
-                    <button type="submit" class="btn btn-danger btn-sm"><i class="ai-trash"></i></button>
+                <form onsubmit="disableSubmitButtonWhileSubmitting(this)" th:attr="hx-post='/delete/group/announcement', hx-swap='outerHTML', hx-target='#announcement-' + ${announcement.id}">
+                    <input type="hidden" th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}"/>
+                    <input type="hidden" name="groupId" th:value="${group.id}"/>
+                    <input type="hidden" name="announcementId" th:value="${announcement.id}"/>
+                    <button type="submit" class="btn btn-danger btn-sm ms-4"><i class="ai-trash"></i>
+                    </button>
                 </form>
             </div>
         </div>
