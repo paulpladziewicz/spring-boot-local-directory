@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -76,6 +77,18 @@ public class UserService {
         } catch (Exception e) {
             logger.error("Unexpected error occurred while creating user", e);
             return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+        }
+    }
+
+    public List<UserProfile> findAllById(List<String> userIds) {
+        try {
+            return userProfileRepository.findAllById(userIds);
+        } catch (DataAccessException e) {
+            logger.error("Database error occurred while retrieving user profiles by IDs", e);
+            throw new RuntimeException("Failed to retrieve user profiles due to a database error. Please try again later.");
+        } catch (Exception e) {
+            logger.error("Unexpected error occurred while retrieving user profiles by IDs", e);
+            throw new RuntimeException("An unexpected error occurred. Please try again later.");
         }
     }
 

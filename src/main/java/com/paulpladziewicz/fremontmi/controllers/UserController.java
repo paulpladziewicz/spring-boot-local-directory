@@ -86,7 +86,7 @@ public class UserController {
             model.addAttribute("userDetails", userProfile);
             return "settings";
         }
-        UserProfile updatedUserDetails = userService.updateUserDetails(userProfile);
+        UserProfile updatedUserDetails = userService.updateUserProfile(userProfile);
         model.addAttribute("userDetails", updatedUserDetails);
         model.addAttribute("isSuccess", true);
         return "settings";
