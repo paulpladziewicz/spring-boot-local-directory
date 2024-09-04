@@ -39,14 +39,14 @@ public class UserService {
     }
 
     @Transactional
-    public ServiceResult<Void> createUser(UserRegistrationDto userRegistrationDto) {
+    public ServiceResponse<Boolean> createUser(UserRegistrationDto userRegistrationDto) {
         try {
             if (userRepository.existsByUsername(userRegistrationDto.getUsername())) {
-                return ServiceResult.error("There is already an account with that username: " + userRegistrationDto.getUsername(), "username_exists");
+                return ServiceResponse.error("username_exists");
             }
 
             if (userProfileRepository.existsByEmail(userRegistrationDto.getEmail())) {
-                return ServiceResult.error("There is already an account with that email: " + userRegistrationDto.getEmail(), "email_exists");
+                return ServiceResponse.error("email_exists");
             }
 
             validatePasswords(userRegistrationDto.getPassword(), userRegistrationDto.getMatchingPassword());
@@ -68,27 +68,27 @@ public class UserService {
 
             logger.info("Successfully created username {} for {} {} with the following email: {}", savedUser.getUsername(), savedUserProfile.getFirstName(), savedUserProfile.getLastName(), userRegistrationDto.getEmail());
 
-            return ServiceResult.success();
+            return ServiceResponse.value(true);
         } catch (ValidationException e) {
-            return ServiceResult.error("Passwords do not match.", "password_mismatch");
+            return ServiceResponse.error("password_mismatch");
         } catch (DataAccessException e) {
             logger.error("Failed to create user due to database error", e);
-            return ServiceResult.error("Failed to create user due to a database error. Please try again later.", "database_error");
+            return ServiceResponse.error("database_error");
         } catch (Exception e) {
             logger.error("Unexpected error occurred while creating user", e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return ServiceResponse.error("unexpected_error");
         }
     }
 
-    public List<UserProfile> findAllById(List<String> userIds) {
+    public ServiceResponse<List<UserProfile>> findAllById(List<String> userIds) {
         try {
-            return userProfileRepository.findAllById(userIds);
+            return ServiceResponse.value(userProfileRepository.findAllById(userIds));
         } catch (DataAccessException e) {
             logger.error("Database error occurred while retrieving user profiles by IDs", e);
-            throw new RuntimeException("Failed to retrieve user profiles due to a database error. Please try again later.");
+            return ServiceResponse.error("database_error");
         } catch (Exception e) {
             logger.error("Unexpected error occurred while retrieving user profiles by IDs", e);
-            throw new RuntimeException("An unexpected error occurred. Please try again later.");
+            return ServiceResponse.error("unexpected_error");
         }
     }
 
@@ -107,60 +107,53 @@ public class UserService {
     public Optional<UserProfile> getUserProfile() {
         Optional<String> userId = getUserId();
 
-        if (userId.isPresent()) {
-            return userProfileRepository.findById(userId.get());
-        } else {
-            return Optional.empty();
-        }
+        return userId.flatMap(userProfileRepository::findById);
     }
 
-    public ServiceResult<Void> saveUserProfile(UserProfile userProfile) {
+    public ServiceResponse<UserProfile> saveUserProfile(UserProfile userProfile) {
         try {
-            userProfileRepository.save(userProfile);
-            return ServiceResult.success();
-
+            return ServiceResponse.value(userProfileRepository.save(userProfile));
         } catch (DataAccessException e) {
             logger.error("Failed to save UserProfile due to database error", e);
-            return ServiceResult.error("Failed to save user profile due to a database error. Please try again later.", "database_error");
+            return ServiceResponse.error("database_error");
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred while saving UserProfile", e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return ServiceResponse.error("unexpected_error");
         }
     }
 
-    public ServiceResult<UserProfile> updateUserProfile(UserProfile updatedUserProfile) {
+    public ServiceResponse<UserProfile> updateUserProfile(UserProfile updatedUserProfile) {
         try {
             Optional<String> userId = getUserId();
             if (userId.isEmpty()) {
                 logger.error("Failed to update user details: userId not found in security context");
-                return ServiceResult.error("User not authenticated.", "user_not_authenticated");
+                return ServiceResponse.error("user_not_authenticated");
             }
 
             Optional<UserProfile> existingDetails = userProfileRepository.findById(userId.get());
             if (existingDetails.isPresent()) {
-                UserProfile updatedDetails = existingDetails.get();
-                updatedDetails.setFirstName(updatedUserProfile.getFirstName());
-                updatedDetails.setLastName(updatedUserProfile.getLastName());
-                updatedDetails.setEmail(updatedUserProfile.getEmail());
-                userProfileRepository.save(updatedDetails);
-                return ServiceResult.success(updatedDetails);
+                UserProfile userProfile = existingDetails.get();
+                userProfile.setFirstName(updatedUserProfile.getFirstName());
+                userProfile.setLastName(updatedUserProfile.getLastName());
+                userProfile.setEmail(updatedUserProfile.getEmail());
+                userProfileRepository.save(userProfile);
+                return ServiceResponse.value(userProfile);
             } else {
                 logger.error("Failed to update user details: no existing user profile found for userId {}", userId.get());
-                return ServiceResult.error("User details not found.", "user_not_found");
+                return ServiceResponse.error("user_not_found");
             }
-
         } catch (DataAccessException e) {
             logger.error("Database error occurred while updating user details for userId: {}", updatedUserProfile.getUserId(), e);
-            return ServiceResult.error("Failed to update user details due to a database error. Please try again later.", "database_error");
+            return ServiceResponse.error("database_error");
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred while updating user details for userId: {}", updatedUserProfile.getUserId(), e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return ServiceResponse.error("unexpected_error");
         }
     }
 
-    public ServiceResult<Void> resetPassword(ResetPasswordDto resetPasswordDto) {
+    public ServiceResponse<Boolean> resetPassword(ResetPasswordDto resetPasswordDto) {
         try {
             String token = resetPasswordDto.getToken();
             String newPassword = resetPasswordDto.getPassword();
@@ -171,7 +164,7 @@ public class UserService {
             Optional<UserRecord> user = userRepository.findByResetPasswordToken(token);
             if (user.isEmpty()) {
                 logger.error("Failed to reset password: invalid or expired reset token");
-                return ServiceResult.error("Invalid or expired reset token.", "invalid_token");
+                return ServiceResponse.error("invalid_token");
             }
 
             UserRecord userRecord = user.get();
@@ -179,32 +172,31 @@ public class UserService {
             userRecord.setResetPasswordToken(null);
             userRepository.save(userRecord);
 
-            return ServiceResult.success();
-
+            return ServiceResponse.value(true);
         } catch (DataAccessException e) {
             logger.error("Database error occurred while resetting password for token: {}", resetPasswordDto.getToken(), e);
-            return ServiceResult.error("Failed to reset password due to a database error. Please try again later.", "database_error");
+            return ServiceResponse.error("database_error");
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred while resetting password for token: {}", resetPasswordDto.getToken(), e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return ServiceResponse.error("unexpected_error");
         }
     }
 
-    public ServiceResult<Void> forgotPassword(String username) {
+    public ServiceResponse<Boolean> forgotPassword(String username) {
         try {
             Optional<UserRecord> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
                 logger.warn("Forgot password request: user not found with username {}", username);
-                return ServiceResult.error("User not found.", "user_not_found");
+                return ServiceResponse.error("user_not_found");
             }
 
             Optional<UserProfile> userProfile = userProfileRepository.findById(user.get().getUserId());
 
             if (userProfile.isEmpty()) {
                 logger.error("UserProfile not found for userId: {}", user.get().getUserId());
-                return ServiceResult.error("User profile not found.", "user_profile_not_found");
+                return ServiceResponse.error("user_profile_not_found");
             }
 
             String token = UUID.randomUUID().toString();
@@ -214,49 +206,46 @@ public class UserService {
 
             emailService.sendResetPasswordEmailAsync(userProfile.get().getEmail(), "https://fremontmi.com/reset-password?token=" + token);
 
-            return ServiceResult.success();
-
+            return ServiceResponse.value(true);
         } catch (DataAccessException e) {
             logger.error("Database error occurred while processing forgot password for username: {}", username, e);
-            return ServiceResult.error("Failed to process forgot password request due to a database error. Please try again later.", "database_error");
+            return ServiceResponse.error("database_error");
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred while processing forgot password for username: {}", username, e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return ServiceResponse.error("unexpected_error");
         }
     }
 
 
-    public ServiceResult<Void> forgotUsername(String email) {
+    public ServiceResponse<Boolean> forgotUsername(String email) {
         try {
             Optional<UserProfile> userProfile = userProfileRepository.findByEmail(email);
 
             if (userProfile.isEmpty()) {
                 logger.warn("Forgot username request: no user profile found with email {}", email);
-                return ServiceResult.error("No user found with that email.", "email_not_found");
+                return ServiceResponse.error("email_not_found");
             }
 
             Optional<UserRecord> user = userRepository.findById(userProfile.get().getUserId());
 
             if (user.isEmpty()) {
                 logger.error("UserRecord not found for userId: {}", userProfile.get().getUserId());
-                return ServiceResult.error("User record not found.", "user_record_not_found");
+                return ServiceResponse.error("user_record_not_found");
             }
 
             emailService.sendForgotUsernameEmailAsync(userProfile.get().getEmail(), user.get().getUsername());
 
-            return ServiceResult.success();
-
+            return ServiceResponse.value(true);
         } catch (DataAccessException e) {
             logger.error("Database error occurred while processing forgot username request for email: {}", email, e);
-            return ServiceResult.error("Failed to process forgot username request due to a database error. Please try again later.", "database_error");
+            return ServiceResponse.error("database_error");
 
         } catch (Exception e) {
             logger.error("Unexpected error occurred while processing forgot username request for email: {}", email, e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return ServiceResponse.error("unexpected_error");
         }
     }
-
 
     private void validatePasswords(String password, String matchingPassword) throws ValidationException {
         if (password == null || !password.equals(matchingPassword)) {
