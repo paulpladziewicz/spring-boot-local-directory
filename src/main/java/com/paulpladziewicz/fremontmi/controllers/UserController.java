@@ -45,26 +45,24 @@ public class UserController {
 
         userRegistrationDto.setTermsAcceptedAt(LocalDateTime.now());
 
-        ServiceResult<Void> serviceResult = userService.createUser(userRegistrationDto);
+        ServiceResponse<Boolean> serviceResponse = userService.createUser(userRegistrationDto);
 
-        if (!serviceResult.isSuccess()) {
-            switch (serviceResult.getErrorCode()) {
+        if (serviceResponse.hasError()) {
+            switch (serviceResponse.errorCode()) {
                 case "username_exists":
-                    result.rejectValue("username", "error.userRegistrationDto", serviceResult.getMessage());
+                    result.rejectValue("username", "error.userRegistrationDto", "messageToShowUser");
                     break;
                 case "email_exists":
-                    result.rejectValue("email", "error.userRegistrationDto", serviceResult.getMessage());
-                    break;
-                case "database_error":
-                    model.addAttribute("databaseError", "There was a problem accessing the database. Please try again later.");
+                    result.rejectValue("email", "error.userRegistrationDto", "messageToShowUser");
                     break;
                 case "password_mismatch":
-                    result.rejectValue("matchingPassword", "error.userRegistrationDto", serviceResult.getMessage());
+                    result.rejectValue("matchingPassword", "error.userRegistrationDto", "messageToShowUser");
                     break;
                 default:
                     model.addAttribute("unexpectedError", "An unexpected error occurred. Please try again later.");
                     break;
             }
+
             model.addAttribute("userRegistrationDto", userRegistrationDto);
             return "auth/register";
         }
@@ -92,16 +90,17 @@ public class UserController {
             model.addAttribute("userDetails", userProfile);
             return "settings";
         }
-        ServiceResult<UserProfile> updatedUserProfile = userService.updateUserProfile(userProfile);
+        ServiceResponse<UserProfile> serviceResponse = userService.updateUserProfile(userProfile);
 
-        if (updatedUserProfile.isSuccess()) {
-            model.addAttribute("isSuccess", true);
-            model.addAttribute("userDetails", updatedUserProfile.getData());
+        if (serviceResponse.hasError()) {
+            model.addAttribute("isSuccess", false);
+            model.addAttribute("userDetails", userProfile);
             return "settings";
         }
 
-        model.addAttribute("isSuccess", false);
-        model.addAttribute("userDetails", userProfile);
+        model.addAttribute("isSuccess", true);
+        model.addAttribute("userDetails", serviceResponse.value());
+
         return "settings";
     }
 
@@ -118,15 +117,16 @@ public class UserController {
             return "auth/forgot-password";
         }
 
-        if (userService.forgotPassword(emailDto.getEmail()).isSuccess()) {
-            redirectAttributes.addFlashAttribute("tokenSent", true);
-            return "redirect:/login";
+        ServiceResponse<Boolean> serviceResponse = userService.forgotPassword(emailDto.getEmail());
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("isSuccess", false);
+            model.addAttribute("emailDto", emailDto);
+            return "auth/forgot-password";
         }
 
-        model.addAttribute("isSuccess", false);
-        model.addAttribute("emailDto", emailDto);
-        return "auth/forgot-password";
-
+        redirectAttributes.addFlashAttribute("tokenSent", true);
+        return "redirect:/login";
     }
 
     @GetMapping("/reset-password")
@@ -138,14 +138,20 @@ public class UserController {
     }
 
     @PostMapping("/reset-password")
-    public String resetPasswordConfirmation(@ModelAttribute("resetPasswordDto") ResetPasswordDto resetPasswordDto,BindingResult bindingResult, Model model) {
+    public String resetPasswordConfirmation(@ModelAttribute("resetPasswordDto") ResetPasswordDto resetPasswordDto, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             return "auth/reset-password";
         }
 
-        userService.resetPassword(resetPasswordDto);
+        ServiceResponse<Boolean> serviceResponse = userService.resetPassword(resetPasswordDto);
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("isSuccess", false);
+            return "auth/reset-password";
+        }
 
         model.addAttribute("message", "Password has been reset successfully");
+
         return "auth/login";
     }
 
@@ -155,24 +161,21 @@ public class UserController {
     }
 
     @PostMapping("/forgot-username")
-    public String handleForgotUsername(@RequestParam("email") @Email String email, Model model) {
-        // Check if the email is valid
+    public String handleForgotUsername(@RequestParam("email") @Email String email, Model model, RedirectAttributes redirectAttributes) {
         if (email == null || email.isEmpty()) {
             model.addAttribute("emailError", "Please provide a valid email address.");
             return "auth/forgot-username";
         }
 
-        // Attempt to send the username to the email
-        userService.forgotUsername(email);
+        ServiceResponse<Boolean> serviceResponse = userService.forgotUsername(email);
 
-//        if (!emailSent) {
-//            model.addAttribute("emailError", "No account found with that email address.");
-//            return "auth/forgot-username";
-//        }
+        if (serviceResponse.hasError()) {
+            model.addAttribute("isSuccess", false);
+            return "auth/login";
+        }
 
-        // Redirect to the home page or a success page
-        model.addAttribute("message", "An email has been sent with your username.");
-        return "auth/login"; // Or redirect to a specific page
+        redirectAttributes.addFlashAttribute("message", "An email has been sent with your username.");
+        return "auth/login";
     }
 }
 
