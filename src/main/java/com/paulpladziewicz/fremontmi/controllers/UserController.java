@@ -1,7 +1,6 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.*;
-import com.paulpladziewicz.fremontmi.repositories.UserRepository;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -12,19 +11,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Controller
 public class UserController {
 
     private final UserService userService;
 
-    private final UserRepository userRepository;
-
-    public UserController(UserService userService, UserRepository userRepository) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.userRepository = userRepository;
     }
 
     @GetMapping("/login")
@@ -76,7 +74,15 @@ public class UserController {
 
     @GetMapping("/my/settings")
     public String settings(Model model) {
-        model.addAttribute("userDetails", userService.getUserProfile());
+        Optional<UserProfile> userProfile = userService.getUserProfile();
+
+        if (userProfile.isEmpty()) {
+            model.addAttribute("error", true);
+            return "settings";
+        }
+
+        model.addAttribute("userProfile", userProfile.get());
+
         return "settings";
     }
 
@@ -86,9 +92,16 @@ public class UserController {
             model.addAttribute("userDetails", userProfile);
             return "settings";
         }
-        UserProfile updatedUserDetails = userService.updateUserProfile(userProfile);
-        model.addAttribute("userDetails", updatedUserDetails);
-        model.addAttribute("isSuccess", true);
+        ServiceResult<UserProfile> updatedUserProfile = userService.updateUserProfile(userProfile);
+
+        if (updatedUserProfile.isSuccess()) {
+            model.addAttribute("isSuccess", true);
+            model.addAttribute("userDetails", updatedUserProfile.getData());
+            return "settings";
+        }
+
+        model.addAttribute("isSuccess", false);
+        model.addAttribute("userDetails", userProfile);
         return "settings";
     }
 
@@ -99,17 +112,21 @@ public class UserController {
     }
 
     @PostMapping("/forgot-password")
-    public String handleForgotPassword(@ModelAttribute("emailDto") @Valid EmailDto emailDto, BindingResult result, Model model) {
+    public String handleForgotPassword(@ModelAttribute("emailDto") @Valid EmailDto emailDto, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("emailDto", emailDto);
             return "auth/forgot-password";
         }
 
-        userService.forgotPassword(emailDto.getEmail());
+        if (userService.forgotPassword(emailDto.getEmail()).isSuccess()) {
+            redirectAttributes.addFlashAttribute("tokenSent", true);
+            return "redirect:/login";
+        }
 
-        model.addAttribute("tokenSent", true);
+        model.addAttribute("isSuccess", false);
+        model.addAttribute("emailDto", emailDto);
+        return "auth/forgot-password";
 
-        return "redirect:/login";
     }
 
     @GetMapping("/reset-password")

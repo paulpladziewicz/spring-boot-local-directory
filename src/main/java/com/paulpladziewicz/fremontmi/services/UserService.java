@@ -107,7 +107,11 @@ public class UserService {
     public Optional<UserProfile> getUserProfile() {
         Optional<String> userId = getUserId();
 
-        return userId.flatMap(userProfileRepository::findById);
+        if (userId.isPresent()) {
+            return userProfileRepository.findById(userId.get());
+        } else {
+            return Optional.empty();
+        }
     }
 
     public ServiceResult<Void> saveUserProfile(UserProfile userProfile) {

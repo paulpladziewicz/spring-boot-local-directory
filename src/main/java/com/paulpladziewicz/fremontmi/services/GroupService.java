@@ -79,6 +79,7 @@ public class GroupService {
     }
 
     public ServiceResult<List<Group>> findAll() {
+        System.out.println("calling group service");
         try {
             List<Group> groups = groupRepository.findAll();
             return ServiceResult.success(groups);
@@ -92,6 +93,7 @@ public class GroupService {
     }
 
     public ServiceResult<Group> findGroupById(String id) {
+        System.out.println("calling");
         try {
             Optional<Group> group = groupRepository.findById(id);
             if (group.isPresent()) {
