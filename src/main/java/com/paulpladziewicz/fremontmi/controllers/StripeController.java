@@ -102,16 +102,12 @@ public class StripeController {
         return ResponseEntity.ok(subscriptions.toJson());
     }
 
-    // Cancel a subscription
     @PostMapping("/cancel-subscription")
-    public ResponseEntity<Map<String, Object>> cancelSubscription(@RequestBody CancelSubscriptionRequest request) throws StripeException {
+    public ResponseEntity<String> cancelSubscription(@RequestBody CancelSubscriptionRequest request) throws StripeException {
         Subscription subscription = Subscription.retrieve(request.subscriptionId);
         Subscription canceledSubscription = subscription.cancel();
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("subscription", canceledSubscription);
-
-        return ResponseEntity.ok(responseData);
+        return ResponseEntity.ok(canceledSubscription.toJson());
     }
 
     // Webhook for Stripe events

@@ -25,4 +25,9 @@ public class StripeViewController {
     public String account() {
         return "stripe/account";
     }
+
+    @GetMapping("/stripe/cancel")
+    public String cancel() {
+        return "stripe/cancel";
+    }
 }
