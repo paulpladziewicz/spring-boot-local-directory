@@ -3,6 +3,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
 import com.paulpladziewicz.fremontmi.models.SendEmailDto;
+import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.models.ServiceResult;
 import com.paulpladziewicz.fremontmi.services.EmailService;
 import com.paulpladziewicz.fremontmi.services.GroupService;
@@ -32,11 +33,14 @@ public class GroupController {
 
     @GetMapping("/groups")
     public String displayGroups(Model model) {
-        if (groupService.findAll().isSuccess()) {
-            model.addAttribute("groups", groupService.findAll().getData());
-        } else {
+        ServiceResponse<List<Group>> serviceRequest = groupService.findAll();
+
+        if (serviceRequest.hasError()) {
             model.addAttribute("error", true);
         }
+
+        List<Group> groups = serviceRequest.value();
+        model.addAttribute("groups", groups);
 
         return "groups/groups";
     }

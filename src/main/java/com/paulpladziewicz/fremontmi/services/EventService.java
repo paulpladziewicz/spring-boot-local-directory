@@ -23,9 +23,7 @@ public class EventService {
     private static final Logger logger = LoggerFactory.getLogger(EventService.class);
 
     private final EventRepository eventRepository;
-
     private final UserService userService;
-
     private final UserProfileRepository userProfileRepository;
 
     public EventService(EventRepository eventRepository, UserService userService, UserProfileRepository userProfileRepository) {
@@ -35,237 +33,190 @@ public class EventService {
     }
 
     @Transactional
-    public ServiceResult<Event> createEvent(Event event) {
+    public ServiceResponse<Event> createEvent(Event event) {
         try {
             Optional<UserProfile> userProfileOpt = userService.getUserProfile();
             if (userProfileOpt.isEmpty()) {
-                logger.error("Failed to create event: could not retrieve user profile.");
-                return ServiceResult.error("Failed to create event: could not retrieve user profile.", "user_profile_not_found");
+                return logAndReturnError("Failed to create event: user profile not found.", "user_profile_not_found");
             }
 
             UserProfile userDetails = userProfileOpt.get();
-            var userId = userDetails.getUserId();
+            String userId = userDetails.getUserId();
 
-            LocalDateTime soonestStartTime = event.getDays().stream()
-                    .map(DayEvent::getStartTime)
-                    .min(LocalDateTime::compareTo)
-                    .orElse(null);
-            event.setSoonestStartTime(soonestStartTime);
-
-            event.getDays().forEach(dayEvent -> {
-                if (dayEvent.getEndTime() != null && dayEvent.getEndTime().isBefore(dayEvent.getStartTime())) {
-                    throw new IllegalArgumentException("End time(s) must be after the start time.");
-                }
-            });
+            validateEventTimes(event);
 
             event.setOrganizerId(userId);
             populateFormattedTimes(event);
-            var savedEvent = eventRepository.save(event);
 
-            List<String> eventAdminIds = new ArrayList<>(userDetails.getEventAdminIds());
-            eventAdminIds.add(savedEvent.getId());
-            userDetails.setEventAdminIds(eventAdminIds);
+            Event savedEvent = eventRepository.save(event);
+
+            userDetails.getEventAdminIds().add(savedEvent.getId());
             userProfileRepository.save(userDetails);
 
-            return ServiceResult.success(savedEvent);
-
+            return ServiceResponse.value(savedEvent);
         } catch (DataAccessException e) {
-            logger.error("Failed to create event due to a database error", e);
-            return ServiceResult.error("Failed to create event due to a database error. Please try again later.", "database_error");
+            return logAndReturnError("Database error while creating event.", "database_error", e);
         } catch (Exception e) {
-            logger.error("Unexpected error occurred while creating event.", e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return logAndReturnError("Unexpected error while creating event.", "unexpected_error", e);
         }
     }
 
-    public ServiceResult<List<Event>> findAll() {
+    public ServiceResponse<List<Event>> findAll() {
         try {
             LocalDateTime now = LocalDateTime.now();
             List<Event> events = eventRepository.findBySoonestStartTimeAfterOrderBySoonestStartTimeAsc(now);
-            return ServiceResult.success(events);
+            return ServiceResponse.value(events);
         } catch (DataAccessException e) {
-            logger.error("Failed to retrieve events due to a database error", e);
-            return ServiceResult.error("Failed to retrieve events due to a database error. Please try again later.", "database_error");
+            return logAndReturnError("Database error while retrieving events.", "database_error", e);
         } catch (Exception e) {
-            logger.error("Unexpected error occurred while retrieving events.", e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return logAndReturnError("Unexpected error while retrieving events.", "unexpected_error", e);
         }
     }
 
-
-    public ServiceResult<Event> findEventById(String id) {
+    public ServiceResponse<Event> findEventById(String id) {
         try {
-            Optional<Event> eventOpt = eventRepository.findById(id);
-            if (eventOpt.isEmpty()) {
-                logger.warn("Event not found with id: {}", id);
-                return ServiceResult.error("Event not found.", "event_not_found");
-            }
-            return ServiceResult.success(eventOpt.get());
+            return eventRepository.findById(id)
+                    .map(ServiceResponse::value)
+                    .orElseGet(() -> logAndReturnError("Event not found with id: " + id, "event_not_found"));
         } catch (DataAccessException e) {
-            logger.error("Failed to retrieve event due to a database error", e);
-            return ServiceResult.error("Failed to retrieve event due to a database error. Please try again later.", "database_error");
+            return logAndReturnError("Database error while retrieving event.", "database_error", e);
         } catch (Exception e) {
-            logger.error("Unexpected error occurred while retrieving event.", e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return logAndReturnError("Unexpected error while retrieving event.", "unexpected_error", e);
         }
     }
 
-    public ServiceResult<List<Event>> findEventsByUser() {
+    public ServiceResponse<List<Event>> findEventsByUser() {
         try {
             Optional<UserProfile> userProfileOpt = userService.getUserProfile();
             if (userProfileOpt.isEmpty()) {
-                logger.error("Failed to retrieve events: could not retrieve user profile.");
-                return ServiceResult.error("Failed to retrieve events: could not retrieve user profile.", "user_profile_not_found");
+                return logAndReturnError("Failed to retrieve events: user profile not found.", "user_profile_not_found");
             }
 
             UserProfile userDetails = userProfileOpt.get();
             List<Event> events = eventRepository.findAllById(userDetails.getEventAdminIds());
-            return ServiceResult.success(events);
+            return ServiceResponse.value(events);
         } catch (DataAccessException e) {
-            logger.error("Failed to retrieve events due to a database error", e);
-            return ServiceResult.error("Failed to retrieve events due to a database error. Please try again later.", "database_error");
+            return logAndReturnError("Database error while retrieving events.", "database_error", e);
         } catch (Exception e) {
-            logger.error("Unexpected error occurred while retrieving events.", e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return logAndReturnError("Unexpected error while retrieving events.", "unexpected_error", e);
         }
     }
 
-    public ServiceResult<Void> updateEvent(String id, Event updatedEvent) {
+    @Transactional
+    public ServiceResponse<Void> updateEvent(String id, Event updatedEvent) {
         try {
-            Event existingEvent = eventRepository.findById(id).orElseThrow(() ->
-                    new IllegalArgumentException("Event not found")
-            );
+            Event existingEvent = eventRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Event not found"));
 
-            Optional<UserProfile> userProfileOpt = userService.getUserProfile();
-            if (userProfileOpt.isEmpty()) {
-                logger.error("Failed to update event: could not retrieve user profile.");
-                return ServiceResult.error("Failed to update event: could not retrieve user profile.", "user_profile_not_found");
+            ServiceResponse<UserProfile> userProfileResult = validateUserProfileForEventAdmin(id);
+            if (userProfileResult.hasError()) {
+                return ServiceResponse.error(userProfileResult.errorCode());
             }
 
-            UserProfile userDetails = userProfileOpt.get();
-            if (!userDetails.getEventAdminIds().contains(id)) {
-                logger.warn("User doesn't have permission to update the event with id: {}", id);
-                return ServiceResult.error("User doesn't have permission to update this event.", "permission_denied");
-            }
+            validateEventTimes(updatedEvent);
 
-            existingEvent.setName(updatedEvent.getName());
-            existingEvent.setDescription(updatedEvent.getDescription());
-            existingEvent.setLocationName(updatedEvent.getLocationName());
-            existingEvent.setAddress(updatedEvent.getAddress());
-            existingEvent.setDays(updatedEvent.getDays());
-
-            LocalDateTime soonestStartTime = updatedEvent.getDays().stream()
-                    .map(DayEvent::getStartTime)
-                    .min(LocalDateTime::compareTo)
-                    .orElse(null);
-            existingEvent.setSoonestStartTime(soonestStartTime);
-
-            updatedEvent.getDays().forEach(dayEvent -> {
-                if (dayEvent.getEndTime() != null && dayEvent.getEndTime().isBefore(dayEvent.getStartTime())) {
-                    throw new IllegalArgumentException("End time(s) must be after the start time.");
-                }
-            });
-
-            populateFormattedTimes(existingEvent);
-
+            updateExistingEvent(existingEvent, updatedEvent);
             eventRepository.save(existingEvent);
 
-            return ServiceResult.success();
+            return ServiceResponse.value(null);
         } catch (DataAccessException e) {
-            logger.error("Failed to update event due to a database error", e);
-            return ServiceResult.error("Failed to update event due to a database error. Please try again later.", "database_error");
+            return logAndReturnError("Database error while updating event.", "database_error", e);
         } catch (IllegalArgumentException e) {
-            logger.error("Invalid argument while updating event: {}", e.getMessage());
-            return ServiceResult.error(e.getMessage(), "invalid_argument");
+            return logAndReturnError("Invalid argument while updating event: " + e.getMessage(), "invalid_argument");
         } catch (Exception e) {
-            logger.error("Unexpected error occurred while updating event.", e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return logAndReturnError("Unexpected error while updating event.", "unexpected_error", e);
         }
     }
 
-    public ServiceResult<Void> deleteEvent(String eventId) {
+    @Transactional
+    public ServiceResponse<Void> deleteEvent(String eventId) {
         try {
-            Optional<UserProfile> userProfileOpt = userService.getUserProfile();
-            if (userProfileOpt.isEmpty()) {
-                logger.error("Failed to delete event: could not retrieve user profile.");
-                return ServiceResult.error("Failed to delete event: could not retrieve user profile.", "user_profile_not_found");
-            }
-
-            UserProfile userDetails = userProfileOpt.get();
-            if (!userDetails.getEventAdminIds().contains(eventId)) {
-                logger.warn("User doesn't have permission to delete the event with id: {}", eventId);
-                return ServiceResult.error("User doesn't have permission to delete this event.", "permission_denied");
+            ServiceResponse<UserProfile> userProfileResult = validateUserProfileForEventAdmin(eventId);
+            if (userProfileResult.hasError()) {
+                return ServiceResponse.error(userProfileResult.errorCode());
             }
 
             eventRepository.deleteById(eventId);
-            logger.info("Event with id {} deleted successfully", eventId);
-            return ServiceResult.success();
-
+            logger.info("Successfully deleted event with id: {}", eventId);
+            return ServiceResponse.value(null);
         } catch (DataAccessException e) {
-            logger.error("Failed to delete event due to a database error", e);
-            return ServiceResult.error("Failed to delete event due to a database error. Please try again later.", "database_error");
+            return logAndReturnError("Database error while deleting event.", "database_error", e);
         } catch (Exception e) {
-            logger.error("Unexpected error occurred while deleting event.", e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return logAndReturnError("Unexpected error while deleting event.", "unexpected_error", e);
         }
     }
 
-    public ServiceResult<Void> cancelEvent(String eventId) {
+    public ServiceResponse<Void> cancelEvent(String eventId) {
+        return updateEventStatus(eventId, "cancelled", "Failed to cancel event.");
+    }
+
+    public ServiceResponse<Void> reactivateEvent(String eventId) {
+        return updateEventStatus(eventId, "active", "Failed to reactivate event.");
+    }
+
+    private ServiceResponse<Void> updateEventStatus(String eventId, String status, String errorMessage) {
         try {
-            ServiceResult<Event> eventResult = findEventById(eventId);
-            if (!eventResult.isSuccess()) {
-                return ServiceResult.error("Could not cancel event due to a database error.", eventResult.getErrorCode());
+            ServiceResponse<Event> eventResult = findEventById(eventId);
+            if (eventResult.hasError()) {
+                return logAndReturnError(errorMessage, eventResult.errorCode());
             }
 
-            Event event = eventResult.getData();
-            event.setStatus("cancelled");
+            Event event = eventResult.value();
+            event.setStatus(status);
             eventRepository.save(event);
-            logger.info("Event with id {} was successfully cancelled", eventId);
 
-            return ServiceResult.success();
-
+            logger.info("Event with id {} was successfully updated to status: {}", eventId, status);
+            return ServiceResponse.value(null);
         } catch (DataAccessException e) {
-            logger.error("Failed to cancel event due to a database error", e);
-            return ServiceResult.error("Failed to cancel event due to a database error. Please try again later.", "database_error");
+            return logAndReturnError("Database error while updating event status.", "database_error", e);
         } catch (Exception e) {
-            logger.error("Unexpected error occurred while cancelling event.", e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return logAndReturnError("Unexpected error while updating event status.", "unexpected_error", e);
         }
     }
 
-    public ServiceResult<Void> reactivateEvent(String eventId) {
-        try {
-            ServiceResult<Event> eventResult = findEventById(eventId);
-            if (!eventResult.isSuccess()) {
-                return ServiceResult.error("Could not reactivate event due to a database error.", eventResult.getErrorCode());
+    private void validateEventTimes(Event event) {
+        LocalDateTime soonestStartTime = event.getDays().stream()
+                .map(DayEvent::getStartTime)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
+        event.setSoonestStartTime(soonestStartTime);
+
+        event.getDays().forEach(dayEvent -> {
+            if (dayEvent.getEndTime() != null && dayEvent.getEndTime().isBefore(dayEvent.getStartTime())) {
+                throw new IllegalArgumentException("End time(s) must be after the start time.");
             }
-
-            Event event = eventResult.getData();
-            event.setStatus("active");
-            eventRepository.save(event);
-            logger.info("Event with id {} was successfully reactivated", eventId);
-
-            return ServiceResult.success();
-
-        } catch (DataAccessException e) {
-            logger.error("Failed to reactivate event due to a database error", e);
-            return ServiceResult.error("Failed to reactivate event due to a database error. Please try again later.", "database_error");
-        } catch (Exception e) {
-            logger.error("Unexpected error occurred while reactivating event.", e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
-        }
+        });
     }
 
+    private ServiceResponse<UserProfile> validateUserProfileForEventAdmin(String eventId) {
+        Optional<UserProfile> userProfileOpt = userService.getUserProfile();
+        if (userProfileOpt.isEmpty()) {
+            return logAndReturnError("User profile not found.", "user_profile_not_found");
+        }
+
+        UserProfile userProfile = userProfileOpt.get();
+        if (!userProfile.getEventAdminIds().contains(eventId)) {
+            return logAndReturnError("User does not have permission for event: " + eventId, "permission_denied");
+        }
+
+        return ServiceResponse.value(userProfile);
+    }
+
+    private void updateExistingEvent(Event existingEvent, Event updatedEvent) {
+        existingEvent.setName(updatedEvent.getName());
+        existingEvent.setDescription(updatedEvent.getDescription());
+        existingEvent.setLocationName(updatedEvent.getLocationName());
+        existingEvent.setAddress(updatedEvent.getAddress());
+        existingEvent.setDays(updatedEvent.getDays());
+        populateFormattedTimes(existingEvent);
+    }
 
     public void populateFormattedTimes(Event event) {
         List<String> formattedTimes = event.getDays().stream()
-                .flatMap(dayEvent -> {
-                    String formattedStartTime = formatDateTime(dayEvent.getStartTime());
-                    String formattedEndTime = dayEvent.getEndTime() != null
-                            ? formatDateTime(dayEvent.getEndTime())
-                            : "No End Time"; // or use "N/A" or any other placeholder
-                    return Stream.of(formattedStartTime, formattedEndTime);
-                })
+                .flatMap(dayEvent -> Stream.of(
+                        formatDateTime(dayEvent.getStartTime()),
+                        dayEvent.getEndTime() != null ? formatDateTime(dayEvent.getEndTime()) : "No End Time"
+                ))
                 .collect(Collectors.toList());
 
         event.setFormattedTimes(formattedTimes);
@@ -284,10 +235,20 @@ public class EventService {
             return "th";
         }
         switch (day % 10) {
-            case 1:  return "st";
-            case 2:  return "nd";
-            case 3:  return "rd";
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
             default: return "th";
         }
+    }
+
+    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
+        logger.error(message);
+        return ServiceResponse.error(errorCode);
+    }
+
+    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode, Exception e) {
+        logger.error(message, e);
+        return ServiceResponse.error(errorCode);
     }
 }

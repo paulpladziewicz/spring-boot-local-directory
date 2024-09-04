@@ -1,6 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
-import com.paulpladziewicz.fremontmi.models.ServiceResult;
+import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.models.Subscriber;
 import com.paulpladziewicz.fremontmi.repositories.SubscriberRepository;
 import org.slf4j.Logger;
@@ -21,13 +21,13 @@ public class SubscribeService {
         this.subscriberRepository = subscriberRepository;
     }
 
-    public ServiceResult<Void> subscribe(String email) {
+    public ServiceResponse<Void> subscribe(String email) {
         try {
             Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmailIgnoreCase(email);
 
             if (existingSubscriber.isPresent()) {
                 logger.info("Subscriber with email {} already exists.", email);
-                return ServiceResult.success();
+                return ServiceResponse.value(null); // No action needed, return success with no value
             }
 
             Subscriber subscriber = new Subscriber();
@@ -35,15 +35,23 @@ public class SubscribeService {
             subscriberRepository.save(subscriber);
 
             logger.info("Successfully subscribed email: {}", email);
-            return ServiceResult.success();
+            return ServiceResponse.value(null); // Successfully subscribed
 
         } catch (DataAccessException e) {
-            logger.error("Database error occurred while subscribing email: {}", email, e);
-            return ServiceResult.error("Failed to subscribe due to a database error. Please try again later.", "database_error");
+            return logAndReturnError("Database error occurred while subscribing email: " + email, "database_error", e);
 
         } catch (Exception e) {
-            logger.error("Unexpected error occurred while subscribing email: {}", email, e);
-            return ServiceResult.error("An unexpected error occurred. Please try again later.", "unexpected_error");
+            return logAndReturnError("Unexpected error occurred while subscribing email: " + email, "unexpected_error", e);
         }
+    }
+
+    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode, Exception e) {
+        logger.error(message, e);
+        return ServiceResponse.error(errorCode);
+    }
+
+    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
+        logger.error(message);
+        return ServiceResponse.error(errorCode);
     }
 }
