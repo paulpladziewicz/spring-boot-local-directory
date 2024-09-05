@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.models.UserProfile;
@@ -7,6 +8,7 @@ import com.paulpladziewicz.fremontmi.repositories.GroupRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -210,6 +212,93 @@ public class GroupService {
         groupIds.remove(savedGroup.getId());
         userProfile.setGroupIds(groupIds);
         userService.saveUserProfile(userProfile);
+
+        return ServiceResponse.value(true);
+    }
+
+    public ServiceResponse<List<Announcement>> addAnnouncement(String groupId, Announcement announcement) {
+        Optional<UserProfile> userProfileOptional =  userService.getUserProfile();
+
+        if (userProfileOptional.isEmpty()) {
+            return logAndReturnError("User profile not found", "user_profile_not_found");
+        }
+
+        UserProfile userProfile = userProfileOptional.get();
+
+        if (!userProfile.getGroupAdminIds().contains(groupId)) {
+            return logAndReturnError("User doesn't have permission to add an announcement", "permission_denied");
+        }
+
+        ServiceResponse<Group> serviceResponse = findGroupById(groupId);
+
+        if (serviceResponse.hasError()) {
+            return ServiceResponse.error(serviceResponse.errorCode());
+        }
+
+        Group group = serviceResponse.value();
+
+        announcement.setId(group.getAnnouncements().size() + 1);
+        List<Announcement> announcements = new ArrayList<>(group.getAnnouncements());
+        announcements.addFirst(announcement);
+        group.setAnnouncements(announcements);
+
+        try {
+            groupRepository.save(group);
+        } catch (DataIntegrityViolationException e) {
+            return logAndReturnError("Failed to add an announcement due to a database error when saving the group.", "database_error", e);
+        } catch (Exception e) {
+            return logAndReturnError("Unexpected error occurred while deleting group.", "unexpected_error", e);
+        }
+
+        return ServiceResponse.value(announcements);
+    }
+
+    public ServiceResponse<Boolean> deleteAnnouncement(String groupId, int announcementId) {
+        Optional<UserProfile> userProfileOptional =  userService.getUserProfile();
+
+        if (userProfileOptional.isEmpty()) {
+            return logAndReturnError("User profile not found", "user_profile_not_found");
+        }
+
+        UserProfile userProfile = userProfileOptional.get();
+
+        if (!userProfile.getGroupAdminIds().contains(groupId)) {
+            return logAndReturnError("User doesn't have permission to add an announcement", "permission_denied");
+        }
+
+        ServiceResponse<Group> serviceResponse = findGroupById(groupId);
+
+        if (serviceResponse.hasError()) {
+            return ServiceResponse.error(serviceResponse.errorCode());
+        }
+
+        Group group = serviceResponse.value();
+
+        List<Announcement> announcements = new ArrayList<>(group.getAnnouncements());
+
+        boolean isDeleted = false;
+
+        for (int i = 0; i < announcements.size(); i++) {
+            Announcement currentAnnouncement = announcements.get(i);
+            if (currentAnnouncement.getId() == announcementId) {
+                announcements.remove(i);
+                isDeleted = true;
+                break;
+            }
+        }
+        if (!isDeleted) {
+            return ServiceResponse.error("announcement_not_found");
+        }
+
+        group.setAnnouncements(announcements);
+
+        try {
+            groupRepository.save(group);
+        } catch (DataIntegrityViolationException e) {
+            return logAndReturnError("Failed to delete an announcement due to a database error when saving the group.", "database_error", e);
+        } catch (Exception e) {
+            return logAndReturnError("Unexpected error occurred while deleting an announcement.", "unexpected_error", e);
+        }
 
         return ServiceResponse.value(true);
     }

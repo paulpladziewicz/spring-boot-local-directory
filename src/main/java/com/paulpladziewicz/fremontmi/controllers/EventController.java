@@ -7,14 +7,15 @@ import com.paulpladziewicz.fremontmi.services.EventService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.apache.catalina.Server;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class EventController {
@@ -25,6 +26,39 @@ public class EventController {
     public EventController(EventService eventService, UserService userService) {
         this.eventService = eventService;
         this.userService = userService;
+    }
+
+    @GetMapping("/create/event")
+    public String displayCreateForm(Model model) {
+        Event event = new Event();
+
+        if (event.getDays() == null || event.getDays().isEmpty()) {
+            List<DayEvent> days = new ArrayList<>();
+            days.add(new DayEvent());
+            event.setDays(days);
+        }
+
+        model.addAttribute("event", event);
+
+        return "events/create-event";
+    }
+
+    @PostMapping("/create/event")
+    public String createEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "events/create-event";
+        }
+
+        ServiceResponse<Event> serviceResponse = eventService.createEvent(event);
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "events/create-event";
+        }
+
+        Event savedEvent = serviceResponse.value();
+
+        return "redirect:/events/" + savedEvent.getId();
     }
 
     @GetMapping("/events")
@@ -42,125 +76,137 @@ public class EventController {
 
         return "events/events";
     }
-//
-//    @GetMapping("/events/{id}")
-//    public String displayEvent(@PathVariable String id, Model model) {
-//        Event event = eventService.findEventById(id);
-//        String userId = userService.getUserId();
-//
-//        if ("cancelled".equals(event.getStatus())) {
-//            model.addAttribute("cancelled", "This event has been cancelled.");
-//        }
-//
-//        model.addAttribute("event", event);
-//        model.addAttribute("isAdmin", event.getOrganizerId().equals(userId));
-//        return "events/event-page";
-//    }
-//
-//    @GetMapping("/edit/event/{id}")
-//    public String displayEditForm(@PathVariable String id, Model model) {
-//        Event event = eventService.findEventById(id);
-//        if (event == null) {
-//            // Handle case where the event is not found (optional)
-//            return "redirect:/events"; // Redirect to event listing or an error page
-//        }
-//        model.addAttribute("event", event);
-//        return "events/edit-event";
-//    }
-//
-//    @PostMapping("/edit/event/{id}")
-//    public String updateEvent(@PathVariable String id, @Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
-//        if (result.hasErrors()) {
-//            return "events/edit-event"; // Return to the edit page if there are validation errors
-//        }
-//
-//        try {
-//            eventService.updateEvent(id, event);
-//        } catch (IllegalArgumentException e) {
-//            // Handle any exceptions thrown by the service, e.g., invalid date-time inputs
-//            model.addAttribute("errorMessage", e.getMessage());
-//            return "events/edit-event";
-//        }
-//
-//        return "redirect:/events/" + id; // Redirect to the event's detail page after a successful update
-//    }
-//
-//    @GetMapping("/my/events")
-//    public String displayMyEvents(Model model) {
-//        try {
-//            List<Event> eventDetails = eventService.findEventsByUser();
-//            model.addAttribute("events", eventDetails);
-//            return "events/my-events";
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//            return "home";
-//        }
-//    }
-//
-//    @GetMapping("/create/event")
-//    public String displayCreateForm(Model model) {
-//        Event event = new Event();
-//
-//        if (event.getDays() == null || event.getDays().isEmpty()) {
-//            List<DayEvent> days = new ArrayList<>();
-//            days.add(new DayEvent());
-//            event.setDays(days);
-//        }
-//
-//        model.addAttribute("event", event);
-//        return "events/create-event";
-//    }
-//
-//    @PostMapping("/create/event/add-day")
-//    public String addDayToCreateForm(@ModelAttribute("event") Event event, Model model) {
-//        event.getDays().add(new DayEvent());
-//
-//        model.addAttribute("event", event);
-//        return "events/htmx/adjust-days";
-//    }
-//
-//    @PostMapping("/create/event/remove-day")
-//    public String removeDayToCreateForm(@ModelAttribute("event") Event event, Model model) {
-//        if (event.getDays().isEmpty()) {
-//            model.addAttribute("event", event);
-//            return "events/htmx/adjust-days";
-//        }
-//
-//        event.getDays().removeLast();
-//        model.addAttribute("event", event);
-//        return "events/htmx/adjust-days";
-//    }
-//
-//    @PostMapping("/create/event")
-//    public String createEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
-//        if (result.hasErrors()) {
-//            return "events/create-event";
-//        }
-//
-//        try {
-//            Event savedEvent = eventService.createEvent(event);
-//            return "redirect:/events/" + savedEvent.getId();
-//        } catch (IllegalArgumentException e) {
-//            model.addAttribute("errorMessage", e.getMessage());
-//            return "events/create-event";
-//        }
-//    }
-//
-//    @PostMapping("/cancel/event")
-//    public String cancelEvent(@NotNull @RequestParam("eventId") String eventId) {
-//        eventService.cancelEvent(eventId);
-//        return "redirect:/events/" + eventId;
-//    }
-//
-//    @PostMapping("/reactivate/event")
-//    public String uncancelEvent(@NotNull @RequestParam("eventId") String eventId) {
-//        eventService.reactivateEvent(eventId);
-//        return "redirect:/events/" + eventId;
-//    }
-//
-//    @PostMapping("/delete/event")
-//    public String deleteGroup(@NotNull @RequestParam("eventId") String eventId) {
-//        eventService.deleteEvent(eventId);
-//        return "redirect:/events";
-//    }
+
+    @GetMapping("/events/{id}")
+    public String displayEvent(@PathVariable String id, Model model) {
+        ServiceResponse<Event> serviceResponse = eventService.findEventById(id);
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "events/events";
+        }
+
+        Event event = serviceResponse.value();
+
+        Optional<String> userIdOpt = userService.getUserId();
+
+        if (userIdOpt.isEmpty()) {
+            model.addAttribute("error", true);
+            return "events/events";
+        }
+
+        String userId = userIdOpt.get();
+
+        if ("cancelled".equals(event.getStatus())) {
+            model.addAttribute("cancelled", "This event has been cancelled.");
+        }
+
+        model.addAttribute("event", event);
+        model.addAttribute("isAdmin", event.getOrganizerId().equals(userId));
+
+        return "events/event-page";
+    }
+
+    @GetMapping("/edit/event/{id}")
+    public String displayEditForm(@PathVariable String id, Model model) {
+        ServiceResponse<Event> serviceResponse = eventService.findEventById(id);
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "events/events";
+        }
+
+        Event event = serviceResponse.value();
+
+        model.addAttribute("event", event);
+
+        return "events/edit-event";
+    }
+
+    @PostMapping("/edit/event/{id}")
+    public String updateEvent(@PathVariable String id, @Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "events/edit-event";
+        }
+
+        ServiceResponse<Void> serviceResponse = eventService.updateEvent(id, event);
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "events/edit-event";
+        }
+
+        return "redirect:/events/" + id;
+    }
+
+    @GetMapping("/my/events")
+    public String displayMyEvents(Model model) {
+        ServiceResponse<List<Event>> serviceResponse = eventService.findEventsByUser();
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "events/events";
+        }
+
+        List<Event> events = serviceResponse.value();
+
+        model.addAttribute("events", events);
+
+        return "events/my-events";
+    }
+
+    @PostMapping("/create/event/add-day")
+    public String addDayToCreateForm(@ModelAttribute("event") Event event, Model model) {
+        event.getDays().add(new DayEvent());
+
+        model.addAttribute("event", event);
+
+        return "events/htmx/adjust-days";
+    }
+
+    @PostMapping("/create/event/remove-day")
+    public String removeDayToCreateForm(@ModelAttribute("event") Event event, Model model) {
+        if (event.getDays().isEmpty()) {
+            model.addAttribute("event", event);
+            return "events/htmx/adjust-days";
+        }
+
+        event.getDays().removeLast();
+        model.addAttribute("event", event);
+
+        return "events/htmx/adjust-days";
+    }
+
+    @PostMapping("/cancel/event")
+    public String cancelEvent(@NotNull @RequestParam("eventId") String eventId, RedirectAttributes redirectAttributes) {
+        ServiceResponse<Void> serviceResponse = eventService.cancelEvent(eventId);
+
+        if (serviceResponse.hasError()) {
+            redirectAttributes.addFlashAttribute("error", true);
+        }
+
+        return "redirect:/events/" + eventId;
+    }
+
+    @PostMapping("/reactivate/event")
+    public String uncancelEvent(@NotNull @RequestParam("eventId") String eventId, RedirectAttributes redirectAttributes) {
+        ServiceResponse<Void> serviceResponse = eventService.reactivateEvent(eventId);
+
+        if (serviceResponse.hasError()) {
+            redirectAttributes.addFlashAttribute("error", true);
+        }
+
+        return "redirect:/events/" + eventId;
+    }
+
+    @PostMapping("/delete/event")
+    public String deleteGroup(@NotNull @RequestParam("eventId") String eventId, RedirectAttributes redirectAttributes) {
+        ServiceResponse<Void> serviceResponse = eventService.deleteEvent(eventId);
+
+        if (serviceResponse.hasError()) {
+            redirectAttributes.addFlashAttribute("error", true);
+        }
+
+        return "redirect:/events";
+    }
 }
