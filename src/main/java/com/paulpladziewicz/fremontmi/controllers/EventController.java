@@ -2,10 +2,12 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.DayEvent;
 import com.paulpladziewicz.fremontmi.models.Event;
+import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.services.EventService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.apache.catalina.Server;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,11 +29,16 @@ public class EventController {
 
     @GetMapping("/events")
     public String displayGroups(Model model) {
-        if (eventService.findAll().isSuccess()) {
-            model.addAttribute("events", eventService.findAll());
-        } else {
-            model.addAttribute("events", new ArrayList<>());
+        ServiceResponse<List<Event>> serviceResponse = eventService.findAll();
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "events/events";
         }
+
+        List<Event> events = serviceResponse.value();
+
+        model.addAttribute("events", events);
 
         return "events/events";
     }

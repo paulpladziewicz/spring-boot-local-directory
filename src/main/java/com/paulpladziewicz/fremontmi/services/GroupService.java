@@ -10,6 +10,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -146,6 +147,71 @@ public class GroupService {
         }
 
         return ServiceResponse.value(userProfile);
+    }
+
+    @Transactional
+    public ServiceResponse<Boolean> joinGroup(String groupId) {
+        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
+
+        if (userProfileOptional.isEmpty()) {
+            return logAndReturnError("User profile not found", "user_profile_not_found");
+        }
+
+        UserProfile userProfile = userProfileOptional.get();
+
+        ServiceResponse<Group> serviceResponse = findGroupById(groupId);
+
+        if (serviceResponse.hasError()) {
+            return ServiceResponse.error(serviceResponse.errorCode());
+        }
+
+        Group group = serviceResponse.value();
+
+        List<String> members = group.getMembers();
+        if (!members.contains(userProfile.getUserId())) {
+            members.add(userProfile.getUserId());
+            group.setMembers(members);
+            groupRepository.save(group);
+        }
+        List<String> groupIds = userProfile.getGroupIds();
+        if (!groupIds.contains(groupId)) {
+            groupIds.add(groupId);
+            userProfile.setGroupIds(groupIds);
+            userService.saveUserProfile(userProfile);
+        }
+
+        return ServiceResponse.value(true);
+    }
+
+    @Transactional
+    public ServiceResponse<Boolean> leaveGroup(String groupId) {
+        Optional<UserProfile> userProfileOptional =  userService.getUserProfile();
+
+        if (userProfileOptional.isEmpty()) {
+            return logAndReturnError("User profile not found", "user_profile_not_found");
+        }
+
+        UserProfile userProfile = userProfileOptional.get();
+
+        ServiceResponse<Group> serviceResponse = findGroupById(groupId);
+
+        if (serviceResponse.hasError()) {
+            return ServiceResponse.error(serviceResponse.errorCode());
+        }
+
+        Group group = serviceResponse.value();
+
+        List<String> members = new ArrayList<>(group.getMembers());
+        members.remove(userProfile.getUserId());
+        group.setMembers(members);
+        Group savedGroup = groupRepository.save(group);
+
+        List<String> groupIds = new ArrayList<>(userProfile.getGroupIds());
+        groupIds.remove(savedGroup.getId());
+        userProfile.setGroupIds(groupIds);
+        userService.saveUserProfile(userProfile);
+
+        return ServiceResponse.value(true);
     }
 
     private void addUserToGroupAdministrators(Group group, UserProfile userProfile) {
