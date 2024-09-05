@@ -25,6 +25,7 @@ import java.util.Optional;
 public class GroupController {
 
     private final GroupService groupService;
+
     private final UserService userService;
 
     public GroupController(GroupService groupService, UserService userService) {
