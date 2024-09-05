@@ -15,17 +15,17 @@
             </div>
             <form th:action="@{/my/settings}" th:object="${userProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)" class="row g-3 g-sm-4 mt-0 mt-lg-2">
                 <div class="col-sm-6">
-                    <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="firstName">First name</label>
+                    <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="firstName">First name</label>
                     <input class="form-control" type="text" id="firstName" th:field="*{firstName}" required>
                     <div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" class="form-text text-danger"></div>
                 </div>
                 <div class="col-sm-6">
-                    <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="lastName">Last name</label>
+                    <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="lastName">Last name</label>
                     <input class="form-control" type="text" id="lastName" th:field="*{lastName}" required>
                     <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" class="form-text text-danger"></div>
                 </div>
                 <div class="col-sm-6">
-                    <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="email">Email address</label>
+                    <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="email">Email address</label>
                     <input class="form-control" type="email" id="email" th:field="*{email}" required>
                     <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="form-text text-danger"></div>
                 </div>

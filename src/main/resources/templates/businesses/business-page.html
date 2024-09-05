@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - Business')}"></head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<main>
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-md-10 col-lg-8 mx-auto">
+                <h1 class="display-4 mb-0">Fremont Business Name</h1>
+
+                <div class="row mt-4">
+                    <div class="col-lg-6">
+                        <div class="fs-sm text-uppercase mb-3">What we do</div>
+                        <h2 class="display-6">We are a team who create marketing strategies</h2>
+                    </div>
+                    <div class="col-lg-6 pt-1 pt-sm-2 pt-md-5">
+                        <p class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
+                        <p class="fs-xl">Sit congue tellus urna phasellus sagittis interdum sed laoreet eget curabitur. <strong>Vel magna sit aliquet viverra morbi massa mattis urna,</strong> feugiat egestas tincidunt ipsum diam quam massa amet odio nisi duis dolor.</p>
+                        <p class="fs-xl mb-0">Ac facilisis eros sem faucibus aliquet venenatis amet fermentum nisi. Mauris consectetur sem malesuada. viverra a non sapien odio id risus volutpat at.</p>
+                    </div>
+                </div>
+
+                <section class="bg-secondary">
+                    <div class="row g-4 pb-2 pb-sm-4 pb-lg-5">
+
+                        <!-- Address -->
+                        <div class="col-6">
+                            <div class="card border-0 h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title mb-4">Address</h4>
+                                    <p class="fs-lg fw-medium pb-3 mb-3">514 Magnolia St. Orlando, FL 32806</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="col-6">
+                            <div class="card border-0 h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title mb-4">Phone</h4>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="pb-1 mb-2">
+                                            <span class="d-block fs-sm text-body-secondary mb-1">Main office</span>
+                                            <a class="nav-link fs-lg p-0" href="tel:+178632256033">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;33</a>
+                                        </li>
+                                        <li>
+                                            <span class="d-block fs-sm text-body-secondary mb-1">Reception room</span>
+                                            <a class="nav-link fs-lg p-0" href="tel:+178630056044">+1&nbsp;(786)&nbsp;300&nbsp;560&nbsp;44</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Schedule -->
+                        <div class="col-6">
+                            <div class="card border-0 h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title mb-4">Schedule</h4>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="pb-1 mb-2">
+                                            <span class="d-block fs-sm text-body-secondary mb-1">Mon - Thu</span>
+                                            <div class="d-flex align-items-center">
+                                                <span class="text-nav fs-lg fw-medium">10:00</span>
+                                                <span class="border-top mx-4" style="width: 36px; height: 1px;"></span>
+                                                <span class="text-nav fs-lg fw-medium">22:00</span>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <span class="d-block fs-sm text-body-secondary mb-1">Fri - Sat</span>
+                                            <div class="d-flex align-items-center">
+                                                <span class="text-nav fs-lg fw-medium">10:00</span>
+                                                <span class="border-top mx-4" style="width: 36px; height: 1px;"></span>
+                                                <span class="text-nav fs-lg fw-medium">20:00</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-6">
+                            <div class="card border-0 h-100">
+                                <div class="card-body">
+                                    <h4 class="card-title mb-4">Email</h4>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="pb-1 mb-2">
+                                            <span class="d-block fs-sm text-body-secondary mb-1">Main office</span>
+                                            <a class="nav-link fs-lg p-0" href="mailto:office@example.com">office@example.com</a>
+                                        </li>
+                                        <li>
+                                            <span class="d-block fs-sm text-body-secondary mb-1">Reception room</span>
+                                            <a class="nav-link fs-lg p-0" href="mailto:reception@example.com">reception@example.com</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+
+                <a class="d-inline-block d-sm-none btn btn-outline-primary">Edit Business</a>
+
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>

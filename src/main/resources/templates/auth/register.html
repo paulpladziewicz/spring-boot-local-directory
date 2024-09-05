@@ -15,28 +15,28 @@
             <form th:action="@{/register}" th:object="${userRegistrationDto}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                 <div class="row row-cols-1 row-cols-sm-2">
                     <div class="col mb-4">
-                        <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="firstName">First Name</label>
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="firstName">First Name</label>
                         <input class="form-control form-control-lg" type="text" name="firstName" id="firstName" th:field="*{firstName}" placeholder="First name" required>
                         <span class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
                     </div>
                     <div class="col mb-4">
-                        <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="lastName">Last Name</label>
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="lastName">Last Name</label>
                         <input class="form-control form-control-lg" type="text" id="lastName" name="lastName" th:field="*{lastName}" placeholder="Last name" required>
                         <span class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="username">Username</label>
+                    <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="username">Username</label>
                     <input class="form-control form-control-lg" type="text" id="username" name="username" th:field="*{username}" placeholder="Username" required>
                     <span class="text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Password Error</span>
                 </div>
                 <div class="mb-4">
-                    <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="email">Email Address</label>
+                    <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="email">Email Address</label>
                     <input class="form-control form-control-lg" type="email" id="email" name="email" th:field="*{email}" placeholder="Email address" required>
                     <span class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Password Error</span>
                 </div>
                 <div class="mb-3">
-                    <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="password">Password</label>
+                    <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="password">Password</label>
                     <div class="password-toggle">
                         <input class="form-control form-control-lg" type="password" id="password" name="password" placeholder="Password" required>
                         <label class="password-toggle-btn" aria-label="Show/hide password">
@@ -47,7 +47,7 @@
                     <span class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password Error</span>
                 </div>
                 <div class="mb-3">
-                    <label class="mb-1 form-label opacity-75 fw-semibold fs-base" for="matchingPassword">Confirm Password</label>
+                    <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="matchingPassword">Confirm Password</label>
                     <div class="password-toggle">
                         <input class="form-control form-control-lg" type="password" id="matchingPassword" name="matchingPassword" placeholder="Confirm password" required>
                         <label class="password-toggle-btn" aria-label="Show/hide password">
