@@ -8,6 +8,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class BusinessController {
 
+    @GetMapping("/create/business-listing")
+    public String createBusinessListing(Model model) {
+        return "businesses/business-create";
+    }
+
+    @GetMapping("/businesses")
+    public String displayBusinesses(Model model) {
+        return "businesses/businesses";
+    }
+
     @GetMapping("/businesses/{id}")
     public String viewBusiness(@PathVariable String id, Model model) {
         return "businesses/business-page";

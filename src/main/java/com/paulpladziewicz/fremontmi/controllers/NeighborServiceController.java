@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class NeighborServiceController {
 
+    @GetMapping("/neighbor-services")
+    public String displayNeighborServices(Model model) {
+        return "neighborservices/neighborservices";
+    }
+
     @GetMapping("/neighbor-service/{id}")
     public String viewNeighborService(@PathVariable String id, Model model) {
         return "neighborservices/neighborservices-page";

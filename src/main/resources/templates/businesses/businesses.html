@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - Businesses')}"><title>Placeholder Title</title></head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+<main class="bg-secondary pt-4 pb-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-3 mb-0">Businesses</h1>
+            <div>
+                <a href="/create/business-listing" class="btn btn-primary">Create Business Listing</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                There are no Businesses listed at the moment.
+            </div>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{partials/footer}"></footer>
+</body>
+</html>
