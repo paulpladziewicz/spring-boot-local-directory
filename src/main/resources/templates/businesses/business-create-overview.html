@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - Businesses')}"><title>Placeholder Title</title></head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+<main>
+    <h1 class="display-3 text-center">Create Business Listing</h1>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h2 class="h1">How It Works</h2>
+                <p class="mb-2">Get your business listed and gain visibility with new customers. Follow these simple steps to create your business listing and start growing your business today.</p>
+
+                <div class="position-relative d-flex justify-content-end my-3 py-1">
+                    <div class="btn btn-lg btn-icon btn-primary fs-xl fw-bold rounded-circle position-absolute top-50 start-0 translate-middle-y z-2 pe-none">
+                        01
+                    </div>
+                    <div class="card border-0 ps-3" style="width: calc(100% - 1.75rem);">
+                        <div class="card-body ps-4">
+                            <h3 class="h5 card-title pb-2 mb-1">Select Your Subscription Plan</h3>
+                            <p class="card-text">Choose from our flexible subscription options—monthly or annual. The annual plan offers better value for long-term business visibility.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="position-relative d-flex justify-content-end my-3 py-1">
+                    <div class="btn btn-lg btn-icon btn-primary fs-xl fw-bold rounded-circle position-absolute top-50 start-0 translate-middle-y z-2 pe-none">
+                        02
+                    </div>
+                    <div class="card border-0 ps-3" style="width: calc(100% - 1.75rem);">
+                        <div class="card-body ps-4">
+                            <h3 class="h5 card-title pb-2 mb-1">Enter Your Business Information</h3>
+                            <p class="card-text">Provide details about your business so customers can easily find and connect with you.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="position-relative d-flex justify-content-end my-3 py-1">
+                    <div class="btn btn-lg btn-icon btn-primary fs-xl fw-bold rounded-circle position-absolute top-50 start-0 translate-middle-y z-2 pe-none">
+                        03
+                    </div>
+                    <div class="card border-0 ps-3" style="width: calc(100% - 1.75rem);">
+                        <div class="card-body ps-4">
+                            <h3 class="h5 card-title pb-2 mb-1">Complete Payment</h3>
+                            <p class="card-text">Secure your listing by providing your payment details and confirming your subscription plan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subscription Form Section -->
+            <div class="col-md-6">
+                <form action="/your-form-endpoint" method="post">
+                    <h2 class="h1">Choose Your Subscription</h2>
+
+                    <div class="card border-0 bg-secondary rounded-4 position-relative mb-3 subscription-option" style="cursor: pointer;">
+                        <div class="card-body d-sm-flex align-items-start text-center text-sm-start">
+                            <input type="radio" name="subscription" value="monthly" id="monthly-plan" class="me-3 subscription-radio" style="display: none;" />
+                            <label for="monthly-plan" class="w-100" style="cursor: pointer;">
+                                <div class="w-100 pe-sm-4 mb-3 mb-sm-0" style="max-width: 27rem;">
+                                    <h3 class="mb-2">Monthly Subscription</h3>
+                                    <p class="fs-lg mb-0">Subscribe monthly to get listed and renew your subscription each month.</p>
+                                </div>
+                                <div class="w-100 pe-sm-3 mx-auto me-sm-0 mb-3 mb-sm-0" style="max-width: 8rem;">
+                                    <div class="h3 text-primary mb-0 mb-sm-2">$10/month</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 bg-secondary rounded-4 position-relative mb-3 subscription-option selected" style="cursor: pointer;">
+                        <div class="card-body d-sm-flex align-items-start text-center text-sm-start">
+                            <input type="radio" name="subscription" value="annual" id="annual-plan" class="me-3 subscription-radio" checked style="display: none;" />
+                            <label for="annual-plan" class="w-100" style="cursor: pointer;">
+                                <div class="w-100 pe-sm-4 mb-3 mb-sm-0" style="max-width: 27rem;">
+                                    <h3 class="mb-2">Annual Subscription</h3>
+                                    <p class="fs-lg mb-0">Subscribe annually to save money and ensure uninterrupted service throughout the year.</p>
+                                </div>
+                                <div class="w-100 pe-sm-3 mx-auto me-sm-0 mb-3 mb-sm-0" style="max-width: 8rem;">
+                                    <div class="h3 text-primary mb-0 mb-sm-2">$100/year</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Continue</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // JavaScript to handle subscription option selection
+    const subscriptionOptions = document.querySelectorAll('.subscription-option');
+    subscriptionOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            // Remove 'selected' class from all options
+            subscriptionOptions.forEach(opt => opt.classList.remove('selected'));
+
+            // Add 'selected' class to the clicked option
+            option.classList.add('selected');
+
+            // Check the corresponding radio button
+            option.querySelector('.subscription-radio').checked = true;
+        });
+    });
+</script>
+
+<style>
+    .subscription-option.selected {
+        border: 2px solid #007bff;
+    }
+</style>
+
+<footer th:replace="~{partials/footer}"></footer>
+</body>
+</html>

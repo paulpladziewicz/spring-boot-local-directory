@@ -1,4 +1,4 @@
-package com.paulpladziewicz.fremontmi.controllers;
+package com.paulpladziewicz.fremontmi.config;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

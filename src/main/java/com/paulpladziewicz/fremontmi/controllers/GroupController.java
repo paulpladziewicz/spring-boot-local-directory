@@ -6,6 +6,7 @@ import com.paulpladziewicz.fremontmi.models.SendEmailDto;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.services.EmailService;
 import com.paulpladziewicz.fremontmi.services.GroupService;
+import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -24,11 +25,14 @@ import java.util.Optional;
 @Controller
 public class GroupController {
 
+    private final HtmlSanitizationService htmlSanitizationService;
+
     private final GroupService groupService;
 
     private final UserService userService;
 
-    public GroupController(GroupService groupService, UserService userService) {
+    public GroupController(HtmlSanitizationService htmlSanitizationService, GroupService groupService, UserService userService) {
+        this.htmlSanitizationService = htmlSanitizationService;
         this.groupService = groupService;
         this.userService = userService;
     }
@@ -84,6 +88,7 @@ public class GroupController {
         }
 
         Group group = serviceResponse.value();
+        group.setDescription(htmlSanitizationService.sanitizeHtml(group.getDescription().replace("\n", "<br/>")));
 
         model.addAttribute("group", group);
         model.addAttribute("adminCount", group.getAdministrators().size());
@@ -94,6 +99,9 @@ public class GroupController {
         if (userId.isPresent()) {
             model.addAttribute("isMember", group.getMembers().contains(userId.get()));
             model.addAttribute("isAdmin", group.getAdministrators().contains(userId.get()));
+        } else {
+            model.addAttribute("isMember", false);
+            model.addAttribute("isAdmin", false);
         }
 
         return "groups/group-page";

@@ -8,7 +8,7 @@
     <div class="container my-4">
         <div class="row">
             <div class="col-md-10 col-lg-8 mx-auto">
-                <h1 class="display-4 mb-0">Fremont Business Name</h1>
+                <h1 th:text="${business.name}" class="display-4 mb-0">Fremont Business Name</h1>
 
                 <div class="row mt-4">
                     <div class="col-lg-6">
@@ -16,9 +16,7 @@
                         <h2 class="display-6">We are a team who create marketing strategies</h2>
                     </div>
                     <div class="col-lg-6 pt-1 pt-sm-2 pt-md-5">
-                        <p class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
-                        <p class="fs-xl">Sit congue tellus urna phasellus sagittis interdum sed laoreet eget curabitur. <strong>Vel magna sit aliquet viverra morbi massa mattis urna,</strong> feugiat egestas tincidunt ipsum diam quam massa amet odio nisi duis dolor.</p>
-                        <p class="fs-xl mb-0">Ac facilisis eros sem faucibus aliquet venenatis amet fermentum nisi. Mauris consectetur sem malesuada. viverra a non sapien odio id risus volutpat at.</p>
+                        <p th:text="${business.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
                     </div>
                 </div>
 

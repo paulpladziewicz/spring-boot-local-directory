@@ -26,5 +26,7 @@ public class UserProfile {
 
     private List<String> eventAdminIds = new ArrayList<>();
 
+    private String stripeCustomerId;
+
     private LocalDateTime termsAcceptedAt;
 }

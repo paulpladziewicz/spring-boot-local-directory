@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - Businesses')}"><title>Placeholder Title</title></head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+<main>
+    <h1>Subscription</h1>
+    <p>what was chosen</p>
+
+
+    <form action="">
+        <div class="form-group mb-2">
+            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="name">Full name</label>
+            <input type="text" class="form-control" id="name" placeholder="Full name">
+        </div>
+
+        <div class="mb-3">
+            <label for="cardFormat">Card number</label>
+            <input type="text" class="form-control" id="cardFormat" data-format='{"creditCard": true}' placeholder="Enter credit card number">
+            <div class="input-group-text py-0">
+                <div class="credit-card-icon"></div>
+            </div>
+        </div>
+
+        <div class="form-group mb-2">
+            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="expiration">Expiration</label>
+            <input type="text" class="form-control" id="expiration" placeholder="Full name">
+        </div>
+
+        <div class="form-group mb-2">
+            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="zipcode">Zip Code</label>
+            <input type="text" class="form-control" id="zipcode" placeholder="Full name">
+        </div>
+
+        <button class="btn btn-primary" type="submit">Complete Subscription</button>
+    </form>
+</main>
+<footer th:replace="~{partials/footer}"></footer>
+</body>
+</html>

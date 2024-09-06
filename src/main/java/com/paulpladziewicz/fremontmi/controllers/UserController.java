@@ -26,7 +26,18 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(@RequestParam(value = "error", required = false) String error,
+                        @RequestParam(value = "logout", required = false) String logout,
+                        Model model) {
+
+        if (error != null) {
+            model.addAttribute("errorMessage", "Invalid username or password.");
+        }
+
+        if (logout != null) {
+            model.addAttribute("logoutMessage", "You have been logged out successfully.");
+        }
+
         return "auth/login";
     }
 
@@ -76,32 +87,38 @@ public class UserController {
 
         if (userProfile.isEmpty()) {
             model.addAttribute("error", true);
-            return "settings";
+            return "settings/profile";
         }
 
         model.addAttribute("userProfile", userProfile.get());
 
-        return "settings";
+        return "settings/profile";
     }
 
     @PostMapping("/my/settings")
     public String updateSettings(@ModelAttribute("userDetails") @Valid UserProfile userProfile, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("userDetails", userProfile);
-            return "settings";
+            return "settings/profile";
         }
         ServiceResponse<UserProfile> serviceResponse = userService.updateUserProfile(userProfile);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("isSuccess", false);
             model.addAttribute("userDetails", userProfile);
-            return "settings";
+            return "settings/profile";
         }
 
         model.addAttribute("isSuccess", true);
         model.addAttribute("userDetails", serviceResponse.value());
 
-        return "settings";
+        return "settings/profile";
+    }
+
+    @GetMapping("/my/settings/billing")
+    public String billingSettings(Model model) {
+
+        return "settings/billing";
     }
 
     @GetMapping("/forgot-password")

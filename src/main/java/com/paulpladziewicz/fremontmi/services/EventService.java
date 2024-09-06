@@ -23,7 +23,9 @@ public class EventService {
     private static final Logger logger = LoggerFactory.getLogger(EventService.class);
 
     private final EventRepository eventRepository;
+
     private final UserService userService;
+
     private final UserProfileRepository userProfileRepository;
 
     public EventService(EventRepository eventRepository, UserService userService, UserProfileRepository userProfileRepository) {

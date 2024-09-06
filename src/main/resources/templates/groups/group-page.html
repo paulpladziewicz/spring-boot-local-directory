@@ -44,7 +44,7 @@
                         <span th:text="${memberCount == 1 ? 'Member' : 'Members'}"></span>
                     </p>
 
-                    <p class="fs-lg my-3" th:text="${group.description}">Group description here...</p>
+                    <p class="fs-lg my-3" th:utext="${group.description}">Group description here...</p>
                 </section>
 
                 <section class="mb-4">

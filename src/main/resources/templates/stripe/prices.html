@@ -63,7 +63,7 @@
             .then((data) => {
                 window.sessionStorage.setItem('subscriptionId', data.subscriptionId);
                 window.sessionStorage.setItem('clientSecret', data.clientSecret);
-                // window.location.href = '/subscribe.html';
+                window.location.href = '/stripe/subscribe';
             })
             .catch((error) => {
                 console.error('Error:', error);

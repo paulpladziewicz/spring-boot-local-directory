@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,8 +22,12 @@ public class Event {
     private String name;
 
     @NotBlank(message = "Description must not be null")
-    @Size(max = 500, message = "Description can't be longer than 500 characters")
+    @Size(max = 5000, message = "Description can't be longer than 5000 characters")
     private String description;
+
+    private List<String> categories =  new ArrayList<>();;
+
+    private List<String> tags = new ArrayList<>();
 
     @Size(max = 256, message = "Location name can't be longer than 256 characters")
     private String locationName;

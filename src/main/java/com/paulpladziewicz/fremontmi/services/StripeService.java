@@ -1,29 +1,42 @@
-package com.paulpladziewicz.fremontmi.controllers;
+package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.models.ServiceResponse;
+import com.paulpladziewicz.fremontmi.models.UserProfile;
+import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.*;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.PriceListParams;
 import com.stripe.param.SubscriptionCreateParams;
 import com.stripe.param.SubscriptionListParams;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
-import com.stripe.Stripe;
-import jakarta.annotation.PostConstruct;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
-@RequestMapping("/api/stripe")
-public class StripeController {
+@Service
+public class StripeService {
+
+    private static final Logger logger = LoggerFactory.getLogger(StripeService.class);
+
+    private final UserService userService;
 
     @Value("${stripe.secret.key}")
     private String stripeApiKey;
 
     @Value("${stripe.publishable.key}")
     private String stripePublishableKey;
+
+    public StripeService(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostConstruct
     public void init() {
@@ -42,7 +55,6 @@ public class StripeController {
         public String subscriptionId;
     }
 
-    @GetMapping("/config")
     public ResponseEntity<Map<String, Object>> getConfig() throws StripeException {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("publishableKey", stripePublishableKey);
@@ -57,38 +69,47 @@ public class StripeController {
         return ResponseEntity.ok(responseData);
     }
 
-    @PostMapping("/create-customer")
-    public ResponseEntity<Map<String, Object>> createCustomer(@RequestBody CreateCustomerRequest request) throws StripeException {
+    public ServiceResponse<String> createCustomer(UserProfile userProfile) throws StripeException {
         CustomerCreateParams params = CustomerCreateParams.builder()
-                .setEmail(request.email)
+                .setName(userProfile.getFirstName() + ' ' + userProfile.getLastName())
+                .setEmail(userProfile.getEmail())
                 .build();
         Customer customer = Customer.create(params);
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("customer", customer.getId());
+        userProfile.setStripeCustomerId(customer.getId());
 
-        return ResponseEntity.ok(responseData);
+        ServiceResponse<UserProfile> saveUserProfile = userService.saveUserProfile(userProfile);
+
+        if (saveUserProfile.hasError()) {
+            logger.error("Failed to save user profile when creating a Stripe customer");
+            ServiceResponse.error(saveUserProfile.errorCode());
+        }
+
+        return ServiceResponse.value(customer.getId());
     }
 
-    @PostMapping("/create-subscription")
-    public ResponseEntity<Map<String, Object>> createSubscription(@RequestBody CreateSubscriptionRequest request, @CookieValue(name = "customer") String customerId) throws StripeException {
+    public ServiceResponse<Map<String, Object>> createSubscription(UserProfile userProfile) {
         SubscriptionCreateParams subCreateParams = SubscriptionCreateParams.builder()
-                .setCustomer(customerId)
-                .addItem(SubscriptionCreateParams.Item.builder().setPrice(request.priceId).build())
+                .setCustomer(userProfile.getStripeCustomerId())
+                .addItem(SubscriptionCreateParams.Item.builder().setPrice("price_1Pv7XIBCHBXtJFxOUIvRA6Xf").build())
                 .setPaymentBehavior(SubscriptionCreateParams.PaymentBehavior.DEFAULT_INCOMPLETE)
                 .addExpand("latest_invoice.payment_intent")
                 .build();
 
-        Subscription subscription = Subscription.create(subCreateParams);
+        try {
+            Subscription subscription = Subscription.create(subCreateParams);
 
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("subscriptionId", subscription.getId());
-        responseData.put("clientSecret", subscription.getLatestInvoiceObject().getPaymentIntentObject().getClientSecret());
+            Map<String, Object> subscriptionData = new HashMap<>();
+            subscriptionData.put("subscriptionId", subscription.getId());
+            subscriptionData.put("clientSecret", subscription.getLatestInvoiceObject().getPaymentIntentObject().getClientSecret());
 
-        return ResponseEntity.ok(responseData);
+            return ServiceResponse.value(subscriptionData);
+        } catch (StripeException e) {
+            logger.error("Failed to create subscription due to a Stripe exception", e);
+            return ServiceResponse.error("stripe_error");
+        }
     }
 
-    @GetMapping("/subscriptions")
     public ResponseEntity<String> getSubscriptions(@CookieValue(name = "customer") String customerId) throws StripeException {
         SubscriptionListParams params = SubscriptionListParams.builder()
                 .setStatus(SubscriptionListParams.Status.ALL)
@@ -101,19 +122,11 @@ public class StripeController {
         return ResponseEntity.ok(subscriptions.toJson());
     }
 
-    @PostMapping("/cancel-subscription")
     public ResponseEntity<String> cancelSubscription(@RequestBody CancelSubscriptionRequest request) throws StripeException {
         Subscription subscription = Subscription.retrieve(request.subscriptionId);
         Subscription canceledSubscription = subscription.cancel();
 
         return ResponseEntity.ok(canceledSubscription.toJson());
-    }
-
-    // Webhook for Stripe events
-    @PostMapping("/webhook")
-    public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
-        // Webhook handling code...
-        return ResponseEntity.ok("");
     }
 }
 

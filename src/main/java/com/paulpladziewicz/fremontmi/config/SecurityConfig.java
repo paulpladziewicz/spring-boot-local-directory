@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
@@ -47,6 +48,7 @@ public class SecurityConfig {
         http.formLogin(formLogin -> formLogin
                 .loginPage("/login")
                 .permitAll()
+                .failureHandler(customAuthenticationFailureHandler())
                 .successHandler(savedRequestAwareAuthenticationSuccessHandler())
         );
         http.logout(logout -> logout
@@ -84,6 +86,11 @@ public class SecurityConfig {
                 super.handle(request, response, authentication);
             }
         };
+    }
+
+    @Bean
+    public AuthenticationFailureHandler customAuthenticationFailureHandler() {
+        return new CustomAuthenticationFailureHandler();
     }
 
     @Bean
