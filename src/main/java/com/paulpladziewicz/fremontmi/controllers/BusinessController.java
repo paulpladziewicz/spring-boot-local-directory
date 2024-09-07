@@ -5,13 +5,12 @@ import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.services.BusinessService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -28,9 +27,23 @@ public class BusinessController {
         return "businesses/business-create-overview";
     }
 
-    @GetMapping("/create/business-listing")
-    public String createBusinessListingView(Model model) {
-        model.addAttribute("business", new Business());
+    @PostMapping("/start/business-listing")
+    public String createBusinessListingView(@RequestParam("priceId") String priceId, Model model) {
+        if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
+            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
+            return "businesses/business-create-overview";
+        }
+
+        if (!priceId.equals("price_1Pv7V0BCHBXtJFxOinfPKMUE") && !priceId.equals("price_1Pv7XIBCHBXtJFxOUIvRA6Xf")) {
+            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
+            return "businesses/business-create-overview";
+        }
+
+        Business business = new Business();
+        business.setSubscriptionPriceId(priceId);
+
+        model.addAttribute("business", business);
+
         return "businesses/business-create-form";
     }
 
@@ -38,6 +51,18 @@ public class BusinessController {
     public String createBusinessListing(@Valid @ModelAttribute("business") Business business, BindingResult result, Model model) {
         if (result.hasErrors()) {
             return "businesses/business-create-form";
+        }
+
+        String priceId = business.getSubscriptionPriceId();
+
+        if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
+            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
+            return "businesses/business-create-overview";
+        }
+
+        if (!priceId.equals("price_1Pv7V0BCHBXtJFxOinfPKMUE") && !priceId.equals("price_1Pv7XIBCHBXtJFxOUIvRA6Xf")) {
+            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
+            return "businesses/business-create-overview";
         }
 
         ServiceResponse<Business> serviceResponse = businessService.createBusiness(business);
@@ -49,11 +74,26 @@ public class BusinessController {
 
         Business savedBusiness = serviceResponse.value();
 
-        return "redirect:/businesses/" + savedBusiness.getId();
+        model.addAttribute("business", savedBusiness);
+        model.addAttribute("planName", "Monthly Business Listing Subscription");
+        model.addAttribute("price", "$10/month");
+
+        return "businesses/business-create-subscription";
     }
 
     @GetMapping("/businesses")
-    public String displayBusinesses(Model model) {
+    public String displayActiveBusinesses(Model model) {
+        ServiceResponse<List<Business>> serviceResponse = businessService.findAllActiveBusinesses();
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "businesses/business-listing-overview";
+        }
+
+        List<Business> businesses = serviceResponse.value();
+
+        model.addAttribute("businesses", businesses);
+
         return "businesses/businesses";
     }
 
@@ -73,8 +113,19 @@ public class BusinessController {
         return "businesses/business-page";
     }
 
-    @GetMapping("/stripe/subscribe")
-    public String subscribe() {
-        return "businesse/business-create-subscription";
+    @GetMapping("/edit/business/{id}")
+    public String editBusiness(@PathVariable String id, Model model) {
+        Optional<Business> businessOptional = businessService.findBusinessById(id);
+
+        if (businessOptional.isEmpty()) {
+            model.addAttribute("error", true);
+            return "businesses/businesses";
+        }
+
+        Business business = businessOptional.get();
+
+        model.addAttribute("business", business);
+
+        return "businesses/business-edit";
     }
 }

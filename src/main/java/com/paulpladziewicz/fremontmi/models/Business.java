@@ -40,11 +40,11 @@ public class Business {
 
     private String status;
 
-    private String subscriptionChoice;
+    private String clientSecret;
 
-    private LocalDateTime subscriptionEndTime;
-
-    private String stripeCustomerId;
+    private String subscriptionPriceId;
 
     private String stripeSubscriptionId;
+
+    private LocalDateTime subscriptionEndTime;
 }

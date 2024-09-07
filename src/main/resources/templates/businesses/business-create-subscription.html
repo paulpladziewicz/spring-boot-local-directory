@@ -4,37 +4,56 @@
 <body>
 <header th:insert="~{partials/navbar}"></header>
 <main>
-    <h1>Subscription</h1>
-    <p>what was chosen</p>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1>Subscription Payment</h1>
+                <p class="mb-2">You are paying for the <strong th:text="${planName}"></strong> plan at <strong th:text="${price}">.</strong></p>
+                <p><a href="/" class="btn btn-link fw-semibold fs-sm p-0 mb-4">Change Subscription</a></p>
 
-
-    <form action="">
-        <div class="form-group mb-2">
-            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="name">Full name</label>
-            <input type="text" class="form-control" id="name" placeholder="Full name">
-        </div>
-
-        <div class="mb-3">
-            <label for="cardFormat">Card number</label>
-            <input type="text" class="form-control" id="cardFormat" data-format='{"creditCard": true}' placeholder="Enter credit card number">
-            <div class="input-group-text py-0">
-                <div class="credit-card-icon"></div>
+                <form id="payment-form" class="my-4" th:object="${business}">
+                    <input type="hidden" id="clientSecret" th:value="*{clientSecret}" />
+                    <div id="payment-element"></div>
+                    <div id="error-message" class="alert alert-danger mt-3" role="alert" style="display:none;"></div>
+                    <button id="submit-button" class="btn btn-primary mt-4" type="submit">Submit Payment</button>
+                </form>
             </div>
         </div>
-
-        <div class="form-group mb-2">
-            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="expiration">Expiration</label>
-            <input type="text" class="form-control" id="expiration" placeholder="Full name">
-        </div>
-
-        <div class="form-group mb-2">
-            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="zipcode">Zip Code</label>
-            <input type="text" class="form-control" id="zipcode" placeholder="Full name">
-        </div>
-
-        <button class="btn btn-primary" type="submit">Complete Subscription</button>
-    </form>
+    </div>
 </main>
+
+<script>
+    const clientSecret = document.querySelector('#clientSecret').value;
+    const stripe = Stripe("pk_test_51KCrhcBCHBXtJFxOMYJo8xRymfT9m3PvrruBp7gZmcvCV2vpYnMH8EdkwVeibCrtj5bwNhhuAj5MzWU1NXtq6iBs000IzgImdE");
+
+    const elements = stripe.elements({ clientSecret });
+
+    const paymentElement = elements.create("payment");
+    paymentElement.mount("#payment-element");
+
+    const form = document.getElementById("payment-form");
+    const submitButton = document.getElementById("submit-button");
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        submitButton.disabled = true;
+
+        const {error} = await stripe.confirmPayment({
+            clientSecret: "your-client-secret",
+            elements,
+            confirmParams: {
+                return_url: "http://localhost:8080/payment-success",
+            },
+        });
+
+        if (error) {
+            document.getElementById("error-message").innerText = error.message;
+            document.getElementById("error-message").style.display = 'block';
+            submitButton.disabled = false;
+        }
+    });
+</script>
+
 <footer th:replace="~{partials/footer}"></footer>
 </body>
 </html>

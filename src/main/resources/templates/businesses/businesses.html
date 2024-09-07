@@ -3,22 +3,59 @@
 <head th:replace="~{partials/head :: head('FremontMI - Businesses')}"><title>Placeholder Title</title></head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
+
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true">
+        <div class="toast-header">
+            <div class="d-inline-block align-middle bg-primary rounded-circle me-2" style="width: 1.25rem; height: 1.25rem;"></div>
+            <h6 class="mb-0 me-auto">Around</h6>
+            <small class="fw-medium text-body-secondary">11 mins ago</small>
+            <button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">Hello, world! This is a toast message.</div>
+    </div>
+</div>
+
+
+
 <main class="bg-secondary pt-4 pb-5">
+    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        <span class="fw-semibold">Primary alert:</span> Dismiss me by clicking the close button on the right.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="display-3 mb-0">Businesses</h1>
             <div>
+                <a href="" class="btn btn-link fw-semibold fs-lg text-primary">My Business Listings</a>
                 <a href="/create/business-listing-overview" class="btn btn-primary">Create Business Listing</a>
             </div>
         </div>
 
         <div class="row">
-            <div>
-                There are no Businesses listed at the moment.
+            <div th:if="${#lists.isEmpty(businesses)}" class="my-4">
+                <div>
+                    There are no businesses listed at the moment.
+                </div>
+            </div>
+            <div th:each="business : ${businesses}" class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="h3 mb-1" th:text="${business.name}">Business Name</h4>
+                        <p class="text-muted fw-semibold mb-2">
+                            <span th:text="${business.address}">Business Address</span>
+                        </p>
+                        <p th:text="${#strings.length(business.description) > 120 ? #strings.substring(business.description, 0, 120) + '...' : business.description}">
+                            Business Description
+                        </p>
+                        <a th:href="'/businesses/' + ${business.id}" class="btn btn-lg btn-link p-0">View Business<i class="ai-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </main>
+
 <footer th:replace="~{partials/footer}"></footer>
 </body>
 </html>

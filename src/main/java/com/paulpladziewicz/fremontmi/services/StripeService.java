@@ -18,8 +18,10 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.desktop.OpenFilesEvent;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class StripeService {
@@ -55,26 +57,46 @@ public class StripeService {
         public String subscriptionId;
     }
 
-    public ResponseEntity<Map<String, Object>> getConfig() throws StripeException {
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("publishableKey", stripePublishableKey);
+    public ServiceResponse<String> getCustomerId() {
+        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
 
-        PriceListParams params = PriceListParams.builder()
-                .addLookupKey("neighbor_services_monthly")
-                .addLookupKey("neighbor_services_annually")
-                .build();
-        PriceCollection prices = Price.list(params);
-        responseData.put("prices", prices.getData());
+        if (userProfileOptional.isEmpty()) {
+            return ServiceResponse.error("No user profile found");
+        }
 
-        return ResponseEntity.ok(responseData);
+        UserProfile userProfile = userProfileOptional.get();
+
+        if (userProfile.getStripeCustomerId() != null) {
+            return ServiceResponse.value(userProfile.getStripeCustomerId());
+        }
+
+        ServiceResponse<String> serviceResponse = createCustomer(userProfile);
+
+        if (serviceResponse.hasError()) {
+            return serviceResponse;
+        }
+
+        String customerId = serviceResponse.value();
+
+        return ServiceResponse.value(customerId);
     }
 
-    public ServiceResponse<String> createCustomer(UserProfile userProfile) throws StripeException {
-        CustomerCreateParams params = CustomerCreateParams.builder()
-                .setName(userProfile.getFirstName() + ' ' + userProfile.getLastName())
-                .setEmail(userProfile.getEmail())
-                .build();
-        Customer customer = Customer.create(params);
+    public ServiceResponse<String> createCustomer(UserProfile userProfile) {
+        Customer customer = null;
+        try {
+            CustomerCreateParams params = CustomerCreateParams.builder()
+                    .setName(userProfile.getFirstName() + ' ' + userProfile.getLastName())
+                    .setEmail(userProfile.getEmail())
+                    .build();
+            customer = Customer.create(params);
+        } catch (StripeException e) {
+            logger.error("Error creating Stripe customer: ", e);
+            return ServiceResponse.error("STRIPE_CUSTOMER_CREATION_FAILED");
+        }
+
+        if (customer == null) {
+            return ServiceResponse.error("STRIPE_CUSTOMER_CREATION_FAILED");
+        }
 
         userProfile.setStripeCustomerId(customer.getId());
 
@@ -88,11 +110,26 @@ public class StripeService {
         return ServiceResponse.value(customer.getId());
     }
 
-    public ServiceResponse<Map<String, Object>> createSubscription(UserProfile userProfile) {
+    public ServiceResponse<Map<String, Object>> createSubscription(String priceId) {
+        ServiceResponse<String> serviceResponse = getCustomerId();
+
+        if (serviceResponse.hasError()) {
+            return ServiceResponse.error(serviceResponse.errorCode());
+        }
+
+        String customerId = serviceResponse.value();
+
         SubscriptionCreateParams subCreateParams = SubscriptionCreateParams.builder()
-                .setCustomer(userProfile.getStripeCustomerId())
-                .addItem(SubscriptionCreateParams.Item.builder().setPrice("price_1Pv7XIBCHBXtJFxOUIvRA6Xf").build())
+                .setCustomer(customerId)
+                .addItem(SubscriptionCreateParams.Item.builder().setPrice(priceId).build())
                 .setPaymentBehavior(SubscriptionCreateParams.PaymentBehavior.DEFAULT_INCOMPLETE)
+                .setPaymentSettings(
+                        SubscriptionCreateParams.PaymentSettings.builder()
+                                .setPaymentMethodTypes(
+                                        java.util.List.of(SubscriptionCreateParams.PaymentSettings.PaymentMethodType.CARD)  // Use PaymentMethodType enum
+                                )
+                                .build()
+                )
                 .addExpand("latest_invoice.payment_intent")
                 .build();
 
@@ -101,7 +138,17 @@ public class StripeService {
 
             Map<String, Object> subscriptionData = new HashMap<>();
             subscriptionData.put("subscriptionId", subscription.getId());
-            subscriptionData.put("clientSecret", subscription.getLatestInvoiceObject().getPaymentIntentObject().getClientSecret());
+
+            String clientSecret = subscription.getLatestInvoiceObject()
+                    .getPaymentIntentObject()
+                    .getClientSecret();
+
+            if (clientSecret == null) {
+                logger.error("ClientSecret is null for subscription: {}", subscription.getId());
+                return ServiceResponse.error("payment_intent_error");
+            }
+
+            subscriptionData.put("clientSecret", clientSecret);
 
             return ServiceResponse.value(subscriptionData);
         } catch (StripeException e) {

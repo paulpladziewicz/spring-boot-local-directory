@@ -51,12 +51,29 @@
 
             <!-- Subscription Form Section -->
             <div class="col-md-6">
-                <form action="/your-form-endpoint" method="post">
+                <form th:action="@{/start/business-listing}" method="post">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <input type="radio" class="btn-check" id="weight1" name="weight" value="140 g" checked>
+                            <label for="weight1" class="btn btn-outline-secondary px-2">
+                                <span class="mx-1">140 g</span>
+                            </label>
+                        </div>
+                        <div class="me-3">
+                            <input type="radio" class="btn-check" id="weight2" name="weight" value="260 g">
+                            <label for="weight2" class="btn btn-outline-secondary px-2">
+                                <span class="mx-1">260 g</span>
+                            </label>
+                        </div>
+                    </div>
+
+
                     <h2 class="h1">Choose Your Subscription</h2>
 
-                    <div class="card border-0 bg-secondary rounded-4 position-relative mb-3 subscription-option" style="cursor: pointer;">
+                    <!-- Monthly Plan Card -->
+                    <div class="card border-0 bg-secondary rounded-4 position-relative mb-3 subscription-option" style="cursor: pointer;" id="monthly-card">
                         <div class="card-body d-sm-flex align-items-start text-center text-sm-start">
-                            <input type="radio" name="subscription" value="monthly" id="monthly-plan" class="me-3 subscription-radio" style="display: none;" />
+                            <input type="radio" name="priceId" value="price_1Pv7V0BCHBXtJFxOinfPKMUE" id="monthly-plan" class="me-3 subscription-radio" style="display: none;" />
                             <label for="monthly-plan" class="w-100" style="cursor: pointer;">
                                 <div class="w-100 pe-sm-4 mb-3 mb-sm-0" style="max-width: 27rem;">
                                     <h3 class="mb-2">Monthly Subscription</h3>
@@ -69,9 +86,10 @@
                         </div>
                     </div>
 
-                    <div class="card border-0 bg-secondary rounded-4 position-relative mb-3 subscription-option selected" style="cursor: pointer;">
+                    <!-- Annual Plan Card -->
+                    <div class="card border-0 bg-secondary rounded-4 position-relative mb-3 subscription-option" style="cursor: pointer;" id="annual-card">
                         <div class="card-body d-sm-flex align-items-start text-center text-sm-start">
-                            <input type="radio" name="subscription" value="annual" id="annual-plan" class="me-3 subscription-radio" checked style="display: none;" />
+                            <input type="radio" name="priceId" value="price_1Pv7XIBCHBXtJFxOUIvRA6Xf" id="annual-plan" class="me-3 subscription-radio" checked style="display: none;" />
                             <label for="annual-plan" class="w-100" style="cursor: pointer;">
                                 <div class="w-100 pe-sm-4 mb-3 mb-sm-0" style="max-width: 27rem;">
                                     <h3 class="mb-2">Annual Subscription</h3>
@@ -84,7 +102,6 @@
                         </div>
                     </div>
 
-                    <!-- Submit Button -->
                     <div class="d-grid gap-2 mt-4">
                         <button type="submit" class="btn btn-primary btn-lg">Continue</button>
                     </div>
@@ -94,28 +111,34 @@
     </div>
 </main>
 
+<!-- Add the following JavaScript to handle selection and border color -->
 <script>
-    // JavaScript to handle subscription option selection
-    const subscriptionOptions = document.querySelectorAll('.subscription-option');
-    subscriptionOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            // Remove 'selected' class from all options
-            subscriptionOptions.forEach(opt => opt.classList.remove('selected'));
+    // Get the card elements
+    const monthlyCard = document.getElementById('monthly-card');
+    const annualCard = document.getElementById('annual-card');
+    const monthlyRadio = document.getElementById('monthly-plan');
+    const annualRadio = document.getElementById('annual-plan');
 
-            // Add 'selected' class to the clicked option
-            option.classList.add('selected');
+    // Function to update selected card's border
+    function updateCardBorders() {
+        if (monthlyRadio.checked) {
+            monthlyCard.classList.add('selected');
+            annualCard.classList.remove('selected');
+        } else if (annualRadio.checked) {
+            annualCard.classList.add('selected');
+            monthlyCard.classList.remove('selected');
+        }
+    }
 
-            // Check the corresponding radio button
-            option.querySelector('.subscription-radio').checked = true;
-        });
-    });
+    // Add event listeners to update borders on change
+    monthlyRadio.addEventListener('change', updateCardBorders);
+    annualRadio.addEventListener('change', updateCardBorders);
+
+    // Initial update to ensure the correct border is applied on page load
+    updateCardBorders();
 </script>
 
-<style>
-    .subscription-option.selected {
-        border: 2px solid #007bff;
-    }
-</style>
+
 
 <footer th:replace="~{partials/footer}"></footer>
 </body>
