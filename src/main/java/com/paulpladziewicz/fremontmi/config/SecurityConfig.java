@@ -61,7 +61,7 @@ public class SecurityConfig {
                 .permitAll()
         );
         http.csrf((csrf) -> csrf
-                .ignoringRequestMatchers("/api/stripe/*")
+                .ignoringRequestMatchers("/api/stripe/*", "/login")
         );
         return http.build();
     }
