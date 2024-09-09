@@ -1,6 +1,7 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.CustomResponse;
+import com.paulpladziewicz.fremontmi.models.InvoiceDTO;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.models.SubscriptionDTO;
 import com.paulpladziewicz.fremontmi.services.StripeService;
@@ -65,38 +66,51 @@ public class BillingController {
     }
 
     @GetMapping("/invoices")
-    public ResponseEntity<String> getInvoices(@CookieValue(name = "customer") String customerId) throws StripeException {
-        // Create the parameters for fetching the invoices
-        InvoiceListParams params = InvoiceListParams.builder()
-                .setCustomer(customerId) // Filter invoices for this customer
-                //.setLimit(10) // Optional: Limit the number of invoices to return
-                .build();
+    public ResponseEntity<List<InvoiceDTO>> getInvoices() {
+        // Get the user's invoices using the service layer
+        ServiceResponse<List<Invoice>> getInvoicesResponse = stripeService.getInvoices();
 
-        // Fetch the invoices from Stripe
-        InvoiceCollection invoices = Invoice.list(params);
+        if (getInvoicesResponse.hasError()) {
+            return ResponseEntity.status(500).body(null); // Return 500 if there is an error
+        }
 
-        // Return the invoices as JSON
-        return ResponseEntity.ok(invoices.toJson());
+        // Map the list of invoices to DTOs for the response
+        List<InvoiceDTO> invoiceDTOs = getInvoicesResponse.value().stream()
+                .map(this::mapInvoiceToDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(invoiceDTOs); // Return the mapped invoice DTOs
     }
 
     @PostMapping("/cancel-subscription")
     public ResponseEntity<CustomResponse> cancelSubscription(@RequestBody CancelSubscriptionRequest request) {
         String subscriptionId = request.subscriptionId;
-        ServiceResponse<Boolean> cancelSubscriptionResponse = stripeService.cancelSubscription(subscriptionId);
+        ServiceResponse<Boolean> cancelSubscriptionResponse = stripeService.cancelSubscriptionAtPeriodEnd(subscriptionId);
 
         if (cancelSubscriptionResponse.hasError()) {
             return ResponseEntity.status(500)
                     .body(new CustomResponse(false, cancelSubscriptionResponse.errorCode()));
         }
 
-        return ResponseEntity.ok(new CustomResponse(true, "Subscription canceled successfully"));
+        return ResponseEntity.ok(new CustomResponse(true, "Subscription cancellation scheduled at period end."));
     }
 
-    // Webhook for Stripe events
+    @PostMapping("/resume-subscription")
+    public ResponseEntity<CustomResponse> resumeSubscription(@RequestBody CancelSubscriptionRequest request) {
+        String subscriptionId = request.subscriptionId;
+        ServiceResponse<Boolean> resumeSubscriptionResponse = stripeService.resumeSubscription(subscriptionId);
+
+        if (resumeSubscriptionResponse.hasError()) {
+            return ResponseEntity.status(500)
+                    .body(new CustomResponse(false, resumeSubscriptionResponse.errorCode()));
+        }
+
+        return ResponseEntity.ok(new CustomResponse(true, "Subscription resumed successfully."));
+    }
+
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
-        // Webhook handling code...
-        return ResponseEntity.ok("");
+        return stripeService.handleStripeWebhook(payload, sigHeader);
     }
 
     public SubscriptionDTO mapToDTO(Subscription subscription) {
@@ -125,6 +139,24 @@ public class BillingController {
 
         // Extract payment methods
         dto.setPaymentMethods(subscription.getPaymentSettings().getPaymentMethodTypes());
+
+        return dto;
+    }
+
+    public InvoiceDTO mapInvoiceToDTO(Invoice invoice) {
+        InvoiceDTO dto = new InvoiceDTO();
+        dto.setId(invoice.getId());
+        dto.setCustomerId(invoice.getCustomer());
+        dto.setStatus(invoice.getStatus());
+        dto.setAmountDue(invoice.getAmountDue());
+        dto.setAmountPaid(invoice.getAmountPaid());
+        dto.setAmountRemaining(invoice.getAmountRemaining());
+        dto.setCreated(invoice.getCreated());
+        dto.setCurrency(invoice.getCurrency());
+
+        if (invoice.getPaymentIntentObject() != null) {
+            dto.setPaymentIntent(invoice.getPaymentIntentObject().getId());
+        }
 
         return dto;
     }

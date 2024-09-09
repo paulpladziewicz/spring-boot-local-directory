@@ -3,12 +3,11 @@ package com.paulpladziewicz.fremontmi.services;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.models.UserProfile;
 import com.stripe.Stripe;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.*;
-import com.stripe.param.CustomerCreateParams;
-import com.stripe.param.PriceListParams;
-import com.stripe.param.SubscriptionCreateParams;
-import com.stripe.param.SubscriptionListParams;
+import com.stripe.net.Webhook;
+import com.stripe.param.*;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -191,6 +190,32 @@ public class StripeService {
         }
     }
 
+    public ServiceResponse<List<Invoice>> getInvoices() {
+        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
+
+        if (userProfileOptional.isEmpty()) {
+            return ServiceResponse.error("No user profile found");
+        }
+
+        UserProfile userProfile = userProfileOptional.get();
+
+        try {
+            // Create parameters to retrieve invoices for this customer
+            InvoiceListParams params = InvoiceListParams.builder()
+                    .setCustomer(userProfile.getStripeCustomerId()) // Filter by Stripe customer ID
+                    .build();
+
+            // Retrieve the invoices from Stripe
+            InvoiceCollection invoiceCollection = Invoice.list(params);
+
+            // Return the list of invoices
+            return ServiceResponse.value(invoiceCollection.getData());
+        } catch (StripeException e) {
+            logger.error("Error retrieving invoices from Stripe: ", e);
+            return ServiceResponse.error("STRIPE_INVOICE_RETRIEVAL_FAILED");
+        }
+    }
+
     public ServiceResponse<Boolean> isSubscriptionActive(String subscriptionId) {
         try {
             Subscription subscription = Subscription.retrieve(subscriptionId);
@@ -201,16 +226,111 @@ public class StripeService {
         }
     }
 
-    public ResponseEntity<String> getSubscriptions(@CookieValue(name = "customer") String customerId) throws StripeException {
-        SubscriptionListParams params = SubscriptionListParams.builder()
-                .setStatus(SubscriptionListParams.Status.ALL)
-                .setCustomer(customerId)
-                .addExpand("data.default_payment_method")
-                .build();
+    public ServiceResponse<Boolean> cancelSubscriptionAtPeriodEnd(String subscriptionId) {
+        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
 
-        SubscriptionCollection subscriptions = Subscription.list(params);
+        if (userProfileOptional.isEmpty()) {
+            return ServiceResponse.error("No user profile found");
+        }
 
-        return ResponseEntity.ok(subscriptions.toJson());
+        UserProfile userProfile = userProfileOptional.get();
+
+        if (userProfile.getStripeCustomerId() == null) {
+            return ServiceResponse.error("No Stripe customer ID found");
+        }
+
+        try {
+            // Retrieve the subscription
+            Subscription subscription = Subscription.retrieve(subscriptionId);
+
+            // Set the cancel_at_period_end flag to true
+            SubscriptionUpdateParams updateParams = SubscriptionUpdateParams.builder()
+                    .setCancelAtPeriodEnd(true)
+                    .build();
+
+            subscription.update(updateParams);
+            return ServiceResponse.value(true);
+        } catch (StripeException e) {
+            logger.error("Error setting cancel_at_period_end flag for subscription: ", e);
+            return ServiceResponse.error("STRIPE_SUBSCRIPTION_CANCELLATION_FAILED");
+        }
+    }
+
+    public ServiceResponse<Boolean> resumeSubscription(String subscriptionId) {
+        try {
+            // Retrieve the subscription
+            Subscription subscription = Subscription.retrieve(subscriptionId);
+
+            if (subscription.getCancelAtPeriodEnd()) {
+                // Unset the cancel_at_period_end flag
+                SubscriptionUpdateParams updateParams = SubscriptionUpdateParams.builder()
+                        .setCancelAtPeriodEnd(false)
+                        .build();
+
+                subscription.update(updateParams);
+                return ServiceResponse.value(true);
+            } else {
+                return ServiceResponse.error("Subscription is not set to cancel at period end.");
+            }
+        } catch (StripeException e) {
+            logger.error("Error resuming subscription: ", e);
+            return ServiceResponse.error("STRIPE_SUBSCRIPTION_RESUME_FAILED");
+        }
+    }
+
+    public ResponseEntity<String> handleStripeWebhook(String payload, String sigHeader) {
+        String webhookSecret = "your-webhook-signing-secret";  // Replace with your actual secret
+        try {
+            // Verify the Stripe event
+            Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
+
+            // Deserialize the event's data object
+            EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
+
+            // Handle different types of events
+            switch (event.getType()) {
+                case "invoice.payment_failed":
+                    Invoice failedInvoice = (Invoice) dataObjectDeserializer.getObject().orElse(null);
+                    if (failedInvoice != null) {
+                        //handlePaymentFailed(failedInvoice);
+                    }
+                    break;
+
+                case "payment_intent.succeeded":
+                    PaymentIntent paymentIntent = (PaymentIntent) dataObjectDeserializer.getObject().orElse(null);
+                    if (paymentIntent != null) {
+                        //handlePaymentSuccess(paymentIntent);
+                    }
+                    break;
+
+                case "customer.subscription.deleted":
+                    Subscription subscription = (Subscription) dataObjectDeserializer.getObject().orElse(null);
+                    if (subscription != null) {
+                        //handleSubscriptionCancellation(subscription);
+                    }
+                    break;
+
+                case "charge.dispute.created":
+                    Dispute dispute = (Dispute) dataObjectDeserializer.getObject().orElse(null);
+                    if (dispute != null) {
+                        //handleDisputeCreated(dispute);
+                    }
+                    break;
+
+                default:
+                    logger.info("Unhandled event type: {}", event.getType());
+            }
+
+            return ResponseEntity.ok("");
+        } catch (SignatureVerificationException e) {
+            // Invalid signature error, reject the request
+            logger.error("Invalid Stripe webhook signature: ", e);
+            return ResponseEntity.status(400).body("Invalid signature");
+        } catch (Exception e) {
+            // General error while processing the event
+            logger.error("Error handling Stripe webhook: ", e);
+            return ResponseEntity.status(400).body("Webhook handling error");
+        }
     }
 
     public ServiceResponse<Boolean> cancelSubscription(String subscriptionId) {
