@@ -30,6 +30,8 @@ public class Business {
 
     private List<String> tags = new ArrayList<>();
 
+    private List<String> adminIds = new ArrayList<>();
+
     private String address;
 
     private String phoneNumber;
@@ -48,7 +50,7 @@ public class Business {
 
     private String paymentIntentId;
 
-    private String paymentStatus;
+    private String paymentStatus = "incomplete";
 
     private LocalDateTime subscriptionEndTime;
 }

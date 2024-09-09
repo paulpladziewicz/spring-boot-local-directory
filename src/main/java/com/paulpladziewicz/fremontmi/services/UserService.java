@@ -218,6 +218,7 @@ public class UserService {
         return profile;
     }
 
+    // TODO not good, this did not save all the values I wanted it to and the abstraction should be removed
     private void updateProfileDetails(UserProfile existingProfile, UserProfile updatedProfile) {
         existingProfile.setFirstName(updatedProfile.getFirstName());
         existingProfile.setLastName(updatedProfile.getLastName());

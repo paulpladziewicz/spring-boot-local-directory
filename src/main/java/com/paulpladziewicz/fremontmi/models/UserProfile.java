@@ -26,6 +26,12 @@ public class UserProfile {
 
     private List<String> eventAdminIds = new ArrayList<>();
 
+    private List<String> eventIds = new ArrayList<>();
+
+    private List<String> businessIds = new ArrayList<>();
+
+    private List<String> neighborServiceIds = new ArrayList<>();
+
     private String stripeCustomerId;
 
     private LocalDateTime termsAcceptedAt;

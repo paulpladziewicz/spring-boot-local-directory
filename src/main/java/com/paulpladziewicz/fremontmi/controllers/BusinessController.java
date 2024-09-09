@@ -138,6 +138,22 @@ public class BusinessController {
         return "businesses/business-page";
     }
 
+    @GetMapping("/my/businesses")
+    public String getMyBusinesses(Model model) {
+        ServiceResponse<List<Business>> serviceResponse = businessService.findBusinessesByUser();
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("generalError", true);
+            return "businesses/businesses";
+        }
+
+        List<Business> businesses = serviceResponse.value();
+
+        model.addAttribute("businesses", businesses);
+
+        return "businesses/my-businesses";
+    }
+
     @GetMapping("/edit/business/{id}")
     public String editBusiness(@PathVariable String id, Model model) {
         Optional<Business> businessOptional = businessService.findBusinessById(id);
@@ -151,6 +167,26 @@ public class BusinessController {
 
         model.addAttribute("business", business);
 
-        return "businesses/business-edit";
+        return "businesses/edit-business";
+    }
+
+    @PostMapping("/edit/business")
+    public String updateBusiness(@Valid @ModelAttribute("business") Business business, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "businesses/edit-business";
+        }
+
+        ServiceResponse<Business> serviceResponse = businessService.updateBusiness(business);
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "businesses/edit-business";
+        }
+
+        Business updatedBusiness = serviceResponse.value();
+
+        model.addAttribute("business", updatedBusiness);
+
+        return "businesses/business-page";
     }
 }

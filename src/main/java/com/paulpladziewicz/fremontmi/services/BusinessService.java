@@ -3,11 +3,14 @@ package com.paulpladziewicz.fremontmi.services;
 import com.paulpladziewicz.fremontmi.models.Business;
 import com.paulpladziewicz.fremontmi.models.PaymentRequest;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
+import com.paulpladziewicz.fremontmi.models.UserProfile;
 import com.paulpladziewicz.fremontmi.repositories.BusinessRepository;
+import com.stripe.model.PaymentIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,7 +44,31 @@ public class BusinessService {
         business.setStripeSubscriptionId((String) serviceResponse.value().get("subscriptionId"));
 
         try {
-            return ServiceResponse.value(businessRepository.save(business));
+            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+
+            if (optionalUserProfile.isEmpty()) {
+                return ServiceResponse.error("user_profile_not_found");
+            }
+
+            UserProfile userProfile = optionalUserProfile.get();
+
+            ServiceResponse<Business> saveBusinessResponse = ServiceResponse.value(businessRepository.save(business));
+
+            if (saveBusinessResponse.hasError()) {
+                return ServiceResponse.error(saveBusinessResponse.errorCode());
+            }
+
+            Business savedBusiness = saveBusinessResponse.value();
+
+            userProfile.getBusinessIds().add(savedBusiness.getId());
+
+            ServiceResponse<UserProfile> saveUserProfileResponse =  userService.saveUserProfile(userProfile);
+
+            if (saveUserProfileResponse.hasError()) {
+                return ServiceResponse.error(saveUserProfileResponse.errorCode());
+            }
+
+            return ServiceResponse.value(savedBusiness);
         } catch (DataAccessException e) {
             logger.error("Database access error when trying to create a business", e);
             return ServiceResponse.error("database_access_exception");
@@ -68,10 +95,17 @@ public class BusinessService {
 
         Business business = optionalBusiness.get();
 
-        business.setPaymentIntentId(paymentIntentId);
-        business.setPaymentStatus(paymentStatus);
+        ServiceResponse<PaymentIntent> serviceResponse = stripeService.retrievePaymentIntent(paymentIntentId);
+        if (serviceResponse.hasError()) {
+            return ServiceResponse.error(serviceResponse.errorCode());
+        }
 
-        if (paymentStatus.equals("succeeded")) {
+        PaymentIntent paymentIntent = serviceResponse.value();
+
+        business.setPaymentIntentId(paymentIntent.getId());
+        business.setPaymentStatus(paymentIntent.getStatus());
+
+        if (paymentIntent.getStatus().equals("succeeded")) {
             business.setStatus("active");
         } else {
             business.setStatus("inactive");
@@ -110,6 +144,71 @@ public class BusinessService {
         } catch (Exception e) {
             logger.error("Unexpected error when trying to create a business", e);
             return Optional.empty();
+        }
+    }
+
+    public ServiceResponse<List<Business>> findBusinessesByUser () {
+        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+
+        if (optionalUserProfile.isEmpty()) {
+            ServiceResponse.error("user_profile_not_found");
+        }
+
+        UserProfile userProfile = optionalUserProfile.get();
+
+        try {
+            return ServiceResponse.value(businessRepository.findAllById(userProfile.getBusinessIds()));
+        } catch (DataAccessException e) {
+            logger.error("Database access error when trying to retrieve all businesses for the user", e);
+            return ServiceResponse.error("database_access_exception");
+        } catch (Exception e) {
+            logger.error("Unexpected error when trying to retrieve all businesses for the user", e);
+            return ServiceResponse.error("unexpected_error");
+        }
+    }
+
+    public ServiceResponse<Business> updateBusiness(Business business) {
+        try {
+            return ServiceResponse.value(businessRepository.save(business));
+        } catch (DataAccessException e) {
+            logger.error("Database access error when trying to update a business", e);
+            return ServiceResponse.error("database_access_exception");
+        } catch (Exception e) {
+            logger.error("Unexpected error when trying to update a business", e);
+            return ServiceResponse.error("unexpected_error");
+        }
+    }
+
+    public ServiceResponse<Boolean> deleteBusiness(String businessId) {
+        Optional<Business> optionalBusiness = findBusinessById(businessId);
+
+        if (optionalBusiness.isEmpty()) {
+            return ServiceResponse.error("business_not_found");
+        }
+
+        Business business = optionalBusiness.get();
+
+        if (business.getStripeSubscriptionId() != null && !business.getStripeSubscriptionId().isEmpty()) {
+            ServiceResponse<Boolean> isSubscriptionActiveResponse = stripeService.isSubscriptionActive(business.getStripeSubscriptionId());
+
+            if (isSubscriptionActiveResponse.hasError()) {
+                return ServiceResponse.error(isSubscriptionActiveResponse.errorCode());
+            }
+
+            if (isSubscriptionActiveResponse.value()) {
+                return ServiceResponse.error("subscription_still_active");
+            }
+        }
+
+        try {
+            businessRepository.deleteById(businessId);
+            return ServiceResponse.value(true);
+        } catch (DataAccessException e) {
+            logger.error("Database access error when trying to delete a business", e);
+            return ServiceResponse.error("database_access_exception");
+        } catch (Exception e) {
+            logger.error("Unexpected error when trying to delete a business", e);
+            return ServiceResponse.error("unexpected_error");
         }
     }
 }

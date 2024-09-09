@@ -84,8 +84,9 @@
             });
 
             if (response.ok) {
-                response = await response.json();
-                window.location.href = response.redirectURL;
+                const { redirectUrl } = await response.json();
+
+                window.location.href = redirectUrl;
             } else {
                 // Handle the error from the backend
                 document.getElementById("error-message").innerText = "Payment was successful, but there was an error updating your subscription. Please contact support.";
