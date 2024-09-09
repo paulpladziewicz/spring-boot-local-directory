@@ -45,12 +45,14 @@
         // Fetch the list of subscriptions for this customer.
         const response = await fetch('/api/stripe/subscriptions').then((r) => r.json());
 
-        // Construct and display each subscription, its status, last4 of the card
-        // used, and the current period end.
+        // Construct and display each subscription, its status, and the current period end.
         const subscriptionsDiv = document.querySelector('#subscriptions');
-        subscriptionsDiv.innerHTML = response.data.map((subscription) => {
-            let last4 = subscription.default_payment_method?.card?.last4 || '';
-            let statusBadgeClass = subscription.status === 'active' ? 'bg-success' : 'bg-warning';
+        subscriptionsDiv.innerHTML = response.map((subscription) => {
+            // Since you don't have a `last4` field, we will display the payment method type instead.
+            let paymentMethod = subscription.paymentMethods.length > 0 ? subscription.paymentMethods[0] : 'N/A';
+
+            // Use status to determine badge class
+            let statusBadgeClass = subscription.status === 'active' ? 'bg-success' : (subscription.status === 'incomplete' ? 'bg-warning' : 'bg-danger');
 
             return `
         <div class="col">
@@ -59,23 +61,52 @@
                     <h5 class="card-title">Subscription ID: ${subscription.id}</h5>
                     <span class="badge ${statusBadgeClass}">${subscription.status}</span>
                     <p class="card-text mt-3">
-                        <strong>Card last4:</strong> ${last4 || 'N/A'}
+                        <strong>Payment Method:</strong> ${paymentMethod}
                     </p>
                     <p class="card-text">
-                        <strong>Current Period End:</strong> ${new Date(subscription.current_period_end * 1000).toLocaleDateString()}
+                        <strong>Current Period End:</strong> ${new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString()}
                     </p>
-                    <a href="/stripe/cancel?subscription=${subscription.id}" class="btn btn-outline-danger">Cancel Subscription</a>
+                    <button class="btn btn-outline-danger cancel-subscription-btn" data-subscription-id="${subscription.id}">Cancel Subscription</button>
                 </div>
                 <div class="card-footer">
-                    <small class="text-muted">If last4 is blank, ensure webhooks are being handled properly.</small>
+                    <small class="text-muted">Payment method displayed as type (e.g., card).</small>
                 </div>
             </div>
         </div>
       `;
         }).join('');
-    });
 
+        // Add event listeners to the cancel buttons
+        const cancelButtons = document.querySelectorAll('.cancel-subscription-btn');
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', async (event) => {
+                const subscriptionId = event.target.getAttribute('data-subscription-id');
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+
+                // Send POST request to cancel the subscription
+                const cancelResponse = await fetch('/api/stripe/cancel-subscription', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken,
+                    },
+                    body: JSON.stringify({ subscriptionId: subscriptionId })
+                });
+
+                if (cancelResponse.ok) {
+                    alert('Subscription canceled successfully!');
+                    // Optionally, refresh the page or remove the canceled subscription from the UI
+                    location.reload();
+                } else {
+                    alert('Failed to cancel the subscription. Please try again.');
+                }
+            });
+        });
+    });
 </script>
+
+
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
         // Fetch the list of invoices for this customer.
@@ -107,6 +138,7 @@
         }).join('');
     });
 </script>
+
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
         // Fetch the ID of the subscription from the query string

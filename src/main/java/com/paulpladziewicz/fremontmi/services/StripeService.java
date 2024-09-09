@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.awt.desktop.OpenFilesEvent;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -167,6 +168,29 @@ public class StripeService {
         }
     }
 
+    public ServiceResponse<List<Subscription>> getSubscriptions() {
+        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
+
+        if (userProfileOptional.isEmpty()) {
+            return ServiceResponse.error("No user profile found");
+        }
+
+        UserProfile userProfile = userProfileOptional.get();
+
+        try {
+            SubscriptionListParams params = SubscriptionListParams.builder()
+                    .setStatus(SubscriptionListParams.Status.ALL)
+                    .setCustomer(userProfile.getStripeCustomerId())
+                    .addExpand("data.default_payment_method")
+                    .build();
+            SubscriptionCollection subscriptions = Subscription.list(params);
+            return ServiceResponse.value(subscriptions.getData());
+        } catch (StripeException e) {
+            logger.error("Error retrieving subscriptions from Stripe: ", e);
+            return ServiceResponse.error("STRIPE_SUBSCRIPTION_RETRIEVAL_FAILED");
+        }
+    }
+
     public ServiceResponse<Boolean> isSubscriptionActive(String subscriptionId) {
         try {
             Subscription subscription = Subscription.retrieve(subscriptionId);
@@ -189,11 +213,50 @@ public class StripeService {
         return ResponseEntity.ok(subscriptions.toJson());
     }
 
-    public ResponseEntity<String> cancelSubscription(@RequestBody CancelSubscriptionRequest request) throws StripeException {
-        Subscription subscription = Subscription.retrieve(request.subscriptionId);
-        Subscription canceledSubscription = subscription.cancel();
+    public ServiceResponse<Boolean> cancelSubscription(String subscriptionId) {
+        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
 
-        return ResponseEntity.ok(canceledSubscription.toJson());
+        if (userProfileOptional.isEmpty()) {
+            return ServiceResponse.error("No user profile found");
+        }
+
+        UserProfile userProfile = userProfileOptional.get();
+
+        if (userProfile.getStripeCustomerId() == null) {
+            return ServiceResponse.error("No Stripe customer ID found");
+        }
+
+        try {
+            SubscriptionListParams params = SubscriptionListParams.builder()
+                    .setStatus(SubscriptionListParams.Status.ALL)
+                    .setCustomer(userProfile.getStripeCustomerId())
+                    .build();
+            SubscriptionCollection subscriptions = Subscription.list(params);
+
+            if (subscriptions.getData().isEmpty()) {
+                return ServiceResponse.error("No subscriptions found");
+            }
+
+            boolean subscriptionFound = false;
+
+            for (Subscription subscription : subscriptions.getData()) {
+                if (subscription.getId().equals(subscriptionId)) {
+                    subscriptionFound = true;
+                    break;
+                }
+            }
+
+            if (!subscriptionFound) {
+                return ServiceResponse.error("Subscription not found");
+            }
+
+            Subscription subscription = Subscription.retrieve(subscriptionId);
+            subscription.cancel();
+            return ServiceResponse.value(true);
+        } catch (StripeException e) {
+            logger.error("Error canceling subscription: ", e);
+            return ServiceResponse.error("STRIPE_SUBSCRIPTION_CANCELLATION_FAILED");
+        }
     }
 }
 
