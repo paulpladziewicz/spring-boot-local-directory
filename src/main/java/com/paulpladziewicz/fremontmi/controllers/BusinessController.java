@@ -228,4 +228,16 @@ public class BusinessController {
 
         return "businesses/business-page";
     }
+
+    @PostMapping("/delete/business")
+    public String deleteBusiness(@RequestParam("businessId") String businessId, Model model) {
+        ServiceResponse<Boolean> serviceResponse = businessService.deleteBusiness(businessId);
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "businesses/my-businesses";
+        }
+
+        return "redirect:/my/businesses";
+    }
 }
