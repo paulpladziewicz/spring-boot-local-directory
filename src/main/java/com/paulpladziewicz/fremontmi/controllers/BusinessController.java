@@ -30,7 +30,7 @@ public class BusinessController {
     }
 
     @PostMapping("/create/business/form")
-    public String createBusinessListingView(@RequestParam("priceId") String priceId, Model model) {
+    public String createBusinessListingView(@RequestParam("priceId") String priceId, @RequestParam(value = "businessId", required = false) String existingBusinessId, Model model) {
         // shows outstanding businesses to continue with or resub
         // option to create a new business
         // form post back to the same to setup the form, whether with an existing business or new business
@@ -43,6 +43,45 @@ public class BusinessController {
         if (!priceId.equals("price_1Pv7V0BCHBXtJFxOinfPKMUE") && !priceId.equals("price_1Pv7XIBCHBXtJFxOUIvRA6Xf")) {
             model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
             return "businesses/business-create-overview";
+        }
+
+        if (existingBusinessId != null && !existingBusinessId.isEmpty() && !existingBusinessId.trim().isEmpty()) {
+
+            Optional<Business> optionalBusiness = businessService.findBusinessById(existingBusinessId);
+
+            if (optionalBusiness.isEmpty()) {
+                model.addAttribute("errorMessage", "Business not found. Please refresh the page and try again.");
+                return "businesses/business-create-overview";
+            }
+
+            Business existingBusiness = optionalBusiness.get();
+
+            existingBusiness.setSubscriptionPriceId(priceId);
+
+            model.addAttribute("business", existingBusiness);
+            return "businesses/business-create-form";
+        }
+
+        ServiceResponse<List<Business>> findBusinessesByUserResponse = businessService.findBusinessesByUser();
+
+        if (findBusinessesByUserResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "businesses/business-create-overview";
+        }
+
+        List<Business> businesses = findBusinessesByUserResponse.value();
+        List<Business> incompleteBusinesses = new ArrayList<>();
+
+        for (Business business : businesses) {
+            if (business.getStatus().equals("incomplete")) {
+                incompleteBusinesses.add(business);
+            }
+        }
+
+        if (!incompleteBusinesses.isEmpty()) {
+            model.addAttribute("priceId", priceId);
+            model.addAttribute("incompleteBusinesses", incompleteBusinesses);
+            return "businesses/business-continue-progress";
         }
 
         Business business = new Business();

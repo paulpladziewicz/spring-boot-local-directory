@@ -12,6 +12,7 @@
             <div class="col-12 col-md-10 col-lg-8">
                 <h1>Create Business Listing</h1>
                 <form id="create-business-form" th:action="@{/create/business/subscription}" th:object="${business}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                    <input type="hidden" th:if="${business.id != null}" th:field="*{id}">
                     <input type="hidden" th:field="*{subscriptionPriceId}">
 
                     <div class="form-group mb-2">

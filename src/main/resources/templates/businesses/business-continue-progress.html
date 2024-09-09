@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - Businesses')}"><title>Placeholder Title</title></head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+<main>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 mx-auto text-center">
+                <h1 class="display-3">Continue Where You Left Off</h1>
+                <p class="lead">These business listings are incomplete. You can continue where you left off or create a new business listing</p>
+            </div>
+        </div>
+        <div class="row">
+            <div th:each="business : ${incompleteBusinesses}" class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${business.name}">Business Name</h5>
+                        <p class="card-text" th:text="${business.description}">Business description here...</p>
+                        <form th:action="@{/create/business/form}" method="post">
+                            <input type="hidden" name="priceId" th:value="${priceId}" />
+                            <input type="hidden" name="businessId" th:value="${business.id}"/>
+                            <button type="submit" class="btn btn-primary">Continue</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{partials/footer}"></footer>
+</body>
+</html>

@@ -40,7 +40,7 @@ public class Business {
 
     private String website;
 
-    private String status;
+    private String status = "incomplete";
 
     private String clientSecret;
 
