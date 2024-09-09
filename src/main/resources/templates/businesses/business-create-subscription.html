@@ -11,8 +11,7 @@
                 <p class="mb-2">You are paying for the <strong th:text="${planName}"></strong> plan at <strong th:text="${price}">.</strong></p>
                 <p><a href="/" class="btn btn-link fw-semibold fs-sm p-0 mb-4">Change Subscription</a></p>
 
-                <form id="payment-form" class="my-4" th:object="${business}">
-                    <input type="hidden" id="clientSecret" th:value="*{clientSecret}" />
+                <form id="payment-form" class="my-4">
                     <div id="payment-element"></div>
                     <div id="error-message" class="alert alert-danger mt-3" role="alert" style="display:none;"></div>
                     <button id="submit-button" class="btn btn-primary mt-4" type="submit">Submit Payment</button>
@@ -22,12 +21,14 @@
     </div>
 </main>
 
-<script>
-    const clientSecret = document.querySelector('#clientSecret').value;
+<script th:inline="javascript">
+    const clientSecret = /*[[${business.clientSecret}]]*/ 'undefined';
+    const businessId = /*[[${business.id}]]*/ 'undefined';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
     const stripe = Stripe("pk_test_51KCrhcBCHBXtJFxOMYJo8xRymfT9m3PvrruBp7gZmcvCV2vpYnMH8EdkwVeibCrtj5bwNhhuAj5MzWU1NXtq6iBs000IzgImdE");
 
     const elements = stripe.elements({ clientSecret });
-
     const paymentElement = elements.create("payment");
     paymentElement.mount("#payment-element");
 
@@ -38,20 +39,65 @@
         event.preventDefault();
         submitButton.disabled = true;
 
-        const {error} = await stripe.confirmPayment({
-            clientSecret: "your-client-secret",
+        const {error: submitError} = await elements.submit();
+
+        if (submitError) {
+            document.getElementById("error-message").innerText = submitError.message;
+            document.getElementById("error-message").style.display = 'block';
+            submitButton.disabled = false;
+            return;  // Stop the form submission if there's an error
+        }
+
+        const {error, paymentIntent} = await stripe.confirmPayment({
+            clientSecret: clientSecret,
             elements,
             confirmParams: {
+                // return_url: "https://fremontmi.com/error?stripe-redirect=true",
                 return_url: "http://localhost:8080/payment-success",
             },
+            redirect: "if_required"
         });
 
         if (error) {
             document.getElementById("error-message").innerText = error.message;
             document.getElementById("error-message").style.display = 'block';
             submitButton.disabled = false;
+        } else {
+            // Payment was successful
+            sendPaymentStatusToServer(paymentIntent);
         }
     });
+
+    async function sendPaymentStatusToServer(paymentIntent) {
+        try {
+            let response = await fetch("/create/business/subscription/success", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [csrfHeader]: csrfToken,
+                },
+                body: JSON.stringify({
+                    id: businessId,
+                    paymentIntentId: paymentIntent.id,
+                    paymentStatus: paymentIntent.status,
+                }),
+            });
+
+            if (response.ok) {
+                response = await response.json();
+                window.location.href = response.redirectURL;
+            } else {
+                // Handle the error from the backend
+                document.getElementById("error-message").innerText = "Payment was successful, but there was an error updating your subscription. Please contact support.";
+                document.getElementById("error-message").style.display = 'block';
+            }
+        } catch (error) {
+            document.getElementById("error-message").innerText = "There was an issue processing your payment. Please try again.";
+            document.getElementById("error-message").style.display = 'block';
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
 </script>
 
 <footer th:replace="~{partials/footer}"></footer>

@@ -1,11 +1,13 @@
 package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.models.Business;
+import com.paulpladziewicz.fremontmi.models.PaymentRequest;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.repositories.BusinessRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +39,43 @@ public class BusinessService {
 
         business.setClientSecret((String) serviceResponse.value().get("clientSecret"));
         business.setStripeSubscriptionId((String) serviceResponse.value().get("subscriptionId"));
+
+        try {
+            return ServiceResponse.value(businessRepository.save(business));
+        } catch (DataAccessException e) {
+            logger.error("Database access error when trying to create a business", e);
+            return ServiceResponse.error("database_access_exception");
+        } catch (Exception e) {
+            logger.error("Unexpected error when trying to create a business", e);
+            return ServiceResponse.error("unexpected_error");
+        }
+    }
+
+    public ServiceResponse<Business> handleSubscriptionSuccess(PaymentRequest paymentRequest) {
+        String businessId = paymentRequest.getId();
+        String paymentIntentId = paymentRequest.getPaymentIntentId();
+        String paymentStatus = paymentRequest.getPaymentStatus();
+
+        if (businessId == null || businessId.isEmpty() || paymentIntentId == null || paymentIntentId.isEmpty() || paymentStatus == null || paymentStatus.isEmpty()) {
+            return ServiceResponse.error("required_info_not_correct");
+        }
+
+        Optional<Business> optionalBusiness = businessRepository.findById(businessId);
+
+        if (optionalBusiness.isEmpty()) {
+            return ServiceResponse.error("business_not_found");
+        }
+
+        Business business = optionalBusiness.get();
+
+        business.setPaymentIntentId(paymentIntentId);
+        business.setPaymentStatus(paymentStatus);
+
+        if (paymentStatus.equals("succeeded")) {
+            business.setStatus("active");
+        } else {
+            business.setStatus("inactive");
+        }
 
         try {
             return ServiceResponse.value(businessRepository.save(business));

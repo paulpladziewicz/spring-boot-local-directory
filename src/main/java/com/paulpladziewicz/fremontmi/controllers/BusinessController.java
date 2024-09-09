@@ -1,17 +1,19 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.Business;
+import com.paulpladziewicz.fremontmi.models.PaymentRequest;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.services.BusinessService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 public class BusinessController {
@@ -22,13 +24,17 @@ public class BusinessController {
         this.businessService = businessService;
     }
 
-    @GetMapping("/create/business-listing-overview")
+    @GetMapping("/create/business/overview")
     public String createBusinessListingOverview(Model model) {
         return "businesses/business-create-overview";
     }
 
-    @PostMapping("/start/business-listing")
+    @PostMapping("/create/business/form")
     public String createBusinessListingView(@RequestParam("priceId") String priceId, Model model) {
+        // shows outstanding businesses to continue with or resub
+        // option to create a new business
+        // form post back to the same to setup the form, whether with an existing business or new business
+        // following the pricing choice in the beginning of the flow
         if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
             model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
             return "businesses/business-create-overview";
@@ -47,7 +53,7 @@ public class BusinessController {
         return "businesses/business-create-form";
     }
 
-    @PostMapping("/create/business-listing")
+    @PostMapping("/create/business/subscription")
     public String createBusinessListing(@Valid @ModelAttribute("business") Business business, BindingResult result, Model model) {
         if (result.hasErrors()) {
             return "businesses/business-create-form";
@@ -79,6 +85,25 @@ public class BusinessController {
         model.addAttribute("price", "$10/month");
 
         return "businesses/business-create-subscription";
+    }
+
+    @PostMapping("/create/business/subscription/success")
+    @ResponseBody
+    public ResponseEntity<?> handleSubscriptionSuccess(@RequestBody PaymentRequest paymentRequest) {
+        ServiceResponse<Business> serviceResponse = businessService.handleSubscriptionSuccess(paymentRequest);
+
+        if (serviceResponse.hasError()) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Collections.singletonMap("error", serviceResponse.errorCode()));
+        }
+
+        Business business = serviceResponse.value();
+
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("redirectUrl", "/businesses/" + business.getId());
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @GetMapping("/businesses")

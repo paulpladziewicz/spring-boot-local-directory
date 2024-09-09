@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.stripe.exception.StripeException;
 import com.stripe.model.*;
+import com.stripe.param.InvoiceListParams;
 import com.stripe.param.SubscriptionListParams;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,21 @@ public class StripeController {
         SubscriptionCollection subscriptions = Subscription.list(params);
 
         return ResponseEntity.ok(subscriptions.toJson());
+    }
+
+    @GetMapping("/invoices")
+    public ResponseEntity<String> getInvoices(@CookieValue(name = "customer") String customerId) throws StripeException {
+        // Create the parameters for fetching the invoices
+        InvoiceListParams params = InvoiceListParams.builder()
+                .setCustomer(customerId) // Filter invoices for this customer
+                //.setLimit(10) // Optional: Limit the number of invoices to return
+                .build();
+
+        // Fetch the invoices from Stripe
+        InvoiceCollection invoices = Invoice.list(params);
+
+        // Return the invoices as JSON
+        return ResponseEntity.ok(invoices.toJson());
     }
 
     @PostMapping("/cancel-subscription")

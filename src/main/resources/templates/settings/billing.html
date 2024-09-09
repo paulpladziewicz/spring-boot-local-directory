@@ -24,16 +24,21 @@
         <div class="card-body">
             <div class="d-flex align-items-center mt-sm-n1 mb-0 mb-lg-1 mb-xl-3">
                 <i class="ai-wallet text-primary lead pe-1 me-2"></i>
-                <h2 class="h4 mb-0">Billing Info</h2>
+                <h2 class="h4 mb-0">Billing</h2>
             </div>
 
             <h3 class="mt-4">Subscriptions</h3>
-
             <div id="subscriptions" class="row row-cols-1 row-cols-md-2 g-4">
             </div>
+
+            <h3 class="mt-4">History</h3>
+            <div id="invoices"></div>
         </div>
     </section>
 </div>
+
+<!--Manage Automatic Payments-->
+<!--Allow users to toggle whether or not they want automatic payments enabled (Stripe supports this via the cancel_at_period_end property).-->
 
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
@@ -70,6 +75,37 @@
         }).join('');
     });
 
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Fetch the list of invoices for this customer.
+        const response = await fetch('/api/stripe/invoices').then((r) => r.json());
+
+        const invoicesDiv = document.querySelector('#invoices');
+        invoicesDiv.innerHTML = response.data.map((invoice) => {
+            let statusBadgeClass = invoice.status === 'paid' ? 'bg-success' : (invoice.status === 'open' ? 'bg-warning' : 'bg-danger');
+            let amount = (invoice.amount_due / 100).toFixed(2); // Convert from cents to dollars
+            let date = new Date(invoice.created * 1000).toLocaleDateString();
+
+            return `
+        <div class="col">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Invoice ID: ${invoice.id}</h5>
+                    <span class="badge ${statusBadgeClass}">${invoice.status}</span>
+                    <p class="card-text mt-3">
+                        <strong>Amount:</strong> $${amount}
+                    </p>
+                    <p class="card-text">
+                        <strong>Date:</strong> ${date}
+                    </p>
+                    <a href="${invoice.hosted_invoice_url}" target="_blank" class="btn btn-outline-primary">View Invoice</a>
+                </div>
+            </div>
+        </div>
+      `;
+        }).join('');
+    });
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', async () => {

@@ -42,7 +42,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers(HttpMethod.POST, "/register", "/contact", "/subscribe", "/api/stripe/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/stripe/**").permitAll()
-                .requestMatchers("/groups/","/groups/**","/events","/events/**", "/register", "/forgot-password", "/reset-password", "/forgot-username", "/css/**", "/privacy-policy", "/terms-of-service", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/groups/","/groups/**","/events","/events/**", "/register", "/forgot-password", "/reset-password", "/forgot-username", "/css/**", "/privacy-policy", "/terms-of-service", "/js/**", "/images/**", "/favicon.ico", "/error", "/login?error").permitAll()
                 .anyRequest().authenticated()
         );
         http.formLogin(formLogin -> formLogin
@@ -50,6 +50,9 @@ public class SecurityConfig {
                 .permitAll()
                 .failureHandler(customAuthenticationFailureHandler())
                 .successHandler(savedRequestAwareAuthenticationSuccessHandler())
+        );
+        http.requestCache(requestCacheCustomizer -> requestCacheCustomizer
+                .requestCache(new CustomRequestCache())
         );
         http.logout(logout -> logout
                 .logoutSuccessUrl("/")

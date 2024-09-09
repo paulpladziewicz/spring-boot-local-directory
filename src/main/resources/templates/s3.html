@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>S3 File Upload</title>
+</head>
+<body>
+<h1>Upload File to S3</h1>
+
+<form th:action="@{/upload}" method="post" enctype="multipart/form-data">
+
+    <input type="file" name="file"/>
+    <button type="submit">Upload</button>
+</form>
+
+<h2>Files in S3 Bucket:</h2>
+<ul>
+    <li th:each="file : ${files}" th:text="${file}"></li>
+</ul>
+</body>
+</html>

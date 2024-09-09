@@ -15,7 +15,10 @@
         </div>
 
         <div class="row">
-            <div th:if="${#lists.isEmpty(groups)}" class="my-4">
+            <div class="alert d-flex alert-danger" role="alert">
+                <i class="ai-circle-slash fs-xl pe-1 me-2"></i>
+                <div>A simple danger alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.</div>
+            </div>            <div th:if="${#lists.isEmpty(groups)}" class="my-4">
                 <div>
                     There are no groups available at the moment.
                 </div>

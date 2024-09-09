@@ -17,6 +17,7 @@
                 <p class="pb-3 mb-3">Don't have an account yet?&nbsp;&nbsp;<a href="/register">Register here!</a></p>
 
                 <div th:if="${param.error}" class="alert alert-danger" role="alert">
+<!--                    <p>[[${session.SPRING_SECURITY_LAST_EXCEPTION.message}]]</p>-->
                     Invalid username or password. Please try again.
                 </div>
 

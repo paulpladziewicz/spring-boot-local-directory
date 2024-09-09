@@ -46,5 +46,9 @@ public class Business {
 
     private String stripeSubscriptionId;
 
+    private String paymentIntentId;
+
+    private String paymentStatus;
+
     private LocalDateTime subscriptionEndTime;
 }
