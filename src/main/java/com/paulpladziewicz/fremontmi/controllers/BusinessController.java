@@ -113,7 +113,7 @@ public class BusinessController {
         ServiceResponse<Business> serviceResponse = businessService.createBusiness(business);
 
         if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
+            model.addAttribute("generalError", true);
             return "events/create-event";
         }
 

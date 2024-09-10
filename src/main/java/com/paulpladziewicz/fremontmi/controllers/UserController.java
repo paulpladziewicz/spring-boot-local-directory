@@ -96,21 +96,21 @@ public class UserController {
     }
 
     @PostMapping("/my/settings")
-    public String updateSettings(@ModelAttribute("userDetails") @Valid UserProfile userProfile, BindingResult result, Model model) {
+    public String updateSettings(@ModelAttribute("userProfile") @Valid UserProfile userProfile, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            model.addAttribute("userDetails", userProfile);
+            model.addAttribute("userProfile", userProfile);
             return "settings/profile";
         }
         ServiceResponse<UserProfile> serviceResponse = userService.updateUserProfile(userProfile);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("isSuccess", false);
-            model.addAttribute("userDetails", userProfile);
+            model.addAttribute("userProfile", userProfile);
             return "settings/profile";
         }
 
         model.addAttribute("isSuccess", true);
-        model.addAttribute("userDetails", serviceResponse.value());
+        model.addAttribute("userProfile", serviceResponse.value());
 
         return "settings/profile";
     }

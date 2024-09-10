@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('FremontMI - NeighborServices™')}"><title>Placeholder Title</title></head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+<main>
+    <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+    <p th:if="${generalError}">Something bad happened</p>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 mx-auto text-center">
+                <h1 class="display-3">Start a NeighborService™</h1>
+                <p class="lead">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur atque commodi dolor impedit inventore laboriosam libero perferendis possimus sequi vero!</p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="steps steps-no-connector">
+
+                    <div class="step active">
+                        <div class="step-number">
+                            <div class="step-number-inner">01</div>
+                        </div>
+                        <div class="step-body">
+                            <h5 class="pb-1 mb-2">Overview & Pricing</h5>
+                            <p class="mb-0">
+                                Select a subscription plan for your business listing, either monthly or annually. Each subscription applies to a single business listing.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">
+                            <div class="step-number-inner">02</div>
+                        </div>
+                        <div class="step-body">
+                            <h5 class="pb-1 mb-2">Create Your Business Listing</h5>
+                            <p class="mb-0">
+                                Fill in your core business details with a simple form. This information will help customers understand what your business provides and find you easily.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">
+                            <div class="step-number-inner">03</div>
+                        </div>
+                        <div class="step-body">
+                            <h5 class="pb-1 mb-2">Complete Your Subscription</h5>
+                            <p class="mb-0">
+                                Enter your payment details to activate your subscription. Once your subscription is active, your business will be listed on the platform and ready to be discovered. Customers can reach out to you directly through a built-in contact form, with inquiries sent straight to your inbox.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Subscription Form Section -->
+            <div class="col-md-6">
+                <form th:action="@{/create/neighbor-service/form}" method="post">
+                    <!-- Monthly Plan Card -->
+                    <div class="card border-0 bg-secondary rounded-4 position-relative mb-3 subscription-option" style="cursor: pointer;" id="monthly-card">
+                        <div class="card-body d-sm-flex align-items-start text-center text-sm-start">
+                            <input type="radio" name="priceId" value="price_1Pv7TzBCHBXtJFxOWmV5PE4h" id="monthly-plan" class="me-3 subscription-radio" style="display: none;" />
+                            <label for="monthly-plan" class="w-100" style="cursor: pointer;">
+                                <div class="w-100 pe-sm-4 mb-3 mb-sm-0" style="max-width: 27rem;">
+                                    <h3 class="mb-2">Monthly Subscription</h3>
+                                    <p class="fs-lg mb-0">Subscribe monthly to get listed and renew your subscription each month.</p>
+                                </div>
+                                <div class="w-100 pe-sm-3 mx-auto me-sm-0 mb-3 mb-sm-0" style="max-width: 8rem;">
+                                    <div class="h3 text-primary mb-0 mb-sm-2">$5/month</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Annual Plan Card -->
+                    <div class="card border-0 bg-secondary rounded-4 position-relative mb-3 subscription-option" style="cursor: pointer;" id="annual-card">
+                        <div class="card-body d-sm-flex align-items-start text-center text-sm-start">
+                            <input type="radio" name="priceId" value="price_1PELXZBCHBXtJFxO4FchTfAv" id="annual-plan" class="me-3 subscription-radio" checked style="display: none;" />
+                            <label for="annual-plan" class="w-100" style="cursor: pointer;">
+                                <div class="w-100 pe-sm-4 mb-3 mb-sm-0" style="max-width: 27rem;">
+                                    <h3 class="mb-2">Annual Subscription</h3>
+                                    <p class="fs-lg mb-0">Subscribe annually to save money and ensure uninterrupted service throughout the year.</p>
+                                </div>
+                                <div class="w-100 pe-sm-3 mx-auto me-sm-0 mb-3 mb-sm-0" style="max-width: 8rem;">
+                                    <div class="h3 text-primary mb-0 mb-sm-2">$50/year</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Continue</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Add the following JavaScript to handle selection and border color -->
+<script>
+    // Get the card elements
+    const monthlyCard = document.getElementById('monthly-card');
+    const annualCard = document.getElementById('annual-card');
+    const monthlyRadio = document.getElementById('monthly-plan');
+    const annualRadio = document.getElementById('annual-plan');
+
+    // Function to update selected card's border
+    function updateCardBorders() {
+        if (monthlyRadio.checked) {
+            monthlyCard.classList.add('selected');
+            annualCard.classList.remove('selected');
+        } else if (annualRadio.checked) {
+            annualCard.classList.add('selected');
+            monthlyCard.classList.remove('selected');
+        }
+    }
+
+    // Add event listeners to update borders on change
+    monthlyRadio.addEventListener('change', updateCardBorders);
+    annualRadio.addEventListener('change', updateCardBorders);
+
+    // Initial update to ensure the correct border is applied on page load
+    updateCardBorders();
+</script>
+
+
+
+<footer th:replace="~{partials/footer}"></footer>
+</body>
+</html>

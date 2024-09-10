@@ -139,10 +139,10 @@ public class BusinessService {
         try {
             return businessRepository.findById(businessId);
         } catch (DataAccessException e) {
-            logger.error("Database access error when trying to create a business", e);
+            logger.error("Database access error when trying to find a business by id", e);
             return Optional.empty();
         } catch (Exception e) {
-            logger.error("Unexpected error when trying to create a business", e);
+            logger.error("Unexpected error when trying to find a business by id", e);
             return Optional.empty();
         }
     }
@@ -151,7 +151,7 @@ public class BusinessService {
         Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
         if (optionalUserProfile.isEmpty()) {
-            ServiceResponse.error("user_profile_not_found");
+            return ServiceResponse.error("user_profile_not_found");
         }
 
         UserProfile userProfile = optionalUserProfile.get();

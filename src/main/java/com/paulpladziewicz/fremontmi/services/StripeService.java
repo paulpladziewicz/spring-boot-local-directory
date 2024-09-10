@@ -279,7 +279,7 @@ public class StripeService {
     }
 
     public ResponseEntity<String> handleStripeWebhook(String payload, String sigHeader) {
-        String webhookSecret = "your-webhook-signing-secret";  // Replace with your actual secret
+        String webhookSecret = "whsec_d4808bcf47b6151388a0ea88df2544f4a1f16072523a4ae7fecbef42c6d90250";  // Replace with your actual secret
         try {
             // Verify the Stripe event
             Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
@@ -293,6 +293,7 @@ public class StripeService {
                     Invoice failedInvoice = (Invoice) dataObjectDeserializer.getObject().orElse(null);
                     if (failedInvoice != null) {
                         //handlePaymentFailed(failedInvoice);
+                        System.out.println("Payment failed");
                     }
                     break;
 
@@ -300,6 +301,7 @@ public class StripeService {
                     PaymentIntent paymentIntent = (PaymentIntent) dataObjectDeserializer.getObject().orElse(null);
                     if (paymentIntent != null) {
                         //handlePaymentSuccess(paymentIntent);
+                        System.out.println("Payment success");
                     }
                     break;
 
@@ -307,6 +309,7 @@ public class StripeService {
                     Subscription subscription = (Subscription) dataObjectDeserializer.getObject().orElse(null);
                     if (subscription != null) {
                         //handleSubscriptionCancellation(subscription);
+                        System.out.println("Subscription canceled");
                     }
                     break;
 
@@ -314,6 +317,7 @@ public class StripeService {
                     Dispute dispute = (Dispute) dataObjectDeserializer.getObject().orElse(null);
                     if (dispute != null) {
                         //handleDisputeCreated(dispute);
+                        System.out.println("Dispute created");
                     }
                     break;
 

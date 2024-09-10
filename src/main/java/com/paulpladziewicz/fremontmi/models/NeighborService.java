@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Document(collection = "businesses")
+@Document(collection = "neighbor_services")
 public class NeighborService {
 
     @Id
@@ -37,11 +37,17 @@ public class NeighborService {
 
     private String website;
 
-    private String status;
+    private String status = "incomplete";
 
-    private LocalDateTime subscriptionEndTime;
+    private String clientSecret;
 
-    private String stripeCustomerId;
+    private String subscriptionPriceId;
 
     private String stripeSubscriptionId;
+
+    private String paymentIntentId;
+
+    private String paymentStatus = "incomplete";
+
+    private LocalDateTime subscriptionEndTime;
 }
