@@ -18,7 +18,7 @@
                         <h5 class="card-title" th:text="${business.name}">Business Name</h5>
                         <p class="card-text" th:text="${business.description}">Business description here...</p>
                         <form th:action="@{/create/business/form}" method="post">
-                            <input type="hidden" name="priceId" th:value="${priceId}" />
+                            <input type="hidden" name="priceId" th:value="${business.subscriptionPriceId}" />
                             <input type="hidden" name="businessId" th:value="${business.id}"/>
                             <button type="submit" class="btn btn-primary">Continue</button>
                         </form>

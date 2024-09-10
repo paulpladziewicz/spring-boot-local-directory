@@ -18,11 +18,15 @@ public class Business {
     @Id
     private String id;
 
-    @NotBlank(message = "Event name must not be null")
-    @Size(min = 3, max = 100, message = "Event name must be between 3 and 100 characters")
+    @NotBlank(message = "Business name cannot be left blank.")
+    @Size(min = 3, max = 256, message = "Business name must be between 3 and 100 characters")
     private String name;
 
-    @NotBlank(message = "Description must not be null")
+    @NotBlank(message = "Headline cannot be left blank.")
+    @Size(min = 3, max = 500, message = "Headline must be between 3 and 100 characters")
+    private String headline;
+
+    @NotBlank(message = "Description cannot be left blank.")
     @Size(max = 5000, message = "Description can't be longer than 5000 characters")
     private String description;
 

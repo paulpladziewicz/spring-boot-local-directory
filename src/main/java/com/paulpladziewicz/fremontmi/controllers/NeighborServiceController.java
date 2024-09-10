@@ -58,6 +58,28 @@ public class NeighborServiceController {
             return "neighborservices/neighborservices-create-form";
         }
 
+        ServiceResponse<List<NeighborService>> findNeighborServicesByUserResponse = neighborServiceService.findNeighborServicesByUser();
+
+        if (findNeighborServicesByUserResponse.hasError()) {
+            model.addAttribute("errorMessage", "An error occurred while trying to retrieve your neighbor services. Please try again later.");
+            return "neighborservices/neighborservices-create-overview";
+        }
+
+        List<NeighborService> neighborServices = findNeighborServicesByUserResponse.value();
+        List<NeighborService> incompleteNeighborServices = new ArrayList<>();
+
+        for (NeighborService neighborService : neighborServices) {
+            if (neighborService.getStatus().equals("incomplete")) {
+                neighborService.setSubscriptionPriceId(priceId);
+                incompleteNeighborServices.add(neighborService);
+            }
+        }
+
+        if (!incompleteNeighborServices.isEmpty()) {
+            model.addAttribute("incompleteNeighborServices", incompleteNeighborServices);
+            return "neighborservices/neighborservices-continue-progress";
+        }
+
         NeighborService neighborService = new NeighborService();
         neighborService.setSubscriptionPriceId(priceId);
 

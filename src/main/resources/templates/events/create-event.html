@@ -14,7 +14,7 @@
                 <form id="create-event-form" th:action="@{/create/event}" th:object="${event}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
 
                     <div class="form-group mb-2">
-                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="name">Group Name</label>
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="name">Event Name</label>
                         <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter group name">
                         <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="alert alert-danger"></div>
                     </div>

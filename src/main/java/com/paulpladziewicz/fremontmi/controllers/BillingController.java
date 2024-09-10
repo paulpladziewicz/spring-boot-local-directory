@@ -5,14 +5,11 @@ import com.paulpladziewicz.fremontmi.models.InvoiceDTO;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.models.SubscriptionDTO;
 import com.paulpladziewicz.fremontmi.services.StripeService;
-import com.stripe.exception.StripeException;
-import com.stripe.model.*;
-import com.stripe.param.InvoiceListParams;
-import org.springframework.beans.factory.annotation.Value;
+import com.stripe.model.Invoice;
+import com.stripe.model.Subscription;
+import com.stripe.model.SubscriptionItem;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.stripe.Stripe;
-import jakarta.annotation.PostConstruct;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,34 +18,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/stripe")
 public class BillingController {
 
-    @Value("${stripe.secret.key}")
-    private String stripeApiKey;
-
-    @Value("${stripe.publishable.key}")
-    private String stripePublishableKey;
-
     private final StripeService stripeService;
 
     public BillingController(StripeService stripeService) {
         this.stripeService = stripeService;
     }
 
-    @PostConstruct
-    public void init() {
-        Stripe.apiKey = stripeApiKey;
-    }
-
     public static class CancelSubscriptionRequest {
         public String subscriptionId;
-
-        // Optionally add a constructor and getter/setter methods
-        public CancelSubscriptionRequest() {}
-
-        public CancelSubscriptionRequest(String subscriptionId) {
-            this.subscriptionId = subscriptionId;
-        }
     }
-
 
     @GetMapping("/subscriptions")
     public ResponseEntity<List<SubscriptionDTO>> getSubscriptions() {
@@ -67,19 +45,17 @@ public class BillingController {
 
     @GetMapping("/invoices")
     public ResponseEntity<List<InvoiceDTO>> getInvoices() {
-        // Get the user's invoices using the service layer
         ServiceResponse<List<Invoice>> getInvoicesResponse = stripeService.getInvoices();
 
         if (getInvoicesResponse.hasError()) {
-            return ResponseEntity.status(500).body(null); // Return 500 if there is an error
+            return ResponseEntity.status(500).body(null);
         }
 
-        // Map the list of invoices to DTOs for the response
         List<InvoiceDTO> invoiceDTOs = getInvoicesResponse.value().stream()
                 .map(this::mapInvoiceToDTO)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(invoiceDTOs); // Return the mapped invoice DTOs
+        return ResponseEntity.ok(invoiceDTOs);
     }
 
     @PostMapping("/cancel-subscription")
@@ -121,7 +97,6 @@ public class BillingController {
         dto.setCollectionMethod(subscription.getCollectionMethod());
         dto.setCurrency(subscription.getCurrency());
 
-        // Assuming there's always one item in the list; adjust as needed for your use case
         if (!subscription.getItems().getData().isEmpty()) {
             SubscriptionItem item = subscription.getItems().getData().getFirst();
             dto.setAmount(Math.toIntExact(item.getPrice().getUnitAmount()));
@@ -137,7 +112,6 @@ public class BillingController {
         dto.setCanceledAt(subscription.getCanceledAt());
         dto.setLatestInvoice(subscription.getLatestInvoice());
 
-        // Extract payment methods
         dto.setPaymentMethods(subscription.getPaymentSettings().getPaymentMethodTypes());
 
         return dto;

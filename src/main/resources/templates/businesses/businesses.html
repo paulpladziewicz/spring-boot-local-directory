@@ -27,7 +27,7 @@
                         <p class="text-muted fw-semibold mb-2">
                             <span th:text="${business.address}">Business Address</span>
                         </p>
-                        <p th:text="${#strings.length(business.description) > 120 ? #strings.substring(business.description, 0, 120) + '...' : business.description}">
+                        <p th:text="${#strings.length(business.headline) > 120 ? #strings.substring(business.headline, 0, 120) + '...' : business.headline}">
                             Business Description
                         </p>
                         <a th:href="'/businesses/' + ${business.id}" class="btn btn-lg btn-link p-0">View Business<i class="ai-arrow-right ms-2"></i></a>

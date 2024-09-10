@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 import java.awt.desktop.OpenFilesEvent;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class StripeService {
@@ -176,6 +173,12 @@ public class StripeService {
 
         UserProfile userProfile = userProfileOptional.get();
 
+        String stripeCustomerId = userProfile.getStripeCustomerId();
+
+        if (stripeCustomerId == null || stripeCustomerId.isEmpty()) {
+            return ServiceResponse.value(Collections.emptyList());
+        }
+
         try {
             SubscriptionListParams params = SubscriptionListParams.builder()
                     .setStatus(SubscriptionListParams.Status.ALL)
@@ -199,16 +202,19 @@ public class StripeService {
 
         UserProfile userProfile = userProfileOptional.get();
 
+        String stripeCustomerId = userProfile.getStripeCustomerId();
+
+        if (stripeCustomerId == null || stripeCustomerId.isEmpty()) {
+            return ServiceResponse.value(Collections.emptyList());
+        }
+
         try {
-            // Create parameters to retrieve invoices for this customer
             InvoiceListParams params = InvoiceListParams.builder()
-                    .setCustomer(userProfile.getStripeCustomerId()) // Filter by Stripe customer ID
+                    .setCustomer(userProfile.getStripeCustomerId())
                     .build();
 
-            // Retrieve the invoices from Stripe
             InvoiceCollection invoiceCollection = Invoice.list(params);
 
-            // Return the list of invoices
             return ServiceResponse.value(invoiceCollection.getData());
         } catch (StripeException e) {
             logger.error("Error retrieving invoices from Stripe: ", e);

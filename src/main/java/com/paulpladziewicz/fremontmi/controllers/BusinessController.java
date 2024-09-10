@@ -31,10 +31,6 @@ public class BusinessController {
 
     @PostMapping("/create/business/form")
     public String createBusinessListingView(@RequestParam("priceId") String priceId, @RequestParam(value = "businessId", required = false) String existingBusinessId, Model model) {
-        // shows outstanding businesses to continue with or resub
-        // option to create a new business
-        // form post back to the same to setup the form, whether with an existing business or new business
-        // following the pricing choice in the beginning of the flow
         if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
             model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
             return "businesses/business-create-overview";
@@ -74,12 +70,12 @@ public class BusinessController {
 
         for (Business business : businesses) {
             if (business.getStatus().equals("incomplete")) {
+                business.setSubscriptionPriceId(priceId);
                 incompleteBusinesses.add(business);
             }
         }
 
         if (!incompleteBusinesses.isEmpty()) {
-            model.addAttribute("priceId", priceId);
             model.addAttribute("incompleteBusinesses", incompleteBusinesses);
             return "businesses/business-continue-progress";
         }
@@ -120,8 +116,20 @@ public class BusinessController {
         Business savedBusiness = serviceResponse.value();
 
         model.addAttribute("business", savedBusiness);
-        model.addAttribute("planName", "Monthly Business Listing Subscription");
-        model.addAttribute("price", "$10/month");
+
+        String planName;
+        String price;
+
+        if (priceId.equals("price_1Pv7V0BCHBXtJFxOinfPKMUE")) {
+            planName = "Monthly Business Listing Subscription";
+            price = "$10/month";
+        } else {
+            planName = "Annual Business Listing Subscription";
+            price = "$100/year";
+        }
+
+        model.addAttribute("planName", planName);
+        model.addAttribute("price", price);
 
         return "businesses/business-create-subscription";
     }
@@ -226,7 +234,7 @@ public class BusinessController {
 
         model.addAttribute("business", updatedBusiness);
 
-        return "businesses/business-page";
+        return "redirect:/businesses/" + updatedBusiness.getId();
     }
 
     @PostMapping("/delete/business")

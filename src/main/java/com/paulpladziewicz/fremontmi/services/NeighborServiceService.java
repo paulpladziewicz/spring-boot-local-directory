@@ -84,6 +84,7 @@ public class NeighborServiceService {
         NeighborService neighborService = optionalNeighborService.get();
 
         ServiceResponse<PaymentIntent> serviceResponse = stripeService.retrievePaymentIntent(paymentIntentId);
+
         if (serviceResponse.hasError()) {
             return ServiceResponse.error(serviceResponse.errorCode());
         }

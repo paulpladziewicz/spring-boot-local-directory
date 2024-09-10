@@ -7,9 +7,9 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto">
-                <h1>Subscription Payment</h1>
-                <p class="mb-2">You are paying for the <strong th:text="${planName}"></strong> plan at <strong th:text="${price}">.</strong></p>
-                <p><a href="/" class="btn btn-link fw-semibold fs-sm p-0 mb-4">Change Subscription</a></p>
+                <h1 class="display-4">Subscription Payment</h1>
+                <p class="mb-2">You are paying for a <strong th:text="${planName}"></strong> plan at <strong th:text="${price}">.</strong></p>
+                <p><a href="/create/business/overview" class="btn btn-link fw-semibold fs-sm p-0 mb-4">Change Subscription</a></p>
 
                 <form id="payment-form" class="my-4">
                     <div id="payment-element"></div>

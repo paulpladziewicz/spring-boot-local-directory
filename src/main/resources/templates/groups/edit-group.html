@@ -9,7 +9,7 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-12 col-md-8 col-lg-6">
-            <h1>Edit Group</h1>
+            <h1 class="display-4">Edit Group</h1>
             <form th:action="@{/edit/group}" th:object="${group}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                 <input type="hidden" name="id" th:value="${group.id}" />
                 <div class="form-group mb-2">

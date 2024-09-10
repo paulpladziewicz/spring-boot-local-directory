@@ -6,108 +6,134 @@
 
 <main>
     <div class="container my-4">
-        <div class="row">
-            <div class="col-md-10 col-lg-8 mx-auto">
-                <h1 th:text="${business.name}" class="display-4 mb-0">Fremont Business Name</h1>
 
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <nav aria-label="breadcrumb">
+                    <ol class="pt-lg-3 pb-lg-4 pb-2 breadcrumb">
+                        <li class="breadcrumb-item"><a href="/businesses">Businesses</a></li>
+                        <li class="breadcrumb-item active" aria-current="page" th:text="${business.name}"></li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-2">
+                    <h1 th:text="${business.name}" class="display-3 mb-0">Fremont Business Name</h1>
+                    <div>
+                        <!-- Copy Button -->
+                        <button id="copy-button" class="btn btn-outline-secondary btn-icon" aria-label="Copy">
+                            <i class="ai-copy"></i>
+                        </button>
+
+                        <!-- Success Message -->
+                        <div id="copy-success" class="text-success mt-2" style="display: none;">Copied to clipboard!</div>
+                        <a th:href="'/edit/business/' + ${business.id}" class="btn btn-secondary btn-icon" aria-label="Edit">
+                            <i class="ai-edit-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
                 <div class="row mt-4">
                     <div class="col-lg-6">
                         <div class="fs-sm text-uppercase mb-3">What we do</div>
-                        <h2 class="display-6">We are a team who create marketing strategies</h2>
+                        <h2 class="display-6" th:text="${business.headline}">We are a team who create marketing strategies</h2>
+                        <ul class="list-unstyled mb-0">
+                            <li class="nav flex-nowrap mb-3">
+                                <i class="ai-phone lead text-primary me-2"></i>
+                                <a class="nav-link fw-normal p-0 mt-n1" href="tel:+178632256040">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;40</a>
+                            </li>
+                            <li class="nav flex-nowrap mb-3">
+                                <i class="ai-mail lead text-primary me-2"></i>
+                                <a class="nav-link fw-normal p-0 mt-n1" href="mailto:orlando@example.com">orlando@example.com</a>
+                            </li>
+                            <li class="nav flex-nowrap mb-3">
+                                <i class="ai-map-pin lead text-primary me-2"></i>
+                                <a class="nav-link fw-normal p-0 mt-n1" href="#">514 S. Magnolia St. Orlando, FL 32806</a>
+                            </li>
+                        </ul>
                     </div>
                     <div class="col-lg-6 pt-1 pt-sm-2 pt-md-5">
                         <p th:text="${business.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
                     </div>
                 </div>
-
-                <section class="bg-secondary">
-                    <div class="row g-4 pb-2 pb-sm-4 pb-lg-5">
-
-                        <!-- Address -->
-                        <div class="col-6">
-                            <div class="card border-0 h-100">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-4">Address</h4>
-                                    <p class="fs-lg fw-medium pb-3 mb-3">514 Magnolia St. Orlando, FL 32806</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Phone -->
-                        <div class="col-6">
-                            <div class="card border-0 h-100">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-4">Phone</h4>
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="pb-1 mb-2">
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Main office</span>
-                                            <a class="nav-link fs-lg p-0" href="tel:+178632256033">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;33</a>
-                                        </li>
-                                        <li>
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Reception room</span>
-                                            <a class="nav-link fs-lg p-0" href="tel:+178630056044">+1&nbsp;(786)&nbsp;300&nbsp;560&nbsp;44</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Schedule -->
-                        <div class="col-6">
-                            <div class="card border-0 h-100">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-4">Schedule</h4>
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="pb-1 mb-2">
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Mon - Thu</span>
-                                            <div class="d-flex align-items-center">
-                                                <span class="text-nav fs-lg fw-medium">10:00</span>
-                                                <span class="border-top mx-4" style="width: 36px; height: 1px;"></span>
-                                                <span class="text-nav fs-lg fw-medium">22:00</span>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Fri - Sat</span>
-                                            <div class="d-flex align-items-center">
-                                                <span class="text-nav fs-lg fw-medium">10:00</span>
-                                                <span class="border-top mx-4" style="width: 36px; height: 1px;"></span>
-                                                <span class="text-nav fs-lg fw-medium">20:00</span>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="col-6">
-                            <div class="card border-0 h-100">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-4">Email</h4>
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="pb-1 mb-2">
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Main office</span>
-                                            <a class="nav-link fs-lg p-0" href="mailto:office@example.com">office@example.com</a>
-                                        </li>
-                                        <li>
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Reception room</span>
-                                            <a class="nav-link fs-lg p-0" href="mailto:reception@example.com">reception@example.com</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </section>
-
-                <a class="d-inline-block d-sm-none btn btn-outline-primary">Edit Business</a>
-
-
             </div>
         </div>
+
     </div>
+
+    <section class="container pt-5 pb-lg-2 pb-xl-4 py-xxl-5 my-5">
+
+        <div class="row pb-1 pb-sm-3 pb-lg-4">
+            <div class="col-lg-4 pe-xxl-4">
+
+                <!-- Page title -->
+                <h1 class="display-2">Contacts</h1>
+                <p class="fs-lg pb-4 mb-0 mb-sm-2">Get in touch with us by completing the below form or call us now</p>
+            </div>
+            <div class="col-lg-8 col-xl-7 offset-xl-1">
+
+                <!-- Contact form -->
+                <form class="row g-4 needs-validation" novalidate="">
+                    <div class="col-sm-6">
+                        <label class="form-label fs-base" for="name">Name</label>
+                        <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
+                        <div class="invalid-feedback">Please enter your name!</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label fs-base" for="email">Email</label>
+                        <input class="form-control form-control-lg" type="email" placeholder="Email address" required="" id="email">
+                        <div class="invalid-feedback">Please provide a valid email address!</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label fs-base" for="phone">Phone</label>
+                        <input class="form-control form-control-lg" type="text" placeholder="Phone number" id="phone">
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form-label fs-base" for="message">How can we help?</label>
+                        <textarea class="form-control form-control-lg" rows="5" placeholder="Enter your message here..." required="" id="message"></textarea>
+                        <div class="invalid-feedback">Please enter your message!</div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="agree">
+                            <label class="form-check-label" for="agree">I agree to the <a class="nav-link d-inline fs-normal text-decoration-underline p-0" href="#">Terms &amp; Conditions</a></label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 pt-2">
+                        <button class="btn btn-lg btn-primary" type="submit">Send a request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
 </main>
+
+<script th:inline="javascript">
+    document.getElementById('copy-button').addEventListener('click', async function() {
+        var businessId = /*[[${business.id}]]*/ 'default-id';
+        var fullUrl = window.location.origin + '/businesses/' + businessId;
+
+        try {
+            await navigator.clipboard.writeText(fullUrl);
+
+            var successMessage = document.getElementById('copy-success');
+            successMessage.style.display = 'block';
+
+            setTimeout(function() {
+                successMessage.style.display = 'none';
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
+    });
+</script>
 
 <footer th:replace="~{partials/footer}"></footer>
 <script th:replace="~{partials/theme-js}"></script>
