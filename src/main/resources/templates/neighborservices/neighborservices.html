@@ -15,16 +15,16 @@
             </div>
         </div>
 
-        <!-- Tags Section -->
         <div class="mb-4">
-            <h3>Available Tags</h3>
             <div class="d-flex flex-wrap">
                 <a th:each="tag : ${allTags}"
                    th:href="'/neighbor-services?tag=' + ${tag}"
-                   th:classappend="${selectedTag == tag} ? 'badge bg-success' : 'badge bg-primary'"
-                   class="badge m-1"
+                   th:classappend="${selectedTag == tag} ? 'badge bg-primary fs-sm m-1' : 'badge bg-primary bg-opacity-10 text-primary fs-sm m-1'"
                    th:text="${tag}">
                 </a>
+            </div>
+            <div th:if="${selectedTag}">
+                <a class="d-block text-start btn btn-link p-1" href="/neighbor-services">Clear Filter</a>
             </div>
         </div>
 

@@ -1,64 +1,108 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('Create New Group')}">
-    <title>Create Group</title>
+<head th:replace="~{partials/head :: head('Edit NeighborService Profile')}">
+    <title>Edit NeighborService</title>
 </head>
 <body>
 <header th:replace="~{partials/navbar}"></header>
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6">
-            <h1>Edit NeighborService™</h1>
-            <form th:action="@{/edit/neighbor-service}" th:object="${neighborServiceProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                <input type="hidden" name="id" th:value="${neighborServiceProfile.id}" />
-                <div class="form-business mb-2">
-                    <label for="name" class="mb-1 form-label opacity-75 fw-medium fs-base">Group Name</label>
-                    <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter business name">
-                    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="mt-1 text-danger"></p>
-                </div>
-                <div class="form-business mb-3">
-                    <label for="description" class="mb-1 form-label opacity-75 fw-medium fs-base">Description</label>
-                    <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Group description"></textarea>
-                    <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></p>
-                </div>
-                <div class="form-business mb-3">
-                    <label for="address" class="mb-1 form-label opacity-75 fw-medium fs-base">Address</label>
-                    <input type="text" class="form-control" id="address" th:field="*{address}" placeholder="Enter business address">
-                    <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="mt-1 text-danger"></p>
-                </div>
-                <div class="form-business mb-3">
-                    <label for="phone" class="mb-1 form-label opacity-75 fw-medium fs-base">Phone Number</label>
-                    <input type="text" class="form-control" id="phone" th:field="*{phoneNumber}" placeholder="Enter business phone number">
-                    <p th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="mt-1 text-danger"></p>
-                </div>
-                <div class="form-business mb-3">
-                    <label for="email" class="mb-1 form-label opacity-75 fw-medium fs-base">Email</label>
-                    <input type="text" class="form-control" id="email" th:field="*{email}" placeholder="Enter business email">
-                    <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="mt-1 text-danger"></p>
-                </div>
-                <div class="form-business mb-3">
-                    <label for="website" class="mb-1 form-label opacity-75 fw-medium fs-base">Website</label>
-                    <input type="text" class="form-control" id="website" th:field="*{website}" placeholder="Enter business website">
-                    <p th:if="${#fields.hasErrors('website')}" th:errors="*{website}" class="mt-1 text-danger"></p>
-                </div>
-                <div class="d-flex">
-                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
-                    <a class="btn btn-secondary" th:href="'/neighbor-services/' + ${neighborServiceProfile.id}">Cancel</a>
-                </div>
-            </form>
+<main>
+    <div class="container mt-4">
 
-<!--            <section class="my-5">-->
-<!--                <h3>Delete Group</h3>-->
-<!--                <p>The action is not reversible.</p>-->
-<!--                <form method="post" th:action="@{/delete/business}" onsubmit="disableSubmitButtonWhileSubmitting(this)">-->
-<!--                    <input type="hidden" name="businessId" th:value="${business.id}" />-->
-<!--                    <button type="submit" class="btn btn-danger">Delete Business</button>-->
-<!--                </form>-->
-<!--            </section>-->
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Edit NeighborService™</h1>
+                <form id="edit-business-form" th:action="@{/edit/neighbor-service/profile}" th:object="${neighborServiceProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                    <input type="hidden" name="id" th:value="*{id}">
+
+                    <!-- First Name and Last Name -->
+                    <div class="row row-cols-1 row-cols-sm-2">
+                        <div class="col mb-4">
+                            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="firstName">First Name</label>
+                            <input class="form-control form-control-lg" type="text" name="firstName" id="firstName" th:field="*{firstName}" placeholder="First name" required>
+                            <span class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+                        </div>
+                        <div class="col mb-4">
+                            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="lastName">Last Name</label>
+                            <input class="form-control form-control-lg" type="text" id="lastName" name="lastName" th:field="*{lastName}" placeholder="Last name" required>
+                            <span class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group mb-2">
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="description">Description</label>
+                        <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Business description"></textarea>
+                        <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="alert alert-danger"></div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group mb-2">
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="email">Email</label>
+                        <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="Enter email">
+                        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="alert alert-danger"></div>
+                    </div>
+
+                    <!-- NeighborServices -->
+                    <div id="neighborServiceContainer">
+                        <div th:each="service, iterStat : ${neighborServiceProfile.neighborServices}" class="neighbor-service-item">
+                            <h4 th:text="'Neighbor Service ' + (iterStat.index + 1)"></h4>
+
+                            <div class="form-group mb-2">
+                                <label th:for="'neighborServices.' + iterStat.index + '.name'">Service Name</label>
+                                <input type="text" class="form-control" th:field="*{neighborServices[__${iterStat.index}__].name}" placeholder="Service name" required>
+                                <span class="text-danger" th:if="${#fields.hasErrors('neighborServices[' + iterStat.index + '].name')}" th:errors="*{neighborServices[__${iterStat.index}__].name}"></span>
+                            </div>
+
+                            <div class="form-group mb-2">
+                                <label th:for="'neighborServices.' + iterStat.index + '.description'">Service Description</label>
+                                <textarea class="form-control" th:field="*{neighborServices[__${iterStat.index}__].description}" rows="3" placeholder="Service description" required></textarea>
+                                <span class="text-danger" th:if="${#fields.hasErrors('neighborServices[' + iterStat.index + '].description')}" th:errors="*{neighborServices[__${iterStat.index}__].description}"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Button to dynamically add more services -->
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-secondary" onclick="addNeighborService()">Add Another Service</button>
+                    </div>
+
+                    <p th:if="${errorMessage}" th:text="${errorMessage}" class="text-danger my-3"></p>
+
+                    <!-- Save and Cancel buttons -->
+                    <div class="d-flex">
+                        <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                        <a class="btn btn-secondary" th:href="'/neighbor-services/' + ${neighborServiceProfile.id}">Cancel</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+</main>
+
+<!-- JavaScript to dynamically add more NeighborService fields -->
+<script th:inline="javascript">
+    let serviceIndex = /*[[${neighborServiceProfile.neighborServices.size()}]]*/ 'undefined';
+
+    function addNeighborService() {
+        const container = document.getElementById('neighborServiceContainer');
+        const newService = document.createElement('div');
+        newService.classList.add('neighbor-service-item');
+        newService.innerHTML = `
+            <h4>Neighbor Service ${serviceIndex + 1}</h4>
+            <div class="form-group mb-2">
+                <label for="neighborServices[${serviceIndex}].name">Service Name</label>
+                <input type="text" class="form-control" name="neighborServices[${serviceIndex}].name" placeholder="Service name" required>
+            </div>
+            <div class="form-group mb-2">
+                <label for="neighborServices[${serviceIndex}].description">Service Description</label>
+                <textarea class="form-control" name="neighborServices[${serviceIndex}].description" rows="3" placeholder="Service description" required></textarea>
+            </div>
+        `;
+        container.appendChild(newService);
+        serviceIndex++;
+    }
+</script>
 
 <script th:replace="~{partials/theme-js}"></script>
 <footer th:replace="~{partials/footer}"></footer>

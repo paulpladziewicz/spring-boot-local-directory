@@ -116,6 +116,8 @@ public class NeighborServiceController {
                 .flatMap(profile -> profile.getTags().stream())
                 .collect(Collectors.toSet());
 
+        // TODO still displaying profiles that do not have any neighbor services
+
         model.addAttribute("profiles", profiles);
         model.addAttribute("allTags", allTags);  // All available tags
         model.addAttribute("uniqueTagsForProfiles", uniqueTagsForProfiles);  // Tags for currently displayed profiles
@@ -156,41 +158,43 @@ public class NeighborServiceController {
         return "neighborservices/neighborservices-page";
     }
 
-//    @GetMapping("/edit/neighbor-service/{id}")
-//    public String editBusiness(@PathVariable String id, Model model) {
-//        Optional<NeighborServiceProfile> optionalNeighborService = neighborServiceService.findNeighborServiceById(id);
-//
-//        if (optionalNeighborService.isEmpty()) {
-//            model.addAttribute("error", true);
-//            return "businesses/businesses";
-//        }
-//
-//        NeighborServiceProfile neighborServiceProfile = optionalNeighborService.get();
-//
-//        model.addAttribute("neighborService", neighborServiceProfile);
-//
-//        return "neighborservices/edit-neighborservice";
-//    }
-//
-//
-//    @PostMapping("/edit/neighbor-service")
-//    public String editNeighborService(@Valid @ModelAttribute("neighborService") NeighborServiceProfile neighborServiceProfile, BindingResult bindingResult, Model model) {
-//        if (bindingResult.hasErrors()) {
-//            model.addAttribute("neighborService", neighborServiceProfile);
-//            return "neighborservices/edit-neighborservice";
-//        }
-//
-//        ServiceResponse<NeighborServiceProfile> updateNeighborServiceResponse = neighborServiceService.updateNeighborService(neighborServiceProfile);
-//
-//        if (updateNeighborServiceResponse.hasError()) {
-//            model.addAttribute("errorMessage", "An error occurred while trying to update the neighbor service. Please try again later.");
-//            return "neighborservices/edit-neighborservice";
-//        }
-//
-//        NeighborServiceProfile updatedNeighborServiceProfile = updateNeighborServiceResponse.value();
-//
-//        model.addAttribute("neighborService", updatedNeighborServiceProfile);
-//
-//        return "redirect:/neighbor-services/" + updatedNeighborServiceProfile.getId();
-//    }
+    @GetMapping("/edit/neighbor-service/profile/{id}")
+    public String editNeighborServiceProfilePage(@PathVariable String id, Model model) {
+        Optional<NeighborServiceProfile> optionalNeighborService = neighborServiceService.findNeighborServiceProfileById(id);
+
+        if (optionalNeighborService.isEmpty()) {
+            model.addAttribute("error", true);
+            return "neighborservices/neighborservices";
+        }
+
+        NeighborServiceProfile neighborServiceProfile = optionalNeighborService.get();
+
+        model.addAttribute("neighborServiceProfile", neighborServiceProfile);
+
+        return "neighborservices/edit-neighborservice";
+    }
+
+
+    @PostMapping("/edit/neighbor-service/profile")
+    public String editNeighborService(@Valid @ModelAttribute("neighborService") NeighborServiceProfile neighborServiceProfile, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("neighborService", neighborServiceProfile);
+            return "neighborservices/edit-neighborservice";
+        }
+
+        // TODO check if the user is authorized to edit the neighbor service
+
+        ServiceResponse<NeighborServiceProfile> updateNeighborServiceResponse = neighborServiceService.saveNeighborServiceProfile(neighborServiceProfile);
+
+        if (updateNeighborServiceResponse.hasError()) {
+            model.addAttribute("errorMessage", "An error occurred while trying to update the neighbor service. Please try again later.");
+            return "neighborservices/edit-neighborservice";
+        }
+
+        NeighborServiceProfile updatedNeighborServiceProfile = updateNeighborServiceResponse.value();
+
+        model.addAttribute("neighborService", updatedNeighborServiceProfile);
+
+        return "redirect:/neighbor-services/" + updatedNeighborServiceProfile.getId();
+    }
 }

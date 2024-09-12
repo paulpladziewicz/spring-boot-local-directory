@@ -93,6 +93,7 @@
                 document.getElementById("error-message").style.display = 'block';
             }
         } catch (error) {
+            console.log(error);
             document.getElementById("error-message").innerText = "There was an issue processing your payment. Please try again.";
             document.getElementById("error-message").style.display = 'block';
         } finally {

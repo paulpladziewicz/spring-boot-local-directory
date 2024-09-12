@@ -35,6 +35,28 @@
 
                 <a th:href="'/edit/neighbor-service/' + ${neighborServiceProfile.id}" class="d-inline-block d-sm-none btn btn-outline-primary">Edit NeighborService</a>
 
+                <!-- Listing NeighborServices -->
+                <div class="row mt-5">
+                    <div class="col-lg-10 mx-auto">
+                        <h3 class="mb-4">Services Offered</h3>
+
+                        <!-- Loop through neighborServices list -->
+                        <div th:if="${neighborServiceProfile.neighborServices.size() > 0}">
+                            <ul class="list-group">
+                                <li class="list-group-item" th:each="service, iterStat : ${neighborServiceProfile.neighborServices}">
+                                    <h4 th:text="${iterStat.index + 1 + '. ' + service.name}"></h4>
+                                    <p th:text="${service.description}"></p>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Message when no services are available -->
+                        <div th:if="${neighborServiceProfile.neighborServices.size() == 0}">
+                            <p class="text-muted">No services available at this time.</p>
+                        </div>
+                    </div>
+                </div>
+
 
             </div>
         </div>

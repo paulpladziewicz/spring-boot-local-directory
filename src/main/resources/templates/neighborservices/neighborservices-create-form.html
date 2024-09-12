@@ -41,6 +41,26 @@
                         <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="alert alert-danger"></div>
                     </div>
 
+                    <div id="neighborServiceContainer">
+                        <div class="neighbor-service-item">
+                            <h4>Neighbor Service 1</h4>
+                            <div class="form-group mb-2">
+                                <label for="neighborServices[0].name">Service Name</label>
+                                <input type="text" class="form-control" th:field="*{neighborServices[0].name}" placeholder="Service name" required>
+                                <span class="text-danger" th:if="${#fields.hasErrors('neighborServices[0].name')}" th:errors="*{neighborServices[0].name}"></span>
+                            </div>
+                            <div class="form-group mb-2">
+                                <label for="neighborServices[0].description">Service Description</label>
+                                <textarea class="form-control" th:field="*{neighborServices[0].description}" rows="3" placeholder="Service description" required></textarea>
+                                <span class="text-danger" th:if="${#fields.hasErrors('neighborServices[0].description')}" th:errors="*{neighborServices[0].description}"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Button to dynamically add more services -->
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-secondary" onclick="addNeighborService()">Add Another Service</button>
+                    </div>
+
                     <p th:if="${errorMessage}" th:text="${errorMessage}" class="text-danger my-3"></p>
 
                     <div class="mt-3">
@@ -51,6 +71,30 @@
         </div>
     </div>
 </main>
+
+<!-- JavaScript to add more NeighborService fields -->
+<script>
+    let serviceIndex = 1;
+
+    function addNeighborService() {
+        const container = document.getElementById('neighborServiceContainer');
+        const newService = document.createElement('div');
+        newService.classList.add('neighbor-service-item');
+        newService.innerHTML = `
+            <h4>Neighbor Service ${serviceIndex + 1}</h4>
+            <div class="form-group mb-2">
+                <label for="neighborServices[${serviceIndex}].name">Service Name</label>
+                <input type="text" class="form-control" name="neighborServices[${serviceIndex}].name" placeholder="Service name" required>
+            </div>
+            <div class="form-group mb-2">
+                <label for="neighborServices[${serviceIndex}].description">Service Description</label>
+                <textarea class="form-control" name="neighborServices[${serviceIndex}].description" rows="3" placeholder="Service description" required></textarea>
+            </div>
+        `;
+        container.appendChild(newService);
+        serviceIndex++;
+    }
+</script>
 
 <script th:src="@{/js/custom-validation.js}"></script>
 <script th:replace="~{partials/theme-js}"></script>
