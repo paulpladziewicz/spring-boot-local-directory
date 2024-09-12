@@ -1,9 +1,6 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.models.Business;
-import com.paulpladziewicz.fremontmi.models.NeighborService;
-import com.paulpladziewicz.fremontmi.models.PaymentRequest;
-import com.paulpladziewicz.fremontmi.models.ServiceResponse;
+import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.NeighborServiceService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -14,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class NeighborServiceController {
@@ -26,99 +24,55 @@ public class NeighborServiceController {
 
     @GetMapping("/create/neighbor-service/overview")
     public String createNeighborServiceOverview(Model model) {
+        // Need to get the priceIds from the Stripe
         return "neighborservices/neighborservices-create-overview";
     }
 
     @PostMapping("/create/neighbor-service/form")
-    public String createNeighborServiceView(@RequestParam("priceId") String priceId, @RequestParam(value = "neighborServiceId", required = false) String existingNeighborServiceId, Model model) {
-        if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
-            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
-            return "neighborservices/neighborservices-create-overview";
-        }
+    public String createNeighborServiceView(@RequestParam("priceId") String priceId, @RequestParam(value = "neighborServiceProfileId", required = false) String existingNeighborServiceProfileId, Model model) {
+        if (existingNeighborServiceProfileId != null && !existingNeighborServiceProfileId.isEmpty() && !existingNeighborServiceProfileId.trim().isEmpty()) {
+            Optional<NeighborServiceProfile> optionalNeighborServiceProfile = neighborServiceService.findNeighborServiceProfileById(existingNeighborServiceProfileId);
 
-        if (!priceId.equals("price_1Pv7TzBCHBXtJFxOWmV5PE4h") && !priceId.equals("price_1PELXZBCHBXtJFxO4FchTfAv")) {
-            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
-            return "neighborservices/neighborservices-create-overview";
-        }
-
-        if (existingNeighborServiceId != null && !existingNeighborServiceId.isEmpty() && !existingNeighborServiceId.trim().isEmpty()) {
-            Optional<NeighborService> optionalNeighborService = neighborServiceService.findNeighborServiceById(existingNeighborServiceId);
-
-            if (optionalNeighborService.isEmpty()) {
-                model.addAttribute("errorMessage", "Neighbor service not found. Please refresh the page and try again.");
+            if (optionalNeighborServiceProfile.isEmpty()) {
+                model.addAttribute("error", "Neighbor service not found. Please try again later.");
                 return "neighborservices/neighborservices-create-overview";
             }
 
-            NeighborService existingNeighborService = optionalNeighborService.get();
+            NeighborServiceProfile existingNeighborServiceProfile = optionalNeighborServiceProfile.get();
 
-            existingNeighborService.setSubscriptionPriceId(priceId);
-
-            model.addAttribute("neighborService", existingNeighborService);
+            model.addAttribute("priceId", priceId);
+            model.addAttribute("neighborServiceProfile", existingNeighborServiceProfile);
 
             return "neighborservices/neighborservices-create-form";
         }
 
-        ServiceResponse<List<NeighborService>> findNeighborServicesByUserResponse = neighborServiceService.findNeighborServicesByUser();
+        // TODO provide defaults many fields based on the user's profile
 
-        if (findNeighborServicesByUserResponse.hasError()) {
-            model.addAttribute("errorMessage", "An error occurred while trying to retrieve your neighbor services. Please try again later.");
-            return "neighborservices/neighborservices-create-overview";
-        }
-
-        List<NeighborService> neighborServices = findNeighborServicesByUserResponse.value();
-        List<NeighborService> incompleteNeighborServices = new ArrayList<>();
-
-        for (NeighborService neighborService : neighborServices) {
-            if (neighborService.getStatus().equals("incomplete")) {
-                neighborService.setSubscriptionPriceId(priceId);
-                incompleteNeighborServices.add(neighborService);
-            }
-        }
-
-        if (!incompleteNeighborServices.isEmpty()) {
-            model.addAttribute("incompleteNeighborServices", incompleteNeighborServices);
-            return "neighborservices/neighborservices-continue-progress";
-        }
-
-        NeighborService neighborService = new NeighborService();
-        neighborService.setSubscriptionPriceId(priceId);
-
-        model.addAttribute("neighborService", neighborService);
+        model.addAttribute("priceId", priceId);
+        model.addAttribute("neighborServiceProfile", new NeighborServiceProfile());
 
         return "neighborservices/neighborservices-create-form";
     }
 
     @PostMapping("/create/neighbor-service/subscription")
-    public String createNeighborServiceSubscription(@Valid @ModelAttribute("neighborService") NeighborService neighborService, BindingResult bindingResult, Model model) {
+    public String createNeighborServiceSubscription(@RequestParam("priceId") String priceId, @Valid @ModelAttribute("neighborService") NeighborServiceProfile neighborServiceProfile, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("neighborService", neighborService);
+            model.addAttribute("neighborService", neighborServiceProfile);
             return "neighborservices/neighborservices-create-form";
         }
 
-        String priceId = neighborService.getSubscriptionPriceId();
+        ServiceResponse<StripeTransactionRecord> createNeighborServiceProfileResponse = neighborServiceService.createNeighborServiceProfile(priceId, neighborServiceProfile);
 
-        if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
-            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
-            return "businesses/business-create-overview";
-        }
-
-        if (!priceId.equals("price_1Pv7TzBCHBXtJFxOWmV5PE4h") && !priceId.equals("price_1PELXZBCHBXtJFxO4FchTfAv")) {
-            model.addAttribute("errorMessage", "Pricing appears to be tampered with. Please refresh the page and try again.");
-            return "neighborservices/neighborservices-create-overview";
-        }
-
-        ServiceResponse<NeighborService> createNeighborServiceResponse = neighborServiceService.createNeighborService(neighborService);
-
-        if (createNeighborServiceResponse.hasError()) {
+        if (createNeighborServiceProfileResponse.hasError()) {
             model.addAttribute("errorMessage", "An error occurred while trying to create the neighbor service. Please try again later.");
             return "neighborservices/neighborservices-create-overview";
         }
 
-        NeighborService createdNeighborService = createNeighborServiceResponse.value();
+        StripeTransactionRecord stripeTransactionRecord = createNeighborServiceProfileResponse.value();
 
-        model.addAttribute("neighborService", createdNeighborService);
-        model.addAttribute("planName", "Monthly NeighborService™ Subscription");
-        model.addAttribute("price", "$5/month");
+        model.addAttribute("clientSecret", stripeTransactionRecord.getClientSecret());
+        model.addAttribute("subscriptionDisplayName", stripeTransactionRecord.getDisplayName());
+        model.addAttribute("subscriptionDisplayPrice", stripeTransactionRecord.getDisplayPrice());
 
         return "neighborservices/neighborservices-create-subscription";
     }
@@ -126,7 +80,7 @@ public class NeighborServiceController {
     @PostMapping("/create/neighbor-service/subscription/success")
     @ResponseBody
     public ResponseEntity<?> handleSubscriptionSuccess(@RequestBody PaymentRequest paymentRequest) {
-        ServiceResponse<NeighborService> serviceResponse = neighborServiceService.handleSubscriptionSuccess(paymentRequest);
+        ServiceResponse<NeighborServiceProfile> serviceResponse = neighborServiceService.handleSubscriptionSuccess(paymentRequest);
 
         if (serviceResponse.hasError()) {
             return ResponseEntity
@@ -134,97 +88,86 @@ public class NeighborServiceController {
                     .body(Collections.singletonMap("error", serviceResponse.errorCode()));
         }
 
-        NeighborService neighborService = serviceResponse.value();
+        NeighborServiceProfile neighborServiceProfile = serviceResponse.value();
 
         Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("redirectUrl", "/neighbor-services/" + neighborService.getId());
+        responseBody.put("redirectUrl", "/neighbor-services/" + neighborServiceProfile.getId());
 
         return ResponseEntity.ok(responseBody);
     }
 
     @GetMapping("/neighbor-services")
     public String displayActiveNeighborServices(Model model) {
-        ServiceResponse<List<NeighborService>> findAllResponse = neighborServiceService.findAllActiveNeighborServices();
+        ServiceResponse <List<NeighborServiceProfile>> profilesResponse = neighborServiceService.findAllActiveNeighborServices();
 
-        if (findAllResponse.hasError()) {
+        if (profilesResponse.hasError()) {
             model.addAttribute("errorMessage", "An error occurred while trying to retrieve the neighbor services. Please try again later.");
             return "neighborservices/neighborservices";
         }
 
-        List<NeighborService> neighborServices = findAllResponse.value();
+        List<NeighborServiceProfile> profiles = profilesResponse.value();
 
-        model.addAttribute("neighborServices", neighborServices);
+        Set<String> uniqueTags = profiles.stream()
+                .flatMap(profile -> profile.getTags().stream())
+                .collect(Collectors.toSet());
+
+        model.addAttribute("profiles", profiles);
+        model.addAttribute("tags", uniqueTags);
 
         return "neighborservices/neighborservices";
     }
 
-    @GetMapping("/neighbor-services/{id}")
-    public String viewNeighborService(@PathVariable String id, Model model) {
-        Optional<NeighborService> optionalNeighborService = neighborServiceService.findNeighborServiceById(id);
+//    @GetMapping("/neighbor-services/{id}")
+//    public String viewNeighborService(@PathVariable String id, Model model) {
+//        Optional<NeighborServiceProfile> optionalNeighborService = neighborServiceService.findNeighborServiceById(id);
+//
+//        if (optionalNeighborService.isEmpty()) {
+//            model.addAttribute("errorMessage", "Neighbor service not found. Please try again later.");
+//            return "neighborservices/neighborservices-page";
+//        }
+//
+//        NeighborServiceProfile neighborServiceProfile = optionalNeighborService.get();
+//
+//        model.addAttribute("neighborService", neighborServiceProfile);
+//
+//        return "neighborservices/neighborservices-page";
+//    }
 
-        if (optionalNeighborService.isEmpty()) {
-            model.addAttribute("errorMessage", "Neighbor service not found. Please try again later.");
-            return "neighborservices/neighborservices-page";
-        }
-
-        NeighborService neighborService = optionalNeighborService.get();
-
-        model.addAttribute("neighborService", neighborService);
-
-        return "neighborservices/neighborservices-page";
-    }
-
-    @GetMapping("/my/neighbor-services")
-    public String displayMyNeighborServices(Model model) {
-        ServiceResponse<List<NeighborService>> findNeighborServicesByUserResponse = neighborServiceService.findNeighborServicesByUser();
-
-        if (findNeighborServicesByUserResponse.hasError()) {
-            model.addAttribute("errorMessage", "An error occurred while trying to retrieve your neighbor services. Please try again later.");
-            return "neighborservices/my-neighborservices";
-        }
-
-        List<NeighborService> neighborServices = findNeighborServicesByUserResponse.value();
-
-        model.addAttribute("neighborServices", neighborServices);
-
-        return "neighborservices/my-neighborservices";
-    }
-
-    @GetMapping("/edit/neighbor-service/{id}")
-    public String editBusiness(@PathVariable String id, Model model) {
-        Optional<NeighborService> optionalNeighborService = neighborServiceService.findNeighborServiceById(id);
-
-        if (optionalNeighborService.isEmpty()) {
-            model.addAttribute("error", true);
-            return "businesses/businesses";
-        }
-
-        NeighborService neighborService = optionalNeighborService.get();
-
-        model.addAttribute("neighborService", neighborService);
-
-        return "neighborservices/edit-neighborservice";
-    }
-
-
-    @PostMapping("/edit/neighbor-service")
-    public String editNeighborService(@Valid @ModelAttribute("neighborService") NeighborService neighborService, BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("neighborService", neighborService);
-            return "neighborservices/edit-neighborservice";
-        }
-
-        ServiceResponse<NeighborService> updateNeighborServiceResponse = neighborServiceService.updateNeighborService(neighborService);
-
-        if (updateNeighborServiceResponse.hasError()) {
-            model.addAttribute("errorMessage", "An error occurred while trying to update the neighbor service. Please try again later.");
-            return "neighborservices/edit-neighborservice";
-        }
-
-        NeighborService updatedNeighborService = updateNeighborServiceResponse.value();
-
-        model.addAttribute("neighborService", updatedNeighborService);
-
-        return "redirect:/neighbor-services/" + updatedNeighborService.getId();
-    }
+//    @GetMapping("/edit/neighbor-service/{id}")
+//    public String editBusiness(@PathVariable String id, Model model) {
+//        Optional<NeighborServiceProfile> optionalNeighborService = neighborServiceService.findNeighborServiceById(id);
+//
+//        if (optionalNeighborService.isEmpty()) {
+//            model.addAttribute("error", true);
+//            return "businesses/businesses";
+//        }
+//
+//        NeighborServiceProfile neighborServiceProfile = optionalNeighborService.get();
+//
+//        model.addAttribute("neighborService", neighborServiceProfile);
+//
+//        return "neighborservices/edit-neighborservice";
+//    }
+//
+//
+//    @PostMapping("/edit/neighbor-service")
+//    public String editNeighborService(@Valid @ModelAttribute("neighborService") NeighborServiceProfile neighborServiceProfile, BindingResult bindingResult, Model model) {
+//        if (bindingResult.hasErrors()) {
+//            model.addAttribute("neighborService", neighborServiceProfile);
+//            return "neighborservices/edit-neighborservice";
+//        }
+//
+//        ServiceResponse<NeighborServiceProfile> updateNeighborServiceResponse = neighborServiceService.updateNeighborService(neighborServiceProfile);
+//
+//        if (updateNeighborServiceResponse.hasError()) {
+//            model.addAttribute("errorMessage", "An error occurred while trying to update the neighbor service. Please try again later.");
+//            return "neighborservices/edit-neighborservice";
+//        }
+//
+//        NeighborServiceProfile updatedNeighborServiceProfile = updateNeighborServiceResponse.value();
+//
+//        model.addAttribute("neighborService", updatedNeighborServiceProfile);
+//
+//        return "redirect:/neighbor-services/" + updatedNeighborServiceProfile.getId();
+//    }
 }

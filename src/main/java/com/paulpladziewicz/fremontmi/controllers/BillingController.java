@@ -132,6 +132,7 @@ public class BillingController {
             dto.setPaymentIntent(invoice.getPaymentIntentObject().getId());
         }
 
+        dto.setReceiptUrl(invoice.getHostedInvoiceUrl());
         return dto;
     }
 }

@@ -1,7 +1,7 @@
 package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.models.*;
-import com.paulpladziewicz.fremontmi.repositories.NeighborServiceRepository;
+import com.paulpladziewicz.fremontmi.repositories.NeighborServiceProfileRepository;
 import com.stripe.model.PaymentIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,64 +9,69 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class NeighborServiceService {
     private static final Logger logger = LoggerFactory.getLogger(NeighborServiceService.class);
 
-    private final NeighborServiceRepository neighborServiceRepository;
+    private final NeighborServiceProfileRepository neighborServiceProfileRepository;
 
     private final UserService userService;
+
     private final StripeService stripeService;
 
-    public NeighborServiceService(NeighborServiceRepository neighborServiceRepository, UserService userService, StripeService stripeService) {
-        this.neighborServiceRepository = neighborServiceRepository;
+    public NeighborServiceService(NeighborServiceProfileRepository neighborServiceProfileRepository, UserService userService, StripeService stripeService) {
+        this.neighborServiceProfileRepository = neighborServiceProfileRepository;
         this.userService = userService;
         this.stripeService = stripeService;
     }
 
-    public ServiceResponse<NeighborService> createNeighborService(NeighborService neighborService) {
-        ServiceResponse<Map<String, Object>> serviceResponse = stripeService.createSubscription(neighborService.getSubscriptionPriceId());
+    public ServiceResponse<StripeTransactionRecord> createNeighborServiceProfile(String priceId, NeighborServiceProfile neighborServiceProfile) {
+        Optional<String> optionalUserId = userService.getUserId();
 
-        if (serviceResponse.hasError()) {
-            return ServiceResponse.error(serviceResponse.errorCode());
+        if (optionalUserId.isEmpty()) {
+            return ServiceResponse.error("user_id_not_found");
         }
 
-        neighborService.setClientSecret((String) serviceResponse.value().get("clientSecret"));
-        neighborService.setStripeSubscriptionId((String) serviceResponse.value().get("subscriptionId"));
+        String userId = optionalUserId.get();
 
+        neighborServiceProfile.setId(userId);
+
+        ServiceResponse<StripeTransactionRecord> createSubscriptionResponse = stripeService.createSubscription(priceId);
+
+        if (createSubscriptionResponse.hasError()) {
+            logger.error("Error when trying to create a subscription");
+            return ServiceResponse.error(createSubscriptionResponse.errorCode());
+        }
+
+        StripeTransactionRecord stripeTransactionRecord = createSubscriptionResponse.value();
+
+        ServiceResponse<NeighborServiceProfile> savedNeighborServiceProfileResponse = saveNeighborServiceProfile(neighborServiceProfile);
+
+        if (savedNeighborServiceProfileResponse.hasError()) {
+            logger.error("Error when trying to save a NeighborServiceProfile");
+            return ServiceResponse.error(savedNeighborServiceProfileResponse.errorCode());
+        }
+
+        return ServiceResponse.value(stripeTransactionRecord);
+    }
+
+    public ServiceResponse<NeighborServiceProfile> saveNeighborServiceProfile(NeighborServiceProfile neighborServiceProfile) {
         try {
-            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+            NeighborServiceProfile savedNeighborServiceProfile = neighborServiceProfileRepository.save(neighborServiceProfile);
 
-            if (optionalUserProfile.isEmpty()) {
-                return ServiceResponse.error("user_profile_not_found");
-            }
-
-            UserProfile userProfile = optionalUserProfile.get();
-
-            NeighborService savedNeighborService = neighborServiceRepository.save(neighborService);
-
-            userProfile.getNeighborServiceIds().add(savedNeighborService.getId());
-
-            ServiceResponse<UserProfile> saveUserProfileResponse =  userService.saveUserProfile(userProfile);
-
-            if (saveUserProfileResponse.hasError()) {
-                return ServiceResponse.error(saveUserProfileResponse.errorCode());
-            }
-
-            return ServiceResponse.value(savedNeighborService);
+            return ServiceResponse.value(savedNeighborServiceProfile);
         } catch (DataAccessException e) {
-            logger.error("Database access error when trying to create a NeighborService", e);
+            logger.error("Database access error when trying to save a NeighborServiceProfile", e);
             return ServiceResponse.error("database_access_exception");
         } catch (Exception e) {
-            logger.error("Unexpected error when trying to create a NeighborService", e);
+            logger.error("Unexpected error when trying to save a NeighborServiceProfile", e);
             return ServiceResponse.error("unexpected_error");
         }
     }
 
-    public ServiceResponse<NeighborService> handleSubscriptionSuccess(PaymentRequest paymentRequest) {
+    public ServiceResponse<NeighborServiceProfile> handleSubscriptionSuccess(PaymentRequest paymentRequest) {
         String neighborServiceId = paymentRequest.getId();
         String paymentIntentId = paymentRequest.getPaymentIntentId();
         String paymentStatus = paymentRequest.getPaymentStatus();
@@ -75,13 +80,13 @@ public class NeighborServiceService {
             return ServiceResponse.error("required_info_not_correct");
         }
 
-        Optional<NeighborService> optionalNeighborService = neighborServiceRepository.findById(neighborServiceId);
+        Optional<NeighborServiceProfile> optionalNeighborServiceProfile = neighborServiceProfileRepository.findById(neighborServiceId);
 
-        if (optionalNeighborService.isEmpty()) {
+        if (optionalNeighborServiceProfile.isEmpty()) {
             return ServiceResponse.error("neighbor_service_not_found");
         }
 
-        NeighborService neighborService = optionalNeighborService.get();
+        NeighborServiceProfile neighborServiceProfile = optionalNeighborServiceProfile.get();
 
         ServiceResponse<PaymentIntent> serviceResponse = stripeService.retrievePaymentIntent(paymentIntentId);
 
@@ -91,30 +96,25 @@ public class NeighborServiceService {
 
         PaymentIntent paymentIntent = serviceResponse.value();
 
-        neighborService.setPaymentIntentId(paymentIntent.getId());
-        neighborService.setPaymentStatus(paymentIntent.getStatus());
-
         if (paymentIntent.getStatus().equals("succeeded")) {
-            neighborService.setStatus("active");
+            neighborServiceProfile.setStatus("active");
         } else {
-            neighborService.setStatus("inactive");
+            return ServiceResponse.error("payment_not_successful");
         }
 
-        try {
-            return ServiceResponse.value(neighborServiceRepository.save(neighborService));
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to create a neighbor service", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to create a neighbor service", e);
-            return ServiceResponse.error("unexpected_error");
+        ServiceResponse<NeighborServiceProfile> savedNeighborServiceProfileResponse = saveNeighborServiceProfile(neighborServiceProfile);
+
+        if (savedNeighborServiceProfileResponse.hasError()) {
+            return ServiceResponse.error(savedNeighborServiceProfileResponse.errorCode());
         }
+
+        return ServiceResponse.value(neighborServiceProfile);
     }
 
-    public ServiceResponse<List<NeighborService>> findAllActiveNeighborServices() {
+    public ServiceResponse<List<NeighborServiceProfile>> findAllActiveNeighborServices() {
         try {
-            List<NeighborService> activeNeighborServices = neighborServiceRepository.findByStatus("active");
-            return ServiceResponse.value(activeNeighborServices);
+            List<NeighborServiceProfile> activeNeighborServiceProfiles = neighborServiceProfileRepository.findByStatus("active");
+            return ServiceResponse.value(activeNeighborServiceProfiles);
         } catch (DataAccessException e) {
             logger.error("Database access error when trying to find active neighbor services", e);
             return ServiceResponse.error("database_access_exception");
@@ -124,9 +124,9 @@ public class NeighborServiceService {
         }
     }
 
-    public Optional<NeighborService> findNeighborServiceById(String neighborServiceId) {
+    public Optional<NeighborServiceProfile> findNeighborServiceProfileById(String neighborServiceProfileId) {
         try {
-            return neighborServiceRepository.findById(neighborServiceId);
+            return neighborServiceProfileRepository.findById(neighborServiceProfileId);
         } catch (DataAccessException e) {
             logger.error("Database access error when trying to find a neighbor service by id", e);
             return Optional.empty();
@@ -136,61 +136,19 @@ public class NeighborServiceService {
         }
     }
 
-    public ServiceResponse<List<NeighborService>> findNeighborServicesByUser () {
-        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
-
-        if (optionalUserProfile.isEmpty()) {
-            return ServiceResponse.error("user_profile_not_found");
-        }
-
-        UserProfile userProfile = optionalUserProfile.get();
-
-        try {
-            return ServiceResponse.value(neighborServiceRepository.findAllById(userProfile.getNeighborServiceIds()));
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to retrieve all neighbor services for the user", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to retrieve all neighbor services for the user", e);
-            return ServiceResponse.error("unexpected_error");
-        }
-    }
-
-    public ServiceResponse<NeighborService> updateNeighborService(NeighborService neighborService) {
-        try {
-            return ServiceResponse.value(neighborServiceRepository.save(neighborService));
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to update a business", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to update a business", e);
-            return ServiceResponse.error("unexpected_error");
-        }
-    }
-
     public ServiceResponse<Boolean> deleteNeighborService(String neighborServiceId) {
-        Optional<NeighborService> optionalNeighborService = findNeighborServiceById(neighborServiceId);
+        Optional<NeighborServiceProfile> optionalNeighborServiceProfile = findNeighborServiceProfileById(neighborServiceId);
 
-        if (optionalNeighborService.isEmpty()) {
+        if (optionalNeighborServiceProfile.isEmpty()) {
             return ServiceResponse.error("neighbor_service_not_found");
         }
 
-        NeighborService neighborService = optionalNeighborService.get();
+        NeighborServiceProfile neighborServiceProfile = optionalNeighborServiceProfile.get();
 
-        if (neighborService.getStripeSubscriptionId() != null && !neighborService.getStripeSubscriptionId().isEmpty()) {
-            ServiceResponse<Boolean> isSubscriptionActiveResponse = stripeService.isSubscriptionActive(neighborService.getStripeSubscriptionId());
-
-            if (isSubscriptionActiveResponse.hasError()) {
-                return ServiceResponse.error(isSubscriptionActiveResponse.errorCode());
-            }
-
-            if (isSubscriptionActiveResponse.value()) {
-                return ServiceResponse.error("subscription_still_active");
-            }
-        }
+        // TODO check if Stripe subscription is still active and cancel it
 
         try {
-            neighborServiceRepository.deleteById(neighborServiceId);
+            neighborServiceProfileRepository.deleteById(neighborServiceId);
             return ServiceResponse.value(true);
         } catch (DataAccessException e) {
             logger.error("Database access error when trying to delete a business", e);

@@ -15,19 +15,19 @@
         </div>
 
         <div class="row">
-            <div th:if="${#lists.isEmpty(neighborServices)}" class="my-4">
+            <div th:if="${#lists.isEmpty(neighborServiceProfiles)}" class="my-4">
                 <div>
                     You have no NeighborServices™ at the moment.
                 </div>
             </div>
-            <div th:each="neighborService : ${neighborServices}" class="col-md-4 mb-4">
+            <div th:each="neighborServiceProfile : ${neighborServiceProfiles}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="h3 mb-1" th:text="${neighborService.name}">NeighborService™ Name</h4>
-                        <p th:text="${#strings.length(neighborService.description) > 120 ? #strings.substring(neighborService.description, 0, 120) + '...' : neighborService.description}">
+                        <h4 class="h3 mb-1" th:text="${neighborServiceProfile.name}">NeighborService™ Name</h4>
+                        <p th:text="${#strings.length(neighborServiceProfile.description) > 120 ? #strings.substring(neighborServiceProfile.description, 0, 120) + '...' : neighborServiceProfile.description}">
                             NeighborService™ Description
                         </p>
-                        <a th:href="'/neighbor-services/' + ${neighborService.id}" class="btn btn-lg btn-link p-0">View NeighborService™<i class="ai-arrow-right ms-2"></i></a>
+                        <a th:href="'/neighbor-services/' + ${neighborServiceProfile.id}" class="btn btn-lg btn-link p-0">View NeighborService™<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>

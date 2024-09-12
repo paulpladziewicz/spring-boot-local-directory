@@ -25,8 +25,6 @@ public class Event {
     @Size(max = 5000, message = "Description can't be longer than 5000 characters")
     private String description;
 
-    private List<String> categories =  new ArrayList<>();;
-
     private List<String> tags = new ArrayList<>();
 
     @Size(max = 256, message = "Location name can't be longer than 256 characters")

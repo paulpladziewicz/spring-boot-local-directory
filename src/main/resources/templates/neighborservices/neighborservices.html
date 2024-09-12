@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - NeighborServices™')}"><title>Placeholder Title</title></head>
+<head th:replace="~{partials/head :: head('FremontMI - NeighborServices™')}">
+    <title>NeighborServices™</title>
+</head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 <main class="bg-secondary pt-4 pb-5">
@@ -8,32 +10,52 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="display-3 mb-0">NeighborServices™</h1>
             <div>
-                <a href="/my/neighbor-services" class="btn btn-link fw-semibold fs-lg text-primary">My NeighborServices™</a>
+                <a href="/my/neighbor-services" class="btn btn-link fw-semibold fs-lg text-primary">My NeighborServices™ Profile</a>
                 <a href="/create/neighbor-service/overview" class="btn btn-primary">Create NeighborService™</a>
+            </div>
+        </div>
+
+        <!-- Tags Section -->
+        <div class="mb-4">
+            <div class="d-flex flex-wrap">
+                <span th:each="tag : ${tags}"
+                      class="badge bg-primary m-1"
+                      th:text="${tag}">
+                </span>
             </div>
         </div>
 
         <div class="row">
             <div class="row">
-                <div th:if="${#lists.isEmpty(neighborServices)}" class="my-4">
-                    <div>
-                        There are no NeighborServices™ listed at the moment.
-                    </div>
+                <div th:if="${#lists.isEmpty(profiles)}" class="my-4">
+                    <div>There are no NeighborServices™ listed at the moment.</div>
                 </div>
-                <div th:each="neighborService : ${neighborServices}" class="col-md-4 mb-4">
+
+                <!-- Profile Cards -->
+                <div th:each="neighborServiceProfile : ${profiles}" class="col-md-4 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="h3 mb-1" th:text="${neighborService.name}">Business Name</h4>
-                            <p class="text-muted fw-semibold mb-2">
-                                <span th:text="${neighborService.address}">Business Address</span>
-                            </p>
-                            <p th:text="${#strings.length(neighborService.description) > 120 ? #strings.substring(neighborService.description, 0, 120) + '...' : neighborService.description}">
+                            <h4 class="h3 mb-1" th:text="${neighborServiceProfile.firstName + ' ' + neighborServiceProfile.lastName}">Business Name</h4>
+
+                            <p th:text="${#strings.length(neighborServiceProfile.description) > 120 ? #strings.substring(neighborServiceProfile.description, 0, 120) + '...' : neighborServiceProfile.description}">
                                 Business Description
                             </p>
-                            <a th:href="'/neighbor-services/' + ${neighborService.id}" class="btn btn-lg btn-link p-0">View NeighborService™<i class="ai-arrow-right ms-2"></i></a>
+                            <a th:href="'/neighbor-services/' + ${neighborServiceProfile.id}" class="btn btn-lg btn-link p-0">View Profile<i class="ai-arrow-right ms-2"></i></a>
+
+                            <!-- Display Profile Tags -->
+                            <div th:if="${!#lists.isEmpty(neighborServiceProfile.tags)}" class="mt-3">
+                                <h6>Tags:</h6>
+                                <div class="d-flex flex-wrap">
+                                    <span th:each="tag : ${neighborServiceProfile.tags}"
+                                          class="badge bg-secondary m-1"
+                                          th:text="${tag}">
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

@@ -20,17 +20,17 @@
 
         <div class="row">
             <div class="col-lg-10 mx-auto">
+                <div>
+                    <span th:if="${business.status != 'active'}" class="badge bg-danger bg-opacity-10 text-danger fs-sm">Not Active - Requires Subscription</span>
+                </div>
                 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-2">
                     <h1 th:text="${business.name}" class="display-3 mb-0">Fremont Business Name</h1>
                     <div>
-                        <!-- Copy Button -->
-                        <button id="copy-button" class="btn btn-outline-secondary btn-icon" aria-label="Copy">
+                        <button id="copy-button" class="btn btn-outline-secondary btn-icon" aria-label="Copy" data-bs-toggle="tooltip" data-bs-placement="top" title="Copied!">
                             <i class="ai-copy"></i>
                         </button>
 
-                        <!-- Success Message -->
-                        <div id="copy-success" class="text-success mt-2" style="display: none;">Copied to clipboard!</div>
-                        <a th:href="'/edit/business/' + ${business.id}" class="btn btn-secondary btn-icon" aria-label="Edit">
+                        <a th:href="'/edit/business/' + ${business.id}" class="btn btn-secondary btn-icon" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
                             <i class="ai-edit-alt"></i>
                         </a>
                     </div>
@@ -115,23 +115,36 @@
     </section>
 </main>
 
+<!-- Tooltip container -->
+<div id="tooltip" style="display: none; position: absolute; background: #333; color: #fff; padding: 5px; border-radius: 3px;">
+    Copied!
+</div>
+
 <script th:inline="javascript">
-    document.getElementById('copy-button').addEventListener('click', async function() {
-        var businessId = /*[[${business.id}]]*/ 'default-id';
-        var fullUrl = window.location.origin + '/businesses/' + businessId;
+    document.addEventListener('DOMContentLoaded', () => {
+        const copyButton = document.getElementById('copy-button');
 
-        try {
-            await navigator.clipboard.writeText(fullUrl);
+        // Initialize Bootstrap tooltip
+        const tooltip = new bootstrap.Tooltip(copyButton);
 
-            var successMessage = document.getElementById('copy-success');
-            successMessage.style.display = 'block';
+        copyButton.addEventListener('click', async function() {
+            const businessId = /*[[${business.id}]]*/ 'default-id';
+            const fullUrl = window.location.origin + '/businesses/' + businessId;
 
-            setTimeout(function() {
-                successMessage.style.display = 'none';
-            }, 2000);
-        } catch (err) {
-            console.error('Failed to copy: ', err);
-        }
+            try {
+                await navigator.clipboard.writeText(fullUrl);
+
+                // Show the tooltip
+                tooltip.show();
+
+                // Hide the tooltip after 2 seconds
+                setTimeout(() => {
+                    tooltip.hide();
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+            }
+        });
     });
 </script>
 

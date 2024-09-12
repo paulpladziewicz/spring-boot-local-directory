@@ -13,4 +13,6 @@ public class InvoiceDTO {
     private Long created;
     private String currency;
     private String paymentIntent;
+    private String receiptNumber;
+    private String receiptUrl;
 }

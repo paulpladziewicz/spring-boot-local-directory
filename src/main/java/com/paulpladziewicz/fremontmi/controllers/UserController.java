@@ -115,6 +115,12 @@ public class UserController {
         return "settings/profile";
     }
 
+    @GetMapping("/my/settings/subscriptions")
+    public String subscriptionSettings(Model model) {
+
+        return "settings/subscriptions";
+    }
+
     @GetMapping("/my/settings/billing")
     public String billingSettings(Model model) {
 

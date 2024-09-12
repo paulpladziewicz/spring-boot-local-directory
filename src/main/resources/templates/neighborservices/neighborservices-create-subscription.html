@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <h1>Subscription Payment</h1>
-                <p class="mb-2">You are paying for the <strong th:text="${planName}"></strong> plan at <strong th:text="${price}">.</strong></p>
+                <p class="mb-2">You are paying for the <strong th:text="${subscriptionDisplayName}"></strong> plan at <strong th:text="${subscriptionDisplayName}">.</strong></p>
                 <p><a href="/" class="btn btn-link fw-semibold fs-sm p-0 mb-4">Change Subscription</a></p>
 
                 <form id="payment-form" class="my-4">
@@ -23,8 +23,7 @@
 </main>
 
 <script th:inline="javascript">
-    const clientSecret = /*[[${neighborService.clientSecret}]]*/ 'undefined';
-    const businessId = /*[[${neighborService.id}]]*/ 'undefined';
+    const clientSecret = /*[[${clientSecret}]]*/ 'undefined';
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
     const stripe = Stripe("pk_test_51KCrhcBCHBXtJFxOMYJo8xRymfT9m3PvrruBp7gZmcvCV2vpYnMH8EdkwVeibCrtj5bwNhhuAj5MzWU1NXtq6iBs000IzgImdE");

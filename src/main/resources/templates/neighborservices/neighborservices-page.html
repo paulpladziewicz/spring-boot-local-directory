@@ -11,14 +11,18 @@
                 <nav aria-label="breadcrumb">
                     <ol class="pt-lg-3 pb-lg-4 pb-2 breadcrumb">
                         <li class="breadcrumb-item"><a href="/businesses">NeighborServices</a></li>
-                        <li class="breadcrumb-item active" aria-current="page" th:text="${neighborService.name}"></li>
+                        <li class="breadcrumb-item active" aria-current="page" th:text="${neighborServiceProfile.name}"></li>
                     </ol>
                 </nav>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-10 mx-auto">
-                <h1 th:text="${neighborService.name}" class="display-3 mb-0">Fremont Business Name</h1>
+                <div>
+                    <span th:if="${neighborServiceProfile.status != 'active'}" class="badge bg-danger bg-opacity-10 text-danger fs-sm">Not Active - Requires Subscription</span>
+<!--                    <p class="text-danger">Please complete your business subscription.</p>-->
+                </div>
+                <h1 th:text="${neighborServiceProfile.name}" class="display-3 mb-0">Fremont Business Name</h1>
 
                 <div class="row mt-4">
                     <div class="col-lg-6">
@@ -26,7 +30,7 @@
                         <h2 class="display-6">We are a team who create marketing strategies</h2>
                     </div>
                     <div class="col-lg-6 pt-1 pt-sm-2 pt-md-5">
-                        <p th:text="${neighborService.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
+                        <p th:text="${neighborServiceProfile.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
                     </div>
                 </div>
 
@@ -111,7 +115,7 @@
 
                 </section>
 
-                <a th:href="'/edit/neighbor-service/' + ${neighborService.id}" class="d-inline-block d-sm-none btn btn-outline-primary">Edit NeighborService</a>
+                <a th:href="'/edit/neighbor-service/' + ${neighborServiceProfile.id}" class="d-inline-block d-sm-none btn btn-outline-primary">Edit NeighborService</a>
 
 
             </div>

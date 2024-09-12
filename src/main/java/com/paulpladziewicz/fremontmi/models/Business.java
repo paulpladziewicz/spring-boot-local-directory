@@ -30,8 +30,6 @@ public class Business {
     @Size(max = 5000, message = "Description can't be longer than 5000 characters")
     private String description;
 
-    private List<String> categories =  new ArrayList<>();
-
     private List<String> tags = new ArrayList<>();
 
     private List<String> adminIds = new ArrayList<>();
@@ -46,15 +44,5 @@ public class Business {
 
     private String status = "incomplete";
 
-    private String clientSecret;
-
-    private String subscriptionPriceId;
-
-    private String stripeSubscriptionId;
-
-    private String paymentIntentId;
-
-    private String paymentStatus = "incomplete";
-
-    private LocalDateTime subscriptionEndTime;
+    private String stripeTransactionRecordId;
 }

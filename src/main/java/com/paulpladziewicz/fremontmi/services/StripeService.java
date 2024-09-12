@@ -1,7 +1,9 @@
 package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
+import com.paulpladziewicz.fremontmi.models.StripeTransactionRecord;
 import com.paulpladziewicz.fremontmi.models.UserProfile;
+import com.paulpladziewicz.fremontmi.repositories.StripeTransactionRecordRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
@@ -25,6 +27,8 @@ public class StripeService {
 
     private static final Logger logger = LoggerFactory.getLogger(StripeService.class);
 
+    private final StripeTransactionRecordRepository stripeTransactionRecordRepository;
+
     private final UserService userService;
 
     @Value("${stripe.secret.key}")
@@ -33,7 +37,8 @@ public class StripeService {
     @Value("${stripe.publishable.key}")
     private String stripePublishableKey;
 
-    public StripeService(UserService userService) {
+    public StripeService(StripeTransactionRecordRepository stripeTransactionRecordRepository, UserService userService) {
+        this.stripeTransactionRecordRepository = stripeTransactionRecordRepository;
         this.userService = userService;
     }
 
@@ -117,14 +122,25 @@ public class StripeService {
         return ServiceResponse.value(customer.getId());
     }
 
-    public ServiceResponse<Map<String, Object>> createSubscription(String priceId) {
-        ServiceResponse<String> serviceResponse = getCustomerId();
-
-        if (serviceResponse.hasError()) {
-            return ServiceResponse.error(serviceResponse.errorCode());
+    public ServiceResponse<StripeTransactionRecord> createSubscription(String priceId) {
+        if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
+            logger.error("Price ID was not provided when trying to create a subscription");
+            return ServiceResponse.error("price_id_required");
         }
 
-        String customerId = serviceResponse.value();
+        if (!priceId.equals("price_1Pv7TzBCHBXtJFxOWmV5PE4h") && !priceId.equals("price_1PELXZBCHBXtJFxO4FchTfAv")) {
+            logger.error("Invalid price ID provided when trying to create a subscription");
+            return ServiceResponse.error("invalid_price_id");
+        }
+
+        ServiceResponse<String> getCustomerIdResponse = getCustomerId();
+
+        if (getCustomerIdResponse.hasError()) {
+            logger.error("Failed to get customer ID when trying to create a subscription");
+            return ServiceResponse.error(getCustomerIdResponse.errorCode());
+        }
+
+        String customerId = getCustomerIdResponse.value();
 
         SubscriptionCreateParams subCreateParams = SubscriptionCreateParams.builder()
                 .setCustomer(customerId)
@@ -133,7 +149,7 @@ public class StripeService {
                 .setPaymentSettings(
                         SubscriptionCreateParams.PaymentSettings.builder()
                                 .setPaymentMethodTypes(
-                                        java.util.List.of(SubscriptionCreateParams.PaymentSettings.PaymentMethodType.CARD)  // Use PaymentMethodType enum
+                                        java.util.List.of(SubscriptionCreateParams.PaymentSettings.PaymentMethodType.CARD)
                                 )
                                 .build()
                 )
@@ -142,9 +158,6 @@ public class StripeService {
 
         try {
             Subscription subscription = Subscription.create(subCreateParams);
-
-            Map<String, Object> subscriptionData = new HashMap<>();
-            subscriptionData.put("subscriptionId", subscription.getId());
 
             String clientSecret = subscription.getLatestInvoiceObject()
                     .getPaymentIntentObject()
@@ -155,9 +168,21 @@ public class StripeService {
                 return ServiceResponse.error("payment_intent_error");
             }
 
-            subscriptionData.put("clientSecret", clientSecret);
+            Price price = Price.retrieve(priceId);
+            String displayName = price.getMetadata().get("displayName");
+            String displayPrice = price.getMetadata().get("displayPrice");
 
-            return ServiceResponse.value(subscriptionData);
+            StripeTransactionRecord stripeTransactionRecord = new StripeTransactionRecord();
+            stripeTransactionRecord.setDisplayName(displayName);
+            stripeTransactionRecord.setDisplayPrice(displayPrice);
+            stripeTransactionRecord.setClientSecret(clientSecret);
+            stripeTransactionRecord.setSubscriptionId(subscription.getId());
+            stripeTransactionRecord.setCustomerId(customerId);
+            stripeTransactionRecord.setPriceId(priceId);
+
+            StripeTransactionRecord savedStripeTransactionRecord = stripeTransactionRecordRepository.save(stripeTransactionRecord);
+
+            return ServiceResponse.value(savedStripeTransactionRecord);
         } catch (StripeException e) {
             logger.error("Failed to create subscription due to a Stripe exception", e);
             return ServiceResponse.error("stripe_error");
