@@ -6,14 +6,19 @@ import com.stripe.model.PaymentIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class NeighborServiceService {
     private static final Logger logger = LoggerFactory.getLogger(NeighborServiceService.class);
+
+    private final MongoTemplate mongoTemplate;
 
     private final NeighborServiceProfileRepository neighborServiceProfileRepository;
 
@@ -21,7 +26,8 @@ public class NeighborServiceService {
 
     private final StripeService stripeService;
 
-    public NeighborServiceService(NeighborServiceProfileRepository neighborServiceProfileRepository, UserService userService, StripeService stripeService) {
+    public NeighborServiceService(MongoTemplate mongoTemplate, NeighborServiceProfileRepository neighborServiceProfileRepository, UserService userService, StripeService stripeService) {
+        this.mongoTemplate = mongoTemplate;
         this.neighborServiceProfileRepository = neighborServiceProfileRepository;
         this.userService = userService;
         this.stripeService = stripeService;
@@ -36,9 +42,18 @@ public class NeighborServiceService {
 
         String userId = optionalUserId.get();
 
-        neighborServiceProfile.setId(userId);
+        neighborServiceProfile.setUserId(userId);
 
-        ServiceResponse<StripeTransactionRecord> createSubscriptionResponse = stripeService.createSubscription(priceId);
+        ServiceResponse<NeighborServiceProfile> savedNeighborServiceProfileResponse = saveNeighborServiceProfile(neighborServiceProfile);
+
+        if (savedNeighborServiceProfileResponse.hasError()) {
+            logger.error("Error when trying to save a NeighborServiceProfile");
+            return ServiceResponse.error(savedNeighborServiceProfileResponse.errorCode());
+        }
+
+        NeighborServiceProfile savedNeighborServiceProfile = savedNeighborServiceProfileResponse.value();
+
+        ServiceResponse<StripeTransactionRecord> createSubscriptionResponse = stripeService.createSubscription(priceId, savedNeighborServiceProfile.getId(), "neighbor_services_profiles");
 
         if (createSubscriptionResponse.hasError()) {
             logger.error("Error when trying to create a subscription");
@@ -47,12 +62,7 @@ public class NeighborServiceService {
 
         StripeTransactionRecord stripeTransactionRecord = createSubscriptionResponse.value();
 
-        ServiceResponse<NeighborServiceProfile> savedNeighborServiceProfileResponse = saveNeighborServiceProfile(neighborServiceProfile);
 
-        if (savedNeighborServiceProfileResponse.hasError()) {
-            logger.error("Error when trying to save a NeighborServiceProfile");
-            return ServiceResponse.error(savedNeighborServiceProfileResponse.errorCode());
-        }
 
         return ServiceResponse.value(stripeTransactionRecord);
     }
@@ -111,10 +121,17 @@ public class NeighborServiceService {
         return ServiceResponse.value(neighborServiceProfile);
     }
 
-    public ServiceResponse<List<NeighborServiceProfile>> findAllActiveNeighborServices() {
+    public ServiceResponse<List<NeighborServiceProfile>> findAllActiveNeighborServices(String tag) {
         try {
-            List<NeighborServiceProfile> activeNeighborServiceProfiles = neighborServiceProfileRepository.findByStatus("active");
-            return ServiceResponse.value(activeNeighborServiceProfiles);
+            List<NeighborServiceProfile> profiles;
+
+            if (tag != null && !tag.isEmpty()) {
+                profiles = neighborServiceProfileRepository.findByTagsContainingAndStatus(tag, "active");
+            } else {
+                profiles = neighborServiceProfileRepository.findByStatus("active");
+            }
+
+            return ServiceResponse.value(profiles);
         } catch (DataAccessException e) {
             logger.error("Database access error when trying to find active neighbor services", e);
             return ServiceResponse.error("database_access_exception");
@@ -124,6 +141,34 @@ public class NeighborServiceService {
         }
     }
 
+    // Fetch all distinct tags by querying for documents and manually processing the tags field
+    public List<String> findAllDistinctTags() {
+        // Query to find all documents where "tags" exists and is not an empty array
+        Query query = new Query();
+        query.addCriteria(Criteria.where("tags").exists(true).not().size(0));
+
+        // Find documents with non-empty tags
+        List<NeighborServiceProfile> profiles = mongoTemplate.find(query, NeighborServiceProfile.class, "neighbor_services_profiles");
+
+        // Use a Set to automatically handle uniqueness
+        Set<String> distinctTags = new HashSet<>();
+
+        // Loop through all profiles and collect tags
+        for (NeighborServiceProfile profile : profiles) {
+            if (profile.getTags() != null) {
+                for (String tag : profile.getTags()) {
+                    if (tag != null && !tag.trim().isEmpty()) {
+                        distinctTags.add(tag);  // Add only non-empty, non-null tags
+                    }
+                }
+            }
+        }
+
+        // Convert the set of distinct tags to a list
+        return new ArrayList<>(distinctTags);
+    }
+
+
     public Optional<NeighborServiceProfile> findNeighborServiceProfileById(String neighborServiceProfileId) {
         try {
             return neighborServiceProfileRepository.findById(neighborServiceProfileId);
@@ -132,6 +177,26 @@ public class NeighborServiceService {
             return Optional.empty();
         } catch (Exception e) {
             logger.error("Unexpected error when trying to find a neighbor service by id", e);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<NeighborServiceProfile> findNeighborServiceProfileByUserId() {
+        Optional<String> optionalUserId = userService.getUserId();
+
+        if (optionalUserId.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String userId = optionalUserId.get();
+
+        try {
+            return neighborServiceProfileRepository.findByUserId(userId);
+        } catch (DataAccessException e) {
+            logger.error("Database access error when trying to find a neighbor service by user id", e);
+            return Optional.empty();
+        } catch (Exception e) {
+            logger.error("Unexpected error when trying to find a neighbor service by user id", e);
             return Optional.empty();
         }
     }

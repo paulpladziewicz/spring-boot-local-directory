@@ -122,7 +122,7 @@ public class StripeService {
         return ServiceResponse.value(customer.getId());
     }
 
-    public ServiceResponse<StripeTransactionRecord> createSubscription(String priceId) {
+    public ServiceResponse<StripeTransactionRecord> createSubscription(String priceId, String entityId, String entityType) {
         if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
             logger.error("Price ID was not provided when trying to create a subscription");
             return ServiceResponse.error("price_id_required");
@@ -141,6 +141,8 @@ public class StripeService {
         }
 
         String customerId = getCustomerIdResponse.value();
+
+        // TODO prevent duplicate subscriptions if the entity can use an existing subscription
 
         SubscriptionCreateParams subCreateParams = SubscriptionCreateParams.builder()
                 .setCustomer(customerId)
@@ -178,6 +180,8 @@ public class StripeService {
             stripeTransactionRecord.setClientSecret(clientSecret);
             stripeTransactionRecord.setSubscriptionId(subscription.getId());
             stripeTransactionRecord.setCustomerId(customerId);
+            stripeTransactionRecord.setEntityId(entityId);
+            stripeTransactionRecord.setEntityCollection(entityType);
             stripeTransactionRecord.setPriceId(priceId);
 
             StripeTransactionRecord savedStripeTransactionRecord = stripeTransactionRecordRepository.save(stripeTransactionRecord);

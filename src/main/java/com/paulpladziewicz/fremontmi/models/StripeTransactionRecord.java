@@ -31,7 +31,7 @@ public class StripeTransactionRecord {
 
     private String entityId;
 
-    private String entityType;
+    private String entityCollection;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

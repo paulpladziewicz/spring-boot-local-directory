@@ -19,6 +19,9 @@ public class NeighborServiceProfile {
     @Id
     private String id;
 
+    @Indexed
+    private String userId;
+
     @NotBlank(message = "First name is required.")
     @Size(max = 50, message = "First name should be less than 50 characters.")
     private String firstName;

@@ -10,18 +10,21 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="display-3 mb-0">NeighborServices™</h1>
             <div>
-                <a href="/my/neighbor-services" class="btn btn-link fw-semibold fs-lg text-primary">My NeighborServices™ Profile</a>
+                <a href="/my/neighbor-services/profile" class="btn btn-link fw-semibold fs-lg text-primary">My NeighborServices™ Profile</a>
                 <a href="/create/neighbor-service/overview" class="btn btn-primary">Create NeighborService™</a>
             </div>
         </div>
 
         <!-- Tags Section -->
         <div class="mb-4">
+            <h3>Available Tags</h3>
             <div class="d-flex flex-wrap">
-                <span th:each="tag : ${tags}"
-                      class="badge bg-primary m-1"
-                      th:text="${tag}">
-                </span>
+                <a th:each="tag : ${allTags}"
+                   th:href="'/neighbor-services?tag=' + ${tag}"
+                   th:classappend="${selectedTag == tag} ? 'badge bg-success' : 'badge bg-primary'"
+                   class="badge m-1"
+                   th:text="${tag}">
+                </a>
             </div>
         </div>
 

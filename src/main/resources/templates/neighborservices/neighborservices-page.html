@@ -10,8 +10,8 @@
             <div class="col-lg-10 mx-auto">
                 <nav aria-label="breadcrumb">
                     <ol class="pt-lg-3 pb-lg-4 pb-2 breadcrumb">
-                        <li class="breadcrumb-item"><a href="/businesses">NeighborServices</a></li>
-                        <li class="breadcrumb-item active" aria-current="page" th:text="${neighborServiceProfile.name}"></li>
+                        <li class="breadcrumb-item"><a href="/neighbor-services">NeighborServices</a></li>
+                        <li class="breadcrumb-item active" aria-current="page" th:text="${neighborServiceProfile.firstName + ' ' + neighborServiceProfile.lastName}"></li>
                     </ol>
                 </nav>
             </div>
@@ -20,9 +20,8 @@
             <div class="col-lg-10 mx-auto">
                 <div>
                     <span th:if="${neighborServiceProfile.status != 'active'}" class="badge bg-danger bg-opacity-10 text-danger fs-sm">Not Active - Requires Subscription</span>
-<!--                    <p class="text-danger">Please complete your business subscription.</p>-->
                 </div>
-                <h1 th:text="${neighborServiceProfile.name}" class="display-3 mb-0">Fremont Business Name</h1>
+                <h1 th:text="${neighborServiceProfile.firstName + ' ' + neighborServiceProfile.lastName}" class="display-3 mb-0">Fremont Business Name</h1>
 
                 <div class="row mt-4">
                     <div class="col-lg-6">
@@ -33,87 +32,6 @@
                         <p th:text="${neighborServiceProfile.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
                     </div>
                 </div>
-
-                <section class="bg-secondary">
-                    <div class="row g-4 pb-2 pb-sm-4 pb-lg-5">
-
-                        <!-- Address -->
-                        <div class="col-6">
-                            <div class="card border-0 h-100">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-4">Address</h4>
-                                    <p class="fs-lg fw-medium pb-3 mb-3">514 Magnolia St. Orlando, FL 32806</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Phone -->
-                        <div class="col-6">
-                            <div class="card border-0 h-100">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-4">Phone</h4>
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="pb-1 mb-2">
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Main office</span>
-                                            <a class="nav-link fs-lg p-0" href="tel:+178632256033">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;33</a>
-                                        </li>
-                                        <li>
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Reception room</span>
-                                            <a class="nav-link fs-lg p-0" href="tel:+178630056044">+1&nbsp;(786)&nbsp;300&nbsp;560&nbsp;44</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Schedule -->
-                        <div class="col-6">
-                            <div class="card border-0 h-100">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-4">Schedule</h4>
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="pb-1 mb-2">
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Mon - Thu</span>
-                                            <div class="d-flex align-items-center">
-                                                <span class="text-nav fs-lg fw-medium">10:00</span>
-                                                <span class="border-top mx-4" style="width: 36px; height: 1px;"></span>
-                                                <span class="text-nav fs-lg fw-medium">22:00</span>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Fri - Sat</span>
-                                            <div class="d-flex align-items-center">
-                                                <span class="text-nav fs-lg fw-medium">10:00</span>
-                                                <span class="border-top mx-4" style="width: 36px; height: 1px;"></span>
-                                                <span class="text-nav fs-lg fw-medium">20:00</span>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="col-6">
-                            <div class="card border-0 h-100">
-                                <div class="card-body">
-                                    <h4 class="card-title mb-4">Email</h4>
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="pb-1 mb-2">
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Main office</span>
-                                            <a class="nav-link fs-lg p-0" href="mailto:office@example.com">office@example.com</a>
-                                        </li>
-                                        <li>
-                                            <span class="d-block fs-sm text-body-secondary mb-1">Reception room</span>
-                                            <a class="nav-link fs-lg p-0" href="mailto:reception@example.com">reception@example.com</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </section>
 
                 <a th:href="'/edit/neighbor-service/' + ${neighborServiceProfile.id}" class="d-inline-block d-sm-none btn btn-outline-primary">Edit NeighborService</a>
 
