@@ -77,7 +77,7 @@
                     [csrfHeader]: csrfToken
                 },
                 body: JSON.stringify({
-                    id: businessId,
+                    entityId: businessId,
                     paymentIntentId: paymentIntent.id,
                     paymentStatus: paymentIntent.status,
                 }),
