@@ -25,8 +25,6 @@ public class StripeTransactionRecord {
 
     private String displayPrice;
 
-    private String paymentIntentId;
-
     private String clientSecret;
 
     private String entityId;

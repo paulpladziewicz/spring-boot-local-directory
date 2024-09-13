@@ -128,7 +128,7 @@ public class StripeService {
             return ServiceResponse.error("price_id_required");
         }
 
-        if (!priceId.equals("price_1Pv7TzBCHBXtJFxOWmV5PE4h") && !priceId.equals("price_1PELXZBCHBXtJFxO4FchTfAv")) {
+        if (!priceId.equals("price_1Pv7TzBCHBXtJFxOWmV5PE4h") && !priceId.equals("price_1PELXZBCHBXtJFxO4FchTfAv") && !priceId.equals("price_1Pv7V0BCHBXtJFxOinfPKMUE") && !priceId.equals("price_1Pv7XIBCHBXtJFxOUIvRA6Xf")) {
             logger.error("Invalid price ID provided when trying to create a subscription");
             return ServiceResponse.error("invalid_price_id");
         }

@@ -6,7 +6,12 @@ import com.stripe.model.PaymentIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -62,15 +67,12 @@ public class NeighborServiceService {
 
         StripeTransactionRecord stripeTransactionRecord = createSubscriptionResponse.value();
 
-
-
         return ServiceResponse.value(stripeTransactionRecord);
     }
 
     public ServiceResponse<NeighborServiceProfile> saveNeighborServiceProfile(NeighborServiceProfile neighborServiceProfile) {
         try {
             NeighborServiceProfile savedNeighborServiceProfile = neighborServiceProfileRepository.save(neighborServiceProfile);
-
             return ServiceResponse.value(savedNeighborServiceProfile);
         } catch (DataAccessException e) {
             logger.error("Database access error when trying to save a NeighborServiceProfile", e);
@@ -82,15 +84,16 @@ public class NeighborServiceService {
     }
 
     public ServiceResponse<NeighborServiceProfile> handleSubscriptionSuccess(PaymentRequest paymentRequest) {
-        String neighborServiceId = paymentRequest.getId();
+        String neighborServiceProfileId = paymentRequest.getEntityId();
         String paymentIntentId = paymentRequest.getPaymentIntentId();
         String paymentStatus = paymentRequest.getPaymentStatus();
 
-        if (neighborServiceId == null || neighborServiceId.isEmpty() || paymentIntentId == null || paymentIntentId.isEmpty() || paymentStatus == null || paymentStatus.isEmpty()) {
-            return ServiceResponse.error("required_info_not_correct");
+        if (!paymentStatus.equals("succeeded")) {
+            logger.error("Payment not successful but it should have been when handling successful payment. Payment status: {} neighborServiceProfileId: {}", paymentStatus, neighborServiceProfileId);
+            return ServiceResponse.error("payment_not_successful");
         }
 
-        Optional<NeighborServiceProfile> optionalNeighborServiceProfile = neighborServiceProfileRepository.findById(neighborServiceId);
+        Optional<NeighborServiceProfile> optionalNeighborServiceProfile = neighborServiceProfileRepository.findById(neighborServiceProfileId);
 
         if (optionalNeighborServiceProfile.isEmpty()) {
             return ServiceResponse.error("neighbor_service_not_found");
@@ -98,24 +101,14 @@ public class NeighborServiceService {
 
         NeighborServiceProfile neighborServiceProfile = optionalNeighborServiceProfile.get();
 
-        ServiceResponse<PaymentIntent> serviceResponse = stripeService.retrievePaymentIntent(paymentIntentId);
-
-        if (serviceResponse.hasError()) {
-            return ServiceResponse.error(serviceResponse.errorCode());
-        }
-
-        PaymentIntent paymentIntent = serviceResponse.value();
-
-        if (paymentIntent.getStatus().equals("succeeded")) {
+        if (!neighborServiceProfile.getStatus().equals("active")) {
             neighborServiceProfile.setStatus("active");
-        } else {
-            return ServiceResponse.error("payment_not_successful");
-        }
 
-        ServiceResponse<NeighborServiceProfile> savedNeighborServiceProfileResponse = saveNeighborServiceProfile(neighborServiceProfile);
+            ServiceResponse<NeighborServiceProfile> savedNeighborServiceProfileResponse = saveNeighborServiceProfile(neighborServiceProfile);
 
-        if (savedNeighborServiceProfileResponse.hasError()) {
-            return ServiceResponse.error(savedNeighborServiceProfileResponse.errorCode());
+            if (savedNeighborServiceProfileResponse.hasError()) {
+                return ServiceResponse.error(savedNeighborServiceProfileResponse.errorCode());
+            }
         }
 
         return ServiceResponse.value(neighborServiceProfile);
@@ -222,5 +215,29 @@ public class NeighborServiceService {
             logger.error("Unexpected error when trying to delete a business", e);
             return ServiceResponse.error("unexpected_error");
         }
+    }
+
+    // Example Aggregation query to find the top 'n' tags used in NeighborServiceProfiles
+    public List<TagUsage> getTopTags(int limit) {
+        // Step 1: Unwind the "tags" array
+        AggregationOperation unwindTags = Aggregation.unwind("tags");
+
+        // Step 2: Group by tag and count occurrences
+        GroupOperation groupByTag = Aggregation.group("tags").count().as("count");
+
+        // Step 3: Sort by count in descending order
+        AggregationOperation sortByCount = Aggregation.sort(Sort.by(Sort.Direction.DESC, "count"));
+
+        // Step 4: Limit the results to the top 'n' tags
+        AggregationOperation limitResults = Aggregation.limit(limit);
+
+        // Step 5: Combine the aggregation steps into a pipeline
+        Aggregation aggregation = Aggregation.newAggregation(unwindTags, groupByTag, sortByCount, limitResults);
+
+        // Step 6: Execute the aggregation query using MongoTemplate
+        AggregationResults<TagUsage> results = mongoTemplate.aggregate(aggregation, "neighbor_services_profiles", TagUsage.class);
+
+        // Return the list of top tags
+        return results.getMappedResults();
     }
 }

@@ -24,6 +24,7 @@
 
 <script th:inline="javascript">
     const clientSecret = /*[[${clientSecret}]]*/ 'undefined';
+    const entityId = /*[[${entityId}]]*/ 'undefined';
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
     const stripe = Stripe("pk_test_51KCrhcBCHBXtJFxOMYJo8xRymfT9m3PvrruBp7gZmcvCV2vpYnMH8EdkwVeibCrtj5bwNhhuAj5MzWU1NXtq6iBs000IzgImdE");
@@ -77,11 +78,13 @@
                     [csrfHeader]: csrfToken
                 },
                 body: JSON.stringify({
-                    id: businessId,
+                    entityId,
                     paymentIntentId: paymentIntent.id,
                     paymentStatus: paymentIntent.status,
                 }),
             });
+
+            // TODO refactor to have the backend redirect and show a nice success message
 
             if (response.ok) {
                 const { redirectUrl } = await response.json();

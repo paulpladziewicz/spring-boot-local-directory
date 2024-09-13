@@ -71,6 +71,7 @@ public class NeighborServiceController {
         StripeTransactionRecord stripeTransactionRecord = createNeighborServiceProfileResponse.value();
 
         model.addAttribute("clientSecret", stripeTransactionRecord.getClientSecret());
+        model.addAttribute("entityId", stripeTransactionRecord.getEntityId());
         model.addAttribute("subscriptionDisplayName", stripeTransactionRecord.getDisplayName());
         model.addAttribute("subscriptionDisplayPrice", stripeTransactionRecord.getDisplayPrice());
 

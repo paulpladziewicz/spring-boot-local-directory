@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PaymentRequest {
-    private String id;
+    private String entityId;
     private String paymentIntentId;
     private String paymentStatus;
 }
