@@ -24,6 +24,23 @@
             border-color: #0d6efd; /* Primary Bootstrap color */
         }
     </style>
+    <style>
+        .icon-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            color: inherit; /* Keep the inherited text color */
+        }
+
+        .icon-btn:hover {
+            color: #6c757d; /* Optional: hover effect */
+        }
+
+        .icon-btn i {
+            font-size: 1.25rem; /* Adjust icon size if needed */
+        }
+    </style>
     <script>
         function disableSubmitButtonWhileSubmitting(form) {
             const submitButton = form.querySelector('button[type="submit"]');

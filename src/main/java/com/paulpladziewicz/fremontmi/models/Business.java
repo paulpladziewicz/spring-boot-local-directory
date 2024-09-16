@@ -32,7 +32,7 @@ public class Business {
 
     private List<String> tags = new ArrayList<>();
 
-    private List<String> adminIds = new ArrayList<>();
+    private List<String> administrators = new ArrayList<>();
 
     private String address;
 

@@ -43,5 +43,7 @@ public class Event {
     private String status = "active";
 
     private String organizerId;
+
+    private List<String> administrators = new ArrayList<>();
 }
 

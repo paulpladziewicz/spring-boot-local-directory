@@ -2,7 +2,9 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.NeighborService;
 import com.paulpladziewicz.fremontmi.models.NeighborServiceProfile;
+import com.paulpladziewicz.fremontmi.models.Tag;
 import com.paulpladziewicz.fremontmi.repositories.NeighborServiceProfileRepository;
+import com.paulpladziewicz.fremontmi.repositories.TagRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
@@ -13,8 +15,11 @@ public class TestDataLoader implements CommandLineRunner {
 
     private final NeighborServiceProfileRepository profileRepository;
 
-    public TestDataLoader(NeighborServiceProfileRepository profileRepository) {
+    private final TagRepository tagRepository;
+
+    public TestDataLoader(NeighborServiceProfileRepository profileRepository, TagRepository tagRepository) {
         this.profileRepository = profileRepository;
+        this.tagRepository = tagRepository;
     }
 
     @Override
@@ -80,6 +85,18 @@ public class TestDataLoader implements CommandLineRunner {
             System.out.println("Test data inserted into MongoDB.");
         } else {
             System.out.println("Test data already exists, skipping insertion.");
+        }
+
+        if (tagRepository.count() == 0) {
+            System.out.println("Inserting test tags into MongoDB.");
+            tagRepository.saveAll(Arrays.asList(
+                new Tag("home", "Home"),
+                new Tag("yard", "Yard"),
+                new Tag("dogwalking", "Dog Walking"),
+                new Tag("langaugelearning", "Language Learning")
+            ));
+        } else {
+            System.out.println("Test tags already exist, skipping insertion.");
         }
     }
 }

@@ -240,4 +240,28 @@ public class NeighborServiceService {
         // Return the list of top tags
         return results.getMappedResults();
     }
+
+    public ServiceResponse<List<NeighborServiceProfile>> searchNeighborServiceProfiles(String query) {
+        try {
+            // Define the search aggregation using MongoDB Atlas Search
+            Aggregation aggregation = Aggregation.newAggregation(
+                    Aggregation.match(Criteria.where("$search").is("pets")),
+                    Aggregation.match(new Criteria().orOperator(
+                            Criteria.where("firstName").regex(query, "i"),
+                            Criteria.where("lastName").regex(query, "i"),
+                            Criteria.where("description").regex(query, "i"),
+                            Criteria.where("tags").regex(query, "i")
+                    ))
+            );
+
+            // Execute the aggregation query
+            AggregationResults<NeighborServiceProfile> results = mongoTemplate.aggregate(aggregation, "neighbor_services_profiles", NeighborServiceProfile.class);
+
+            // Return the search results
+            return ServiceResponse.value(results.getMappedResults());
+        } catch (Exception e) {
+            logger.error("Error while searching for NeighborServiceProfiles", e);
+            return ServiceResponse.error("search_failed");
+        }
+    }
 }

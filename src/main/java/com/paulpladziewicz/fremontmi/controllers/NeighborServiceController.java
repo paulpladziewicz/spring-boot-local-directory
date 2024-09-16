@@ -198,4 +198,26 @@ public class NeighborServiceController {
 
         return "redirect:/neighbor-services/" + updatedNeighborServiceProfile.getId();
     }
+
+    @GetMapping("/neighbor-services/search")
+    public String searchNeighborServices(@RequestParam("query") String query, Model model) {
+        // Call the service to perform the search
+        ServiceResponse<List<NeighborServiceProfile>> searchResponse = neighborServiceService.searchNeighborServiceProfiles(query);
+
+        if (searchResponse.hasError()) {
+            model.addAttribute("errorMessage", "An error occurred while performing the search. Please try again.");
+            return "neighborservices/neighborservices";
+        }
+
+        // Get the search results
+        List<NeighborServiceProfile> profiles = searchResponse.value();
+
+        // Add the profiles to the model to display in the view
+        model.addAttribute("profiles", profiles);
+        model.addAttribute("allTags", new ArrayList<>());  // All available tags
+        model.addAttribute("uniqueTagsForProfiles", new ArrayList<>());  // Tags for currently displayed profiles
+        model.addAttribute("selectedTag", "cleaning");
+
+        return "neighborservices/neighborservices";
+    }
 }
