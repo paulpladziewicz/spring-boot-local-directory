@@ -25,6 +25,11 @@ public class HomeController {
         return "home";
     }
 
+    @GetMapping("/tags")
+    public String getTags() {
+        return "tagsinput";
+    }
+
     @GetMapping("/error")
     public String error () {
         return "error";

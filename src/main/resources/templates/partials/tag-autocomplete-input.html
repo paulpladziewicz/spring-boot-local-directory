@@ -1,0 +1,114 @@
+<div th:fragment="autocomplete">
+    <div class="form-group mb-2">
+        <label for="tag-input" class="mb-1 form-label opacity-75 fw-medium fs-base">Tags</label>
+        <div class="input-group position-relative">
+            <input type="text" class="form-control" id="tag-input" name="tags" placeholder="Enter tags"
+                   autocomplete="off"/>
+            <div id="autocomplete-list" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+        </div>
+        <small class="form-text text-muted">
+            Max 3 tags. Separate words allowed (e.g., "Ice Cream").
+        </small>
+        <div id="tags-container" class="mt-2">
+            <!-- Selected tags will appear here -->
+        </div>
+        <input type="hidden" id="hidden-tag-input" name="hiddenTags"/>
+    </div>
+
+    <!-- Autocomplete JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tagInput = document.getElementById('tag-input');
+            const autocompleteList = document.getElementById('autocomplete-list');
+            const tagsContainer = document.getElementById('tags-container');
+            const hiddenTagInput = document.getElementById('hidden-tag-input');
+            let tags = [];
+            let debounceTimeout;
+            const debounceDelay = 300;
+            const maxCharacters = 4;
+
+            tagInput.addEventListener('input', function () {
+                clearTimeout(debounceTimeout);
+                const query = tagInput.value.trim();
+                if (query.length >= 2 && query.length <= maxCharacters) {
+                    debounceTimeout = setTimeout(() => {
+                        fetchAutocompleteSuggestions(query);
+                    }, debounceDelay);
+                } else {
+                    hideAutocompleteSuggestions();
+                }
+            });
+
+            function fetchAutocompleteSuggestions(query) {
+                const url = `/autocomplete/tags?query=${encodeURIComponent(query)}`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(suggestions => showAutocompleteSuggestions(suggestions))
+                    .catch(error => console.error('Error fetching suggestions:', error));
+            }
+
+            function showAutocompleteSuggestions(suggestions) {
+                autocompleteList.innerHTML = '';
+                suggestions.forEach(suggestion => {
+                    const item = document.createElement('a');
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = suggestion;
+                    item.addEventListener('click', function () {
+                        tagInput.value = suggestion;
+                        hideAutocompleteSuggestions();
+                        addTagFromInput(suggestion);
+                    });
+                    autocompleteList.appendChild(item);
+                });
+                autocompleteList.style.display = 'block';
+            }
+
+            function hideAutocompleteSuggestions() {
+                autocompleteList.innerHTML = '';
+                autocompleteList.style.display = 'none';
+            }
+
+            function addTagFromInput(tag) {
+                if (tag && !tags.includes(tag) && tags.length < 3) {
+                    tags.push(tag);
+                    const tagPill = document.createElement('span');
+                    tagPill.className = 'badge bg-primary bg-opacity-10 text-primary fs-sm me-1 mb-1';
+                    tagPill.textContent = tag;
+
+                    const removeButton = document.createElement('button');
+                    removeButton.type = 'button';
+                    removeButton.className = 'btn-close btn-close-white btn-sm ms-2';
+                    removeButton.setAttribute('aria-label', 'Remove');
+                    removeButton.addEventListener('click', function () {
+                        removeTag(tag);
+                    });
+                    tagPill.appendChild(removeButton);
+                    tagsContainer.appendChild(tagPill);
+                    updateHiddenInput();
+                }
+                tagInput.value = '';
+            }
+
+            function removeTag(tag) {
+                tags = tags.filter(t => t !== tag);
+                const tagPills = tagsContainer.querySelectorAll('.badge');
+                tagPills.forEach(pill => {
+                    if (pill.firstChild.textContent === tag) {
+                        pill.remove();
+                    }
+                });
+                updateHiddenInput();
+            }
+
+            function updateHiddenInput() {
+                hiddenTagInput.value = tags.join(',');
+            }
+
+            document.addEventListener('click', function (e) {
+                if (!autocompleteList.contains(e.target) && e.target !== tagInput) {
+                    hideAutocompleteSuggestions();
+                }
+            });
+        });
+    </script>
+</div>
