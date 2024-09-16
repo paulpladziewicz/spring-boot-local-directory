@@ -3,6 +3,7 @@ package com.paulpladziewicz.fremontmi.models;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class Content {
 
     private String type; // enum GROUP, EVENT, BUSINESS, NEIGHBOR_SERVICE_PROFILE
 
+    @Indexed(unique = true)
     private String slug; // unique index with type & slug
 
     private String visibility = "public"; // enum PUBLIC, RESTRICTED, HIDDEN
@@ -25,8 +27,6 @@ public class Content {
     private String status; // enum REQUIRES_ACTIVE_SUBSCRIPTION, DELETED
 
     private ContentDetails details; // actual content
-
-    private List<String> tags = new ArrayList<>();
 
     private List<String> relatedContentIds; // future use
 

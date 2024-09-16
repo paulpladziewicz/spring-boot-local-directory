@@ -7,12 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class GroupService {
@@ -32,18 +35,78 @@ public class GroupService {
     }
 
     @Transactional
-    public ServiceResponse<Group> createGroup(Group group) {
+    public ServiceResponse<Content> createGroup(Group group) {
         try {
-            Group savedGroup = contentRepository.save(group);
+            Optional<UserProfile> userProfileOpt = userService.getUserProfile();
+            if (userProfileOpt.isEmpty()) {
+                return logAndReturnError("Failed to create group: user profile not found.", "user_profile_not_found");
+            }
 
-            userService.addContentIdToUserProfile(ContentTypes.GROUP, savedGroup.getId());
+            UserProfile userProfile = userProfileOpt.get();
 
-            return ServiceResponse.value(savedGroup);
+            group.setMembers(List.of(userProfile.getUserId()));
+            group.setAdministrators(List.of(userProfile.getUserId()));
+
+            Content contentDocument = new Content();
+            contentDocument.setType(String.valueOf(ContentTypes.GROUP));
+            contentDocument.setSlug(createUniqueSlug(group.getName()));
+            contentDocument.setDetails(group);
+            contentDocument.setCreatedBy(userProfile.getUserId());
+
+            Content savedContentDocument = contentRepository.save(contentDocument);
+
+            userService.addContentIdToUserProfile(ContentTypes.GROUP, savedContentDocument.getId());
+
+            return ServiceResponse.value(savedContentDocument);
 
         } catch (DataAccessException e) {
             return logAndReturnError("Failed to save group due to a database error", "database_error", e);
         } catch (Exception e) {
             return logAndReturnError("Unexpected error occurred while creating group.", "unexpected_error", e);
+        }
+    }
+
+    public String createUniqueSlug(String name) {
+        // Clean up the name to form the base slug
+        String baseSlug = name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+
+        // Find all slugs that start with the base slug
+        List<Content> matchingSlugs = contentRepository.findBySlugRegex("^" + baseSlug + "(-\\d+)?$");
+
+        // If no matching slugs, return the base slug
+        if (matchingSlugs.isEmpty()) {
+            return baseSlug;
+        }
+
+        // Extract slugs that match the baseSlug-<number> format
+        Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
+
+        int maxNumber = 0;
+        boolean baseSlugExists = false;
+
+        for (Content content : matchingSlugs) {
+            String slug = content.getSlug();
+
+            // Check if the base slug without a number already exists
+            if (slug.equals(baseSlug)) {
+                baseSlugExists = true;
+            }
+
+            // Find the slugs with numbers at the end and get the max number
+            Matcher matcher = pattern.matcher(slug);
+            if (matcher.find()) {
+                int number = Integer.parseInt(matcher.group(1));
+                maxNumber = Math.max(maxNumber, number);
+            }
+        }
+
+        // If the base slug already exists, start numbering from 1
+        if (baseSlugExists) {
+            return baseSlug + "-" + (maxNumber + 1);
+        } else if (maxNumber > 0) {
+            return baseSlug + "-" + (maxNumber + 1);
+        } else {
+            return baseSlug;  // No suffix needed if base slug doesn't exist
         }
     }
 
@@ -54,6 +117,18 @@ public class GroupService {
             return logAndReturnError("Failed to retrieve groups due to a database error", "database_error", e);
         } catch (Exception e) {
             return logAndReturnError("Unexpected error occurred while retrieving groups.", "unexpected_error", e);
+        }
+    }
+
+    public ServiceResponse<Content> findBySlug(String slug) {
+        try {
+            Optional<Content> groupOpt = contentRepository.findBySlug(slug);
+            return groupOpt.map(ServiceResponse::value)
+                    .orElseGet(() -> logAndReturnError("Group not found with slug: " + slug, "group_not_found"));
+        } catch (DataAccessException e) {
+            return logAndReturnError("Failed to retrieve group with slug " + slug + " due to a database error", "database_error", e);
+        } catch (Exception e) {
+            return logAndReturnError("Unexpected error occurred while retrieving group with slug " + slug, "unexpected_error", e);
         }
     }
 
@@ -87,31 +162,31 @@ public class GroupService {
         }
     }
 
-    @Transactional
-    public ServiceResponse<Group> updateGroup(Group group) {
-        try {
-            ServiceResponse<UserProfile> userProfileResponse = getAndValidateUserProfileForAdmin(group.getId());
-            if (userProfileResponse.hasError()) {
-                return logAndReturnError("User doesn't have permission to update group", "permission_denied");
-            }
-
-            ServiceResponse<Group> groupResponse = findGroupById(group.getId());
-            if (groupResponse.hasError()) {
-                return groupResponse;
-            }
-
-            Group existingGroup = groupResponse.value();
-            existingGroup.setName(group.getName());
-            existingGroup.setDescription(group.getDescription());
-
-            return ServiceResponse.value(groupRepository.save(existingGroup));
-
-        } catch (DataAccessException e) {
-            return logAndReturnError("Failed to update group due to a database error", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while updating group.", "unexpected_error", e);
-        }
-    }
+//    @Transactional
+//    public ServiceResponse<Group> updateGroup(Group group) {
+//        try {
+//            ServiceResponse<UserProfile> userProfileResponse = getAndValidateUserProfileForAdmin(group.getId());
+//            if (userProfileResponse.hasError()) {
+//                return logAndReturnError("User doesn't have permission to update group", "permission_denied");
+//            }
+//
+//            ServiceResponse<Group> groupResponse = findGroupById(group.getId());
+//            if (groupResponse.hasError()) {
+//                return groupResponse;
+//            }
+//
+//            Group existingGroup = groupResponse.value();
+//            existingGroup.setName(group.getName());
+//            existingGroup.setDescription(group.getDescription());
+//
+//            return ServiceResponse.value(groupRepository.save(existingGroup));
+//
+//        } catch (DataAccessException e) {
+//            return logAndReturnError("Failed to update group due to a database error", "database_error", e);
+//        } catch (Exception e) {
+//            return logAndReturnError("Unexpected error occurred while updating group.", "unexpected_error", e);
+//        }
+//    }
 
     @Transactional
     public ServiceResponse<Void> deleteGroup(String groupId) {
@@ -204,7 +279,7 @@ public class GroupService {
         Group savedGroup = groupRepository.save(group);
 
         List<String> groupIds = new ArrayList<>(userProfile.getGroupIds());
-        groupIds.remove(savedGroup.getId());
+//        groupIds.remove(savedGroup.getId());
         userProfile.setGroupIds(groupIds);
         userService.saveUserProfile(userProfile);
 

@@ -1,6 +1,7 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.Announcement;
+import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.Group;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.services.GroupService;
@@ -46,19 +47,19 @@ public class GroupController {
             return "groups/create-group";
         }
 
-        ServiceResponse<Group> serviceResponse = groupService.createGroup(group);
+        ServiceResponse<Content> createGroupResponse = groupService.createGroup(group);
 
-        if (serviceResponse.hasError()) {
+        if (createGroupResponse.hasError()) {
             model.addAttribute("error", true);
             model.addAttribute("group", group);
             return "groups/create-group";
         }
 
-        Group savedGroup = serviceResponse.value();
+        Content createdGroup = createGroupResponse.value();
 
         redirectAttributes.addFlashAttribute("successMessage", "Group created successfully!");
 
-        return "redirect:/groups/" + savedGroup.getId();
+        return "redirect:/groups/" + createdGroup.getSlug();
     }
 
     @GetMapping("/groups")
@@ -75,18 +76,21 @@ public class GroupController {
         return "groups/groups";
     }
 
-    @GetMapping("/groups/{id}")
-    public String displayGroup(@PathVariable String id, Model model) {
-        ServiceResponse<Group> serviceResponse = groupService.findGroupById(id);
+    @GetMapping("/groups/{slug}")
+    public String displayGroup(@PathVariable String slug, Model model) {
+        ServiceResponse<Content> findBySlugResponse = groupService.findBySlug(slug);
 
-        if (serviceResponse.hasError()) {
+        if (findBySlugResponse.hasError()) {
             model.addAttribute("error", true);
             return "groups/group-page";
         }
 
-        Group group = serviceResponse.value();
+        Content content = findBySlugResponse.value();
+        Group group = (Group) content.getDetails();
+
         group.setDescription(htmlSanitizationService.sanitizeHtml(group.getDescription().replace("\n", "<br/>")));
 
+        model.addAttribute("contentId", content.getId());
         model.addAttribute("group", group);
         model.addAttribute("adminCount", group.getAdministrators().size());
         model.addAttribute("memberCount", group.getMembers().size());
@@ -160,24 +164,24 @@ public class GroupController {
         return "groups/edit-group";
     }
 
-    @PostMapping("/edit/group")
-    public String updateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-        if (result.hasErrors()) {
-            return "groups/edit-group";
-        }
-        ServiceResponse<Group> serviceResponse = groupService.updateGroup(group);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "groups/edit-group";
-        }
-
-        Group updatedGroup = serviceResponse.value();
-
-        redirectAttributes.addFlashAttribute("isSuccess", true);
-
-        return "redirect:/groups/" + updatedGroup.getId();
-    }
+//    @PostMapping("/edit/group")
+//    public String updateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+//        if (result.hasErrors()) {
+//            return "groups/edit-group";
+//        }
+//        ServiceResponse<Content> serviceResponse = groupService.updateGroup(group);
+//
+//        if (serviceResponse.hasError()) {
+//            model.addAttribute("error", true);
+//            return "groups/edit-group";
+//        }
+//
+//        Content updatedGroup = serviceResponse.value();
+//
+//        redirectAttributes.addFlashAttribute("isSuccess", true);
+//
+//        return "redirect:/groups/" + Content.getSlug();
+//    }
 
     @PostMapping("/delete/group")
     public String deleteGroup(@NotNull @RequestParam("groupId") String groupId, RedirectAttributes redirectAttributes) {

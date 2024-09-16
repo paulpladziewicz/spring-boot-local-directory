@@ -24,15 +24,15 @@
                         <div class="d-flex">
                             <form sec:authorize="isAuthenticated()" th:if="${!isMember}" th:action="@{/groups/join}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                <input type="hidden" name="groupId" th:value="${group.id}"/>
+                                <input type="hidden" name="groupId" th:value="${contentId}"/>
                                 <button type="submit" class="d-none d-sm-block btn btn-primary ms-4">Join Group</button>
                             </form>
                             <form sec:authorize="isAuthenticated()" th:if="${isMember && !isAdmin}"
                                   th:action="@{/groups/leave}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                                <input type="hidden" name="groupId" th:value="${group.id}"/>
+                                <input type="hidden" name="groupId" th:value="${contentId}"/>
                                 <button type="submit" class="d-none d-sm-block btn btn-primary ms-4">Leave Group</button>
                             </form>
-                            <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.id}"
+                            <a th:if="${isAdmin}" th:href="'/edit/group/' + ${contentId}"
                                class="d-none d-sm-block btn btn-outline-primary ms-4">Edit Group</a>
                         </div>
                     </div>
@@ -51,7 +51,7 @@
                     <div class="d-flex align-items-center mb-2">
                         <h2 class="h1 mb-0 me-2">Announcements</h2>
                         <button th:if="${isAdmin}" class="btn btn-outline-primary btn-sm"
-                                th:attr="hx-get='/announcements/group/form/' + ${group.id}"
+                                th:attr="hx-get='/announcements/group/form/' + ${contentId}"
                                 hx-target="#add-announcement-form"
                                 hx-swap="innerHTML"
                         >
@@ -60,7 +60,7 @@
                     </div>
                     <div id="add-announcement-form"></div>
                     <ul id="announcementList" class="list-unstyled">
-                        <li th:if="${group.announcements.empty}">
+                        <li th:if="${group.announcements.isEmpty()}">
                             <p class="my-3">
                                 There are no announcements at this time.
                             </p>
@@ -77,7 +77,7 @@
                                     <form onsubmit="disableSubmitButtonWhileSubmitting(this)" th:attr="hx-post='/delete/group/announcement', hx-swap='outerHTML', hx-target='#announcement-' + ${announcement.id}">
                                         <input type="hidden" th:name="${_csrf.parameterName}"
                                                th:value="${_csrf.token}"/>
-                                        <input type="hidden" name="groupId" th:value="${group.id}"/>
+                                        <input type="hidden" name="groupId" th:value="${contentId}"/>
                                         <input type="hidden" name="announcementId" th:value="${announcement.id}"/>
                                         <button type="submit" class="btn btn-danger btn-sm ms-4"><i class="ai-trash"></i>
                                         </button>
@@ -93,17 +93,17 @@
                     <div>
                         <form sec:authorize="isAuthenticated()" th:if="${!isMember}" th:action="@{/groups/join}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                            <input type="hidden" name="groupId" th:value="${group.id}"/>
+                            <input type="hidden" name="groupId" th:value="${contentId}"/>
                             <button type="submit" class="d-inline-block d-sm-none btn btn-primary me-2">Join Group</button>
                         </form>
                         <form sec:authorize="isAuthenticated()" th:if="${isMember && !isAdmin}" th:action="@{/groups/leave}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                            <input type="hidden" name="groupId" th:value="${group.id}"/>
+                            <input type="hidden" name="groupId" th:value="${contentId}"/>
                             <button type="submit" class="d-inline-block d-sm-none btn btn-primary me-2">Leave Group</button>
                         </form>
-                        <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.id}" class="d-inline-block d-sm-none btn btn-outline-primary me-2">Edit Group</a>
+                        <a th:if="${isAdmin}" th:href="'/edit/group/' + ${contentId}" class="d-inline-block d-sm-none btn btn-outline-primary me-2">Edit Group</a>
                     </div>
-                    <a th:href="'/group/email/administrators/' + ${group.getId()}" th:if="${!isAdmin}" type="button" class="btn btn-link p-0">Email Administrators</a>
-                    <a th:href="'/group/email/members/' + ${group.getId()}" th:if="${isAdmin}" type="button" class="btn btn-link p-0">Email Members</a>
+                    <a th:href="'/group/email/administrators/' + ${contentId}" th:if="${!isAdmin}" type="button" class="btn btn-link p-0">Email Administrators</a>
+                    <a th:href="'/group/email/members/' + ${contentId}" th:if="${isAdmin}" type="button" class="btn btn-link p-0">Email Members</a>
                 </div>
 
             </div>
