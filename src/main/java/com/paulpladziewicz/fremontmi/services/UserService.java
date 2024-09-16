@@ -234,4 +234,8 @@ public class UserService {
         logger.error(message, e);
         return ServiceResponse.error(errorCode);
     }
+
+    public void addContentIdToUserProfile(ContentTypes contentTypes, String id) {
+
+    }
 }

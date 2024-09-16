@@ -9,33 +9,38 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+// One Service for each type of content to handle all the nuances of that type
 @Data
 @Document(collection = "content")
 public class Content {
     @Id
     private String id;
 
-    private String type;
+    private String type; // enum GROUP, EVENT, BUSINESS, NEIGHBOR_SERVICE_PROFILE
 
     private String slug; // unique index with type & slug
 
-    private String status;
+    private String visibility = "public"; // enum PUBLIC, RESTRICTED, HIDDEN
 
-    private String visibility;
+    private String status; // enum REQUIRES_ACTIVE_SUBSCRIPTION, DELETED
+
+    private ContentDetails details; // actual content
 
     private List<String> tags = new ArrayList<>();
 
-    private List<String> relatedContentIds;
-
-    private ContentDetails details;
-
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    private LocalDateTime updatedAt;
+    private List<String> relatedContentIds; // future use
 
     private String createdBy;
 
     private String updatedBy;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    private LocalDateTime updatedAt; // user made changes
+
+    private LocalDateTime lastReviewedAt;
+
+    // eventually, stripe HashMap
 
     @Version
     private Long version;

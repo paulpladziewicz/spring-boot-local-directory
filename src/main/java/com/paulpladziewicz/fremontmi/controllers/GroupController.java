@@ -2,14 +2,11 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.Announcement;
 import com.paulpladziewicz.fremontmi.models.Group;
-import com.paulpladziewicz.fremontmi.models.SendEmailDto;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
-import com.paulpladziewicz.fremontmi.services.EmailService;
 import com.paulpladziewicz.fremontmi.services.GroupService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
@@ -49,7 +46,7 @@ public class GroupController {
             return "groups/create-group";
         }
 
-        ServiceResponse<Group> serviceResponse = groupService.addGroup(group);
+        ServiceResponse<Group> serviceResponse = groupService.createGroup(group);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);

@@ -1,9 +1,7 @@
 package com.paulpladziewicz.fremontmi.services;
 
-import com.paulpladziewicz.fremontmi.models.Announcement;
-import com.paulpladziewicz.fremontmi.models.Group;
-import com.paulpladziewicz.fremontmi.models.ServiceResponse;
-import com.paulpladziewicz.fremontmi.models.UserProfile;
+import com.paulpladziewicz.fremontmi.models.*;
+import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import com.paulpladziewicz.fremontmi.repositories.GroupRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,28 +18,25 @@ import java.util.Optional;
 public class GroupService {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
+
     private final GroupRepository groupRepository;
+
+    private final ContentRepository contentRepository;
+
     private final UserService userService;
 
-    public GroupService(GroupRepository groupRepository, UserService userService) {
+    public GroupService(ContentRepository contentRepository, GroupRepository groupRepository, UserService userService) {
+        this.contentRepository = contentRepository;
         this.groupRepository = groupRepository;
         this.userService = userService;
     }
 
     @Transactional
-    public ServiceResponse<Group> addGroup(Group group) {
+    public ServiceResponse<Group> createGroup(Group group) {
         try {
-            Optional<UserProfile> userProfileOpt = userService.getUserProfile();
+            Group savedGroup = contentRepository.save(group);
 
-            if (userProfileOpt.isEmpty()) {
-                return logAndReturnError("Failed to add group: user profile not found.", "user_profile_not_found");
-            }
-
-            UserProfile userProfile = userProfileOpt.get();
-            addUserToGroupAdministrators(group, userProfile);
-
-            Group savedGroup = groupRepository.save(group);
-            addGroupToUserProfile(savedGroup, userProfile);
+            userService.addContentIdToUserProfile(ContentTypes.GROUP, savedGroup.getId());
 
             return ServiceResponse.value(savedGroup);
 
@@ -303,15 +298,8 @@ public class GroupService {
         return ServiceResponse.value(true);
     }
 
-    private void addUserToGroupAdministrators(Group group, UserProfile userProfile) {
-        group.getAdministrators().add(userProfile.getUserId());
-        group.getMembers().add(userProfile.getUserId());
-    }
-
-    private void addGroupToUserProfile(Group savedGroup, UserProfile userProfile) {
-        userProfile.getGroupIds().add(savedGroup.getId());
-        userProfile.getGroupAdminIds().add(savedGroup.getId());
-        userService.saveUserProfile(userProfile);
+    public Boolean userCanEdit(String userId, Group group) {
+        return group.getAdministrators().contains(userId);
     }
 
     private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
