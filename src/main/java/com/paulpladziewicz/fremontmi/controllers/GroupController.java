@@ -47,7 +47,7 @@ public class GroupController {
             return "groups/create-group";
         }
 
-        ServiceResponse<Content> createGroupResponse = groupService.createGroup(group);
+        ServiceResponse<Group> createGroupResponse = groupService.createGroup(group);
 
         if (createGroupResponse.hasError()) {
             model.addAttribute("error", true);
@@ -64,34 +64,31 @@ public class GroupController {
 
     @GetMapping("/groups")
     public String displayGroups(Model model) {
-        ServiceResponse<List<Content>> findAllResponse = groupService.findAll();
+        ServiceResponse<List<Group>> findAllResponse = groupService.findAll();
 
         if (findAllResponse.hasError()) {
             model.addAttribute("error", true);
         }
 
-        List<Content> groupContent = findAllResponse.value();
-        System.out.println(groupContent);
-        model.addAttribute("groupContent", groupContent);
+        List<Group> groups = findAllResponse.value();
+        model.addAttribute("groups", groups);
 
         return "groups/groups";
     }
 
     @GetMapping("/groups/{slug}")
     public String displayGroup(@PathVariable String slug, Model model) {
-        ServiceResponse<Content> findBySlugResponse = groupService.findBySlug(slug);
+        ServiceResponse<Group> findBySlugResponse = groupService.findBySlug(slug);
 
         if (findBySlugResponse.hasError()) {
             model.addAttribute("error", true);
             return "groups/group-page";
         }
 
-        Content content = findBySlugResponse.value();
-        Group group = (Group) content.getDetails();
+        Group group = findBySlugResponse.value();
 
         group.setDescription(htmlSanitizationService.sanitizeHtml(group.getDescription().replace("\n", "<br/>")));
 
-        model.addAttribute("contentId", content.getId());
         model.addAttribute("group", group);
         model.addAttribute("adminCount", group.getAdministrators().size());
         model.addAttribute("memberCount", group.getMembers().size());
@@ -135,16 +132,16 @@ public class GroupController {
 
     @GetMapping("/my/groups")
     public String groups(Model model) {
-        ServiceResponse<List<Content>> serviceRequest = groupService.findGroupsByUser();
+        ServiceResponse<List<Group>> serviceRequest = groupService.findGroupsByUser();
 
         if (serviceRequest.hasError()) {
             model.addAttribute("error", true);
             return "groups/my-groups";
         }
 
-        List<Content> groupsContent = serviceRequest.value();
+        List<Group> groups = serviceRequest.value();
 
-        model.addAttribute("groups", groupsContent);
+        model.addAttribute("groups", groups);
 
         return "groups/my-groups";
     }
