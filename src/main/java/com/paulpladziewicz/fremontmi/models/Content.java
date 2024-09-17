@@ -17,6 +17,8 @@ public class Content {
     @Id
     private String id;
 
+    private String type; // enum GROUP, EVENT, ANNOUNCEMENT, RESOURCE, USER, etc.
+
     private String slug; // unique index with type & slug
 
     private String visibility = ContentVisibility.PUBLIC.getVisibility(); // enum PUBLIC, RESTRICTED, HIDDEN

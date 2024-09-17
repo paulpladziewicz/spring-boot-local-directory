@@ -14,8 +14,6 @@ import java.util.List;
 @TypeAlias("group")
 public class Group extends Content {
 
-    private String type = ContentTypes.GROUP.getContentType();
-
     @NotBlank(message = "Please provide a group name.")
     @Size(max = 100, message = "Name should not be longer than 100 characters.")
     private String name;

@@ -43,7 +43,7 @@ public class GroupService {
 
             group.setMembers(List.of(userProfile.getUserId()));
             group.setAdministrators(List.of(userProfile.getUserId()));
-            group.setType(String.valueOf(ContentTypes.GROUP));
+            group.setType(ContentTypes.GROUP.getContentType());
             group.setSlug(createUniqueSlug(group.getName()));
             group.setCreatedBy(userProfile.getUserId());
 
@@ -107,7 +107,7 @@ public class GroupService {
 
     public ServiceResponse<List<Group>> findAll() {
         try {
-            List<Content> contentList = contentRepository.findAllByType(String.valueOf(ContentTypes.GROUP));
+            List<Content> contentList = contentRepository.findAllByType(ContentTypes.GROUP.getContentType());
 
             List<Group> groupList = contentList.stream()
                     .filter(content -> content instanceof Group)
