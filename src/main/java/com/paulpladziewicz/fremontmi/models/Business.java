@@ -42,10 +42,13 @@ public class Business {
 
     private String website;
 
-    private String status = "incomplete";
+    private String subscriptionId;
 
     private String clientSecret;
 
+    private String priceId;
+
+    // for delete
     private String subscriptionPriceId;
 
     private String stripeSubscriptionId;
@@ -55,4 +58,6 @@ public class Business {
     private String paymentStatus = "incomplete";
 
     private LocalDateTime subscriptionEndTime;
+
+    private String status = "incomplete";
 }

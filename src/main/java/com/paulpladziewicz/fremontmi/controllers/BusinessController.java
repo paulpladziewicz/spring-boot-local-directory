@@ -52,7 +52,7 @@ public class BusinessController {
 
             Business existingBusiness = optionalBusiness.get();
 
-            existingBusiness.setSubscriptionPriceId(priceId);
+            existingBusiness.setPriceId(priceId);
 
             model.addAttribute("business", existingBusiness);
             return "businesses/business-create-form";

@@ -40,8 +40,6 @@ public class Content {
 
     private Boolean reviewed = false;
 
-    private String stripeSubscriptionId;
-
     @Version
     private Long version;
 }

@@ -44,6 +44,14 @@ public class NeighborServiceProfile {
 
     private List<NeighborService> neighborServices = new ArrayList<>();
 
+    private String subscriptionId;
+
+    private String clientSecret;
+
+    private String priceId;
+
+    // for delete
+
     private String status = "incomplete";
 
     private LocalDateTime createdAt = LocalDateTime.now();
