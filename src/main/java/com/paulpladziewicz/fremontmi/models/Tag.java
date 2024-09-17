@@ -15,14 +15,16 @@ public class Tag {
 
     private String name; // canonical form, unique index
 
-    public Tag(String name, String displayName) {
-        this.name = name;
-        this.displayName = displayName;
-    }
-
     private String displayName; // user-friendly version
+
+    private Boolean reviewed = false;
 
     private int count;
 
     private Map<String, Integer> countByContentType = new HashMap<>();
+
+    public Tag(String name, String displayName) {
+        this.name = name;
+        this.displayName = displayName;
+    }
 }

@@ -8,31 +8,28 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="display-3 mb-0">Groups</h1>
-            <div hx-boost="true">
+            <div>
                 <a href="/my/groups" class="btn btn-link fw-semibold fs-lg text-primary">My Groups</a>
                 <a href="/create/group" class="btn btn-primary">Create Group</a>
             </div>
         </div>
 
         <div class="row">
-            <div class="alert d-flex alert-danger" role="alert">
-                <i class="ai-circle-slash fs-xl pe-1 me-2"></i>
-                <div>A simple danger alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.</div>
-            </div>            <div th:if="${#lists.isEmpty(groups)}" class="my-4">
+            <div th:if="${#lists.isEmpty(groupContent)}" class="my-4">
                 <div>
                     There are no groups available at the moment.
                 </div>
             </div>
-            <div th:each="group : ${groups}" class="col-md-4 mb-4">
+            <div th:each="group : ${groupContent}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="h3 mb-1" th:text="${group.name}">Card title</h4>
+                        <h4 class="h3 mb-1" th:text="${group.details.name}">Card title</h4>
                         <p class="text-muted fw-semibold mb-2">
-                            <span th:text="${group.members.size()}"></span>
-                            <span th:text="${group.members.size() == 1 ? 'Member' : 'Members'}"></span>
+                            <span th:text="${group.details.members.size()}"></span>
+                            <span th:text="${group.details.members.size() == 1 ? 'Member' : 'Members'}"></span>
                         </p>
-                        <p th:text="${#strings.length(group.description) > 120 ? #strings.substring(group.description, 0, 120) + '...' : group.description}"></p>
-                        <a th:href="'/groups/' + ${group.id}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
+                        <p th:text="${#strings.length(group.details.description) > 120 ? #strings.substring(group.details.description, 0, 120) + '...' : group.details.description}"></p>
+                        <a th:href="'/groups/' + ${group.slug}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>

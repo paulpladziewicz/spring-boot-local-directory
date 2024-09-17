@@ -66,6 +66,7 @@ public class GroupService {
         }
     }
 
+    // TODO make this more efficient
     public String createUniqueSlug(String name) {
         // Clean up the name to form the base slug
         String baseSlug = name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
@@ -110,9 +111,9 @@ public class GroupService {
         }
     }
 
-    public ServiceResponse<List<Group>> findAll() {
+    public ServiceResponse<List<Content>> findAll() {
         try {
-            return ServiceResponse.value(groupRepository.findAll());
+            return ServiceResponse.value(contentRepository.findAllByType(String.valueOf(ContentTypes.GROUP)));
         } catch (DataAccessException e) {
             return logAndReturnError("Failed to retrieve groups due to a database error", "database_error", e);
         } catch (Exception e) {

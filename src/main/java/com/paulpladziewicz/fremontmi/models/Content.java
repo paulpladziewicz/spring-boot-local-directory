@@ -38,9 +38,9 @@ public class Content {
 
     private LocalDateTime updatedAt; // user made changes
 
-    private LocalDateTime lastReviewedAt;
+    private Boolean reviewed = false;
 
-    // eventually, stripe HashMap
+    private String stripeSubscriptionId;
 
     @Version
     private Long version;

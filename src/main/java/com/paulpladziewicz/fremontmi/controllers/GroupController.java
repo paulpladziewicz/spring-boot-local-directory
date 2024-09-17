@@ -64,14 +64,15 @@ public class GroupController {
 
     @GetMapping("/groups")
     public String displayGroups(Model model) {
-        ServiceResponse<List<Group>> serviceRequest = groupService.findAll();
+        ServiceResponse<List<Content>> findAllResponse = groupService.findAll();
 
-        if (serviceRequest.hasError()) {
+        if (findAllResponse.hasError()) {
             model.addAttribute("error", true);
         }
 
-        List<Group> groups = serviceRequest.value();
-        model.addAttribute("groups", groups);
+        List<Content> groupContent = findAllResponse.value();
+        System.out.println(groupContent);
+        model.addAttribute("groupContent", groupContent);
 
         return "groups/groups";
     }
