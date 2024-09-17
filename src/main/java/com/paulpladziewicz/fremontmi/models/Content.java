@@ -17,13 +17,11 @@ public class Content {
     @Id
     private String id;
 
-    private String type; // enum GROUP, EVENT, BUSINESS, NEIGHBOR_SERVICE_PROFILE
-
     private String slug; // unique index with type & slug
 
-    private String visibility = "public"; // enum PUBLIC, RESTRICTED, HIDDEN
+    private String visibility = ContentVisibility.PUBLIC.getVisibility(); // enum PUBLIC, RESTRICTED, HIDDEN
 
-    private String status; // enum REQUIRES_ACTIVE_SUBSCRIPTION, DELETED
+    private String status = ContentStatus.ACTIVE.getStatus(); // enum REQUIRES_ACTIVE_SUBSCRIPTION, DELETED
 
     private List<String> relatedContentIds; // future use
 

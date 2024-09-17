@@ -1,6 +1,7 @@
 package com.paulpladziewicz.fremontmi.models;
 
 public enum ContentStatus {
+    ACTIVE("active"),
     REQUIRES_ACTIVE_SUBSCRIPTION("requires_active_subscription"),
     DELETED("deleted");
 
