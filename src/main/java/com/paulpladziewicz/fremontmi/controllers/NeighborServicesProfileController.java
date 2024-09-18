@@ -2,9 +2,8 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.NeighborServicesProfileService;
+import com.paulpladziewicz.fremontmi.services.TagService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,9 +16,11 @@ import java.util.stream.Collectors;
 public class NeighborServicesProfileController {
 
     private final NeighborServicesProfileService neighborServicesProfileService;
+    private final TagService tagService;
 
-    public NeighborServicesProfileController(NeighborServicesProfileService neighborServicesProfileService) {
+    public NeighborServicesProfileController(NeighborServicesProfileService neighborServicesProfileService, TagService tagService) {
         this.neighborServicesProfileService = neighborServicesProfileService;
+        this.tagService = tagService;
     }
 
     @GetMapping("/create/neighbor-services-profile/overview")
@@ -78,7 +79,7 @@ public class NeighborServicesProfileController {
         List<NeighborServicesProfile> profiles = profilesResponse.value();
 
         // Fetch all available tags
-        List<String> allTags = neighborServicesProfileService.findAllDistinctTags();
+        List<String> allTags = tagService.findAllDistinctTags();
 
         // Extract tags from the currently filtered profiles for display
         Set<String> uniqueTagsForProfiles = profiles.stream()
@@ -165,27 +166,5 @@ public class NeighborServicesProfileController {
         model.addAttribute("neighborService", updatedNeighborServicesProfile);
 
         return "redirect:/neighbor-services/" + updatedNeighborServicesProfile.getId();
-    }
-
-    @GetMapping("/neighbor-services/search")
-    public String searchNeighborServices(@RequestParam("query") String query, Model model) {
-        // Call the service to perform the search
-        ServiceResponse<List<NeighborServicesProfile>> searchResponse = neighborServicesProfileService.searchNeighborServiceProfiles(query);
-
-        if (searchResponse.hasError()) {
-            model.addAttribute("errorMessage", "An error occurred while performing the search. Please try again.");
-            return "neighborservices/neighborservices";
-        }
-
-        // Get the search results
-        List<NeighborServicesProfile> profiles = searchResponse.value();
-
-        // Add the profiles to the model to display in the view
-        model.addAttribute("profiles", profiles);
-        model.addAttribute("allTags", new ArrayList<>());  // All available tags
-        model.addAttribute("uniqueTagsForProfiles", new ArrayList<>());  // Tags for currently displayed profiles
-        model.addAttribute("selectedTag", "cleaning");
-
-        return "neighborservices/neighborservices";
     }
 }

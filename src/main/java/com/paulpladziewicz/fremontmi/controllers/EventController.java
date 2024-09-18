@@ -102,7 +102,7 @@ public class EventController {
         }
 
         model.addAttribute("event", event);
-        model.addAttribute("isAdmin", event.getOrganizerId().equals(userId));
+        model.addAttribute("isAdmin", event.getCreatedBy().equals(userId));
 
         return "events/event-page";
     }
@@ -129,7 +129,7 @@ public class EventController {
             return "events/edit-event";
         }
 
-        ServiceResponse<Void> serviceResponse = eventService.updateEvent(id, event);
+        ServiceResponse<Event> serviceResponse = eventService.updateEvent(id, event);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);
@@ -179,7 +179,7 @@ public class EventController {
 
     @PostMapping("/cancel/event")
     public String cancelEvent(@NotNull @RequestParam("eventId") String eventId, RedirectAttributes redirectAttributes) {
-        ServiceResponse<Void> serviceResponse = eventService.cancelEvent(eventId);
+        ServiceResponse<Boolean> serviceResponse = eventService.cancelEvent(eventId);
 
         if (serviceResponse.hasError()) {
             redirectAttributes.addFlashAttribute("error", true);
@@ -190,7 +190,7 @@ public class EventController {
 
     @PostMapping("/reactivate/event")
     public String uncancelEvent(@NotNull @RequestParam("eventId") String eventId, RedirectAttributes redirectAttributes) {
-        ServiceResponse<Void> serviceResponse = eventService.reactivateEvent(eventId);
+        ServiceResponse<Boolean> serviceResponse = eventService.reactivateEvent(eventId);
 
         if (serviceResponse.hasError()) {
             redirectAttributes.addFlashAttribute("error", true);
@@ -201,7 +201,7 @@ public class EventController {
 
     @PostMapping("/delete/event")
     public String deleteGroup(@NotNull @RequestParam("eventId") String eventId, RedirectAttributes redirectAttributes) {
-        ServiceResponse<Void> serviceResponse = eventService.deleteEvent(eventId);
+        ServiceResponse<Boolean> serviceResponse = eventService.deleteEvent(eventId);
 
         if (serviceResponse.hasError()) {
             redirectAttributes.addFlashAttribute("error", true);

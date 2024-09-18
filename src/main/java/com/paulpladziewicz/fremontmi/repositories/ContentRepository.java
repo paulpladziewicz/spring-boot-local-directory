@@ -1,10 +1,12 @@
 package com.paulpladziewicz.fremontmi.repositories;
 
 import com.paulpladziewicz.fremontmi.models.Content;
+import com.paulpladziewicz.fremontmi.models.Event;
 import com.paulpladziewicz.fremontmi.models.NeighborServicesProfile;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,4 +29,6 @@ public interface ContentRepository extends MongoRepository<Content, String> {
 
     @Query("{ 'reviewed': false }")
     List<Content> contentNotReviewed();
+
+    List<Event> findBySoonestStartTimeAfterOrderBySoonestStartTimeAsc(LocalDateTime now);
 }

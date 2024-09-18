@@ -2,20 +2,18 @@ package com.paulpladziewicz.fremontmi.models;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
+import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Document(collection = "events")
-public class Event {
-
-    @Id
-    private String id;
+@EqualsAndHashCode(callSuper=true)
+@TypeAlias("Group")
+public class Event extends Content {
 
     @NotBlank(message = "Event name must not be null")
     @Size(min = 3, max = 100, message = "Event name must be between 3 and 100 characters")
@@ -39,11 +37,5 @@ public class Event {
     private List<DayEvent> days;
 
     private List<String> formattedTimes;
-
-    private String status = "active";
-
-    private String organizerId;
-
-    private List<String> administrators = new ArrayList<>();
 }
 

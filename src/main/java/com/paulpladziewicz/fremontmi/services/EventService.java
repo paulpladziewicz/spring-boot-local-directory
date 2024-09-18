@@ -1,8 +1,8 @@
 package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.models.*;
-import com.paulpladziewicz.fremontmi.repositories.EventRepository;
-import com.paulpladziewicz.fremontmi.repositories.UserProfileRepository;
+import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -11,9 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,16 +23,13 @@ public class EventService {
 
     private static final Logger logger = LoggerFactory.getLogger(EventService.class);
 
-    private final EventRepository eventRepository;
+    private final ContentRepository contentRepository;
 
     private final UserService userService;
 
-    private final UserProfileRepository userProfileRepository;
-
-    public EventService(EventRepository eventRepository, UserService userService, UserProfileRepository userProfileRepository) {
-        this.eventRepository = eventRepository;
+    public EventService(ContentRepository contentRepository, UserService userService) {
+        this.contentRepository = contentRepository;
         this.userService = userService;
-        this.userProfileRepository = userProfileRepository;
     }
 
     @Transactional
@@ -42,18 +40,24 @@ public class EventService {
                 return logAndReturnError("Failed to create event: user profile not found.", "user_profile_not_found");
             }
 
-            UserProfile userDetails = userProfileOpt.get();
-            String userId = userDetails.getUserId();
+            UserProfile userProfile = userProfileOpt.get();
+            String userId = userProfile.getUserId();
 
             validateEventTimes(event);
 
-            event.setOrganizerId(userId);
+            event.setCreatedBy(userId);
             populateFormattedTimes(event);
 
-            Event savedEvent = eventRepository.save(event);
+            ServiceResponse<Event> saveEventResponse = saveEvent(event);
 
-            userDetails.getEventAdminIds().add(savedEvent.getId());
-            userProfileRepository.save(userDetails);
+            if (saveEventResponse.hasError()) {
+                return saveEventResponse;
+            }
+
+            Event savedEvent = saveEventResponse.value();
+
+            userProfile.getEventIds().add(savedEvent.getId());
+            userService.saveUserProfile(userProfile);
 
             return ServiceResponse.value(savedEvent);
         } catch (DataAccessException e) {
@@ -63,10 +67,67 @@ public class EventService {
         }
     }
 
+    public ServiceResponse<Event> saveEvent(Event event) {
+        try {
+            return ServiceResponse.value(contentRepository.save(event));
+        } catch (DataAccessException e) {
+            logger.error("Database access error when trying to save event", e);
+            return ServiceResponse.error("database_access_exception");
+        } catch (Exception e) {
+            logger.error("Unexpected error when trying to save event", e);
+            return ServiceResponse.error("unexpected_error");
+        }
+    }
+
+    // TODO make this more efficient
+    public String createUniqueSlug(String name) {
+        // Clean up the name to form the base slug
+        String baseSlug = name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+
+        // Find all slugs that start with the base slug
+        List<Content> matchingSlugs = contentRepository.findBySlugRegex("^" + baseSlug + "(-\\d+)?$");
+
+        // If no matching slugs, return the base slug
+        if (matchingSlugs.isEmpty()) {
+            return baseSlug;
+        }
+
+        // Extract slugs that match the baseSlug-<number> format
+        Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
+
+        int maxNumber = 0;
+        boolean baseSlugExists = false;
+
+        for (Content content : matchingSlugs) {
+            String slug = content.getSlug();
+
+            // Check if the base slug without a number already exists
+            if (slug.equals(baseSlug)) {
+                baseSlugExists = true;
+            }
+
+            // Find the slugs with numbers at the end and get the max number
+            Matcher matcher = pattern.matcher(slug);
+            if (matcher.find()) {
+                int number = Integer.parseInt(matcher.group(1));
+                maxNumber = Math.max(maxNumber, number);
+            }
+        }
+
+        // If the base slug already exists, start numbering from 1
+        if (baseSlugExists) {
+            return baseSlug + "-" + (maxNumber + 1);
+        } else if (maxNumber > 0) {
+            return baseSlug + "-" + (maxNumber + 1);
+        } else {
+            return baseSlug;  // No suffix needed if base slug doesn't exist
+        }
+    }
+
     public ServiceResponse<List<Event>> findAll() {
         try {
             LocalDateTime now = LocalDateTime.now();
-            List<Event> events = eventRepository.findBySoonestStartTimeAfterOrderBySoonestStartTimeAsc(now);
+            List<Event> events = contentRepository.findBySoonestStartTimeAfterOrderBySoonestStartTimeAsc(now);
             return ServiceResponse.value(events);
         } catch (DataAccessException e) {
             return logAndReturnError("Database error while retrieving events.", "database_error", e);
@@ -77,7 +138,9 @@ public class EventService {
 
     public ServiceResponse<Event> findEventById(String id) {
         try {
-            return eventRepository.findById(id)
+            return contentRepository.findById(id)
+                    .filter(content -> content instanceof Event)
+                    .map(content -> (Event) content)
                     .map(ServiceResponse::value)
                     .orElseGet(() -> logAndReturnError("Event not found with id: " + id, "event_not_found"));
         } catch (DataAccessException e) {
@@ -89,13 +152,20 @@ public class EventService {
 
     public ServiceResponse<List<Event>> findEventsByUser() {
         try {
-            Optional<UserProfile> userProfileOpt = userService.getUserProfile();
-            if (userProfileOpt.isEmpty()) {
+            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+            if (optionalUserProfile.isEmpty()) {
                 return logAndReturnError("Failed to retrieve events: user profile not found.", "user_profile_not_found");
             }
 
-            UserProfile userDetails = userProfileOpt.get();
-            List<Event> events = eventRepository.findAllById(userDetails.getEventAdminIds());
+            UserProfile userProfile = optionalUserProfile.get();
+
+            List<Content> contents = contentRepository.findAllById(userProfile.getEventIds());
+
+            List<Event> events = contents.stream()
+                    .filter(content -> content instanceof Event)
+                    .map(content -> (Event) content)
+                    .collect(Collectors.toList());
+
             return ServiceResponse.value(events);
         } catch (DataAccessException e) {
             return logAndReturnError("Database error while retrieving events.", "database_error", e);
@@ -105,22 +175,39 @@ public class EventService {
     }
 
     @Transactional
-    public ServiceResponse<Void> updateEvent(String id, Event updatedEvent) {
+    public ServiceResponse<Event> updateEvent(String id, Event updatedEvent) {
         try {
-            Event existingEvent = eventRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Event not found"));
+            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
-            ServiceResponse<UserProfile> userProfileResult = validateUserProfileForEventAdmin(id);
-            if (userProfileResult.hasError()) {
-                return ServiceResponse.error(userProfileResult.errorCode());
+            if (optionalUserProfile.isEmpty()) {
+                return logAndReturnError("Failed to create business: user profile not found.", "user_profile_not_found");
+            }
+
+            UserProfile userProfile = optionalUserProfile.get();
+
+            ServiceResponse<Event> existingEventResult = findEventById(id);
+
+            if (existingEventResult.hasError()) {
+                return ServiceResponse.error(existingEventResult.errorCode());
+            }
+
+            Event existingEvent = existingEventResult.value();
+
+            if (!hasPermission(userProfile.getUserId(), existingEvent)) {
+                return logAndReturnError("User does not have permission to update event: " + id, "permission_denied");
             }
 
             validateEventTimes(updatedEvent);
 
             updateExistingEvent(existingEvent, updatedEvent);
-            eventRepository.save(existingEvent);
 
-            return ServiceResponse.value(null);
+            ServiceResponse<Event> saveEventResponse = saveEvent(existingEvent);
+
+            if (saveEventResponse.hasError()) {
+                return saveEventResponse;
+            }
+
+            return ServiceResponse.value(saveEventResponse.value());
         } catch (DataAccessException e) {
             return logAndReturnError("Database error while updating event.", "database_error", e);
         } catch (IllegalArgumentException e) {
@@ -131,16 +218,31 @@ public class EventService {
     }
 
     @Transactional
-    public ServiceResponse<Void> deleteEvent(String eventId) {
+    public ServiceResponse<Boolean> deleteEvent(String eventId) {
         try {
-            ServiceResponse<UserProfile> userProfileResult = validateUserProfileForEventAdmin(eventId);
-            if (userProfileResult.hasError()) {
-                return ServiceResponse.error(userProfileResult.errorCode());
+            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+
+            if (optionalUserProfile.isEmpty()) {
+                return logAndReturnError("Failed to create business: user profile not found.", "user_profile_not_found");
             }
 
-            eventRepository.deleteById(eventId);
-            logger.info("Successfully deleted event with id: {}", eventId);
-            return ServiceResponse.value(null);
+            UserProfile userProfile = optionalUserProfile.get();
+
+            ServiceResponse<Event> existingEventResult = findEventById(eventId);
+
+            if (existingEventResult.hasError()) {
+                return ServiceResponse.error(existingEventResult.errorCode());
+            }
+
+            Event existingEvent = existingEventResult.value();
+
+            if (!hasPermission(userProfile.getUserId(), existingEvent)) {
+                return logAndReturnError("User does not have permission to update event: " + eventId, "permission_denied");
+            }
+
+            contentRepository.deleteById(eventId);
+
+            return ServiceResponse.value(true);
         } catch (DataAccessException e) {
             return logAndReturnError("Database error while deleting event.", "database_error", e);
         } catch (Exception e) {
@@ -148,27 +250,44 @@ public class EventService {
         }
     }
 
-    public ServiceResponse<Void> cancelEvent(String eventId) {
+    private Boolean hasPermission(String userId, Event event) {
+        return event.getCreatedBy().equals(userId);
+    }
+
+    public ServiceResponse<Boolean> cancelEvent(String eventId) {
         return updateEventStatus(eventId, "cancelled", "Failed to cancel event.");
     }
 
-    public ServiceResponse<Void> reactivateEvent(String eventId) {
+    public ServiceResponse<Boolean> reactivateEvent(String eventId) {
         return updateEventStatus(eventId, "active", "Failed to reactivate event.");
     }
 
-    private ServiceResponse<Void> updateEventStatus(String eventId, String status, String errorMessage) {
+    private ServiceResponse<Boolean> updateEventStatus(String eventId, String status, String errorMessage) {
         try {
-            ServiceResponse<Event> eventResult = findEventById(eventId);
-            if (eventResult.hasError()) {
-                return logAndReturnError(errorMessage, eventResult.errorCode());
+            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+
+            if (optionalUserProfile.isEmpty()) {
+                return logAndReturnError("Failed to create business: user profile not found.", "user_profile_not_found");
             }
 
-            Event event = eventResult.value();
-            event.setStatus(status);
-            eventRepository.save(event);
+            UserProfile userProfile = optionalUserProfile.get();
 
-            logger.info("Event with id {} was successfully updated to status: {}", eventId, status);
-            return ServiceResponse.value(null);
+            ServiceResponse<Event> existingEventResult = findEventById(eventId);
+
+            if (existingEventResult.hasError()) {
+                return ServiceResponse.error(existingEventResult.errorCode());
+            }
+
+            Event existingEvent = existingEventResult.value();
+
+            if (!hasPermission(userProfile.getUserId(), existingEvent)) {
+                return logAndReturnError("User does not have permission to update event: " + eventId, "permission_denied");
+            }
+
+            existingEvent.setStatus(status);
+            contentRepository.save(existingEvent);
+
+            return ServiceResponse.value(true);
         } catch (DataAccessException e) {
             return logAndReturnError("Database error while updating event status.", "database_error", e);
         } catch (Exception e) {
@@ -188,20 +307,6 @@ public class EventService {
                 throw new IllegalArgumentException("End time(s) must be after the start time.");
             }
         });
-    }
-
-    private ServiceResponse<UserProfile> validateUserProfileForEventAdmin(String eventId) {
-        Optional<UserProfile> userProfileOpt = userService.getUserProfile();
-        if (userProfileOpt.isEmpty()) {
-            return logAndReturnError("User profile not found.", "user_profile_not_found");
-        }
-
-        UserProfile userProfile = userProfileOpt.get();
-        if (!userProfile.getEventAdminIds().contains(eventId)) {
-            return logAndReturnError("User does not have permission for event: " + eventId, "permission_denied");
-        }
-
-        return ServiceResponse.value(userProfile);
     }
 
     private void updateExistingEvent(Event existingEvent, Event updatedEvent) {

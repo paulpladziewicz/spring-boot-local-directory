@@ -5,12 +5,7 @@ import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -172,34 +167,6 @@ public class NeighborServicesProfileService {
         }
     }
 
-    // Fetch all distinct tags by querying for documents and manually processing the tags field
-    public List<String> findAllDistinctTags() {
-        // Query to find all documents where "tags" exists and is not an empty array
-        Query query = new Query();
-        query.addCriteria(Criteria.where("tags").exists(true).not().size(0));
-
-        // Find documents with non-empty tags
-        List<NeighborServicesProfile> profiles = mongoTemplate.find(query, NeighborServicesProfile.class, "neighbor_services_profiles");
-
-        // Use a Set to automatically handle uniqueness
-        Set<String> distinctTags = new HashSet<>();
-
-        // Loop through all profiles and collect tags
-        for (NeighborServicesProfile profile : profiles) {
-            if (profile.getTags() != null) {
-                for (String tag : profile.getTags()) {
-                    if (tag != null && !tag.trim().isEmpty()) {
-                        distinctTags.add(tag);  // Add only non-empty, non-null tags
-                    }
-                }
-            }
-        }
-
-        // Convert the set of distinct tags to a list
-        return new ArrayList<>(distinctTags);
-    }
-
-
     public Optional<NeighborServicesProfile> findNeighborServiceProfileById(String neighborServiceProfileId) {
         try {
             Optional<Content> optionalContent = contentRepository.findById(neighborServiceProfileId);
@@ -303,54 +270,6 @@ public class NeighborServicesProfileService {
 
     private Boolean hasPermission(String userId, NeighborServicesProfile neighborServicesProfile) {
         return neighborServicesProfile.getCreatedBy().equals(userId);
-    }
-
-    // Example Aggregation query to find the top 'n' tags used in NeighborServiceProfiles
-    public List<TagUsage> getTopTags(int limit) {
-        // Step 1: Unwind the "tags" array
-        AggregationOperation unwindTags = Aggregation.unwind("tags");
-
-        // Step 2: Group by tag and count occurrences
-        GroupOperation groupByTag = Aggregation.group("tags").count().as("count");
-
-        // Step 3: Sort by count in descending order
-        AggregationOperation sortByCount = Aggregation.sort(Sort.by(Sort.Direction.DESC, "count"));
-
-        // Step 4: Limit the results to the top 'n' tags
-        AggregationOperation limitResults = Aggregation.limit(limit);
-
-        // Step 5: Combine the aggregation steps into a pipeline
-        Aggregation aggregation = Aggregation.newAggregation(unwindTags, groupByTag, sortByCount, limitResults);
-
-        // Step 6: Execute the aggregation query using MongoTemplate
-        AggregationResults<TagUsage> results = mongoTemplate.aggregate(aggregation, "neighbor_services_profiles", TagUsage.class);
-
-        // Return the list of top tags
-        return results.getMappedResults();
-    }
-
-    public ServiceResponse<List<NeighborServicesProfile>> searchNeighborServiceProfiles(String query) {
-        try {
-            // Define the search aggregation using MongoDB Atlas Search
-            Aggregation aggregation = Aggregation.newAggregation(
-                    Aggregation.match(Criteria.where("$search").is("pets")),
-                    Aggregation.match(new Criteria().orOperator(
-                            Criteria.where("firstName").regex(query, "i"),
-                            Criteria.where("lastName").regex(query, "i"),
-                            Criteria.where("description").regex(query, "i"),
-                            Criteria.where("tags").regex(query, "i")
-                    ))
-            );
-
-            // Execute the aggregation query
-            AggregationResults<NeighborServicesProfile> results = mongoTemplate.aggregate(aggregation, "neighbor_services_profiles", NeighborServicesProfile.class);
-
-            // Return the search results
-            return ServiceResponse.value(results.getMappedResults());
-        } catch (Exception e) {
-            logger.error("Error while searching for NeighborServiceProfiles", e);
-            return ServiceResponse.error("search_failed");
-        }
     }
 
     private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
