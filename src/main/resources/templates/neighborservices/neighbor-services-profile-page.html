@@ -11,7 +11,7 @@
                 <nav aria-label="breadcrumb">
                     <ol class="pt-lg-3 pb-lg-4 pb-2 breadcrumb">
                         <li class="breadcrumb-item"><a href="/neighbor-services">NeighborServices</a></li>
-                        <li class="breadcrumb-item active" aria-current="page" th:text="${neighborServiceProfile.firstName + ' ' + neighborServiceProfile.lastName}"></li>
+                        <li class="breadcrumb-item active" aria-current="page" th:text="${neighborServicesProfile.firstName + ' ' + neighborServicesProfile.lastName}"></li>
                     </ol>
                 </nav>
             </div>
@@ -19,9 +19,9 @@
         <div class="row">
             <div class="col-lg-10 mx-auto">
                 <div>
-                    <span th:if="${neighborServiceProfile.status != 'active'}" class="badge bg-danger bg-opacity-10 text-danger fs-sm">Not Active - Requires Subscription</span>
+                    <span th:if="${neighborServicesProfile.status != 'active'}" class="badge bg-danger bg-opacity-10 text-danger fs-sm">Not Active - Requires Subscription</span>
                 </div>
-                <h1 th:text="${neighborServiceProfile.firstName + ' ' + neighborServiceProfile.lastName}" class="display-3 mb-0">Fremont Business Name</h1>
+                <h1 th:text="${neighborServicesProfile.firstName + ' ' + neighborServicesProfile.lastName}" class="display-3 mb-0">Fremont Business Name</h1>
 
                 <div class="row mt-4">
                     <div class="col-lg-6">
@@ -29,11 +29,11 @@
                         <h2 class="display-6">We are a team who create marketing strategies</h2>
                     </div>
                     <div class="col-lg-6 pt-1 pt-sm-2 pt-md-5">
-                        <p th:text="${neighborServiceProfile.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
+                        <p th:text="${neighborServicesProfile.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
                     </div>
                 </div>
 
-                <a th:href="'/edit/neighbor-service/' + ${neighborServiceProfile.id}" class="d-inline-block d-sm-none btn btn-outline-primary">Edit NeighborService</a>
+                <a th:href="'/edit/neighbor-service/' + ${neighborServicesProfile.id}" class="d-inline-block d-sm-none btn btn-outline-primary">Edit NeighborService</a>
 
                 <!-- Listing NeighborServices -->
                 <div class="row mt-5">
@@ -41,9 +41,9 @@
                         <h3 class="mb-4">Services Offered</h3>
 
                         <!-- Loop through neighborServices list -->
-                        <div th:if="${neighborServiceProfile.neighborServices.size() > 0}">
+                        <div th:if="${neighborServicesProfile.neighborServices.size() > 0}">
                             <ul class="list-group">
-                                <li class="list-group-item" th:each="service, iterStat : ${neighborServiceProfile.neighborServices}">
+                                <li class="list-group-item" th:each="service, iterStat : ${neighborServicesProfile.neighborServices}">
                                     <h4 th:text="${iterStat.index + 1 + '. ' + service.name}"></h4>
                                     <p th:text="${service.description}"></p>
                                 </li>
@@ -51,7 +51,7 @@
                         </div>
 
                         <!-- Message when no services are available -->
-                        <div th:if="${neighborServiceProfile.neighborServices.size() == 0}">
+                        <div th:if="${neighborServicesProfile.neighborServices.size() == 0}">
                             <p class="text-muted">No services available at this time.</p>
                         </div>
                     </div>

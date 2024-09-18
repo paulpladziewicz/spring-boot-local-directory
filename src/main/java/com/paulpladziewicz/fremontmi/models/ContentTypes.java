@@ -2,7 +2,9 @@ package com.paulpladziewicz.fremontmi.models;
 
 public enum ContentTypes {
     GROUP("group"),
-    EVENT("event");
+    EVENT("event"),
+    BUSINESS("business"),
+    NEIGHBOR_SERVICES_PROFILE("neighbor-services-profile");
 
     private final String contentType;
 

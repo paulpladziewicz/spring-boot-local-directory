@@ -4,7 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -12,11 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Document(collection = "businesses")
-public class Business {
-
-    @Id
-    private String id;
+@EqualsAndHashCode(callSuper=true)
+@TypeAlias("Business")
+public class Business extends Content {
 
     @NotBlank(message = "Event name must not be null")
     @Size(min = 3, max = 100, message = "Event name must be between 3 and 100 characters")
@@ -47,17 +47,4 @@ public class Business {
     private String clientSecret;
 
     private String priceId;
-
-    // for delete
-    private String subscriptionPriceId;
-
-    private String stripeSubscriptionId;
-
-    private String paymentIntentId;
-
-    private String paymentStatus = "incomplete";
-
-    private LocalDateTime subscriptionEndTime;
-
-    private String status = "incomplete";
 }

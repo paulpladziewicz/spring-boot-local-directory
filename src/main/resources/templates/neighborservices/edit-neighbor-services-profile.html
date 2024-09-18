@@ -12,7 +12,7 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-10 col-lg-8">
                 <h1>Edit NeighborService™</h1>
-                <form id="edit-business-form" th:action="@{/edit/neighbor-service/profile}" th:object="${neighborServiceProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                <form id="edit-business-form" th:action="@{/edit/neighbor-service/profile}" th:object="${neighborServicesProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                     <input type="hidden" name="id" th:value="*{id}">
 
                     <!-- First Name and Last Name -->
@@ -45,7 +45,7 @@
 
                     <!-- NeighborServices -->
                     <div id="neighborServiceContainer">
-                        <div th:each="service, iterStat : ${neighborServiceProfile.neighborServices}" class="neighbor-service-item">
+                        <div th:each="service, iterStat : ${neighborServicesProfile.neighborServices}" class="neighbor-service-item">
                             <h4 th:text="'Neighbor Service ' + (iterStat.index + 1)"></h4>
 
                             <div class="form-group mb-2">
@@ -72,7 +72,7 @@
                     <!-- Save and Cancel buttons -->
                     <div class="d-flex">
                         <button type="submit" class="btn btn-primary me-2">Save Changes</button>
-                        <a class="btn btn-secondary" th:href="'/neighbor-services/' + ${neighborServiceProfile.id}">Cancel</a>
+                        <a class="btn btn-secondary" th:href="'/neighbor-services/' + ${neighborServicesProfile.id}">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -82,7 +82,7 @@
 
 <!-- JavaScript to dynamically add more NeighborService fields -->
 <script th:inline="javascript">
-    let serviceIndex = /*[[${neighborServiceProfile.neighborServices.size()}]]*/ 'undefined';
+    let serviceIndex = /*[[${neighborServicesProfile.neighborServices.size()}]]*/ 'undefined';
 
     function addNeighborService() {
         const container = document.getElementById('neighborServiceContainer');

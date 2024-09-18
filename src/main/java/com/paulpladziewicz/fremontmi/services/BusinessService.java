@@ -1,16 +1,12 @@
 package com.paulpladziewicz.fremontmi.services;
 
-import com.paulpladziewicz.fremontmi.models.Business;
-import com.paulpladziewicz.fremontmi.models.PaymentRequest;
-import com.paulpladziewicz.fremontmi.models.ServiceResponse;
-import com.paulpladziewicz.fremontmi.models.UserProfile;
+import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.BusinessRepository;
+import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import com.stripe.model.PaymentIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,19 +18,29 @@ public class BusinessService {
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessService.class);
 
-    private final BusinessRepository businessRepository;
+    private final ContentRepository contentRepository;
 
     private final UserService userService;
+
     private final StripeService stripeService;
 
-    public BusinessService(BusinessRepository businessRepository, UserService userService, StripeService stripeService) {
-        this.businessRepository = businessRepository;
+    public BusinessService(ContentRepository contentRepository, UserService userService, StripeService stripeService) {
+        this.contentRepository = contentRepository;
         this.userService = userService;
         this.stripeService = stripeService;
     }
 
     public ServiceResponse<Business> createBusiness(Business business) {
-        ServiceResponse<Map<String, Object>> serviceResponse = stripeService.createSubscription(business.getSubscriptionPriceId());
+        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+
+        if (optionalUserProfile.isEmpty()) {
+            return logAndReturnError("Failed to create business: user profile not found.", "user_profile_not_found");
+        }
+
+        UserProfile userProfile = optionalUserProfile.get();
+
+        business.setType(ContentTypes.BUSINESS.getContentType());
+
 
         if (serviceResponse.hasError()) {
             return ServiceResponse.error(serviceResponse.errorCode());
@@ -210,5 +216,15 @@ public class BusinessService {
             logger.error("Unexpected error when trying to delete a business", e);
             return ServiceResponse.error("unexpected_error");
         }
+    }
+
+    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
+        logger.error(message);
+        return ServiceResponse.error(errorCode);
+    }
+
+    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode, Exception e) {
+        logger.error(message, e);
+        return ServiceResponse.error(errorCode);
     }
 }

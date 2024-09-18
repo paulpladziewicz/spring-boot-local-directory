@@ -12,9 +12,9 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-10 col-lg-8">
                 <h1>Create NeighborService™</h1>
-                <form id="create-business-form" th:action="@{/create/neighbor-service/subscription}" th:object="${neighborServiceProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                <form id="create-business-form" th:action="@{/create/neighbor-service/subscription}" th:object="${neighborServicesProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                     <input type="hidden" name="priceId" id="priceId" th:value="${priceId}">
-                    <input type="hidden" th:if="${neighborServiceProfile.id != null}" th:field="*{id}">
+                    <input type="hidden" th:if="${neighborServicesProfile.id != null}" th:field="*{id}">
 
                     <div class="row row-cols-1 row-cols-sm-2">
                         <div class="col mb-4">

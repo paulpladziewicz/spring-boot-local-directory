@@ -11,7 +11,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper=true)
-@TypeAlias("group")
+@TypeAlias("Group")
 public class Group extends Content {
 
     @NotBlank(message = "Please provide a group name.")

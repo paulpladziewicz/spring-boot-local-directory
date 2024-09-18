@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.models;
 
 public enum ContentVisibility {
     PUBLIC("public"),
+    RESTRICTED("restricted"),
     PRIVATE("private");
 
     private final String visibility;

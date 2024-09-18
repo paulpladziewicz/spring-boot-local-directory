@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - NeighborServices™')}"><title>Placeholder Title</title></head>
+<head th:replace="~{partials/head :: head('FremontMI - Businesses')}"><title>Placeholder Title</title></head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 <main>
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto">
-                <h1>Subscription Payment</h1>
-                <p class="mb-2">You are paying for the <strong th:text="${subscriptionDisplayName}"></strong> plan at <strong th:text="${subscriptionDisplayPrice}">.</strong></p>
-                <p><a href="/" class="btn btn-link fw-semibold fs-sm p-0 mb-4">Change Subscription</a></p>
+                <h1 class="display-4">Subscription Payment</h1>
+                <p class="mb-2">You are paying for a <strong th:text="${planName}"></strong> plan at <strong th:text="${price}">.</strong></p>
+                <p><a href="/create/business/overview" class="btn btn-link fw-semibold fs-sm p-0 mb-4">Change Subscription</a></p>
 
                 <form id="payment-form" class="my-4">
                     <div id="payment-element"></div>
@@ -18,13 +18,12 @@
                 </form>
             </div>
         </div>
-
     </div>
 </main>
 
 <script th:inline="javascript">
-    const clientSecret = /*[[${clientSecret}]]*/ 'undefined';
-    const entityId = /*[[${entityId}]]*/ 'undefined';
+    const clientSecret = /*[[${business.clientSecret}]]*/ 'undefined';
+    const businessId = /*[[${business.id}]]*/ 'undefined';
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
     const stripe = Stripe("pk_test_51KCrhcBCHBXtJFxOMYJo8xRymfT9m3PvrruBp7gZmcvCV2vpYnMH8EdkwVeibCrtj5bwNhhuAj5MzWU1NXtq6iBs000IzgImdE");
@@ -71,20 +70,18 @@
 
     async function sendPaymentStatusToServer(paymentIntent) {
         try {
-            let response = await fetch("/create/neighbor-service/subscription/success", {
+            let response = await fetch("/subscription-payment-success", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     [csrfHeader]: csrfToken
                 },
                 body: JSON.stringify({
-                    entityId,
+                    entityId: businessId,
                     paymentIntentId: paymentIntent.id,
                     paymentStatus: paymentIntent.status,
                 }),
             });
-
-            // TODO refactor to have the backend redirect and show a nice success message
 
             if (response.ok) {
                 const { redirectUrl } = await response.json();
@@ -96,7 +93,6 @@
                 document.getElementById("error-message").style.display = 'block';
             }
         } catch (error) {
-            console.log(error);
             document.getElementById("error-message").innerText = "There was an issue processing your payment. Please try again.";
             document.getElementById("error-message").style.display = 'block';
         } finally {

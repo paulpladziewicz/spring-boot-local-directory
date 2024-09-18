@@ -1,6 +1,7 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.Business;
+import com.paulpladziewicz.fremontmi.models.NeighborServicesProfile;
 import com.paulpladziewicz.fremontmi.models.PaymentRequest;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.services.BusinessService;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
 
@@ -29,128 +31,44 @@ public class BusinessController {
         return "businesses/business-create-overview";
     }
 
-    @PostMapping("/create/business/form")
-    public String createBusinessListingView(@RequestParam("priceId") String priceId, @RequestParam(value = "businessId", required = false) String existingBusinessId, Model model) {
-        if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
-            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
-            return "businesses/business-create-overview";
-        }
-
-        if (!priceId.equals("price_1Pv7V0BCHBXtJFxOinfPKMUE") && !priceId.equals("price_1Pv7XIBCHBXtJFxOUIvRA6Xf")) {
-            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
-            return "businesses/business-create-overview";
-        }
-
-        if (existingBusinessId != null && !existingBusinessId.isEmpty() && !existingBusinessId.trim().isEmpty()) {
-
-            Optional<Business> optionalBusiness = businessService.findBusinessById(existingBusinessId);
-
-            if (optionalBusiness.isEmpty()) {
-                model.addAttribute("errorMessage", "Business not found. Please refresh the page and try again.");
-                return "businesses/business-create-overview";
-            }
-
-            Business existingBusiness = optionalBusiness.get();
-
-            existingBusiness.setPriceId(priceId);
-
-            model.addAttribute("business", existingBusiness);
-            return "businesses/business-create-form";
-        }
-
-        ServiceResponse<List<Business>> findBusinessesByUserResponse = businessService.findBusinessesByUser();
-
-        if (findBusinessesByUserResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "businesses/business-create-overview";
-        }
-
-        List<Business> businesses = findBusinessesByUserResponse.value();
-        List<Business> incompleteBusinesses = new ArrayList<>();
-
-        for (Business business : businesses) {
-            if (business.getStatus().equals("incomplete")) {
-                business.setSubscriptionPriceId(priceId);
-                incompleteBusinesses.add(business);
-            }
-        }
-
-        if (!incompleteBusinesses.isEmpty()) {
-            model.addAttribute("incompleteBusinesses", incompleteBusinesses);
-            return "businesses/business-continue-progress";
-        }
-
-        Business business = new Business();
-        business.setSubscriptionPriceId(priceId);
-
-        model.addAttribute("business", business);
-
-        return "businesses/business-create-form";
+    @PostMapping("/setup/create/business")
+    public String setupCreateBusinessForm(@RequestParam("priceId") String priceId, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("priceId", priceId);
+        return "redirect:/create/business";
     }
 
-    @PostMapping("/create/business/subscription")
+    @GetMapping("/create/business")
+    public String createBusinessListingView(Model model) {
+        if (model.containsAttribute("priceId")) {
+            String priceId = (String) model.getAttribute("priceId");
+
+            Business business = new Business();
+            business.setPriceId(priceId);
+
+            model.addAttribute("business", business);
+
+            return "businesses/create-business";
+        } else {
+            return "redirect:/create/business/overview";
+        }
+    }
+
+    @PostMapping("/create/business")
     public String createBusinessListing(@Valid @ModelAttribute("business") Business business, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            return "businesses/business-create-form";
+            return "businesses/create-business";
         }
 
-        String priceId = business.getSubscriptionPriceId();
+        ServiceResponse<Business> createBusinessResponse = businessService.createBusiness(business);
 
-        if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
-            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
-            return "businesses/business-create-overview";
+        if (createBusinessResponse.hasError()) {
+            model.addAttribute("errorMessage", "An error occurred while trying to create the business listing. Please try again later.");
+            return "businesses/create-business";
         }
 
-        if (!priceId.equals("price_1Pv7V0BCHBXtJFxOinfPKMUE") && !priceId.equals("price_1Pv7XIBCHBXtJFxOUIvRA6Xf")) {
-            model.addAttribute("error", "Pricing appears to be tampered with. Please refresh the page and try again.");
-            return "businesses/business-create-overview";
-        }
+        Business savedBusiness = createBusinessResponse.value();
 
-        ServiceResponse<Business> serviceResponse = businessService.createBusiness(business);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("generalError", true);
-            return "events/create-event";
-        }
-
-        Business savedBusiness = serviceResponse.value();
-
-        model.addAttribute("business", savedBusiness);
-
-        String planName;
-        String price;
-
-        if (priceId.equals("price_1Pv7V0BCHBXtJFxOinfPKMUE")) {
-            planName = "Monthly Business Listing Subscription";
-            price = "$10/month";
-        } else {
-            planName = "Annual Business Listing Subscription";
-            price = "$100/year";
-        }
-
-        model.addAttribute("planName", planName);
-        model.addAttribute("price", price);
-
-        return "businesses/business-create-subscription";
-    }
-
-    @PostMapping("/create/business/subscription/success")
-    @ResponseBody
-    public ResponseEntity<?> handleSubscriptionSuccess(@RequestBody PaymentRequest paymentRequest) {
-        ServiceResponse<Business> serviceResponse = businessService.handleSubscriptionSuccess(paymentRequest);
-
-        if (serviceResponse.hasError()) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(Collections.singletonMap("error", serviceResponse.errorCode()));
-        }
-
-        Business business = serviceResponse.value();
-
-        Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("redirectUrl", "/businesses/" + business.getId());
-
-        return ResponseEntity.ok(responseBody);
+        return "redirect:/pay/subscription?contentId=" + savedBusiness.getId();
     }
 
     @GetMapping("/businesses")

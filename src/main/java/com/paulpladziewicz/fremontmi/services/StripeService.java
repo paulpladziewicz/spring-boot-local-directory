@@ -1,13 +1,13 @@
 package com.paulpladziewicz.fremontmi.services;
 
-import com.paulpladziewicz.fremontmi.models.ServiceResponse;
-import com.paulpladziewicz.fremontmi.models.StripeTransactionRecord;
-import com.paulpladziewicz.fremontmi.models.UserProfile;
+import com.paulpladziewicz.fremontmi.models.*;
+import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import com.paulpladziewicz.fremontmi.repositories.StripeTransactionRecordRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.*;
+import com.stripe.model.Event;
 import com.stripe.net.Webhook;
 import com.stripe.param.*;
 import jakarta.annotation.PostConstruct;
@@ -27,9 +27,9 @@ public class StripeService {
 
     private static final Logger logger = LoggerFactory.getLogger(StripeService.class);
 
-    private final StripeTransactionRecordRepository stripeTransactionRecordRepository;
-
     private final UserService userService;
+
+    private final ContentRepository contentRepository;
 
     @Value("${stripe.secret.key}")
     private String stripeApiKey;
@@ -37,9 +37,9 @@ public class StripeService {
     @Value("${stripe.publishable.key}")
     private String stripePublishableKey;
 
-    public StripeService(StripeTransactionRecordRepository stripeTransactionRecordRepository, UserService userService) {
-        this.stripeTransactionRecordRepository = stripeTransactionRecordRepository;
+    public StripeService(UserService userService, ContentRepository contentRepository) {
         this.userService = userService;
+        this.contentRepository = contentRepository;
     }
 
     @PostConstruct
@@ -122,54 +122,6 @@ public class StripeService {
         return ServiceResponse.value(customer.getId());
     }
 
-    public ServiceResponse<Map<String, Object>> createSubscription(String priceId, String contentId) {
-        ServiceResponse<String> serviceResponse = getCustomerId();
-
-        if (serviceResponse.hasError()) {
-            return ServiceResponse.error(serviceResponse.errorCode());
-        }
-
-        String customerId = serviceResponse.value();
-
-        SubscriptionCreateParams subCreateParams = SubscriptionCreateParams.builder()
-                .setCustomer(customerId)
-                .addItem(SubscriptionCreateParams.Item.builder().setPrice(priceId).build())
-                .setPaymentBehavior(SubscriptionCreateParams.PaymentBehavior.DEFAULT_INCOMPLETE)
-                .setPaymentSettings(
-                        SubscriptionCreateParams.PaymentSettings.builder()
-                                .setPaymentMethodTypes(
-                                        java.util.List.of(SubscriptionCreateParams.PaymentSettings.PaymentMethodType.CARD)  // Use PaymentMethodType enum
-                                )
-                                .build()
-                )
-                .addExpand("latest_invoice.payment_intent")
-                .putMetadata("contentId", contentId)
-                .build();
-
-        try {
-            Subscription subscription = Subscription.create(subCreateParams);
-
-            Map<String, Object> subscriptionData = new HashMap<>();
-            subscriptionData.put("subscriptionId", subscription.getId());
-
-            String clientSecret = subscription.getLatestInvoiceObject()
-                    .getPaymentIntentObject()
-                    .getClientSecret();
-
-            if (clientSecret == null) {
-                logger.error("ClientSecret is null for subscription: {}", subscription.getId());
-                return ServiceResponse.error("payment_intent_error");
-            }
-
-            subscriptionData.put("clientSecret", clientSecret);
-
-            return ServiceResponse.value(subscriptionData);
-        } catch (StripeException e) {
-            logger.error("Failed to create subscription due to a Stripe exception", e);
-            return ServiceResponse.error("stripe_error");
-        }
-    }
-
     public ServiceResponse<Map<String, Object>> createSubscription(String priceId) {
         ServiceResponse<String> serviceResponse = getCustomerId();
 
@@ -186,11 +138,11 @@ public class StripeService {
                 .setPaymentSettings(
                         SubscriptionCreateParams.PaymentSettings.builder()
                                 .setPaymentMethodTypes(
-                                        java.util.List.of(SubscriptionCreateParams.PaymentSettings.PaymentMethodType.CARD)  // Use PaymentMethodType enum
+                                        java.util.List.of(SubscriptionCreateParams.PaymentSettings.PaymentMethodType.CARD)
                                 )
                                 .build()
                 )
-                .addExpand("latest_invoice.payment_intent")
+                .addExpand("latest_invoice.payment_intent") // TODO do I need this?
                 .build();
 
         try {
@@ -211,78 +163,6 @@ public class StripeService {
             subscriptionData.put("clientSecret", clientSecret);
 
             return ServiceResponse.value(subscriptionData);
-        } catch (StripeException e) {
-            logger.error("Failed to create subscription due to a Stripe exception", e);
-            return ServiceResponse.error("stripe_error");
-        }
-    }
-
-    public ServiceResponse<StripeTransactionRecord> createSubscription(String priceId, String entityId, String entityType) {
-        if (priceId == null || priceId.isEmpty() || priceId.trim().isEmpty()) {
-            logger.error("Price ID was not provided when trying to create a subscription");
-            return ServiceResponse.error("price_id_required");
-        }
-
-        if (!priceId.equals("price_1Pv7TzBCHBXtJFxOWmV5PE4h") && !priceId.equals("price_1PELXZBCHBXtJFxO4FchTfAv") && !priceId.equals("price_1Pv7V0BCHBXtJFxOinfPKMUE") && !priceId.equals("price_1Pv7XIBCHBXtJFxOUIvRA6Xf")) {
-            logger.error("Invalid price ID provided when trying to create a subscription");
-            return ServiceResponse.error("invalid_price_id");
-        }
-
-        ServiceResponse<String> getCustomerIdResponse = getCustomerId();
-
-        if (getCustomerIdResponse.hasError()) {
-            logger.error("Failed to get customer ID when trying to create a subscription");
-            return ServiceResponse.error(getCustomerIdResponse.errorCode());
-        }
-
-        String customerId = getCustomerIdResponse.value();
-
-        // TODO prevent duplicate subscriptions if the entity can use an existing subscription
-
-        SubscriptionCreateParams subCreateParams = SubscriptionCreateParams.builder()
-                .setCustomer(customerId)
-                .addItem(SubscriptionCreateParams.Item.builder().setPrice(priceId).build())
-                .setPaymentBehavior(SubscriptionCreateParams.PaymentBehavior.DEFAULT_INCOMPLETE)
-                .setPaymentSettings(
-                        SubscriptionCreateParams.PaymentSettings.builder()
-                                .setPaymentMethodTypes(
-                                        java.util.List.of(SubscriptionCreateParams.PaymentSettings.PaymentMethodType.CARD)
-                                )
-                                .build()
-                )
-                .addExpand("latest_invoice.payment_intent")
-                .putMetadata("contentId", entityId)
-                .build();
-
-        try {
-            Subscription subscription = Subscription.create(subCreateParams);
-
-            String clientSecret = subscription.getLatestInvoiceObject()
-                    .getPaymentIntentObject()
-                    .getClientSecret();
-
-            if (clientSecret == null) {
-                logger.error("ClientSecret is null for subscription: {}", subscription.getId());
-                return ServiceResponse.error("payment_intent_error");
-            }
-
-            Price price = Price.retrieve(priceId);
-            String displayName = price.getMetadata().get("displayName");
-            String displayPrice = price.getMetadata().get("displayPrice");
-
-            StripeTransactionRecord stripeTransactionRecord = new StripeTransactionRecord();
-            stripeTransactionRecord.setDisplayName(displayName);
-            stripeTransactionRecord.setDisplayPrice(displayPrice);
-            stripeTransactionRecord.setClientSecret(clientSecret);
-            stripeTransactionRecord.setSubscriptionId(subscription.getId());
-            stripeTransactionRecord.setCustomerId(customerId);
-            stripeTransactionRecord.setEntityId(entityId);
-            stripeTransactionRecord.setEntityCollection(entityType);
-            stripeTransactionRecord.setPriceId(priceId);
-
-            StripeTransactionRecord savedStripeTransactionRecord = stripeTransactionRecordRepository.save(stripeTransactionRecord);
-
-            return ServiceResponse.value(savedStripeTransactionRecord);
         } catch (StripeException e) {
             logger.error("Failed to create subscription due to a Stripe exception", e);
             return ServiceResponse.error("stripe_error");
@@ -501,6 +381,38 @@ public class StripeService {
             logger.error("Error canceling subscription: ", e);
             return ServiceResponse.error("STRIPE_SUBSCRIPTION_CANCELLATION_FAILED");
         }
+    }
+
+    public ServiceResponse<Boolean> handleSubscriptionSuccess(PaymentRequest paymentRequest) {
+        String contentId = paymentRequest.getEntityId();
+        String paymentIntentId = paymentRequest.getPaymentIntentId();
+        String paymentStatus = paymentRequest.getPaymentStatus();
+
+        if (!paymentStatus.equals("succeeded")) {
+            logger.error("Payment not successful but it should have been when handling successful payment. Payment status: {} neighborServiceProfileId: {}", paymentStatus, paymentRequest.getEntityId());
+            return ServiceResponse.error("payment_not_successful");
+        }
+
+        Optional<Content> optionalContent = contentRepository.findById(contentId);
+
+        if (optionalContent.isEmpty()) {
+            return ServiceResponse.error("content_not_found");
+        }
+
+        Content content = optionalContent.get();
+
+        if (!content.getStatus().equals("active")) {
+            content.setStatus("active");
+        }
+
+        try {
+            contentRepository.save(content);
+        } catch (Exception e) {
+            logger.error("Error saving content after handling successful payment: ", e);
+            return ServiceResponse.error("content_save_error");
+        }
+
+        return ServiceResponse.value(true);
     }
 }
 
