@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 public class NeighborServicesProfileController {
 
     private final NeighborServicesProfileService neighborServicesProfileService;
+
     private final TagService tagService;
 
     public NeighborServicesProfileController(NeighborServicesProfileService neighborServicesProfileService, TagService tagService) {
@@ -25,33 +27,37 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/create/neighbor-services-profile/overview")
     public String createNeighborServicesProfileOverview(Model model) {
-        return "neighborservices/neighborservices-create-overview";
+        return "neighborservices/create-neighbor-services-profile-overview";
     }
 
     @PostMapping("/setup/create/neighbor-services-profile")
-    public String setupNeighborServicesProfileForm(@RequestParam("priceId") String priceId, Model model) {
-
-        model.addAttribute("priceId", priceId);
-        model.addAttribute("neighborServicesProfile", new NeighborServicesProfile());
-
-        return "neighborservices/neighborservices-create-form";
+    public String setupNeighborServicesProfileForm(@RequestParam("priceId") String priceId, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("priceId", priceId);
+        return "redirect:/create/neighbor-services-profile";
     }
 
     @GetMapping("/create/neighbor-services-profile")
-    public String createNeighborServicesProfileForm(@RequestParam("priceId") String priceId, Model model) {
-        NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
-        neighborServicesProfile.setPriceId(priceId);
+    public String createNeighborServicesProfileForm(Model model) {
+        if (model.containsAttribute("priceId")) {
+            String priceId = (String) model.getAttribute("priceId");
 
-        model.addAttribute("neighborServicesProfile", neighborServicesProfile);
+            NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
+            neighborServicesProfile.getNeighborServices().add(new NeighborService());
+            neighborServicesProfile.setPriceId(priceId);
 
-        return "neighborservices/neighborservices-create-form";
+            model.addAttribute("neighborServicesProfile", neighborServicesProfile);
+
+            return "neighborservices/create-neighbor-services-profile";
+        } else {
+            return "redirect:/create/neighbor-services-profile/overview";
+        }
     }
 
     @PostMapping("/create/neighbor-services-profile")
     public String createNeighborServiceSubscription(@Valid @ModelAttribute("neighborService") NeighborServicesProfile neighborServicesProfile, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("neighborService", neighborServicesProfile);
-            return "neighborservices/neighborservices-create-form";
+            return "neighborservices/create-neighbor-services-profile";
         }
 
         ServiceResponse<NeighborServicesProfile> createNeighborServiceProfileResponse = neighborServicesProfileService.createNeighborServiceProfile(neighborServicesProfile);

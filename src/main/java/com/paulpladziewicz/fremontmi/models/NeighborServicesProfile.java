@@ -31,10 +31,4 @@ public class NeighborServicesProfile extends Content {
     private String email;
 
     private List<NeighborService> neighborServices = new ArrayList<>();
-
-    private String subscriptionId;
-
-    private String clientSecret;
-
-    private String priceId;
 }

@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Document(collection = "content")
@@ -38,4 +39,18 @@ public class Content {
 
     @Version
     private Long version;
+
+    // Stripe related fields
+
+    private Map<String, Object> stripeDetails;
+
+    private String price;
+
+    private String planName;
+
+    private String subscriptionId;
+
+    private String clientSecret;
+
+    private String priceId;
 }

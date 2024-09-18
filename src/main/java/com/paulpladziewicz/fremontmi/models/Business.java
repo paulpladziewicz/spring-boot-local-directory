@@ -41,10 +41,4 @@ public class Business extends Content {
     private String email;
 
     private String website;
-
-    private String subscriptionId;
-
-    private String clientSecret;
-
-    private String priceId;
 }

@@ -55,10 +55,7 @@ public class BusinessService {
 
         Map<String, Object> stripeDetails = createSubscriptionResponse.value();
 
-        String subscriptionId = (String) stripeDetails.get("subscriptionId");
-        String clientSecret = (String) stripeDetails.get("clientSecret");
-        business.setSubscriptionId(subscriptionId);
-        business.setClientSecret(clientSecret);
+        business.setStripeDetails(stripeDetails);
 
         ServiceResponse<Business> saveResponse = saveBusiness(business);
 

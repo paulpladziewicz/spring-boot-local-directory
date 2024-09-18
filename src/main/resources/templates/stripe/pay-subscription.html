@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - Businesses')}"><title>Placeholder Title</title></head>
+<head th:replace="~{partials/head :: head('FremontMI - Businesses')}">
+    <title>Subscription Payment</title>
+</head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 <main>
@@ -8,76 +10,115 @@
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <h1 class="display-4">Subscription Payment</h1>
-                <p class="mb-2">You are paying for a <strong th:text="${planName}"></strong> plan at <strong th:text="${price}">.</strong></p>
-                <p><a href="/create/business/overview" class="btn btn-link fw-semibold fs-sm p-0 mb-4">Change Subscription</a></p>
+                <!-- Loading state -->
+                <div id="loading-message" class="text-center my-4">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Fetching subscription details...</p>
+                </div>
 
-                <form id="payment-form" class="my-4">
-                    <div id="payment-element"></div>
-                    <div id="error-message" class="alert alert-danger mt-3" role="alert" style="display:none;"></div>
-                    <button id="submit-button" class="btn btn-primary mt-4" type="submit">Submit Payment</button>
-                </form>
+                <!-- Payment info will be shown here after loading -->
+                <div id="payment-info" style="display:none;">
+                    <p class="mb-2">You are paying for a <strong id="displayName"></strong> plan at <strong id="displayPrice"></strong>.</p>
+                    <p><a href="/create/business/overview" class="btn btn-link fw-semibold fs-sm p-0 mb-4">Change Subscription</a></p>
+
+                    <form id="payment-form" class="my-4">
+                        <div id="payment-element"></div>
+                        <div id="error-message" class="alert alert-danger mt-3" role="alert" style="display:none;"></div>
+                        <button id="submit-button" class="btn btn-primary mt-4" type="submit" disabled>Submit Payment</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </main>
 
 <script th:inline="javascript">
-    const clientSecret = /*[[${business.clientSecret}]]*/ 'undefined';
-    const businessId = /*[[${business.id}]]*/ 'undefined';
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
-    const stripe = Stripe("pk_test_51KCrhcBCHBXtJFxOMYJo8xRymfT9m3PvrruBp7gZmcvCV2vpYnMH8EdkwVeibCrtj5bwNhhuAj5MzWU1NXtq6iBs000IzgImdE");
+    document.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const contentId = urlParams.get('contentId');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
 
-    const elements = stripe.elements({ clientSecret });
-    const paymentElement = elements.create("payment");
-    paymentElement.mount("#payment-element");
+        // Fetch content information using the contentId
+        try {
+            const response = await fetch(`/api/get-content/${contentId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken,
+                }
+            });
 
-    const form = document.getElementById("payment-form");
-    const submitButton = document.getElementById("submit-button");
+            if (response.ok) {
+                const data = await response.json();
 
-    form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        submitButton.disabled = true;
+                document.getElementById('displayName').textContent = data.displayName;
+                document.getElementById('displayPrice').textContent = data.displayPrice;
 
-        const {error: submitError} = await elements.submit();
+                const stripe = Stripe("pk_test_51KCrhcBCHBXtJFxOMYJo8xRymfT9m3PvrruBp7gZmcvCV2vpYnMH8EdkwVeibCrtj5bwNhhuAj5MzWU1NXtq6iBs000IzgImdE");
+                const elements = stripe.elements({ clientSecret: data.clientSecret });
+                const paymentElement = elements.create("payment");
+                paymentElement.mount("#payment-element");
 
-        if (submitError) {
-            document.getElementById("error-message").innerText = submitError.message;
-            document.getElementById("error-message").style.display = 'block';
-            submitButton.disabled = false;
-            return;  // Stop the form submission if there's an error
-        }
+                document.getElementById('payment-info').style.display = 'block';
+                document.getElementById('loading-message').style.display = 'none';
+                document.getElementById('submit-button').disabled = false;
 
-        const {error, paymentIntent} = await stripe.confirmPayment({
-            clientSecret: clientSecret,
-            elements,
-            confirmParams: {
-                // return_url: "https://fremontmi.com/error?stripe-redirect=true",
-                return_url: "http://localhost:8080/payment-success",
-            },
-            redirect: "if_required"
-        });
+                document.getElementById('payment-form').addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    document.getElementById('submit-button').disabled = true;
 
-        if (error) {
-            document.getElementById("error-message").innerText = error.message;
-            document.getElementById("error-message").style.display = 'block';
-            submitButton.disabled = false;
-        } else {
-            // Payment was successful
-            sendPaymentStatusToServer(paymentIntent);
+                    const {error: submitError} = await elements.submit();
+
+                    if (submitError) {
+                        document.getElementById('error-message').innerText = submitError.message;
+                        document.getElementById('error-message').style.display = 'block';
+                        document.getElementById('submit-button').disabled = false;
+                        return;
+                    }
+
+                    const {error, paymentIntent} = await stripe.confirmPayment({
+                        clientSecret: data.clientSecret,
+                        elements,
+                        confirmParams: {
+                            return_url: "http://localhost:8080/payment-success",
+                        },
+                        redirect: "if_required"
+                    });
+
+                    if (error) {
+                        document.getElementById('error-message').innerText = error.message;
+                        document.getElementById('error-message').style.display = 'block';
+                        document.getElementById('submit-button').disabled = false;
+                    } else {
+                        sendPaymentStatusToServer(paymentIntent, contentId);
+                    }
+                });
+
+            } else {
+                document.getElementById('error-message').innerText = 'Failed to load subscription details. Please try again later.';
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('loading-message').style.display = 'none';
+            }
+        } catch (error) {
+            document.getElementById('error-message').innerText = 'Error fetching subscription details. Please try again.';
+            document.getElementById('error-message').style.display = 'block';
+            document.getElementById('loading-message').style.display = 'none';
         }
     });
 
-    async function sendPaymentStatusToServer(paymentIntent) {
+    async function sendPaymentStatusToServer(paymentIntent, contentId) {
         try {
             let response = await fetch("/subscription-payment-success", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    [csrfHeader]: csrfToken
+                    [csrfHeader]: csrfToken,
                 },
                 body: JSON.stringify({
-                    entityId: businessId,
+                    entityId: contentId,
                     paymentIntentId: paymentIntent.id,
                     paymentStatus: paymentIntent.status,
                 }),
@@ -85,10 +126,8 @@
 
             if (response.ok) {
                 const { redirectUrl } = await response.json();
-
                 window.location.href = redirectUrl;
             } else {
-                // Handle the error from the backend
                 document.getElementById("error-message").innerText = "Payment was successful, but there was an error updating your subscription. Please contact support.";
                 document.getElementById("error-message").style.display = 'block';
             }
@@ -96,7 +135,7 @@
             document.getElementById("error-message").innerText = "There was an issue processing your payment. Please try again.";
             document.getElementById("error-message").style.display = 'block';
         } finally {
-            submitButton.disabled = false;
+            document.getElementById('submit-button').disabled = false;
         }
     }
 </script>

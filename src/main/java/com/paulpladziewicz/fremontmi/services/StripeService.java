@@ -144,9 +144,6 @@ public class StripeService {
         try {
             Subscription subscription = Subscription.create(subCreateParams);
 
-            Map<String, Object> subscriptionData = new HashMap<>();
-            subscriptionData.put("subscriptionId", subscription.getId());
-
             String clientSecret = subscription.getLatestInvoiceObject()
                     .getPaymentIntentObject()
                     .getClientSecret();
@@ -156,7 +153,40 @@ public class StripeService {
                 return ServiceResponse.error("payment_intent_error");
             }
 
+            Map<String, Object> subscriptionData = new HashMap<>();
+            subscriptionData.put("subscriptionId", subscription.getId());
             subscriptionData.put("clientSecret", clientSecret);
+
+            if (subscription.getItems() != null && !subscription.getItems().getData().isEmpty()) {
+                SubscriptionItem subscriptionItem = subscription.getItems().getData().getFirst(); // First item
+
+                Price price = subscriptionItem.getPrice();
+
+                String displayName = price.getMetadata().get("displayName");
+                String displayPrice = price.getMetadata().get("displayPrice");
+
+                if (displayName != null) {
+                    subscriptionData.put("displayName", displayName);
+                }
+                if (displayPrice != null) {
+                    subscriptionData.put("displayPrice", displayPrice);
+                }
+
+                subscriptionData.put("priceId", price.getId());
+            }
+
+            // Compute the time remaining until the subscription auto-cancels
+            // We can use the billing_cycle_anchor to understand the time left
+//            long billingCycleAnchor = subscription.getBillingCycleAnchor();
+//            long currentTimestamp = System.currentTimeMillis() / 1000; // Current time in seconds
+//            long timeUntilBillingCycleAnchor = billingCycleAnchor - currentTimestamp;
+
+            // You may decide to consider subscriptions "too close" if they're within a certain time frame (e.g., 48 hours)
+//            long thresholdTimeInSeconds = 48 * 3600; // 48 hours in seconds
+//            boolean isTooCloseToAutoCancel = timeUntilBillingCycleAnchor <= thresholdTimeInSeconds;
+
+//            subscriptionData.put("timeUntilBillingCycleAnchor", timeUntilBillingCycleAnchor);
+//            subscriptionData.put("isTooCloseToAutoCancel", isTooCloseToAutoCancel);
 
             return ServiceResponse.value(subscriptionData);
         } catch (StripeException e) {
@@ -409,6 +439,18 @@ public class StripeService {
         }
 
         return ServiceResponse.value(true);
+    }
+
+    public ServiceResponse<Map<String, Object>> getContentDetails(String contentId) {
+        Optional<Content> optionalContent = contentRepository.findById(contentId);
+
+        if (optionalContent.isEmpty()) {
+            return ServiceResponse.error("content_not_found");
+        }
+
+        Content content = optionalContent.get();
+
+        return ServiceResponse.value(content.getStripeDetails());
     }
 }
 

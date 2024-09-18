@@ -58,10 +58,7 @@ public class NeighborServicesProfileService {
 
         Map<String, Object> stripeDetails = createSubscriptionResponse.value();
 
-        String subscriptionId = (String) stripeDetails.get("subscriptionId");
-        String clientSecret = (String) stripeDetails.get("clientSecret");
-        neighborServicesProfile.setSubscriptionId(subscriptionId);
-        neighborServicesProfile.setClientSecret(clientSecret);
+        neighborServicesProfile.setStripeDetails(stripeDetails);
 
         ServiceResponse<NeighborServicesProfile> saveResponse = saveNeighborServiceProfile(neighborServicesProfile);
 
