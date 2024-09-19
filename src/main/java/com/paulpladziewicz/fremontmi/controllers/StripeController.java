@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
+import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.PaymentRequest;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.services.StripeService;
@@ -21,8 +22,7 @@ public class StripeController {
     }
 
     @GetMapping("/pay/subscription")
-    public String paySubscription(@RequestParam("contentId") String contentId, Model model) {
-        // get content by id from Stripe service and pass to view
+    public String paySubscription(Model model) {
         return "stripe/pay-subscription";
     }
 
@@ -41,9 +41,16 @@ public class StripeController {
     @PostMapping("/subscription-payment-success")
     @ResponseBody
     public ResponseEntity<String> subscriptionPaymentSuccess(@RequestBody PaymentRequest paymentRequest) {
-        stripeService.handleSubscriptionSuccess(paymentRequest);
+        ServiceResponse<Content> serviceResponse = stripeService.handleSubscriptionSuccess(paymentRequest);
 
-        // Redirect to content page
-        return ResponseEntity.ok("{\"redirectUrl\": \"/businesses/" + paymentRequest.getEntityId() + "\"}");
+        if (serviceResponse.hasError()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
+        Content content = serviceResponse.value();
+
+        String redirectUrl = content.getPathname();
+
+        return ResponseEntity.ok("{\"redirectUrl\": \"" + redirectUrl + "\"}");
     }
 }

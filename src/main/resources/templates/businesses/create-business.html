@@ -11,9 +11,8 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-10 col-lg-8">
                 <h1 class="display-4">Create Business Listing</h1>
-                <form id="create-business-form" th:action="@{/create/business/subscription}" th:object="${business}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                    <input type="hidden" th:if="${business.id != null}" th:field="*{id}">
-                    <input type="hidden" th:field="*{subscriptionPriceId}">
+                <form id="create-business-form" th:action="@{/create/business}" th:object="${business}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                    <input type="hidden" name="priceId" id="priceId" th:value="*{priceId}">
 
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="name">Business Name</label>

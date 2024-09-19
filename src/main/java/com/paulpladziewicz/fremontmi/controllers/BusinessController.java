@@ -28,7 +28,7 @@ public class BusinessController {
 
     @GetMapping("/create/business/overview")
     public String createBusinessListingOverview(Model model) {
-        return "businesses/business-create-overview";
+        return "businesses/create-business-overview";
     }
 
     @PostMapping("/setup/create/business")
@@ -87,9 +87,9 @@ public class BusinessController {
         return "businesses/businesses";
     }
 
-    @GetMapping("/businesses/{id}")
-    public String viewBusiness(@PathVariable String id, Model model) {
-        Optional<Business> businessOptional = businessService.findBusinessById(id);
+    @GetMapping("/businesses/{slug}")
+    public String viewBusiness(@PathVariable String slug, Model model) {
+        Optional<Business> businessOptional = businessService.findBusinessBySlug(slug);
 
         if (businessOptional.isEmpty()) {
             model.addAttribute("error", true);
@@ -119,9 +119,9 @@ public class BusinessController {
         return "businesses/my-businesses";
     }
 
-    @GetMapping("/edit/business/{id}")
-    public String editBusiness(@PathVariable String id, Model model) {
-        Optional<Business> businessOptional = businessService.findBusinessById(id);
+    @GetMapping("/edit/business/{slug}")
+    public String editBusiness(@PathVariable String slug, Model model) {
+        Optional<Business> businessOptional = businessService.findBusinessBySlug(slug);
 
         if (businessOptional.isEmpty()) {
             model.addAttribute("error", true);

@@ -45,6 +45,7 @@ public class NeighborServicesProfileService {
 
         neighborServicesProfile.setType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
         neighborServicesProfile.setSlug(createUniqueSlug(neighborServicesProfile.getName()));
+        neighborServicesProfile.setPathname("/neighbor-services/" + neighborServicesProfile.getSlug());
         neighborServicesProfile.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
         neighborServicesProfile.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
         neighborServicesProfile.setCreatedBy(userProfile.getUserId());

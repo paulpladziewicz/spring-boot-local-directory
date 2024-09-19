@@ -42,6 +42,7 @@ public class BusinessService {
 
         business.setType(ContentTypes.BUSINESS.getContentType());
         business.setSlug(createUniqueSlug(business.getName()));
+        business.setPathname("/businesses/" + business.getSlug());
         business.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
         business.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
         business.setCreatedBy(userProfile.getUserId());
@@ -161,6 +162,23 @@ public class BusinessService {
     public Optional<Business> findBusinessById(String businessId) {
         try {
             Optional<Content> contentOpt = contentRepository.findById(businessId);
+
+            return contentOpt
+                    .filter(content -> content instanceof Business)
+                    .map(content -> (Business) content);
+
+        } catch (DataAccessException e) {
+            logger.error("Database access error when trying to find a business by id", e);
+            return Optional.empty();
+        } catch (Exception e) {
+            logger.error("Unexpected error when trying to find a business by id", e);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Business> findBusinessBySlug(String slug) {
+        try {
+            Optional<Content> contentOpt = contentRepository.findBySlug(slug);
 
             return contentOpt
                     .filter(content -> content instanceof Business)

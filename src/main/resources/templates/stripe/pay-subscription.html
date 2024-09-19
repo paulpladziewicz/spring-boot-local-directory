@@ -10,6 +10,7 @@
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <h1 class="display-4">Subscription Payment</h1>
+
                 <!-- Loading state -->
                 <div id="loading-message" class="text-center my-4">
                     <div class="spinner-border" role="status">
@@ -20,9 +21,8 @@
 
                 <!-- Payment info will be shown here after loading -->
                 <div id="payment-info" style="display:none;">
-                    <p class="mb-2">You are paying for a <strong id="displayName"></strong> plan at <strong id="displayPrice"></strong>.</p>
-                    <p><a href="/create/business/overview" class="btn btn-link fw-semibold fs-sm p-0 mb-4">Change Subscription</a></p>
-
+                    <p class="mb-2">You are paying for a <strong id="displayName"></strong> at <strong id="displayPrice"></strong>.</p>
+                    <p><a href="/create/business/overview" class="btn btn-link fw-semibold fs-sm p-0">Change Subscription</a></p>
                     <form id="payment-form" class="my-4">
                         <div id="payment-element"></div>
                         <div id="error-message" class="alert alert-danger mt-3" role="alert" style="display:none;"></div>
@@ -88,12 +88,12 @@
                         redirect: "if_required"
                     });
 
-                    if (error) {
+                    if (paymentIntent.error) {
                         document.getElementById('error-message').innerText = error.message;
                         document.getElementById('error-message').style.display = 'block';
                         document.getElementById('submit-button').disabled = false;
                     } else {
-                        sendPaymentStatusToServer(paymentIntent, contentId);
+                        await sendPaymentStatusToServer(paymentIntent, contentId);
                     }
                 });
 
@@ -111,6 +111,8 @@
 
     async function sendPaymentStatusToServer(paymentIntent, contentId) {
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
             let response = await fetch("/subscription-payment-success", {
                 method: "POST",
                 headers: {

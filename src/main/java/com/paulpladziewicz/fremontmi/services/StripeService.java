@@ -175,6 +175,13 @@ public class StripeService {
                 subscriptionData.put("priceId", price.getId());
             }
 
+            Invoice latestInvoice = subscription.getLatestInvoiceObject();
+            if (latestInvoice != null) {
+                subscriptionData.put("invoiceId", latestInvoice.getId());
+            } else {
+                logger.warn("Latest invoice is null for subscription: {}", subscription.getId());
+            }
+
             // Compute the time remaining until the subscription auto-cancels
             // We can use the billing_cycle_anchor to understand the time left
 //            long billingCycleAnchor = subscription.getBillingCycleAnchor();
@@ -330,6 +337,7 @@ public class StripeService {
                     Invoice failedInvoice = (Invoice) dataObjectDeserializer.getObject().orElse(null);
                     if (failedInvoice != null) {
                         //handlePaymentFailed(failedInvoice);
+                        // there is subscription data within; may not need invoice is
                         System.out.println("Payment failed");
                     }
                     break;
@@ -409,7 +417,7 @@ public class StripeService {
         }
     }
 
-    public ServiceResponse<Boolean> handleSubscriptionSuccess(PaymentRequest paymentRequest) {
+    public ServiceResponse<Content> handleSubscriptionSuccess(PaymentRequest paymentRequest) {
         String contentId = paymentRequest.getEntityId();
         String paymentIntentId = paymentRequest.getPaymentIntentId();
         String paymentStatus = paymentRequest.getPaymentStatus();
@@ -426,19 +434,17 @@ public class StripeService {
         }
 
         Content content = optionalContent.get();
-
-        if (!content.getStatus().equals("active")) {
-            content.setStatus("active");
-        }
+        content.setStatus(ContentStatus.ACTIVE.getStatus());
+        content.setVisibility(ContentVisibility.PUBLIC.getVisibility());
 
         try {
-            contentRepository.save(content);
+            Content savedContent = contentRepository.save(content);
+
+            return ServiceResponse.value(savedContent);
         } catch (Exception e) {
             logger.error("Error saving content after handling successful payment: ", e);
             return ServiceResponse.error("content_save_error");
         }
-
-        return ServiceResponse.value(true);
     }
 
     public ServiceResponse<Map<String, Object>> getContentDetails(String contentId) {

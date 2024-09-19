@@ -65,7 +65,7 @@
                         <div class="display-2 text-primary">$10</div>
                         <div class="mb-4">per month</div>
                         <p class="mb-4 pb-4">Perfect for businesses that want flexibility without a long-term commitment.</p>
-                        <form th:action="@{/create/business/form}" method="post" id="monthly-subscription-form">
+                        <form th:action="@{/setup/create/business}" method="post" id="monthly-subscription-form">
                             <input type="hidden" name="priceId" value="price_1Pv7V0BCHBXtJFxOinfPKMUE" />
                             <button class="btn btn-primary w-100" type="submit">Proceed with Monthly Subscription</button>
                         </form>
@@ -80,7 +80,7 @@
                         <div class="display-2 text-light">$100</div>
                         <div class="text-light opacity-70 mb-4">per year</div>
                         <p class="text-light opacity-70 mb-4 pb-4">Save money with the annual plan. Ideal for businesses looking for long-term growth.</p>
-                        <form th:action="@{/create/business/form}" method="post" id="annual-subscription-form">
+                        <form th:action="@{/setup/create/business}" method="post" id="annual-subscription-form">
                             <input type="hidden" name="priceId" value="price_1Pv7XIBCHBXtJFxOUIvRA6Xf" />
                             <button class="btn btn-light w-100" type="submit">Proceed with Annual Subscription</button>
                         </form>

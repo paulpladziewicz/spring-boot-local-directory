@@ -14,7 +14,6 @@
                 <h1>Create NeighborService™</h1>
                 <form id="create-business-form" th:action="@{/create/neighbor-services-profile}" th:object="${neighborServicesProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                     <input type="hidden" name="priceId" id="priceId" th:value="*{priceId}">
-                    <input type="hidden" th:if="${neighborServicesProfile.id != null}" th:field="*{id}">
 
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="displayName">Display name</label>
