@@ -28,7 +28,7 @@
                             Event Start Time
                         </p>
                         <p th:text="${#strings.length(event.description) > 120 ? #strings.substring(event.description, 0, 120) + '...' : event.description}">Event Description</p>
-                        <a hx-boost="true" th:href="'/events/' + ${event.id}" class="btn btn-lg btn-link p-0">View Event<i class="ai-arrow-right ms-2"></i></a>
+                        <a hx-boost="true" th:href="'/events/' + ${event.slug}" class="btn btn-lg btn-link p-0">View Event<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>

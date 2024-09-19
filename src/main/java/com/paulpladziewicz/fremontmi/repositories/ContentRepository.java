@@ -2,7 +2,6 @@ package com.paulpladziewicz.fremontmi.repositories;
 
 import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.Event;
-import com.paulpladziewicz.fremontmi.models.NeighborServicesProfile;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -31,4 +30,10 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     List<Content> contentNotReviewed();
 
     List<Event> findBySoonestStartTimeAfterOrderBySoonestStartTimeAsc(LocalDateTime now);
+
+    @Query("{ 'stripeDetails.subscriptionId': ?0 }")
+    Optional<Content> findByStripeDetails_SubscriptionId(String subscriptionId);
+
+    @Query("{ 'stripeDetails.invoiceId': ?0 }")
+    Optional<Content> findByStripeDetails_InvoiceId(String invoiceId);
 }

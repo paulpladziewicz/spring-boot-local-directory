@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.stripe.model.Dispute;
 import jakarta.mail.Address;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
@@ -135,6 +136,32 @@ public class EmailService {
 
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
             logger.error("Failed to send group email to {} from {} with a subject of {} and message of {}.", recipients, replyTo, subject, messageBody, e);
+        }
+    }
+
+    @Async
+    public void sendDisputeCreatedEmailAsync(String email, Dispute dispute) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+
+            // Prepare the context for the email template
+            Context context = new Context();
+            context.setVariable("disputeId", dispute.getId());
+            context.setVariable("amountDisputed", dispute.getAmount() / 100.0); // Stripe stores amounts in cents
+            context.setVariable("currency", dispute.getCurrency());
+            context.setVariable("reason", dispute.getReason());
+
+            // Generate the email content using a template
+            String html = templateEngine.process("stripe/email/dispute-created", context);
+
+            message.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
+            message.setRecipients(MimeMessage.RecipientType.TO, email);
+            message.setSubject("Dispute Created - " + dispute.getId());
+            message.setContent(html, "text/html; charset=utf-8");
+
+            mailSender.send(message);
+        } catch (MessagingException | MailException | UnsupportedEncodingException e) {
+            logger.error("Failed to send dispute created email to {}", email, e);
         }
     }
 }

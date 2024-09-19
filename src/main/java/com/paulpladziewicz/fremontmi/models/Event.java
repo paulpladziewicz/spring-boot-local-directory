@@ -12,7 +12,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper=true)
-@TypeAlias("Group")
+@TypeAlias("Event")
 public class Event extends Content {
 
     @NotBlank(message = "Event name must not be null")

@@ -58,7 +58,7 @@ public class EventController {
 
         Event savedEvent = serviceResponse.value();
 
-        return "redirect:/events/" + savedEvent.getId();
+        return "redirect:/events/" + savedEvent.getSlug();
     }
 
     @GetMapping("/events")
@@ -77,9 +77,9 @@ public class EventController {
         return "events/events";
     }
 
-    @GetMapping("/events/{id}")
-    public String displayEvent(@PathVariable String id, Model model) {
-        ServiceResponse<Event> serviceResponse = eventService.findEventById(id);
+    @GetMapping("/events/{slug}")
+    public String displayEvent(@PathVariable String slug, Model model) {
+        ServiceResponse<Event> serviceResponse = eventService.findEventBySlug(slug);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);
@@ -107,9 +107,9 @@ public class EventController {
         return "events/event-page";
     }
 
-    @GetMapping("/edit/event/{id}")
-    public String displayEditForm(@PathVariable String id, Model model) {
-        ServiceResponse<Event> serviceResponse = eventService.findEventById(id);
+    @GetMapping("/edit/event/{slug}")
+    public String displayEditForm(@PathVariable String slug, Model model) {
+        ServiceResponse<Event> serviceResponse = eventService.findEventBySlug(slug);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);
@@ -123,20 +123,22 @@ public class EventController {
         return "events/edit-event";
     }
 
-    @PostMapping("/edit/event/{id}")
-    public String updateEvent(@PathVariable String id, @Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
+    @PostMapping("/edit/event")
+    public String updateEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
         if (result.hasErrors()) {
             return "events/edit-event";
         }
 
-        ServiceResponse<Event> serviceResponse = eventService.updateEvent(id, event);
+        ServiceResponse<Event> serviceResponse = eventService.updateEvent(event);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);
             return "events/edit-event";
         }
 
-        return "redirect:/events/" + id;
+        Event savedEvent = serviceResponse.value();
+
+        return "redirect:/events/" + savedEvent.getSlug();
     }
 
     @GetMapping("/my/events")

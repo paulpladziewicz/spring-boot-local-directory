@@ -181,6 +181,22 @@ public class NeighborServicesProfileService {
         }
     }
 
+    public Optional<NeighborServicesProfile> findNeighborServiceProfileBySlug(String neighborServiceProfileSlug) {
+        try {
+            Optional<Content> optionalContent = contentRepository.findBySlug(neighborServiceProfileSlug);
+
+            return optionalContent
+                    .filter(content -> content instanceof NeighborServicesProfile)
+                    .map(content -> (NeighborServicesProfile) content);
+        } catch (DataAccessException e) {
+            logger.error("Database access error when trying to find a neighbor service by id", e);
+            return Optional.empty();
+        } catch (Exception e) {
+            logger.error("Unexpected error when trying to find a neighbor service by id", e);
+            return Optional.empty();
+        }
+    }
+
     public Optional<NeighborServicesProfile> findNeighborServiceProfileByUserId() {
         Optional<String> optionalUserId = userService.getUserId();
 
@@ -205,7 +221,7 @@ public class NeighborServicesProfileService {
         }
     }
 
-    public ServiceResponse<NeighborServicesProfile> updateNeighborServiceProfile(String neighborServiceProfileId) {
+    public ServiceResponse<NeighborServicesProfile> updateNeighborServiceProfile(NeighborServicesProfile neighborServiceProfile) {
         Optional<String> optionalUserId = userService.getUserId();
 
         if (optionalUserId.isEmpty()) {
@@ -214,7 +230,7 @@ public class NeighborServicesProfileService {
 
         String userId = optionalUserId.get();
 
-        Optional<NeighborServicesProfile> optionalNeighborServiceProfile = findNeighborServiceProfileById(neighborServiceProfileId);
+        Optional<NeighborServicesProfile> optionalNeighborServiceProfile = findNeighborServiceProfileById(neighborServiceProfile.getId());
 
         if (optionalNeighborServiceProfile.isEmpty()) {
             return ServiceResponse.error("neighbor_service_not_found");

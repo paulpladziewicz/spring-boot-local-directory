@@ -9,7 +9,7 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-10 col-lg-8">
                 <h1 class="display-4">Edit Event</h1>
-                <form id="edit-event-form" th:action="@{/edit/event/{id}(id=${event.id})}" th:object="${event}" onsubmit="disableSubmitButtonWhileSubmitting(this)" method="post">
+                <form id="edit-event-form" th:action="@{/edit/event}" th:object="${event}" onsubmit="disableSubmitButtonWhileSubmitting(this)" method="post">
                     <input type="hidden" name="id" th:value="${event.id}"/>
 
                     <div class="form-group mb-2">

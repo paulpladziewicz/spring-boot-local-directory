@@ -25,6 +25,8 @@ public class StripeService {
 
     private final UserService userService;
 
+    private final EmailService emailService;
+
     private final ContentRepository contentRepository;
 
     @Value("${stripe.secret.key}")
@@ -33,8 +35,9 @@ public class StripeService {
     @Value("${stripe.publishable.key}")
     private String stripePublishableKey;
 
-    public StripeService(UserService userService, ContentRepository contentRepository) {
+    public StripeService(UserService userService, EmailService emailService, ContentRepository contentRepository) {
         this.userService = userService;
+        this.emailService = emailService;
         this.contentRepository = contentRepository;
     }
 
@@ -336,7 +339,7 @@ public class StripeService {
                 case "invoice.payment_failed":
                     Invoice failedInvoice = (Invoice) dataObjectDeserializer.getObject().orElse(null);
                     if (failedInvoice != null) {
-                        //handlePaymentFailed(failedInvoice);
+                        handlePaymentFailed(failedInvoice);
                         // there is subscription data within; may not need invoice is
                         System.out.println("Payment failed");
                     }
@@ -345,7 +348,7 @@ public class StripeService {
                 case "customer.subscription.deleted":
                     Subscription subscription = (Subscription) dataObjectDeserializer.getObject().orElse(null);
                     if (subscription != null) {
-                        //handleSubscriptionCancellation(subscription);
+                        handleSubscriptionCancellation(subscription);
                         System.out.println("Subscription canceled");
                     }
                     break;
@@ -353,8 +356,8 @@ public class StripeService {
                 case "charge.dispute.created":
                     Dispute dispute = (Dispute) dataObjectDeserializer.getObject().orElse(null);
                     if (dispute != null) {
-                        //handleDisputeCreated(dispute);
-                        System.out.println("Dispute created");
+                        emailService.sendDisputeCreatedEmailAsync("ppladziewicz@gmail.com", dispute);
+                        logger.info("Dispute created and email sent for dispute ID {}", dispute.getId());
                     }
                     break;
             }
@@ -371,49 +374,42 @@ public class StripeService {
         }
     }
 
-    public ServiceResponse<Boolean> cancelSubscription(String subscriptionId) {
-        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
+    private void handleSubscriptionCancellation(Subscription subscription) {
+        String subscriptionId = subscription.getId();
 
-        if (userProfileOptional.isEmpty()) {
-            return ServiceResponse.error("No user profile found");
+        // Retrieve the content by subscriptionId from the repository
+        Optional<Content> optionalContent = contentRepository.findByStripeDetails_SubscriptionId(subscriptionId);
+
+        if (optionalContent.isPresent()) {
+            Content content = optionalContent.get();
+
+            // Mark the content or subscription as canceled, you can set a status field or similar
+            content.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
+            content.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
+            contentRepository.save(content);
+
+            logger.info("Subscription {} canceled and content updated.", subscriptionId);
+        } else {
+            logger.warn("Content not found for subscription ID {}", subscriptionId);
         }
+    }
 
-        UserProfile userProfile = userProfileOptional.get();
+    private void handlePaymentFailed(Invoice failedInvoice) {
+        String invoiceId = failedInvoice.getId();
 
-        if (userProfile.getStripeCustomerId() == null) {
-            return ServiceResponse.error("No Stripe customer ID found");
-        }
+        // Retrieve the content by invoiceId from the repository
+        Optional<Content> optionalContent = contentRepository.findByStripeDetails_InvoiceId(invoiceId);
 
-        try {
-            SubscriptionListParams params = SubscriptionListParams.builder()
-                    .setStatus(SubscriptionListParams.Status.ALL)
-                    .setCustomer(userProfile.getStripeCustomerId())
-                    .build();
-            SubscriptionCollection subscriptions = Subscription.list(params);
+        if (optionalContent.isPresent()) {
+            Content content = optionalContent.get();
 
-            if (subscriptions.getData().isEmpty()) {
-                return ServiceResponse.error("No subscriptions found");
-            }
+            // Mark the content or subscription as having failed payment, e.g., set status or flag
+            content.setStatus(ContentStatus.PAYMENT_FAILED.getStatus());
+            contentRepository.save(content);
 
-            boolean subscriptionFound = false;
-
-            for (Subscription subscription : subscriptions.getData()) {
-                if (subscription.getId().equals(subscriptionId)) {
-                    subscriptionFound = true;
-                    break;
-                }
-            }
-
-            if (!subscriptionFound) {
-                return ServiceResponse.error("Subscription not found");
-            }
-
-            Subscription subscription = Subscription.retrieve(subscriptionId);
-            subscription.cancel();
-            return ServiceResponse.value(true);
-        } catch (StripeException e) {
-            logger.error("Error canceling subscription: ", e);
-            return ServiceResponse.error("STRIPE_SUBSCRIPTION_CANCELLATION_FAILED");
+            logger.info("Payment failed for invoice {} and content updated.", invoiceId);
+        } else {
+            logger.warn("Content not found for invoice ID {}", invoiceId);
         }
     }
 

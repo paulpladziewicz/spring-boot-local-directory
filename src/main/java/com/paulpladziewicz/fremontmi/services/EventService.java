@@ -47,6 +47,8 @@ public class EventService {
 
             event.setCreatedBy(userId);
             populateFormattedTimes(event);
+            event.setSlug(createUniqueSlug(event.getName()));
+            event.setPathname("/events/" + event.getSlug());
 
             ServiceResponse<Event> saveEventResponse = saveEvent(event);
 
@@ -150,6 +152,20 @@ public class EventService {
         }
     }
 
+    public ServiceResponse<Event> findEventBySlug(String slug) {
+        try {
+            return contentRepository.findBySlug(slug)
+                    .filter(content -> content instanceof Event)
+                    .map(content -> (Event) content)
+                    .map(ServiceResponse::value)
+                    .orElseGet(() -> logAndReturnError("Event not found with slug: " + slug, "event_not_found"));
+        } catch (DataAccessException e) {
+            return logAndReturnError("Database error while retrieving event.", "database_error", e);
+        } catch (Exception e) {
+            return logAndReturnError("Unexpected error while retrieving event.", "unexpected_error", e);
+        }
+    }
+
     public ServiceResponse<List<Event>> findEventsByUser() {
         try {
             Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
@@ -175,7 +191,7 @@ public class EventService {
     }
 
     @Transactional
-    public ServiceResponse<Event> updateEvent(String id, Event updatedEvent) {
+    public ServiceResponse<Event> updateEvent(Event updatedEvent) {
         try {
             Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
@@ -185,7 +201,7 @@ public class EventService {
 
             UserProfile userProfile = optionalUserProfile.get();
 
-            ServiceResponse<Event> existingEventResult = findEventById(id);
+            ServiceResponse<Event> existingEventResult = findEventBySlug(updatedEvent.getSlug());
 
             if (existingEventResult.hasError()) {
                 return ServiceResponse.error(existingEventResult.errorCode());
@@ -194,7 +210,7 @@ public class EventService {
             Event existingEvent = existingEventResult.value();
 
             if (!hasPermission(userProfile.getUserId(), existingEvent)) {
-                return logAndReturnError("User does not have permission to update event: " + id, "permission_denied");
+                return logAndReturnError("User does not have permission to update event: " + existingEvent.getId(), "permission_denied");
             }
 
             validateEventTimes(updatedEvent);
