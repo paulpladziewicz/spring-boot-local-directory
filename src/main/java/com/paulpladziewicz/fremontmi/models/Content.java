@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -40,17 +41,13 @@ public class Content {
     @Version
     private Long version;
 
-    // Stripe related fields
-
     private Map<String, Object> stripeDetails;
 
-    private String price;
-
-    private String planName;
+    private String priceId;
 
     private String subscriptionId;
 
-    private String clientSecret;
-
-    private String priceId;
+    public List<String> getTags() {
+        return Collections.emptyList();
+    }
 }

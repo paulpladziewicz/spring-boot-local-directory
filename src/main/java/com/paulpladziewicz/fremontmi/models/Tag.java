@@ -13,9 +13,9 @@ public class Tag {
     @Id
     private String id;
 
-    private String name; // canonical form, unique index
+    private String name;
 
-    private String displayName; // user-friendly version
+    private String displayName;
 
     private Boolean reviewed = false;
 
@@ -26,5 +26,9 @@ public class Tag {
     public Tag(String name, String displayName) {
         this.name = name;
         this.displayName = displayName;
+    }
+
+    public void incrementCountForContentType(String contentType) {
+        this.countByContentType.put(contentType, this.countByContentType.getOrDefault(contentType, 0) + 1);
     }
 }

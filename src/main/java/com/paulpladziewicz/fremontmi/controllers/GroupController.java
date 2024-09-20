@@ -1,11 +1,9 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.models.Announcement;
-import com.paulpladziewicz.fremontmi.models.Content;
-import com.paulpladziewicz.fremontmi.models.Group;
-import com.paulpladziewicz.fremontmi.models.ServiceResponse;
+import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.GroupService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
+import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -17,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,10 +28,13 @@ public class GroupController {
 
     private final UserService userService;
 
-    public GroupController(HtmlSanitizationService htmlSanitizationService, GroupService groupService, UserService userService) {
+    private final TagService tagService;
+
+    public GroupController(HtmlSanitizationService htmlSanitizationService, GroupService groupService, UserService userService, TagService tagService) {
         this.htmlSanitizationService = htmlSanitizationService;
         this.groupService = groupService;
         this.userService = userService;
+        this.tagService = tagService;
     }
 
     @GetMapping("/create/group")
@@ -72,6 +74,10 @@ public class GroupController {
 
         List<Group> groups = findAllResponse.value();
         model.addAttribute("groups", groups);
+
+        List<Content> contentList = new ArrayList<>(groups);
+        List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 10);
+        model.addAttribute("popularTags", popularTags);
 
         return "groups/groups";
     }
@@ -147,9 +153,9 @@ public class GroupController {
     }
 
 
-    @GetMapping("/edit/group/{id}")
-    public String getEditGroupForm(@NotNull @PathVariable String id, Model model) {
-        ServiceResponse<Group> serviceResponse = groupService.findGroupById(id);
+    @GetMapping("/edit/group/{slug}")
+    public String getEditGroupForm(@NotNull @PathVariable String slug, Model model) {
+        ServiceResponse<Group> serviceResponse = groupService.findBySlug(slug);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);

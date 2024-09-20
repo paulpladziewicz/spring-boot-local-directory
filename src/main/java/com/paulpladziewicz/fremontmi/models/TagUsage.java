@@ -2,8 +2,28 @@ package com.paulpladziewicz.fremontmi.models;
 
 import lombok.Data;
 
-@Data
 public class TagUsage {
-    private String id;  // The tag name (as MongoDB groups by "_id")
-    private int count;  // The number of times the tag is used
+    private String name;
+    private int count;
+
+    public TagUsage(String name, int count) {
+        this.name = name;
+        this.count = count;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 }
