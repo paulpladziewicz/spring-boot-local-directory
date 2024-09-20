@@ -31,6 +31,14 @@ public class NeighborServicesProfileController {
 
     @PostMapping("/setup/create/neighbor-services-profile")
     public String setupNeighborServicesProfileForm(@RequestParam("priceId") String priceId, RedirectAttributes redirectAttributes) {
+        Optional<NeighborServicesProfile> optionalNeighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
+
+        if (optionalNeighborServicesProfile.isPresent()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "You already have a NeighborServices™ Profile. You can only have one profile at a time.");
+            return "redirect:/my/neighbor-services/profile";
+
+        }
+
         redirectAttributes.addFlashAttribute("priceId", priceId);
         return "redirect:/create/neighbor-services-profile";
     }
@@ -116,7 +124,7 @@ public class NeighborServicesProfileController {
 
         NeighborServicesProfile neighborServicesProfile = optionalNeighborService.get();
 
-        model.addAttribute("neighborServiceProfile", neighborServicesProfile);
+        model.addAttribute("neighborServicesProfile", neighborServicesProfile);
 
         return "neighborservices/neighbor-services-profile-page";
     }

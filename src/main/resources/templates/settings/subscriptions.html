@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - My Billing Info')}"><title>Placeholder Title</title></head>
+<head th:replace="~{partials/head :: head('FremontMI - My Billing Info')}"><title>Subscriptions</title></head>
 <body class="bg-secondary">
 <header th:insert="~{partials/navbar}"></header>
 
@@ -9,19 +9,13 @@
 
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item">
-            <a href="/my/settings" class="nav-link" role="tab">
-                Profile
-            </a>
+            <a href="/my/settings" class="nav-link" role="tab">Profile</a>
         </li>
         <li class="nav-item">
-            <a href="/my/settings/subscriptions" class="nav-link active" role="tab">
-                Subscriptions
-            </a>
+            <a href="/my/settings/subscriptions" class="nav-link active" role="tab">Subscriptions</a>
         </li>
         <li class="nav-item">
-            <a href="/my/settings/billing" class="nav-link" role="tab">
-                Billing
-            </a>
+            <a href="/my/settings/billing" class="nav-link" role="tab">Billing</a>
         </li>
     </ul>
 
@@ -37,51 +31,29 @@
                 <span class="placeholder col-6"></span>
             </p>
             <div id="subscriptions" class="row row-cols-1 row-cols-md-2 g-4"></div>
-
         </div>
     </section>
 </div>
 
-<!--Manage Automatic Payments-->
-<!--Allow users to toggle whether or not they want automatic payments enabled (Stripe supports this via the cancel_at_period_end property).-->
-
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
-        // Show the loading element initially
         document.querySelector('#loading').style.display = 'block';
 
         try {
-            // Fetch the list of subscriptions for this customer.
             const response = await fetch('/api/stripe/subscriptions').then((r) => r.json());
-
             const subscriptionsDiv = document.querySelector('#subscriptions');
+
             subscriptionsDiv.innerHTML = response.map((subscription) => {
-                // Display the payment method type instead of last4.
-                let paymentMethod = subscription.paymentMethods.length > 0 ? subscription.paymentMethods[0] : 'N/A';
-
-                // Use status to determine badge class
-                let statusBadgeClass = subscription.status === 'active'
-                    ? 'bg-success'
-                    : (subscription.status === 'incomplete'
-                        ? 'bg-warning'
-                        : 'bg-danger');
-
-                // Check if the subscription is scheduled for cancellation at the end of the period
-                const isCancelAtPeriodEnd = subscription.cancelAtPeriodEnd;
-
-                // Determine the correct button (Cancel or Resume)
                 let actionButton = '';
-                if (isCancelAtPeriodEnd) {
-                    // Show "Resume Subscription" if it's set to cancel at the end
+                if (subscription.cancelAtPeriodEnd) {
                     actionButton = `
-                        <button class="btn btn-outline-primary resume-subscription-btn" data-subscription-id="${subscription.id}">
+                        <button class="btn btn-link p-0 resume-subscription-btn" data-subscription-id="${subscription.id}">
                             Resume Subscription
                         </button>
                     `;
                 } else {
-                    // Show "Cancel Subscription" if it's not already set to cancel
                     actionButton = `
-                        <button class="btn btn-outline-danger cancel-subscription-btn" data-subscription-id="${subscription.id}">
+                        <button class="btn btn-link text-danger p-0 cancel-subscription-btn" data-subscription-id="${subscription.id}">
                             Cancel Subscription
                         </button>
                     `;
@@ -91,35 +63,28 @@
             <div class="col">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        <h5 class="card-title">Subscription ID: ${subscription.id}</h5>
-                        <span class="badge ${statusBadgeClass}">${subscription.status}</span>
+                        <h5 class="card-title">${subscription.planName}</h5>
                         <p class="card-text mt-3">
-                            <strong>Payment Method:</strong> ${paymentMethod}
+                            <strong>Price:</strong> ${subscription.price}
                         </p>
                         <p class="card-text">
-                            <strong>Current Period End:</strong> ${new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString()}
+                            ${subscription.subscriptionEnd}
                         </p>
                         ${actionButton}
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-muted">Payment method displayed as type (e.g., card).</small>
                     </div>
                 </div>
             </div>
           `;
             }).join('');
 
-            // Hide the loading element after data is loaded
             document.querySelector('#loading').style.display = 'none';
 
-            // Add event listeners to the cancel and resume buttons
             document.querySelectorAll('.cancel-subscription-btn').forEach(button => {
                 button.addEventListener('click', async (event) => {
                     const subscriptionId = event.target.getAttribute('data-subscription-id');
                     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
 
-                    // Send POST request to cancel the subscription at the end of the period
                     const cancelResponse = await fetch('/api/stripe/cancel-subscription', {
                         method: 'POST',
                         headers: {
@@ -131,7 +96,6 @@
 
                     if (cancelResponse.ok) {
                         alert('Subscription scheduled to cancel at the end of the period!');
-                        // Optionally, refresh the page or update the UI
                         location.reload();
                     } else {
                         alert('Failed to schedule subscription cancellation. Please try again.');
@@ -139,14 +103,12 @@
                 });
             });
 
-            // Add event listeners to the resume buttons
             document.querySelectorAll('.resume-subscription-btn').forEach(button => {
                 button.addEventListener('click', async (event) => {
                     const subscriptionId = event.target.getAttribute('data-subscription-id');
                     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
 
-                    // Send POST request to resume the subscription
                     const resumeResponse = await fetch('/api/stripe/resume-subscription', {
                         method: 'POST',
                         headers: {
@@ -158,7 +120,6 @@
 
                     if (resumeResponse.ok) {
                         alert('Subscription resumed successfully!');
-                        // Optionally, refresh the page or update the UI
                         location.reload();
                     } else {
                         alert('Failed to resume the subscription. Please try again.');
@@ -168,16 +129,11 @@
 
         } catch (error) {
             console.error('Failed to fetch subscriptions:', error);
-            // Handle errors here
         }
     });
 </script>
-
 
 <script th:replace="~{partials/theme-js}"></script>
 <footer th:replace="~{partials/footer}"></footer>
 </body>
 </html>
-
-
-

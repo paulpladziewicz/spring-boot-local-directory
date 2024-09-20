@@ -11,6 +11,9 @@ import com.stripe.model.SubscriptionItem;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,33 +92,32 @@ public class BillingController {
         return stripeService.handleStripeWebhook(payload, sigHeader);
     }
 
-    public SubscriptionDTO mapToDTO(Subscription subscription) {
+    private SubscriptionDTO mapToDTO(Subscription subscription) {
         SubscriptionDTO dto = new SubscriptionDTO();
+
         dto.setId(subscription.getId());
-        dto.setCustomerId(subscription.getCustomer());
-        dto.setStatus(subscription.getStatus());
-        dto.setCollectionMethod(subscription.getCollectionMethod());
-        dto.setCurrency(subscription.getCurrency());
 
-        if (!subscription.getItems().getData().isEmpty()) {
-            SubscriptionItem item = subscription.getItems().getData().getFirst();
-            dto.setAmount(Math.toIntExact(item.getPrice().getUnitAmount()));
-            dto.setPlanName(item.getPrice().getProduct());
-            dto.setInterval(item.getPrice().getRecurring().getInterval());
-            dto.setIntervalCount(Math.toIntExact(item.getPrice().getRecurring().getIntervalCount()));
-        }
+        String planName = subscription.getItems().getData().get(0).getPrice().getMetadata().get("displayName");
+        String price = subscription.getItems().getData().get(0).getPrice().getMetadata().get("displayPrice");
 
-        dto.setStartDate(subscription.getStartDate());
-        dto.setCurrentPeriodStart(subscription.getCurrentPeriodStart());
-        dto.setCurrentPeriodEnd(subscription.getCurrentPeriodEnd());
-        dto.setCancelAtPeriodEnd(subscription.getCancelAtPeriodEnd());
-        dto.setCanceledAt(subscription.getCanceledAt());
-        dto.setLatestInvoice(subscription.getLatestInvoice());
+        Long nextPaymentUnix = subscription.getCurrentPeriodEnd();
+        String nextRecurringPayment = Instant.ofEpochSecond(nextPaymentUnix)
+                .atZone(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"));
 
-        dto.setPaymentMethods(subscription.getPaymentSettings().getPaymentMethodTypes());
+        boolean willCancel = subscription.getCancelAtPeriodEnd();
+        String subscriptionEnd = willCancel ? "Subscription ends: " + nextRecurringPayment
+                : "Next reoccurring payment: " + nextRecurringPayment;
+
+        dto.setPlanName(planName);
+        dto.setPrice(price);
+        dto.setNextRecurringPayment(nextRecurringPayment);
+        dto.setSubscriptionEnd(subscriptionEnd);
+        dto.setCancelAtPeriodEnd(willCancel);
 
         return dto;
     }
+
 
     public InvoiceDTO mapInvoiceToDTO(Invoice invoice) {
         InvoiceDTO dto = new InvoiceDTO();
