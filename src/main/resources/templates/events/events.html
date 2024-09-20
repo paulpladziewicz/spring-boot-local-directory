@@ -13,6 +13,19 @@
             </div>
         </div>
 
+<!--        <div class="mb-4">-->
+<!--            <div class="d-flex flex-wrap">-->
+<!--                <a th:each="tag : ${popularTags}"-->
+<!--                   th:href="'/events?tag=' + ${tag.name}"-->
+<!--                   th:classappend="${selectedTag == tag} ? 'badge bg-primary fs-sm m-1' : 'badge bg-primary bg-opacity-10 text-primary fs-sm m-1'"-->
+<!--                   th:text="${tag.name}">-->
+<!--                </a>-->
+<!--            </div>-->
+<!--            <div th:if="${selectedTag}">-->
+<!--                <a class="text-dark opacity-50 btn btn-link p-1" href="/events">Clear Filter</a>-->
+<!--            </div>-->
+<!--        </div>-->
+
         <div class="row">
             <div th:if="${#lists.isEmpty(events)}" class="my-4">
                 <div>

@@ -32,7 +32,7 @@
                                 <input type="hidden" name="groupId" th:value="${group.id}"/>
                                 <button type="submit" class="d-none d-sm-block btn btn-primary ms-4">Leave Group</button>
                             </form>
-                            <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.id}"
+                            <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.slug}"
                                class="d-none d-sm-block btn btn-outline-primary ms-4">Edit Group</a>
                         </div>
                     </div>

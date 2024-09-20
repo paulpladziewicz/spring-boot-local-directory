@@ -165,28 +165,33 @@ public class GroupController {
 
         Group group = serviceResponse.value();
 
+        // Convert the list of tags to a comma-separated string
+        String tagsAsString = String.join(",", group.getTags());
+
         model.addAttribute("group", group);
+        model.addAttribute("tagsAsString", tagsAsString);  // Add the comma-separated string to the model
+
         return "groups/edit-group";
     }
 
-//    @PostMapping("/edit/group")
-//    public String updateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-//        if (result.hasErrors()) {
-//            return "groups/edit-group";
-//        }
-//        ServiceResponse<Content> serviceResponse = groupService.updateGroup(group);
-//
-//        if (serviceResponse.hasError()) {
-//            model.addAttribute("error", true);
-//            return "groups/edit-group";
-//        }
-//
-//        Content updatedGroup = serviceResponse.value();
-//
-//        redirectAttributes.addFlashAttribute("isSuccess", true);
-//
-//        return "redirect:/groups/" + Content.getSlug();
-//    }
+    @PostMapping("/edit/group")
+    public String updateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "groups/edit-group";
+        }
+        ServiceResponse<Content> serviceResponse = groupService.updateGroup(group);
+
+        if (serviceResponse.hasError()) {
+            model.addAttribute("error", true);
+            return "groups/edit-group";
+        }
+
+        Content updatedGroup = serviceResponse.value();
+
+        redirectAttributes.addFlashAttribute("isSuccess", true);
+
+        return "redirect:/groups/" + updatedGroup.getSlug();
+    }
 
     @PostMapping("/delete/group")
     public String deleteGroup(@NotNull @RequestParam("groupId") String groupId, RedirectAttributes redirectAttributes) {

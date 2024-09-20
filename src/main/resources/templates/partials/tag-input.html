@@ -1,0 +1,136 @@
+<div class="mb-3" th:fragment="tagInput">
+    <!-- Tags input with model data integration -->
+    <div class="form-group position-relative">
+        <label for="tag-input" class="mb-1 form-label opacity-75 fw-medium fs-base">Tags</label>
+        <div class="input-group">
+            <input type="text" id="tag-input" placeholder="Type tag" class="form-control" autocomplete="off" />
+            <button class="btn btn-primary" type="button" id="add-tag-button">Add</button>
+        </div>
+
+        <small class="form-text text-muted">
+            Max 3 tags. Separate words allowed (e.g., "Ice Cream").
+            <a href="/tagging-guidelines" target="_blank">Learn how to tag well.</a>
+        </small>
+
+        <div id="tags-container" class="mt-2">
+            <!-- Tags will be displayed here -->
+        </div>
+
+        <!-- This hidden input will store the actual tags as a comma-separated string -->
+        <input type="hidden" id="hidden-tag-input" name="tags" th:value="${tagsAsString}">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tagInput = document.getElementById('tag-input');
+            const addTagButton = document.getElementById('add-tag-button');
+            const tagsContainer = document.getElementById('tags-container');
+            const hiddenTagInput = document.getElementById('hidden-tag-input');
+            let tags = hiddenTagInput.value ? hiddenTagInput.value.split(',') : []; // Load existing tags from the hidden input
+            let canonicalTags = tags.map(formatCanonicalTag);  // Canonicalize tags from the start
+            let tagMax = 3;
+
+            // Display the initial tags from the model
+            tags.forEach(function(tag) {
+                addTagPill(tag);
+            });
+
+            // Event listener for the "Add" button
+            addTagButton.addEventListener('click', function () {
+                addTagFromInput();
+            });
+
+            // Event listener for pressing Enter in the input field
+            tagInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();  // Prevent form submission
+                    addTagFromInput();
+                }
+            });
+
+            function addTagFromInput() {
+                const inputValue = tagInput.value.trim();
+                const canonicalTag = formatCanonicalTag(inputValue);
+
+                if (inputValue && !canonicalTags.includes(canonicalTag) && tags.length < tagMax) {
+                    const formattedTag = formatTag(inputValue);
+                    addTag(formattedTag, canonicalTag);
+                }
+                tagInput.value = '';  // Clear input
+            }
+
+            function formatTag(tag) {
+                // Remove invalid characters (allow letters, spaces, and hyphens)
+                const cleanedTag = tag.replace(/[^a-zA-Z\s\-]/g, '').trim();
+
+                // Split by hyphen and then process each part separately
+                return cleanedTag.split('-').map(part => {
+                    return part.split(' ').map(word => {
+                        if (word.toUpperCase() === word) {
+                            return word;  // Keep acronym in all caps
+                        } else {
+                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                        }
+                    }).join(' ');
+                }).join('-');  // Keep hyphen in the display form
+            }
+
+            // Canonical version: lowercase, keep hyphens, remove spaces and special characters
+            function formatCanonicalTag(tag) {
+                return tag.toLowerCase().replace(/[^a-z\s\-]/g, '').replace(/\s+/g, '');  // Keep hyphens, remove spaces and special characters
+            }
+
+            function addTag(tag, canonicalTag) {
+                tags.push(tag);
+                canonicalTags.push(canonicalTag);  // Store canonical version for comparison
+                addTagPill(tag);
+
+                if (tags.length >= tagMax) {
+                    tagInput.disabled = true;
+                    addTagButton.disabled = true;
+                }
+                updateHiddenInput();
+            }
+
+            function addTagPill(tag) {
+                const tagPill = document.createElement('span');
+                tagPill.className = 'badge bg-primary bg-opacity-10 text-primary fs-sm me-1 mb-1';
+                tagPill.textContent = tag;
+
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'btn-close btn-close-white btn-sm ms-2';
+                removeButton.setAttribute('aria-label', 'Remove');
+                removeButton.addEventListener('click', function () {
+                    removeTag(tag, formatCanonicalTag(tag));
+                });
+                tagPill.appendChild(removeButton);
+
+                tagsContainer.appendChild(tagPill);
+            }
+
+            function removeTag(tag, canonicalTag) {
+                tags = tags.filter(t => t !== tag);
+                canonicalTags = canonicalTags.filter(t => t !== canonicalTag);  // Remove canonical version
+
+                const tagPills = tagsContainer.querySelectorAll('.badge');
+                tagPills.forEach(pill => {
+                    if (pill.firstChild.textContent === tag) {
+                        pill.remove();
+                    }
+                });
+
+                updateHiddenInput();
+
+                if (tags.length < tagMax) {
+                    tagInput.disabled = false;
+                    addTagButton.disabled = false;
+                }
+            }
+
+            function updateHiddenInput() {
+                hiddenTagInput.value = tags.join(',');
+            }
+        });
+    </script>
+</div>

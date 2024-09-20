@@ -194,7 +194,7 @@ public class GroupService {
     }
 
     @Transactional
-    public ServiceResponse<Content> updateGroup(String contentId, Group group) {
+    public ServiceResponse<Content> updateGroup(Group group) {
         try {
             Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
@@ -204,7 +204,7 @@ public class GroupService {
 
             UserProfile userProfile = optionalUserProfile.get();
 
-            ServiceResponse<Group> findGroupResponse = findGroupById(contentId);
+            ServiceResponse<Group> findGroupResponse = findGroupById(group.getId());
 
             if (findGroupResponse.hasError()) {
                 return ServiceResponse.error(findGroupResponse.errorCode());
@@ -220,7 +220,6 @@ public class GroupService {
             existingGroup.setName(group.getName());
             existingGroup.setDescription(group.getDescription());
             existingGroup.setTags(group.getTags());
-
 
             return ServiceResponse.value(contentRepository.save(existingGroup));
 
