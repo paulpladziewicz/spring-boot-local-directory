@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,6 +47,7 @@ public class BusinessService {
         business.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
         business.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
         business.setCreatedBy(userProfile.getUserId());
+        business.setAdministrators(List.of(userProfile.getUserId()));
 
         ServiceResponse<Map<String, Object>> createSubscriptionResponse = stripeService.createSubscription(business.getPriceId());
 
@@ -220,7 +222,7 @@ public class BusinessService {
         }
     }
 
-    public ServiceResponse<Business> updateBusiness(Business business) {
+    public ServiceResponse<Business> updateBusiness(Business updatedBusiness) {
         try {
             Optional<String> optionalUserId = userService.getUserId();
 
@@ -230,21 +232,30 @@ public class BusinessService {
 
             String userId = optionalUserId.get();
 
-            if (!hasPermission(userId, business)) {
+            Optional<Business> optionalBusiness = findBusinessById(updatedBusiness.getId());
+
+            if (optionalBusiness.isEmpty()) {
+                return logAndReturnError("Business not found", "business_not_found");
+            }
+
+            Business existingBusiness = optionalBusiness.get();
+
+            if (!hasPermission(userId, existingBusiness)) {
                 return logAndReturnError("User does not have permission to update this business", "permission_denied");
             }
 
-            // actually update the properties
+            updateBusinessProperties(existingBusiness, updatedBusiness);
 
-            ServiceResponse<Business> savedBusinessResponse = saveBusiness(business);
+            existingBusiness.setUpdatedBy(userId);
+            existingBusiness.setUpdatedAt(LocalDateTime.now());
+
+            ServiceResponse<Business> savedBusinessResponse = saveBusiness(existingBusiness);
 
             if (savedBusinessResponse.hasError()) {
                 return ServiceResponse.error(savedBusinessResponse.errorCode());
             }
 
-            Business savedBusiness = savedBusinessResponse.value();
-
-            return ServiceResponse.value(savedBusiness);
+            return ServiceResponse.value(savedBusinessResponse.value());
         } catch (DataAccessException e) {
             logger.error("Database access error when trying to update a business", e);
             return ServiceResponse.error("database_access_exception");
@@ -285,6 +296,18 @@ public class BusinessService {
             logger.error("Unexpected error when trying to delete a business", e);
             return ServiceResponse.error("unexpected_error");
         }
+    }
+
+    private void updateBusinessProperties(Business existingBusiness, Business updatedBusiness) {
+        existingBusiness.setName(updatedBusiness.getName());
+        existingBusiness.setHeadline(updatedBusiness.getHeadline());
+        existingBusiness.setDescription(updatedBusiness.getDescription());
+        existingBusiness.setTags(updatedBusiness.getTags());
+        //existingBusiness.setAdministrators(updatedBusiness.getAdministrators());
+        existingBusiness.setAddress(updatedBusiness.getAddress());
+        existingBusiness.setPhoneNumber(updatedBusiness.getPhoneNumber());
+        existingBusiness.setEmail(updatedBusiness.getEmail());
+        existingBusiness.setWebsite(updatedBusiness.getWebsite());
     }
 
     private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
