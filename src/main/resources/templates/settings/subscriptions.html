@@ -95,10 +95,9 @@
                     });
 
                     if (cancelResponse.ok) {
-                        alert('Subscription scheduled to cancel at the end of the period!');
-                        location.reload();
+                        location.reload(); // Just refresh the page on success
                     } else {
-                        alert('Failed to schedule subscription cancellation. Please try again.');
+                        console.error('Failed to schedule subscription cancellation.');
                     }
                 });
             });
@@ -119,10 +118,9 @@
                     });
 
                     if (resumeResponse.ok) {
-                        alert('Subscription resumed successfully!');
-                        location.reload();
+                        location.reload(); // Just refresh the page on success
                     } else {
-                        alert('Failed to resume the subscription. Please try again.');
+                        console.error('Failed to resume the subscription.');
                     }
                 });
             });
