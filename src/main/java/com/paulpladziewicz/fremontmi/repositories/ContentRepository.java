@@ -29,7 +29,8 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     @Query("{ 'reviewed': false }")
     List<Content> contentNotReviewed();
 
-    List<Event> findBySoonestStartTimeAfterOrderBySoonestStartTimeAsc(LocalDateTime now);
+    @Query("{'visibility': 'public', 'days': { $elemMatch: { 'endTime': { $gt: ?0 } } } }")
+    List<Event> findByAnyFutureDayEvent(LocalDateTime now);
 
     @Query("{ 'stripeDetails.subscriptionId': ?0 }")
     Optional<Content> findByStripeDetails_SubscriptionId(String subscriptionId);

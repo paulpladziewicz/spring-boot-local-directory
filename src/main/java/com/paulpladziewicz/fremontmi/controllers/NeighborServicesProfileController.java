@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Controller
 public class NeighborServicesProfileController {
@@ -64,7 +63,7 @@ public class NeighborServicesProfileController {
 
         if (createNeighborServiceProfileResponse.hasError()) {
             model.addAttribute("errorMessage", "An error occurred while trying to create the neighbor service. Please try again later.");
-            return "neighborservices/neighborservices-create-overview";
+            return "neighborservices/create-neighbor-services-profile";
         }
 
         NeighborServicesProfile createdNeighborServicesProfile = createNeighborServiceProfileResponse.value();
@@ -78,41 +77,32 @@ public class NeighborServicesProfileController {
 
         if (profilesResponse.hasError()) {
             model.addAttribute("errorMessage", "An error occurred while trying to retrieve the neighbor services. Please try again later.");
-            return "neighborservices/neighborservices";
+            return "neighborservices/neighbor-services";
         }
 
         List<NeighborServicesProfile> profiles = profilesResponse.value();
 
-//        List<String> allTags = tagService.findAllDistinctTags();
-//
-//        Set<String> uniqueTagsForProfiles = profiles.stream()
-//                .flatMap(profile -> profile.getTags().stream())
-//                .collect(Collectors.toSet());
-
         // TODO still displaying profiles that do not have any neighbor services
 
         model.addAttribute("profiles", profiles);
-//        model.addAttribute("allTags", new ArrayList<>());
-//        model.addAttribute("uniqueTagsForProfiles", new ArrayList<>());
-//        model.addAttribute("selectedTag", "");
 
-        return "neighborservices/neighborservices";
+        return "neighborservices/neighbor-services";
     }
 
-    @GetMapping("/neighbor-services/{id}")
-    public String viewNeighborService(@PathVariable String id, Model model) {
-        Optional<NeighborServicesProfile> optionalNeighborService = neighborServicesProfileService.findNeighborServiceProfileById(id);
+    @GetMapping("/neighbor-services/{slug}")
+    public String viewNeighborService(@PathVariable String slug, Model model) {
+        Optional<NeighborServicesProfile> optionalNeighborService = neighborServicesProfileService.findNeighborServiceProfileBySlug(slug);
 
         if (optionalNeighborService.isEmpty()) {
             model.addAttribute("errorMessage", "Neighbor service not found. Please try again later.");
-            return "neighborservices/neighborservices-page";
+            return "redirect:/neighbor-services";
         }
 
         NeighborServicesProfile neighborServicesProfile = optionalNeighborService.get();
 
-        model.addAttribute("neighborServiceProfile", neighborServicesProfile);
+        model.addAttribute("neighborServicesProfile", neighborServicesProfile);
 
-        return "neighborservices/neighborservices-page";
+        return "neighborservices/neighbor-services-profile-page";
     }
 
     @GetMapping("/my/neighbor-services/profile")
@@ -121,14 +111,14 @@ public class NeighborServicesProfileController {
 
         if (optionalNeighborService.isEmpty()) {
             model.addAttribute("errorMessage", "You do not currently have a NeighborServices™ Profile. Please create one.");
-            return "neighborservices/neighborservices-create-overview";
+            return "redirect:/create/neighbor-services-profile/overview";
         }
 
         NeighborServicesProfile neighborServicesProfile = optionalNeighborService.get();
 
         model.addAttribute("neighborServiceProfile", neighborServicesProfile);
 
-        return "neighborservices/neighborservices-page";
+        return "neighborservices/neighbor-services-profile-page";
     }
 
     @GetMapping("/edit/neighbor-service/profile/{slug}")
@@ -137,35 +127,35 @@ public class NeighborServicesProfileController {
 
         if (optionalNeighborService.isEmpty()) {
             model.addAttribute("error", true);
-            return "neighborservices/neighborservices";
+            return "neighborservices/edit-neighbor-services-profile";
         }
 
         NeighborServicesProfile neighborServicesProfile = optionalNeighborService.get();
 
-        model.addAttribute("neighborServiceProfile", neighborServicesProfile);
+        model.addAttribute("neighborServicesProfile", neighborServicesProfile);
 
-        return "neighborservices/edit-neighborservice";
+        return "neighborservices/edit-neighbor-services-profile";
     }
 
 
-    @PostMapping("/edit/neighbor-service-profile")
+    @PostMapping("/edit/neighbor-service/profile")
     public String editNeighborService(@Valid @ModelAttribute("neighborService") NeighborServicesProfile neighborServicesProfile, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("neighborService", neighborServicesProfile);
-            return "neighborservices/edit-neighborservice";
+            return "neighborservices/edit-neighbor-services-profile";
         }
 
         ServiceResponse<NeighborServicesProfile> updateNeighborServiceResponse = neighborServicesProfileService.updateNeighborServiceProfile(neighborServicesProfile);
 
         if (updateNeighborServiceResponse.hasError()) {
             model.addAttribute("errorMessage", "An error occurred while trying to update the neighbor service. Please try again later.");
-            return "neighborservices/edit-neighborservice";
+            return "neighborservices/edit-neighbor-services-profile";
         }
 
         NeighborServicesProfile updatedNeighborServicesProfile = updateNeighborServiceResponse.value();
 
         model.addAttribute("neighborService", updatedNeighborServicesProfile);
 
-        return "redirect:/neighbor-services/" + updatedNeighborServicesProfile.getId();
+        return "redirect:/neighbor-services/" + updatedNeighborServicesProfile.getSlug();
     }
 }

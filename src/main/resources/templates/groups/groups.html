@@ -14,20 +14,18 @@
             </div>
         </div>
 
-        <h2>Popular Tags</h2>
-        <ul>
-            <li th:each="tag : ${popularTags}">
-                <span th:text="${tag.name}"></span> (<span th:text="${tag.count}"></span>)
-            </li>
-        </ul>
-
-<!--        specific to content tags I compute-->
-<!--        <h2>Popular Tags</h2>-->
-<!--        <ul>-->
-<!--            <li th:each="tagUsage : ${tagUsageList}">-->
-<!--                <span th:text="${tagUsage.name}"></span> (<span th:text="${tagUsage.count}"></span>)-->
-<!--            </li>-->
-<!--        </ul>-->
+        <div class="mb-4">
+            <div class="d-flex flex-wrap">
+                <a th:each="tag : ${popularTags}"
+                   th:href="'/groups?tag=' + ${tag.name}"
+                   th:classappend="${selectedTag == tag} ? 'badge bg-primary fs-sm m-1' : 'badge bg-primary bg-opacity-10 text-primary fs-sm m-1'"
+                   th:text="${tag.name}">
+                </a>
+            </div>
+            <div th:if="${selectedTag}">
+                <a class="text-dark opacity-50 btn btn-link p-1" href="/groups">Clear Filter</a>
+            </div>
+        </div>
 
         <div class="row">
             <div th:if="${#lists.isEmpty(groups)}" class="my-4">

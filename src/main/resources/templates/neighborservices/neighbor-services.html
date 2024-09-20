@@ -11,10 +11,9 @@
             <h1 class="display-3 mb-0">NeighborServices™</h1>
             <div>
                 <a href="/my/neighbor-services/profile" class="btn btn-link fw-semibold fs-lg text-primary">My Profile</a>
-                <a href="/create/neighbor-service/overview" class="btn btn-primary">Create NeighborService™</a>
+                <a href="/create/neighbor-services-profile/overview" class="btn btn-primary">Create NeighborService™</a>
             </div>
         </div>
-
 
         <div class="row">
             <div class="row">
@@ -26,22 +25,12 @@
                 <div th:each="neighborServicesProfile : ${profiles}" class="col-md-4 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="h3 mb-1" th:text="${neighborServicesProfile.firstName + ' ' + neighborServicesProfile.lastName}">Business Name</h4>
+                            <h4 class="h3 mb-1" th:text="${neighborServicesProfile.name}"></h4>
 
                             <p th:text="${#strings.length(neighborServicesProfile.description) > 120 ? #strings.substring(neighborServicesProfile.description, 0, 120) + '...' : neighborServicesProfile.description}">
                                 Business Description
                             </p>
-                            <a th:href="'/neighbor-services/' + ${neighborServicesProfile.id}" class="btn btn-lg btn-link p-0">View Profile<i class="ai-arrow-right ms-2"></i></a>
-
-                            <!-- Display Profile Tags -->
-                            <div th:if="${!#lists.isEmpty(neighborServicesProfile.tags)}" class="mt-3">
-                                <div class="d-flex flex-wrap">
-                                    <span th:each="tag : ${neighborServicesProfile.tags}"
-                                          class="badge bg-secondary m-1"
-                                          th:text="${tag}">
-                                    </span>
-                                </div>
-                            </div>
+                            <a th:href="'/neighbor-services/' + ${neighborServicesProfile.slug}" class="btn btn-lg btn-link p-0">View Profile<i class="ai-arrow-right ms-2"></i></a>
                         </div>
                     </div>
                 </div>

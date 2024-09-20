@@ -129,7 +129,7 @@ public class EventService {
     public ServiceResponse<List<Event>> findAll() {
         try {
             LocalDateTime now = LocalDateTime.now();
-            List<Event> events = contentRepository.findBySoonestStartTimeAfterOrderBySoonestStartTimeAsc(now);
+            List<Event> events = contentRepository.findByAnyFutureDayEvent(now);
             return ServiceResponse.value(events);
         } catch (DataAccessException e) {
             return logAndReturnError("Database error while retrieving events.", "database_error", e);

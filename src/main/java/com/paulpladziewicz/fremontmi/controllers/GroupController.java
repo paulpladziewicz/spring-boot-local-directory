@@ -65,8 +65,8 @@ public class GroupController {
     }
 
     @GetMapping("/groups")
-    public String displayGroups(Model model) {
-        ServiceResponse<List<Group>> findAllResponse = groupService.findAll();
+    public String displayGroups(@RequestParam(value = "tag", required = false) String tag, Model model) {
+        ServiceResponse<List<Group>> findAllResponse = groupService.findAll(tag);
 
         if (findAllResponse.hasError()) {
             model.addAttribute("error", true);
@@ -76,8 +76,9 @@ public class GroupController {
         model.addAttribute("groups", groups);
 
         List<Content> contentList = new ArrayList<>(groups);
-        List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 10);
+        List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 15);
         model.addAttribute("popularTags", popularTags);
+        model.addAttribute("selectedTag", tag);
 
         return "groups/groups";
     }

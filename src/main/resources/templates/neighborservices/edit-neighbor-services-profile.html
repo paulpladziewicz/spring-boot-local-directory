@@ -14,36 +14,26 @@
                 <h1>Edit NeighborService™</h1>
                 <form id="edit-business-form" th:action="@{/edit/neighbor-service/profile}" th:object="${neighborServicesProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                     <input type="hidden" name="id" th:value="*{id}">
+                    <input type="hidden" name="slug" th:value="*{slug}">
 
-                    <!-- First Name and Last Name -->
-                    <div class="row row-cols-1 row-cols-sm-2">
-                        <div class="col mb-4">
-                            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="firstName">First Name</label>
-                            <input class="form-control form-control-lg" type="text" name="firstName" id="firstName" th:field="*{firstName}" placeholder="First name" required>
-                            <span class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
-                        </div>
-                        <div class="col mb-4">
-                            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="lastName">Last Name</label>
-                            <input class="form-control form-control-lg" type="text" id="lastName" name="lastName" th:field="*{lastName}" placeholder="Last name" required>
-                            <span class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
-                        </div>
+                    <div class="form-group mb-2">
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="displayName">Display name</label>
+                        <textarea class="form-control" id="displayName" th:field="*{name}" rows="3" placeholder="Display name"></textarea>
+                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="alert alert-danger"></div>
                     </div>
 
-                    <!-- Description -->
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="description">Description</label>
                         <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Business description"></textarea>
                         <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="alert alert-danger"></div>
                     </div>
 
-                    <!-- Email -->
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="email">Email</label>
                         <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="Enter email">
                         <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="alert alert-danger"></div>
                     </div>
 
-                    <!-- NeighborServices -->
                     <div id="neighborServiceContainer">
                         <div th:each="service, iterStat : ${neighborServicesProfile.neighborServices}" class="neighbor-service-item">
                             <h4 th:text="'Neighbor Service ' + (iterStat.index + 1)"></h4>
@@ -62,17 +52,15 @@
                         </div>
                     </div>
 
-                    <!-- Button to dynamically add more services -->
                     <div class="mb-3">
                         <button type="button" class="btn btn-secondary" onclick="addNeighborService()">Add Another Service</button>
                     </div>
 
                     <p th:if="${errorMessage}" th:text="${errorMessage}" class="text-danger my-3"></p>
 
-                    <!-- Save and Cancel buttons -->
                     <div class="d-flex">
                         <button type="submit" class="btn btn-primary me-2">Save Changes</button>
-                        <a class="btn btn-secondary" th:href="'/neighbor-services/' + ${neighborServicesProfile.id}">Cancel</a>
+                        <a class="btn btn-secondary" th:href="'/neighbor-services/' + ${neighborServicesProfile.slug}">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -80,7 +68,6 @@
     </div>
 </main>
 
-<!-- JavaScript to dynamically add more NeighborService fields -->
 <script th:inline="javascript">
     let serviceIndex = /*[[${neighborServicesProfile.neighborServices.size()}]]*/ 'undefined';
 

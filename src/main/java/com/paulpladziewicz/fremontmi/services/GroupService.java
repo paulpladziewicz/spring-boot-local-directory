@@ -55,7 +55,8 @@ public class GroupService {
 
             Group savedGroup = contentRepository.save(group);
 
-            userService.addContentIdToUserProfile(ContentTypes.GROUP, savedGroup.getId());
+            userProfile.getGroupIds().add(savedGroup.getId());
+            userService.saveUserProfile(userProfile);
 
             return ServiceResponse.value(savedGroup);
 
@@ -111,22 +112,34 @@ public class GroupService {
         }
     }
 
-    public ServiceResponse<List<Group>> findAll() {
+    public ServiceResponse<List<Group>> findAll(String tag) {
         try {
-            List<Content> contentList = contentRepository.findAllByType(ContentTypes.GROUP.getContentType());
+            List<Content> contentList;
 
+            // Check if a tag is provided, and search by tag and type
+            if (tag != null && !tag.isEmpty()) {
+                contentList = contentRepository.findByTagAndType(tag, ContentTypes.GROUP.getContentType());
+            } else {
+                // Otherwise, search by type only
+                contentList = contentRepository.findAllByType(ContentTypes.GROUP.getContentType());
+            }
+
+            // Filter content to ensure only Group objects are returned
             List<Group> groupList = contentList.stream()
-                    .filter(content -> content instanceof Group)
+                    .filter(content -> content instanceof Group)  // Ensure type safety
                     .map(content -> (Group) content)
                     .collect(Collectors.toList());
 
             return ServiceResponse.value(groupList);
         } catch (DataAccessException e) {
-            return logAndReturnError("Failed to retrieve groups due to a database error", "database_error", e);
+            logger.error("Database access error when trying to find active groups", e);
+            return ServiceResponse.error("database_access_exception");
         } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while retrieving groups.", "unexpected_error", e);
+            logger.error("Unexpected error when trying to find active groups", e);
+            return ServiceResponse.error("unexpected_error");
         }
     }
+
 
     public ServiceResponse<Group> findBySlug(String slug) {
         try {

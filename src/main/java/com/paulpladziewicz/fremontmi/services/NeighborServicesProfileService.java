@@ -5,11 +5,9 @@ import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,13 +23,10 @@ public class NeighborServicesProfileService {
 
     private final StripeService stripeService;
 
-    private final MongoTemplate mongoTemplate;
-
-    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, StripeService stripeService, MongoTemplate mongoTemplate) {
+    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, StripeService stripeService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.stripeService = stripeService;
-        this.mongoTemplate = mongoTemplate;
     }
 
     public ServiceResponse<NeighborServicesProfile> createNeighborServiceProfile(NeighborServicesProfile neighborServicesProfile) {
@@ -70,14 +65,6 @@ public class NeighborServicesProfileService {
 
         NeighborServicesProfile savedNeighborServicesProfile = saveResponse.value();
 
-        userProfile.setNeighborServiceProfileId(savedNeighborServicesProfile.getId());
-
-        ServiceResponse<UserProfile> saveUserProfileResponse = userService.saveUserProfile(userProfile);
-
-        if (saveUserProfileResponse.hasError()) {
-            logger.error("Error when trying to save a UserProfile");
-            return ServiceResponse.error(saveUserProfileResponse.errorCode());
-        }
 
         return ServiceResponse.value(savedNeighborServicesProfile);
     }
@@ -236,15 +223,15 @@ public class NeighborServicesProfileService {
             return ServiceResponse.error("neighbor_service_not_found");
         }
 
-        NeighborServicesProfile neighborServicesProfile = optionalNeighborServiceProfile.get();
+        NeighborServicesProfile existingProfile = optionalNeighborServiceProfile.get();
 
-        if (!hasPermission(userId, neighborServicesProfile)) {
+        if (!hasPermission(userId, existingProfile)) {
             return ServiceResponse.error("permission_denied");
         }
 
-        // TODO update values and save the neighbor service profile
+        updateExistingNeighborServiceProfile(existingProfile, neighborServiceProfile);
 
-        return ServiceResponse.value(neighborServicesProfile);
+        return ServiceResponse.value(existingProfile);
     }
 
     public ServiceResponse<Boolean> deleteNeighborService(String neighborServiceId) {
@@ -285,6 +272,23 @@ public class NeighborServicesProfileService {
     private Boolean hasPermission(String userId, NeighborServicesProfile neighborServicesProfile) {
         return neighborServicesProfile.getCreatedBy().equals(userId);
     }
+
+    private void updateExistingNeighborServiceProfile(NeighborServicesProfile existingProfile, NeighborServicesProfile updatedProfile) {
+        // Update basic fields
+        existingProfile.setName(updatedProfile.getName());
+        existingProfile.setDescription(updatedProfile.getDescription());
+        existingProfile.setEmail(updatedProfile.getEmail());
+        existingProfile.setTags(updatedProfile.getTags());
+
+        // Update neighbor services if provided
+        if (updatedProfile.getNeighborServices() != null) {
+            existingProfile.setNeighborServices(updatedProfile.getNeighborServices());
+        }
+
+        // Set updatedAt to the current time
+        existingProfile.setUpdatedAt(LocalDateTime.now());
+    }
+
 
     private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
         logger.error(message);
