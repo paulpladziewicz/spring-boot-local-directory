@@ -26,23 +26,24 @@
                     <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></p>
                 </div>
 
-<!--                <div th:replace="~{partials/tags-autocomplete-input}"></div>-->
+                <!-- Tags input without autocomplete -->
                 <div class="form-group position-relative">
                     <label for="tag-input">Tags</label>
                     <div class="input-group">
-                        <input type="text" id="tag-input" name="tags" placeholder="Type tag" class="form-control" autocomplete="off" />
+                        <input type="text" id="tag-input" placeholder="Type tag" class="form-control" autocomplete="off" />
                         <button class="btn btn-primary" type="button" id="add-tag-button">Add</button>
                     </div>
-
-                    <ul id="autocomplete-list" class="bg-light list-group w-100 position-absolute" style="top: 96px"></ul>
 
                     <small class="form-text text-muted">
                         Max 3 tags. Separate words allowed (e.g., "Ice Cream").
                         <a href="/tagging-guidelines" target="_blank">Learn how to tag well.</a>
                     </small>
+
                     <div id="tags-container" class="mt-2">
                         <!-- Tags will be displayed here -->
                     </div>
+
+                    <!-- This hidden input will store the actual tags -->
                     <input type="hidden" id="hidden-tag-input" name="tags">
                 </div>
 
@@ -52,11 +53,9 @@
                         const addTagButton = document.getElementById('add-tag-button');
                         const tagsContainer = document.getElementById('tags-container');
                         const hiddenTagInput = document.getElementById('hidden-tag-input');
-                        const autocompleteList = document.getElementById('autocomplete-list');
                         let tags = [];
-                        let debounceTimeout;
-                        const debounceDelay = 300;
-                        const maxCharacters = 4;
+                        let canonicalTags = [];
+                        let tagMax = 3;
 
                         // Event listener for the "Add" button
                         addTagButton.addEventListener('click', function () {
@@ -73,26 +72,39 @@
 
                         function addTagFromInput() {
                             const inputValue = tagInput.value.trim();
-                            if (inputValue && !tags.includes(inputValue) && tags.length < 3) {
+                            const canonicalTag = formatCanonicalTag(inputValue);
+
+                            if (inputValue && !canonicalTags.includes(canonicalTag) && tags.length < tagMax) {
                                 const formattedTag = formatTag(inputValue);
-                                addTag(formattedTag);
+                                addTag(formattedTag, canonicalTag);
                             }
                             tagInput.value = '';  // Clear input
-                            hideAutocompleteSuggestions();
                         }
 
                         function formatTag(tag) {
-                            return tag.split(' ').map(word => {
-                                if (word.toUpperCase() === word) {
-                                    return word;  // Acronym
-                                } else {
-                                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                                }
-                            }).join(' ');
+                            // Remove invalid characters (allow letters, spaces, and hyphens)
+                            const cleanedTag = tag.replace(/[^a-zA-Z\s\-]/g, '').trim();
+
+                            // Split by hyphen and then process each part separately
+                            return cleanedTag.split('-').map(part => {
+                                return part.split(' ').map(word => {
+                                    if (word.toUpperCase() === word) {
+                                        return word;  // Keep acronym in all caps
+                                    } else {
+                                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                                    }
+                                }).join(' ');
+                            }).join('-');  // Keep hyphen in the display form
                         }
 
-                        function addTag(tag) {
+// Canonical version: lowercase, keep hyphens, remove spaces and special characters
+                        function formatCanonicalTag(tag) {
+                            return tag.toLowerCase().replace(/[^a-z\s\-]/g, '').replace(/\s+/g, '');  // Keep hyphens, remove spaces and special characters
+                        }
+
+                        function addTag(tag, canonicalTag) {
                             tags.push(tag);
+                            canonicalTags.push(canonicalTag);  // Store canonical version for comparison
 
                             const tagPill = document.createElement('span');
                             tagPill.className = 'badge bg-primary bg-opacity-10 text-primary fs-sm me-1 mb-1';
@@ -103,21 +115,22 @@
                             removeButton.className = 'btn-close btn-close-white btn-sm ms-2';
                             removeButton.setAttribute('aria-label', 'Remove');
                             removeButton.addEventListener('click', function () {
-                                removeTag(tag);
+                                removeTag(tag, canonicalTag);
                             });
                             tagPill.appendChild(removeButton);
 
                             tagsContainer.appendChild(tagPill);
                             updateHiddenInput();
 
-                            if (tags.length >= 3) {
+                            if (tags.length >= tagMax) {
                                 tagInput.disabled = true;
                                 addTagButton.disabled = true;
                             }
                         }
 
-                        function removeTag(tag) {
+                        function removeTag(tag, canonicalTag) {
                             tags = tags.filter(t => t !== tag);
+                            canonicalTags = canonicalTags.filter(t => t !== canonicalTag);  // Remove canonical version
 
                             const tagPills = tagsContainer.querySelectorAll('.badge');
                             tagPills.forEach(pill => {
@@ -128,7 +141,7 @@
 
                             updateHiddenInput();
 
-                            if (tags.length < 3) {
+                            if (tags.length < tagMax) {
                                 tagInput.disabled = false;
                                 addTagButton.disabled = false;
                             }
@@ -137,57 +150,6 @@
                         function updateHiddenInput() {
                             hiddenTagInput.value = tags.join(',');
                         }
-
-                        // Autocomplete with debouncing and API logic
-                        tagInput.addEventListener('input', function () {
-                            clearTimeout(debounceTimeout);
-                            const query = tagInput.value.trim();
-
-                            if (query.length >= 2 && query.length <= maxCharacters) {
-                                debounceTimeout = setTimeout(() => {
-                                    fetchAutocompleteSuggestions(query);
-                                }, debounceDelay);
-                            } else {
-                                hideAutocompleteSuggestions();
-                            }
-                        });
-
-                        function fetchAutocompleteSuggestions(query) {
-                            const url = `/autocomplete/tags?query=${encodeURIComponent(query)}`;
-
-                            fetch(url)
-                                .then(response => response.json())
-                                .then(suggestions => showAutocompleteSuggestions(suggestions))
-                                .catch(error => console.error('Error fetching suggestions:', error));
-                        }
-
-                        function showAutocompleteSuggestions(suggestions) {
-                            autocompleteList.innerHTML = '';
-                            suggestions.forEach(suggestion => {
-                                const item = document.createElement('li');
-                                item.className = 'list-group-item list-group-item-action';
-                                item.style.cursor = 'pointer';
-                                item.textContent = suggestion;
-                                item.addEventListener('click', function () {
-                                    tagInput.value = suggestion;
-                                    hideAutocompleteSuggestions();
-                                    addTagFromInput();
-                                });
-                                autocompleteList.appendChild(item);
-                            });
-                            autocompleteList.style.display = 'block';
-                        }
-
-                        function hideAutocompleteSuggestions() {
-                            autocompleteList.innerHTML = '';
-                            autocompleteList.style.display = 'none';
-                        }
-
-                        document.addEventListener('click', function (e) {
-                            if (!autocompleteList.contains(e.target) && e.target !== tagInput) {
-                                hideAutocompleteSuggestions();
-                            }
-                        });
                     });
                 </script>
 

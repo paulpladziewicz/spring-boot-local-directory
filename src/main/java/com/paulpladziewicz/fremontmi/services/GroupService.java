@@ -25,9 +25,12 @@ public class GroupService {
 
     private final UserService userService;
 
-    public GroupService(ContentRepository contentRepository, UserService userService) {
+    private final TagService tagService;
+
+    public GroupService(ContentRepository contentRepository, UserService userService, TagService tagService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
+        this.tagService = tagService;
     }
 
     @Transactional
@@ -46,6 +49,9 @@ public class GroupService {
             group.setType(ContentTypes.GROUP.getContentType());
             group.setSlug(createUniqueSlug(group.getName()));
             group.setCreatedBy(userProfile.getUserId());
+
+            List<String> validatedTags = tagService.addTags(group.getTags(), ContentTypes.GROUP.getContentType());
+            group.setTags(validatedTags);
 
             Group savedGroup = contentRepository.save(group);
 

@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.NeighborServicesProfile;
+import com.paulpladziewicz.fremontmi.models.Tag;
 import com.paulpladziewicz.fremontmi.models.TagUsage;
 import com.paulpladziewicz.fremontmi.repositories.TagAutocompleteRepository;
 import com.paulpladziewicz.fremontmi.repositories.TagRepository;
@@ -12,6 +13,7 @@ import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -106,4 +108,66 @@ public class TagService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public List<String> addTags(List<String> displayNames, String contentType) {
+        List<String> validatedDisplayNames = new ArrayList<>();
+        Set<String> canonicalTagsSet = new HashSet<>();  // Track canonical versions of tags
+
+        for (String displayName : displayNames) {
+            // Generate the canonical name (lowercase, no spaces, but keep special characters)
+            String canonicalName = generateCanonicalName(displayName);
+
+            // Skip if this canonical name has already been processed
+            if (canonicalTagsSet.contains(canonicalName)) {
+                continue;
+            }
+            canonicalTagsSet.add(canonicalName);
+
+            // Format the display name
+            String formattedDisplayName = formatDisplayName(displayName);
+
+            // Check if the tag exists in the database
+            Optional<Tag> optionalTag = tagRepository.findByName(canonicalName);
+
+            if (optionalTag.isPresent()) {
+                Tag existingTag = optionalTag.get();
+                validatedDisplayNames.add(existingTag.getDisplayName());  // Use existing display name from DB
+                existingTag.incrementCountForContentType(contentType);
+                existingTag.setCount(existingTag.getCount() + 1);
+                tagRepository.save(existingTag);
+            } else {
+                // Tag does not exist, create a new one
+                Tag newTag = new Tag(canonicalName, formattedDisplayName);
+                validatedDisplayNames.add(formattedDisplayName);  // Use the formatted display name
+                newTag.incrementCountForContentType(contentType);
+                newTag.setCount(1);
+                tagRepository.save(newTag);
+            }
+        }
+
+        return validatedDisplayNames;  // Return the validated display names
+    }
+
+    // Helper method to generate the canonical form of a tag
+    private String generateCanonicalName(String displayName) {
+        // Remove all characters except lowercase letters, spaces, and hyphens
+        return displayName.toLowerCase().replaceAll("[^a-z\\s-]", "").replaceAll("\\s+", "");
+    }
+
+    // Helper method to format the display name of a tag
+    private String formatDisplayName(String name) {
+        // Remove invalid characters and capitalize the words
+        String cleanedName = name.replaceAll("[^a-zA-Z\\s-]", "").trim();
+
+        return Arrays.stream(cleanedName.split("-"))
+                .map(part -> Arrays.stream(part.split("\\s+"))
+                        .map(word -> word.equals(word.toUpperCase()) ? word : capitalizeFirstLetter(word))
+                        .collect(Collectors.joining(" "))
+                ).collect(Collectors.joining("-"));
+    }
+
+    // Helper to capitalize the first letter of each word
+    private String capitalizeFirstLetter(String word) {
+        return word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase();
+    }
 }
