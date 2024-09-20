@@ -26,7 +26,7 @@
                                 <span th:text="${group.members.size() == 1 ? 'Member' : 'Members'}"></span>
                             </p>
                             <p th:text="${#strings.length(group.description) > 120 ? #strings.substring(group.description, 0, 120) + '...' : group.description}"></p>
-                            <a hx-boost="true" th:href="'/groups/' + ${group.id}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
+                            <a th:href="'/groups/' + ${group.slug}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
                         </div>
                     </div>
                 </div>

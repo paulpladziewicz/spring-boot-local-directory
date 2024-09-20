@@ -20,7 +20,7 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     @Query("{ 'tags': ?0, 'type':  ?1, 'visibility': ContentVISIBILITY.PUBLIC.getVisibility() }")
     List<Content> findByTagAndType(String tag, String contentType);
 
-    @Query("{ 'createdBy': ?0 }")
+    @Query("{ 'type': 'neighbor-services-profile', 'createdBy': ?0 }")
     Optional<Content> findByCreatedBy(String createdBy);
 
     @Query(value = "{}", fields = "{ 'tags': 1 }")

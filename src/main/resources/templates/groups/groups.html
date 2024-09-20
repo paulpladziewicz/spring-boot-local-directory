@@ -18,12 +18,12 @@
             <div class="d-flex flex-wrap">
                 <a th:each="tag : ${popularTags}"
                    th:href="'/groups?tag=' + ${tag.name}"
-                   th:classappend="${selectedTag == tag} ? 'badge bg-primary fs-sm m-1' : 'badge bg-primary bg-opacity-10 text-primary fs-sm m-1'"
+                   th:classappend="${selectedTag == tag.name} ? 'badge bg-primary bg-opacity-10 text-primary fs-sm m-1' : 'badge bg-secondary fs-sm m-1'"
                    th:text="${tag.name}">
                 </a>
             </div>
             <div th:if="${selectedTag}">
-                <a class="text-dark opacity-50 btn btn-link p-1" href="/groups">Clear Filter</a>
+                <a class="text-dark opacity-50 btn btn-link p-0" href="/groups">Clear Filter</a>
             </div>
         </div>
 

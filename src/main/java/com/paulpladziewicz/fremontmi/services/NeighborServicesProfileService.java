@@ -231,7 +231,13 @@ public class NeighborServicesProfileService {
 
         updateExistingNeighborServiceProfile(existingProfile, neighborServiceProfile);
 
-        return ServiceResponse.value(existingProfile);
+        ServiceResponse<NeighborServicesProfile> saveResponse = saveNeighborServiceProfile(existingProfile);
+
+        if (saveResponse.hasError()) {
+            return ServiceResponse.error(saveResponse.errorCode());
+        }
+
+        return ServiceResponse.value(saveResponse.value());
     }
 
     public ServiceResponse<Boolean> deleteNeighborService(String neighborServiceId) {
