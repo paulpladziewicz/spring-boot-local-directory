@@ -140,7 +140,7 @@ public class BusinessService {
         }
     }
 
-    public ServiceResponse<List<Business>> findAllActiveBusinesses() {
+    public ServiceResponse<List<Business>> findAllBusinesses() {
         try {
             List<Content> contents = contentRepository.findAllByType(ContentTypes.BUSINESS.getContentType());
 

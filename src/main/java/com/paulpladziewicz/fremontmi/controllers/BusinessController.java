@@ -1,15 +1,10 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.Business;
-import com.paulpladziewicz.fremontmi.models.NeighborServicesProfile;
-import com.paulpladziewicz.fremontmi.models.PaymentRequest;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.services.BusinessService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -73,7 +68,7 @@ public class BusinessController {
 
     @GetMapping("/businesses")
     public String displayActiveBusinesses(Model model) {
-        ServiceResponse<List<Business>> serviceResponse = businessService.findAllActiveBusinesses();
+        ServiceResponse<List<Business>> serviceResponse = businessService.findAllBusinesses();
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);

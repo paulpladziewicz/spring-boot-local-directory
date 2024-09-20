@@ -14,7 +14,7 @@ public interface ContentRepository extends MongoRepository<Content, String> {
 
     List<Content> findBySlugRegex(String slugPattern);
 
-    @Query("{ 'type': ?0, 'visibility': ContentVISIBILITY.PUBLIC.getVisibility() }")
+    @Query("{ 'type': ?0, 'visibility': 'public' }")
     List<Content> findAllByType(String contentType);
 
     @Query("{ 'tags': ?0, 'type':  ?1, 'visibility': ContentVISIBILITY.PUBLIC.getVisibility() }")
