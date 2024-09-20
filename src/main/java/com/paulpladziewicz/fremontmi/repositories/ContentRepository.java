@@ -29,7 +29,7 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     @Query("{ 'reviewed': false }")
     List<Content> contentNotReviewed();
 
-    @Query("{'visibility': 'public', 'days': { $elemMatch: { 'endTime': { $gt: ?0 } } } }")
+    @Query("{'visibility': 'public', 'days': { $elemMatch: { 'endTime': { $gt: ?0 } } }, 'status': { $in: ['active', 'cancelled'] } }")
     List<Event> findByAnyFutureDayEvent(LocalDateTime now);
 
     @Query("{ 'stripeDetails.subscriptionId': ?0 }")
