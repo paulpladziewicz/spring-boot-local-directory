@@ -119,22 +119,34 @@ public class BillingController {
     }
 
 
-    public InvoiceDTO mapInvoiceToDTO(Invoice invoice) {
+    private InvoiceDTO mapInvoiceToDTO(Invoice invoice) {
         InvoiceDTO dto = new InvoiceDTO();
-        dto.setId(invoice.getId());
-        dto.setCustomerId(invoice.getCustomer());
-        dto.setStatus(invoice.getStatus());
-        dto.setAmountDue(invoice.getAmountDue());
-        dto.setAmountPaid(invoice.getAmountPaid());
-        dto.setAmountRemaining(invoice.getAmountRemaining());
-        dto.setCreated(invoice.getCreated());
-        dto.setCurrency(invoice.getCurrency());
 
-        if (invoice.getPaymentIntentObject() != null) {
-            dto.setPaymentIntent(invoice.getPaymentIntentObject().getId());
+        // Set the invoice ID
+        dto.setId(invoice.getId());
+
+        // Extract plan name from the line item description
+        String planName = invoice.getLines().getData().get(0).getDescription();
+        dto.setPlanName(planName);
+
+        // Amount paid (in smallest currency unit, e.g., cents)
+        dto.setAmountPaid(invoice.getAmountPaid());
+
+        // Customer name
+        dto.setCustomerName(invoice.getCustomerName());
+
+        // Convert the paid timestamp to a human-readable date format
+        Long paidAtUnix = invoice.getStatusTransitions().getPaidAt();
+        if (paidAtUnix != null) {
+            String paidDate = Instant.ofEpochSecond(paidAtUnix)
+                    .atZone(ZoneId.systemDefault())
+                    .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"));
+            dto.setPaidDate(paidDate);
         }
 
-        dto.setReceiptUrl(invoice.getHostedInvoiceUrl());
+        // Set the invoice URL (hosted_invoice_url or invoice_pdf)
+        dto.setInvoiceUrl(invoice.getHostedInvoiceUrl() != null ? invoice.getHostedInvoiceUrl() : invoice.getInvoicePdf());
+
         return dto;
     }
 }
