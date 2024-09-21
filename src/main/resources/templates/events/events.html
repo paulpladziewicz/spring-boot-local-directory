@@ -4,7 +4,9 @@
 <body>
 <header th:insert="~{partials/navbar}"></header>
 <main class="bg-secondary pt-4 pb-5">
+
     <div class="container">
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="display-3 mb-0">Events</h1>
             <div>
@@ -41,7 +43,7 @@
                             Event Start Time
                         </p>
                         <p th:text="${#strings.length(event.description) > 120 ? #strings.substring(event.description, 0, 120) + '...' : event.description}">Event Description</p>
-                        <a hx-boost="true" th:href="'/events/' + ${event.slug}" class="btn btn-lg btn-link p-0">View Event<i class="ai-arrow-right ms-2"></i></a>
+                        <a th:href="'/events/' + ${event.slug}" class="btn btn-lg btn-link p-0">View Event<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>

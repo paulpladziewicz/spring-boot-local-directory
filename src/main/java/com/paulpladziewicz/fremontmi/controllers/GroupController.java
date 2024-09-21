@@ -6,8 +6,11 @@ import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -114,27 +117,27 @@ public class GroupController {
     }
 
     @PostMapping("/groups/join")
-    public String joinGroup(@RequestParam("groupId") String groupId, Model model) {
-        ServiceResponse<Boolean> serviceResponse = groupService.joinGroup(groupId);
+    public String joinGroup(@RequestParam("slug") String slug, Model model) {
+        ServiceResponse<Boolean> serviceResponse = groupService.joinGroup(slug);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);
             return "groups/group-page";
         }
 
-        return "redirect:/groups/" + groupId;
+        return "redirect:/groups/" + slug;
     }
 
     @PostMapping("/groups/leave")
-    public String leaveGroup(@RequestParam("groupId") String groupId, Model model) {
-        ServiceResponse<Boolean> serviceResponse = groupService.leaveGroup(groupId);
+    public String leaveGroup(@RequestParam("slug") String slug, Model model) {
+        ServiceResponse<Boolean> serviceResponse = groupService.leaveGroup(slug);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);
             return "groups/group-page";
         }
 
-        return "redirect:/groups/" + groupId;
+        return "redirect:/groups/" + slug;
     }
 
     @GetMapping("/my/groups")
@@ -262,30 +265,20 @@ public class GroupController {
 
         return "groups/htmx/delete";
     }
-//
-//    @GetMapping("/group/email/{emailTarget}/{groupId}")
-//    public String emailGroup(@NotNull @PathVariable String emailTarget, @NotNull @PathVariable String groupId, Model model) {
-//        model.addAttribute("emailTarget", emailTarget);
-//        model.addAttribute("groupId", groupId);
-//        return "groups/email-group";
-//    }
-//
-//    @PostMapping("/group/email/send")
-//    public String handleEmailGroup(@NotNull @RequestParam("emailTarget") String emailTarget,
-//                                   @NotNull @RequestParam("groupId") String groupId,
-//                                   @NotBlank @RequestParam("subject") String subject,
-//                                   @NotBlank @RequestParam("message") String message,
-//                                   Model model) {
-//        boolean emailSent = groupService.emailGroup(emailTarget, groupId, subject, message);
-//
-//        if (emailSent) {
-//            model.addAttribute("successMessage", "Email sent successfully!");
-//        } else {
-//            model.addAttribute("errorMessage", "Failed to send email. Please try again.");
-//        }
-//
-//        model.addAttribute("emailTarget", emailTarget);
-//        model.addAttribute("groupId", groupId);
-//        return "groups/email-group";
-//    }
+
+    @PostMapping("/email/group")
+    @ResponseBody
+    public ResponseEntity<String> handleEmailGroup(@RequestBody EmailGroupRequest emailGroupRequest) {
+        boolean emailSent = groupService.emailGroup(
+                emailGroupRequest.getSlug(),
+                emailGroupRequest.getSubject(),
+                emailGroupRequest.getMessage()
+        );
+
+        if (emailSent) {
+            return ResponseEntity.ok("Email sent successfully!");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email. Please try again.");
+        }
+    }
 }

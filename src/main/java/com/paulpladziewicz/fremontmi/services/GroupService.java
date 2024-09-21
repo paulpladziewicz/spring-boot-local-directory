@@ -26,11 +26,13 @@ public class GroupService {
     private final UserService userService;
 
     private final TagService tagService;
+    private final EmailService emailService;
 
-    public GroupService(ContentRepository contentRepository, UserService userService, TagService tagService) {
+    public GroupService(ContentRepository contentRepository, UserService userService, TagService tagService, EmailService emailService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.tagService = tagService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -271,7 +273,7 @@ public class GroupService {
     }
 
     @Transactional
-    public ServiceResponse<Boolean> joinGroup(String contentId) {
+    public ServiceResponse<Boolean> joinGroup(String slug) {
         Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
         if (optionalUserProfile.isEmpty()) {
@@ -280,7 +282,7 @@ public class GroupService {
 
         UserProfile userProfile = optionalUserProfile.get();
 
-        ServiceResponse<Group> findGroupResponse = findGroupById(contentId);
+        ServiceResponse<Group> findGroupResponse = findBySlug(slug);
 
         if (findGroupResponse.hasError()) {
             return ServiceResponse.error(findGroupResponse.errorCode());
@@ -295,8 +297,8 @@ public class GroupService {
             contentRepository.save(group);
         }
         List<String> groupIds = userProfile.getGroupIds();
-        if (!groupIds.contains(contentId)) {
-            groupIds.add(contentId);
+        if (!groupIds.contains(group.getId())) {
+            groupIds.add(group.getId());
             userProfile.setGroupIds(groupIds);
             userService.saveUserProfile(userProfile);
         }
@@ -305,7 +307,7 @@ public class GroupService {
     }
 
     @Transactional
-    public ServiceResponse<Boolean> leaveGroup(String groupId) {
+    public ServiceResponse<Boolean> leaveGroup(String slug) {
         Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
         if (optionalUserProfile.isEmpty()) {
@@ -314,7 +316,7 @@ public class GroupService {
 
         UserProfile userProfile = optionalUserProfile.get();
 
-        ServiceResponse<Group> findGroupResponse = findGroupById(groupId);
+        ServiceResponse<Group> findGroupResponse = findBySlug(slug);
 
         if (findGroupResponse.hasError()) {
             return ServiceResponse.error(findGroupResponse.errorCode());
@@ -372,7 +374,7 @@ public class GroupService {
         return ServiceResponse.value(announcements);
     }
 
-    public ServiceResponse<Boolean> deleteAnnouncement(String groupId, int announcementId) {
+    public ServiceResponse<Boolean> deleteAnnouncement(String slug, int announcementId) {
         Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
         if (optionalUserProfile.isEmpty()) {
@@ -381,7 +383,7 @@ public class GroupService {
 
         UserProfile userProfile = optionalUserProfile.get();
 
-        ServiceResponse<Group> findGroupResponse = findGroupById(groupId);
+        ServiceResponse<Group> findGroupResponse = findBySlug(slug);
 
         if (findGroupResponse.hasError()) {
             return ServiceResponse.error(findGroupResponse.errorCode());
@@ -420,6 +422,58 @@ public class GroupService {
         }
 
         return ServiceResponse.value(true);
+    }
+
+    public Boolean emailGroup(String slug, String subject, String message) {
+        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+
+        if (optionalUserProfile.isEmpty()) {
+            return false;
+        }
+
+        UserProfile senderUserProfile = optionalUserProfile.get();
+
+        if (senderUserProfile.getEmailSendCount() >= 5) {
+            return false;
+        }
+
+        senderUserProfile.setEmailSendCount(senderUserProfile.getEmailSendCount() + 1);
+
+        userService.saveUserProfile(senderUserProfile);
+
+        Optional<Group> optionalGroup = contentRepository.findBySlug(slug)
+                .filter(content -> content instanceof Group)
+                .map(content -> (Group) content);
+
+        if (optionalGroup.isEmpty()) {
+            return false;
+        }
+
+        Group group = optionalGroup.get();
+
+        if (group.getAdministrators().contains(senderUserProfile.getUserId())) {
+            List<UserProfile> memberUserProfiles = userService.getUserProfiles(group.getMembers());
+
+            List<String> emailAddresses = memberUserProfiles.stream()
+                    .map(UserProfile::getEmail)
+                    .filter(email -> email != null && !email.isEmpty())
+                    .collect(Collectors.toList());
+
+            return emailService.sendGroupEmail(emailAddresses, senderUserProfile.getEmail(), subject, message);
+        }
+
+        if (group.getMembers().contains(senderUserProfile.getUserId())) {
+            List<UserProfile> adminUserProfiles = userService.getUserProfiles(group.getAdministrators());
+
+            List<String> emailAddresses = adminUserProfiles.stream()
+                    .map(UserProfile::getEmail)
+                    .filter(email -> email != null && !email.isEmpty())
+                    .collect(Collectors.toList());
+
+            return emailService.sendGroupEmail(emailAddresses, senderUserProfile.getEmail(), subject, message);
+        }
+
+        return false;
     }
 
     private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {

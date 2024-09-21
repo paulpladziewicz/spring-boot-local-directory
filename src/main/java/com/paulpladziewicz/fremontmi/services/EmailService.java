@@ -119,8 +119,7 @@ public class EmailService {
         }
     }
 
-    @Async
-    public void sendGroupEmailAsync(List<String> recipients, String replyTo, String subject, String messageBody) {
+    public Boolean sendGroupEmail(List<String> recipients, String replyTo, String subject, String messageBody) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
 
@@ -134,8 +133,10 @@ public class EmailService {
                 mailSender.send(message);
             }
 
+            return true;
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
             logger.error("Failed to send group email to {} from {} with a subject of {} and message of {}.", recipients, replyTo, subject, messageBody, e);
+            return false;
         }
     }
 

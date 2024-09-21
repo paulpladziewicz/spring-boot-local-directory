@@ -26,14 +26,12 @@
             const addTagButton = document.getElementById('add-tag-button');
             const tagsContainer = document.getElementById('tags-container');
             const hiddenTagInput = document.getElementById('hidden-tag-input');
-            let tags = hiddenTagInput.value ? hiddenTagInput.value.split(',') : []; // Load existing tags from the hidden input
-            let canonicalTags = tags.map(formatCanonicalTag);  // Canonicalize tags from the start
-            let tagMax = 3;
+            let tags = hiddenTagInput.value ? hiddenTagInput.value.split(',') : [];
+            let canonicalTags = tags.map(formatCanonicalTag);
+            const tagMax = 3;
 
-            // Display the initial tags from the model
-            tags.forEach(function(tag) {
-                addTagPill(tag);
-            });
+            // Display the initial tags
+            tags.forEach(addTagPill);
 
             // Event listener for the "Add" button
             addTagButton.addEventListener('click', function () {
@@ -56,47 +54,48 @@
                     const formattedTag = formatTag(inputValue);
                     addTag(formattedTag, canonicalTag);
                 }
-                tagInput.value = '';  // Clear input
+
+                // Clear input field after adding the tag
+                tagInput.value = '';
             }
 
             function formatTag(tag) {
-                // Remove invalid characters (allow letters, spaces, and hyphens)
+                // Remove invalid characters and properly format tag
                 const cleanedTag = tag.replace(/[^a-zA-Z\s\-]/g, '').trim();
-
-                // Split by hyphen and then process each part separately
                 return cleanedTag.split('-').map(part => {
                     return part.split(' ').map(word => {
-                        if (word.toUpperCase() === word) {
-                            return word;  // Keep acronym in all caps
-                        } else {
-                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                        }
+                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
                     }).join(' ');
-                }).join('-');  // Keep hyphen in the display form
+                }).join('-');
             }
 
-            // Canonical version: lowercase, keep hyphens, remove spaces and special characters
             function formatCanonicalTag(tag) {
-                return tag.toLowerCase().replace(/[^a-z\s\-]/g, '').replace(/\s+/g, '');  // Keep hyphens, remove spaces and special characters
+                return tag.toLowerCase().replace(/[^a-z\s\-]/g, '').replace(/\s+/g, '');
             }
 
             function addTag(tag, canonicalTag) {
                 tags.push(tag);
-                canonicalTags.push(canonicalTag);  // Store canonical version for comparison
+                canonicalTags.push(canonicalTag);
                 addTagPill(tag);
 
+                // Disable input and button if max tags reached
                 if (tags.length >= tagMax) {
                     tagInput.disabled = true;
                     addTagButton.disabled = true;
                 }
+
                 updateHiddenInput();
             }
 
             function addTagPill(tag) {
                 const tagPill = document.createElement('span');
-                tagPill.className = 'badge bg-primary bg-opacity-10 text-primary fs-sm me-1 mb-1';
-                tagPill.textContent = tag;
+                tagPill.className = 'badge bg-primary bg-opacity-10 text-primary fs-sm me-1 mb-1 d-inline-flex align-items-center';
 
+                // Add tag text
+                const tagText = document.createElement('span');
+                tagText.textContent = tag;
+
+                // Add remove button
                 const removeButton = document.createElement('button');
                 removeButton.type = 'button';
                 removeButton.className = 'btn-close btn-sm ms-2';
@@ -104,14 +103,15 @@
                 removeButton.addEventListener('click', function () {
                     removeTag(tag, formatCanonicalTag(tag));
                 });
-                tagPill.appendChild(removeButton);
 
+                tagPill.appendChild(tagText);
+                tagPill.appendChild(removeButton);
                 tagsContainer.appendChild(tagPill);
             }
 
             function removeTag(tag, canonicalTag) {
                 tags = tags.filter(t => t !== tag);
-                canonicalTags = canonicalTags.filter(t => t !== canonicalTag);  // Remove canonical version
+                canonicalTags = canonicalTags.filter(t => t !== canonicalTag);
 
                 const tagPills = tagsContainer.querySelectorAll('.badge');
                 tagPills.forEach(pill => {
@@ -122,6 +122,7 @@
 
                 updateHiddenInput();
 
+                // Re-enable input and button if the number of tags is less than the max
                 if (tags.length < tagMax) {
                     tagInput.disabled = false;
                     addTagButton.disabled = false;

@@ -43,6 +43,18 @@
             const response = await fetch('/api/stripe/subscriptions').then((r) => r.json());
             const subscriptionsDiv = document.querySelector('#subscriptions');
 
+            // Check if there are no subscriptions
+            if (response.length === 0) {
+                subscriptionsDiv.innerHTML = `
+                    <div class="col-12">
+                        <p class="text-muted" style="text-align: left;">You currently have no active subscriptions.</p>
+                    </div>
+                `;
+                document.querySelector('#loading').style.display = 'none';
+                return;
+            }
+
+            // Populate the subscriptions if available
             subscriptionsDiv.innerHTML = response.map((subscription) => {
                 let actionButton = '';
                 if (subscription.cancelAtPeriodEnd) {
@@ -60,25 +72,26 @@
                 }
 
                 return `
-            <div class="col">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">${subscription.planName}</h5>
-                        <p class="card-text mt-3">
-                            <strong>Price:</strong> ${subscription.price}
-                        </p>
-                        <p class="card-text">
-                            ${subscription.subscriptionEnd}
-                        </p>
-                        ${actionButton}
+                    <div class="col">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">${subscription.planName}</h5>
+                                <p class="card-text mt-3">
+                                    <strong>Price:</strong> ${subscription.price}
+                                </p>
+                                <p class="card-text">
+                                    ${subscription.subscriptionEnd}
+                                </p>
+                                ${actionButton}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-          `;
+                `;
             }).join('');
 
             document.querySelector('#loading').style.display = 'none';
 
+            // Adding event listeners for cancel and resume buttons
             document.querySelectorAll('.cancel-subscription-btn').forEach(button => {
                 button.addEventListener('click', async (event) => {
                     const subscriptionId = event.target.getAttribute('data-subscription-id');
@@ -130,6 +143,7 @@
         }
     });
 </script>
+
 
 <script th:replace="~{partials/theme-js}"></script>
 <footer th:replace="~{partials/footer}"></footer>

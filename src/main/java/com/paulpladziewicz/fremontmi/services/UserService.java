@@ -234,4 +234,8 @@ public class UserService {
         logger.error(message, e);
         return ServiceResponse.error(errorCode);
     }
+
+    public List<UserProfile> getUserProfiles(List<String> members) {
+        return userProfileRepository.findAllById(members);
+    }
 }

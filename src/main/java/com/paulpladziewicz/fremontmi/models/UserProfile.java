@@ -30,5 +30,7 @@ public class UserProfile {
 
     private List<String> businessIds = new ArrayList<>();
 
+    private int emailSendCount;
+
     private LocalDateTime termsAcceptedAt;
 }
