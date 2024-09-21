@@ -30,7 +30,7 @@
                             <p th:text="${#strings.length(neighborServicesProfile.description) > 120 ? #strings.substring(neighborServicesProfile.description, 0, 120) + '...' : neighborServicesProfile.description}">
                                 Business Description
                             </p>
-                            <a th:href="'/neighbor-services/' + ${neighborServicesProfile.id}" class="btn btn-lg btn-link p-0">View Profile<i class="ai-arrow-right ms-2"></i></a>
+                            <a th:href="'/neighbor-services/' + ${neighborServicesProfile.slug}" class="btn btn-lg btn-link p-0">View Profile<i class="ai-arrow-right ms-2"></i></a>
 
                             <!-- Display Profile Tags -->
                             <div th:if="${!#lists.isEmpty(neighborServicesProfile.tags)}" class="mt-3">

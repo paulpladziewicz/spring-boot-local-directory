@@ -14,7 +14,7 @@
             </div>
         </div>
 
-        <div class="mb-4">
+        <div th:if="${popularTags.size() > 0}" class="mb-4">
             <div class="d-flex flex-wrap">
                 <a th:each="tag : ${popularTags}"
                    th:href="'/groups?tag=' + ${tag.name}"
