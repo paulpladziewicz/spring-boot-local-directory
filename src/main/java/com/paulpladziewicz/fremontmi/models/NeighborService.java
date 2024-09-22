@@ -15,8 +15,6 @@ public class NeighborService {
 
     private String description;
 
-    private String price;
-
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime updatedAt;

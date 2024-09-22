@@ -16,6 +16,7 @@
                 </nav>
             </div>
         </div>
+
         <div class="row">
             <div class="col-lg-10 mx-auto">
                 <div>
@@ -27,26 +28,26 @@
                     <p th:text="${neighborServicesProfile.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
                 </div>
 
-                <a th:href="'/edit/neighbor-service/profile/' + ${neighborServicesProfile.slug}" class="d-inline-block btn btn-outline-primary">Edit NeighborService</a>
 
-                <div class="row mt-5">
-                    <div class="col-lg-10 mx-auto">
-                        <h3 class="mb-4">Services Offered</h3>
+                <div class="row mt-4">
+                    <h3 class="mb-3 fs-1">NeighborServices™</h3>
 
-                        <div th:if="${neighborServicesProfile.neighborServices.size() > 0}">
-                            <ul class="list-group">
-                                <li class="list-group-item" th:each="service, iterStat : ${neighborServicesProfile.neighborServices}">
-                                    <h4 th:text="${iterStat.index + 1 + '. ' + service.name}"></h4>
-                                    <p th:text="${service.description}"></p>
-                                </li>
-                            </ul>
-                        </div>
+                    <div th:if="${neighborServicesProfile.neighborServices.size() > 0}">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item" th:each="service : ${neighborServicesProfile.neighborServices}">
+                                <h4 th:text="${service.name}"></h4>
+                                <p th:text="${service.description}"></p>
+                            </li>
+                        </ul>
+                    </div>
 
-                        <div th:if="${neighborServicesProfile.neighborServices.size() == 0}">
-                            <p class="text-muted">No services available at this time.</p>
-                        </div>
+                    <div th:if="${neighborServicesProfile.neighborServices.size() == 0}">
+                        <p class="text-muted">No services available at this time.</p>
                     </div>
                 </div>
+
+                <a th:href="'/edit/neighbor-service/profile/' + ${neighborServicesProfile.slug}" class="d-inline-block btn btn-outline-primary">Edit NeighborService</a>
+
 
 
             </div>
