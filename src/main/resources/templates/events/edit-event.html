@@ -27,6 +27,8 @@
                              class="alert alert-danger"></div>
                     </div>
 
+                    <div th:replace="~{partials/tag-input}"></div>
+
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="locationName">Location Name</label>
                         <input type="text" class="form-control" id="locationName" th:field="*{locationName}"

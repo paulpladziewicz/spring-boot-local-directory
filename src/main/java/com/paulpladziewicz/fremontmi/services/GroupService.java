@@ -118,11 +118,9 @@ public class GroupService {
         try {
             List<Content> contentList;
 
-            // Check if a tag is provided, and search by tag and type
             if (tag != null && !tag.isEmpty()) {
                 contentList = contentRepository.findByTagAndType(tag, ContentTypes.GROUP.getContentType());
             } else {
-                // Otherwise, search by type only
                 contentList = contentRepository.findAllByType(ContentTypes.GROUP.getContentType());
             }
 

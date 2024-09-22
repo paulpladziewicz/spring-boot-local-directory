@@ -3,6 +3,7 @@ package com.paulpladziewicz.fremontmi.models;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 
@@ -37,5 +38,11 @@ public class Event extends Content {
     private List<DayEvent> days;
 
     private List<String> formattedTimes;
+
+    @Transient
+    private DayEvent nextAvailableDayEvent;
+
+    @Transient
+    private int moreDayEventsCount;
 }
 

@@ -168,11 +168,10 @@ public class GroupController {
 
         Group group = serviceResponse.value();
 
-        // Convert the list of tags to a comma-separated string
         String tagsAsString = String.join(",", group.getTags());
+        model.addAttribute("tagsAsString", tagsAsString);
 
         model.addAttribute("group", group);
-        model.addAttribute("tagsAsString", tagsAsString);  // Add the comma-separated string to the model
 
         return "groups/edit-group";
     }

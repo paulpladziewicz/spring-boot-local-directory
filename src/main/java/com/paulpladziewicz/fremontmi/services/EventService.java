@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -126,10 +127,21 @@ public class EventService {
         }
     }
 
-    public ServiceResponse<List<Event>> findAll() {
+    public ServiceResponse<List<Event>> findAll(String tag) {
         try {
             LocalDateTime now = LocalDateTime.now();
-            List<Event> events = contentRepository.findByAnyFutureDayEvent(now);
+            List<Event> events;
+
+            if (tag != null && !tag.trim().isEmpty()) {
+                // Fetch events filtered by the tag and having future day events
+                events = contentRepository.findByTagAndAnyFutureDayEvent(tag, now);
+                logger.info("Fetched {} events with tag '{}'", events.size(), tag);
+            } else {
+                // Fetch all events with future day events without tag filtering
+                events = contentRepository.findByAnyFutureDayEvent(now);
+                logger.info("Fetched {} events without any tag filtering", events.size());
+            }
+
             return ServiceResponse.value(events);
         } catch (DataAccessException e) {
             return logAndReturnError("Database error while retrieving events.", "database_error", e);
@@ -331,6 +343,11 @@ public class EventService {
         existingEvent.setLocationName(updatedEvent.getLocationName());
         existingEvent.setAddress(updatedEvent.getAddress());
         existingEvent.setDays(updatedEvent.getDays());
+
+        if (updatedEvent.getTags() != null && !updatedEvent.getTags().isEmpty()) {
+            existingEvent.setTags(updatedEvent.getTags());
+        }
+
         populateFormattedTimes(existingEvent);
     }
 

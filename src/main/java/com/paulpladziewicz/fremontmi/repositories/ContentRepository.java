@@ -32,6 +32,9 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     @Query("{'visibility': 'public', 'days': { $elemMatch: { 'endTime': { $gt: ?0 } } }, 'status': { $in: ['active', 'cancelled'] } }")
     List<Event> findByAnyFutureDayEvent(LocalDateTime now);
 
+    @Query("{ 'visibility': 'public', 'tags': { $in: [?0] }, 'days': { $elemMatch: { 'endTime': { $gt: ?1 } } }, 'status': { $in: ['active', 'cancelled'] } }")
+    List<Event> findByTagAndAnyFutureDayEvent(String tag, LocalDateTime now);
+
     @Query("{ 'stripeDetails.subscriptionId': ?0 }")
     Optional<Content> findByStripeDetails_SubscriptionId(String subscriptionId);
 

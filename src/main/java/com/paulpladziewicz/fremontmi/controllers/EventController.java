@@ -1,9 +1,8 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.models.DayEvent;
-import com.paulpladziewicz.fremontmi.models.Event;
-import com.paulpladziewicz.fremontmi.models.ServiceResponse;
+import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.EventService;
+import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -13,19 +12,25 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class EventController {
 
     private final EventService eventService;
+
     private final UserService userService;
 
-    public EventController(EventService eventService, UserService userService) {
+    private final TagService tagService;
+
+    public EventController(EventService eventService, UserService userService, TagService tagService) {
         this.eventService = eventService;
         this.userService = userService;
+        this.tagService = tagService;
     }
 
     @GetMapping("/create/event")
@@ -62,8 +67,8 @@ public class EventController {
     }
 
     @GetMapping("/events")
-    public String displayGroups(Model model) {
-        ServiceResponse<List<Event>> serviceResponse = eventService.findAll();
+    public String displayEvents(@RequestParam(value = "tag", required = false) String tag, Model model) {
+        ServiceResponse<List<Event>> serviceResponse = eventService.findAll(tag);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);
@@ -71,6 +76,31 @@ public class EventController {
         }
 
         List<Event> events = serviceResponse.value();
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Process each event to find the next available day event and count future days
+        events.forEach(event -> {
+            // Filter future DayEvents
+            List<DayEvent> futureDayEvents = event.getDays().stream()
+                    .filter(dayEvent -> dayEvent.getStartTime().isAfter(now))
+                    .collect(Collectors.toList());
+
+            // Check if there's any future DayEvent
+            if (!futureDayEvents.isEmpty()) {
+                // Set the next available DayEvent as the first future day
+                event.setNextAvailableDayEvent(futureDayEvents.get(0));
+                event.setMoreDayEventsCount(futureDayEvents.size() - 1); // count all future days except the next one
+            } else {
+                event.setNextAvailableDayEvent(null);
+                event.setMoreDayEventsCount(0);
+            }
+        });
+
+        List<Content> contentList = new ArrayList<>(events);
+        List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 15);
+        model.addAttribute("popularTags", popularTags);
+        model.addAttribute("selectedTag", tag);
 
         model.addAttribute("events", events);
 
@@ -118,6 +148,9 @@ public class EventController {
 
         Event event = serviceResponse.value();
 
+        String tagsAsString = String.join(",", event.getTags());
+        model.addAttribute("tagsAsString", tagsAsString);
+
         model.addAttribute("event", event);
 
         return "events/edit-event";
@@ -160,23 +193,17 @@ public class EventController {
     @PostMapping("/create/event/add-day")
     public String addDayToCreateForm(@ModelAttribute("event") Event event, Model model) {
         event.getDays().add(new DayEvent());
-
         model.addAttribute("event", event);
-
-        return "events/htmx/adjust-days";
+        return "events/htmx/adjust-day-events"; // Ensure this fragment only contains the "dayEvents" div content
     }
 
     @PostMapping("/create/event/remove-day")
     public String removeDayToCreateForm(@ModelAttribute("event") Event event, Model model) {
-        if (event.getDays().isEmpty()) {
-            model.addAttribute("event", event);
-            return "events/htmx/adjust-days";
+        if (!event.getDays().isEmpty()) {
+            event.getDays().removeLast(); // Adjusted to avoid potential empty list exception
         }
-
-        event.getDays().removeLast();
         model.addAttribute("event", event);
-
-        return "events/htmx/adjust-days";
+        return "events/htmx/adjust-day-events"; // Ensure this fragment only contains the "dayEvents" div content
     }
 
     @PostMapping("/cancel/event")
