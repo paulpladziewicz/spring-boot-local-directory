@@ -12,6 +12,8 @@
             <h1>Edit Business Listing</h1>
             <form th:action="@{/edit/business}" th:object="${business}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                 <input type="hidden" name="id" th:value="${business.id}" />
+                <input type="hidden" name="slug" th:value="${business.slug}"/>
+
                 <div class="form-business mb-2">
                     <label for="name" class="mb-1 form-label opacity-75 fw-medium fs-base">Group Name</label>
                     <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter business name">
@@ -29,6 +31,8 @@
                     <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Group description"></textarea>
                     <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></p>
                 </div>
+
+                <div th:replace="~{partials/tag-input}"></div>
 
                 <div class="form-business mb-3">
                     <label for="address" class="mb-1 form-label opacity-75 fw-medium fs-base">Address</label>

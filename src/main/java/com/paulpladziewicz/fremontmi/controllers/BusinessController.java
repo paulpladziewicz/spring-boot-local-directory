@@ -1,8 +1,11 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.Business;
+import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
+import com.paulpladziewicz.fremontmi.models.TagUsage;
 import com.paulpladziewicz.fremontmi.services.BusinessService;
+import com.paulpladziewicz.fremontmi.services.TagService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,8 +20,11 @@ public class BusinessController {
 
     private final BusinessService businessService;
 
-    public BusinessController(BusinessService businessService) {
+    private final TagService tagService;
+
+    public BusinessController(BusinessService businessService, TagService tagService) {
         this.businessService = businessService;
+        this.tagService = tagService;
     }
 
     @GetMapping("/create/business/overview")
@@ -67,8 +73,8 @@ public class BusinessController {
     }
 
     @GetMapping("/businesses")
-    public String displayActiveBusinesses(Model model) {
-        ServiceResponse<List<Business>> serviceResponse = businessService.findAllBusinesses();
+    public String displayActiveBusinesses(@RequestParam(value = "tag", required = false) String tag, Model model) {
+        ServiceResponse<List<Business>> serviceResponse = businessService.findAllBusinesses(tag);
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);
@@ -76,6 +82,11 @@ public class BusinessController {
         }
 
         List<Business> businesses = serviceResponse.value();
+
+        List<Content> contentList = new ArrayList<>(businesses);
+        List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 15);
+        model.addAttribute("popularTags", popularTags);
+        model.addAttribute("selectedTag", tag);
 
         model.addAttribute("businesses", businesses);
 
@@ -147,7 +158,7 @@ public class BusinessController {
 
         model.addAttribute("business", updatedBusiness);
 
-        return "redirect:/businesses/" + updatedBusiness.getId();
+        return "redirect:/businesses/" + updatedBusiness.getSlug();
     }
 
     @PostMapping("/delete/business")

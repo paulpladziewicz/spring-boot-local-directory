@@ -142,12 +142,22 @@ public class BusinessService {
         }
     }
 
-    public ServiceResponse<List<Business>> findAllBusinesses() {
+    public ServiceResponse<List<Business>> findAllBusinesses(String tag) {
         try {
-            List<Content> contents = contentRepository.findAllByType(ContentTypes.BUSINESS.getContentType());
+            List<Content> contentList;
 
-            List<Business> businesses = contents.stream()
-                    .filter(content -> content instanceof Business)
+            // Check if the tag is provided and not empty
+            if (tag != null && !tag.isEmpty()) {
+                // Fetch content by tag and type BUSINESS
+                contentList = contentRepository.findByTagAndType(tag, ContentTypes.BUSINESS.getContentType());
+            } else {
+                // Fetch all content of type BUSINESS
+                contentList = contentRepository.findAllByType(ContentTypes.BUSINESS.getContentType());
+            }
+
+            // Filter the list to ensure only Business objects are returned
+            List<Business> businesses = contentList.stream()
+                    .filter(content -> content instanceof Business)  // Ensure type safety
                     .map(content -> (Business) content)
                     .collect(Collectors.toList());
 
@@ -160,6 +170,7 @@ public class BusinessService {
             return ServiceResponse.error("unexpected_error");
         }
     }
+
 
     public Optional<Business> findBusinessById(String businessId) {
         try {
@@ -302,7 +313,11 @@ public class BusinessService {
         existingBusiness.setName(updatedBusiness.getName());
         existingBusiness.setHeadline(updatedBusiness.getHeadline());
         existingBusiness.setDescription(updatedBusiness.getDescription());
-        existingBusiness.setTags(updatedBusiness.getTags());
+
+        if (updatedBusiness.getTags() != null && !updatedBusiness.getTags().isEmpty()) {
+            existingBusiness.setTags(updatedBusiness.getTags());
+        }
+
         //existingBusiness.setAdministrators(updatedBusiness.getAdministrators());
         existingBusiness.setAddress(updatedBusiness.getAddress());
         existingBusiness.setPhoneNumber(updatedBusiness.getPhoneNumber());
