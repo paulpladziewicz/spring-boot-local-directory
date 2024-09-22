@@ -286,6 +286,10 @@ public class NeighborServicesProfileService {
         existingProfile.setEmail(updatedProfile.getEmail());
         existingProfile.setTags(updatedProfile.getTags());
 
+        if (updatedProfile.getTags() != null && !updatedProfile.getTags().isEmpty()) {
+            existingProfile.setTags(updatedProfile.getTags()); // Update the existing business's tags
+        }
+
         // Update neighbor services if provided
         if (updatedProfile.getNeighborServices() != null) {
             existingProfile.setNeighborServices(updatedProfile.getNeighborServices());

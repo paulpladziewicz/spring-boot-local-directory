@@ -136,6 +136,9 @@ public class BusinessController {
 
         Business business = businessOptional.get();
 
+        String tagsAsString = String.join(",", business.getTags());
+        model.addAttribute("tagsAsString", tagsAsString);
+
         model.addAttribute("business", business);
 
         return "businesses/edit-business";

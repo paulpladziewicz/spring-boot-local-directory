@@ -92,6 +92,11 @@ public class NeighborServicesProfileController {
 
         // TODO still displaying profiles that do not have any neighbor services
 
+        List<Content> contentList = new ArrayList<>(profiles);
+        List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 15);
+        model.addAttribute("popularTags", popularTags);
+        model.addAttribute("selectedTag", tag);
+
         model.addAttribute("profiles", profiles);
 
         return "neighborservices/neighbor-services";
@@ -139,6 +144,9 @@ public class NeighborServicesProfileController {
         }
 
         NeighborServicesProfile neighborServicesProfile = optionalNeighborService.get();
+
+        String tagsAsString = String.join(",", neighborServicesProfile.getTags());
+        model.addAttribute("tagsAsString", tagsAsString);
 
         model.addAttribute("neighborServicesProfile", neighborServicesProfile);
 
