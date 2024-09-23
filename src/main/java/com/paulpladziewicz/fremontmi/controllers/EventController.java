@@ -207,25 +207,25 @@ public class EventController {
     }
 
     @PostMapping("/cancel/event")
-    public String cancelEvent(@NotNull @RequestParam("eventId") String eventId, RedirectAttributes redirectAttributes) {
-        ServiceResponse<Boolean> serviceResponse = eventService.cancelEvent(eventId);
+    public String cancelEvent(@NotNull @RequestParam("slug") String slug, RedirectAttributes redirectAttributes) {
+        ServiceResponse<Boolean> serviceResponse = eventService.cancelEvent(slug);
 
         if (serviceResponse.hasError()) {
             redirectAttributes.addFlashAttribute("error", true);
         }
 
-        return "redirect:/events/" + eventId;
+        return "redirect:/events/" + slug;
     }
 
     @PostMapping("/reactivate/event")
-    public String uncancelEvent(@NotNull @RequestParam("eventId") String eventId, RedirectAttributes redirectAttributes) {
-        ServiceResponse<Boolean> serviceResponse = eventService.reactivateEvent(eventId);
+    public String uncancelEvent(@NotNull @RequestParam("slug") String slug, RedirectAttributes redirectAttributes) {
+        ServiceResponse<Boolean> serviceResponse = eventService.reactivateEvent(slug);
 
         if (serviceResponse.hasError()) {
             redirectAttributes.addFlashAttribute("error", true);
         }
 
-        return "redirect:/events/" + eventId;
+        return "redirect:/events/" + slug;
     }
 
     @PostMapping("/delete/event")

@@ -282,15 +282,15 @@ public class EventService {
         return event.getCreatedBy().equals(userId);
     }
 
-    public ServiceResponse<Boolean> cancelEvent(String eventId) {
-        return updateEventStatus(eventId, "cancelled", "Failed to cancel event.");
+    public ServiceResponse<Boolean> cancelEvent(String slug) {
+        return updateEventStatus(slug, "cancelled", "Failed to cancel event.");
     }
 
-    public ServiceResponse<Boolean> reactivateEvent(String eventId) {
-        return updateEventStatus(eventId, "active", "Failed to reactivate event.");
+    public ServiceResponse<Boolean> reactivateEvent(String slug) {
+        return updateEventStatus(slug, "active", "Failed to reactivate event.");
     }
 
-    private ServiceResponse<Boolean> updateEventStatus(String eventId, String status, String errorMessage) {
+    private ServiceResponse<Boolean> updateEventStatus(String slug, String status, String errorMessage) {
         try {
             Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
@@ -300,7 +300,7 @@ public class EventService {
 
             UserProfile userProfile = optionalUserProfile.get();
 
-            ServiceResponse<Event> existingEventResult = findEventById(eventId);
+            ServiceResponse<Event> existingEventResult = findEventBySlug(slug);
 
             if (existingEventResult.hasError()) {
                 return ServiceResponse.error(existingEventResult.errorCode());
@@ -309,7 +309,7 @@ public class EventService {
             Event existingEvent = existingEventResult.value();
 
             if (!hasPermission(userProfile.getUserId(), existingEvent)) {
-                return logAndReturnError("User does not have permission to update event: " + eventId, "permission_denied");
+                return logAndReturnError("User does not have permission to update event: " + slug, "permission_denied");
             }
 
             existingEvent.setStatus(status);
