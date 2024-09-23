@@ -189,6 +189,10 @@
         Sending emails...
     `;
 
+        // Clear any existing messages
+        const existingMessages = document.querySelectorAll('.email-response-message');
+        existingMessages.forEach(msg => msg.remove());
+
         try {
             const response = await fetch('/email/group', {
                 method: 'POST',
@@ -199,17 +203,17 @@
                 body: JSON.stringify(payload)
             });
 
-            // Check if the response is successful
             if (response.ok) {
                 // Close the email form
                 closeEmailForm();
 
                 // Display a success message
                 const successMessage = document.createElement('p');
-                successMessage.className = 'text-primary mt-2';
-                successMessage.textContent = 'Email(s) were successfully sent.';
+                successMessage.className = 'text-primary email-response-message mt-2';
+                successMessage.textContent = 'Email(s) successfully sent.';
                 document.getElementById('emailGroupFormContainer').parentNode.appendChild(successMessage);
 
+                // Hide the email links after successful submission
                 const emailAdministratorsLink = document.getElementById('emailAdministratorsLink');
                 const emailMembersLink = document.getElementById('emailMembersLink');
 
@@ -221,12 +225,23 @@
                     emailMembersLink.style.display = 'none';
                 }
             } else {
-                const errorMessage = await response.text();
-                alert(errorMessage);
+                // Display an error message
+                const errorMessageText = response.status === 400
+                    ? 'You have reached the maximum number of emails you can send in one month, which is currently 5. Please contact us if you need to send more.'
+                    : 'Failed to send email. Please try again.';
+
+                const errorMessage = document.createElement('p');
+                errorMessage.className = 'text-danger email-response-message mt-2';
+                errorMessage.textContent = errorMessageText;
+                document.getElementById('emailGroupFormContainer').parentNode.appendChild(errorMessage);
             }
         } catch (error) {
             console.error('Error sending email:', error);
-            alert('An error occurred while sending the email. Please try again later.');
+
+            const errorMessage = document.createElement('p');
+            errorMessage.className = 'text-danger email-response-message mt-2';
+            errorMessage.textContent = 'An error occurred while sending the email. Please try again later.';
+            document.getElementById('emailGroupFormContainer').parentNode.appendChild(errorMessage);
         } finally {
             // Revert the submit button back to its original state
             submitButton.disabled = false;

@@ -422,17 +422,17 @@ public class GroupService {
         return ServiceResponse.value(true);
     }
 
-    public Boolean emailGroup(String slug, String subject, String message) {
+    public ServiceResponse<Boolean> emailGroup(String slug, String subject, String message) {
         Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
         if (optionalUserProfile.isEmpty()) {
-            return false;
+            return logAndReturnError("User profile not found", "user_profile_not_found");
         }
 
         UserProfile senderUserProfile = optionalUserProfile.get();
 
         if (senderUserProfile.getEmailSendCount() >= 5) {
-            return false;
+            return logAndReturnError("User has reached the email limit", "email_limit_reached");
         }
 
         senderUserProfile.setEmailSendCount(senderUserProfile.getEmailSendCount() + 1);
@@ -444,7 +444,7 @@ public class GroupService {
                 .map(content -> (Group) content);
 
         if (optionalGroup.isEmpty()) {
-            return false;
+            return logAndReturnError("Group not found with slug: " + slug, "group_not_found");
         }
 
         Group group = optionalGroup.get();
@@ -457,7 +457,7 @@ public class GroupService {
                     .filter(email -> email != null && !email.isEmpty())
                     .collect(Collectors.toList());
 
-            return emailService.sendGroupEmail(emailAddresses, senderUserProfile.getEmail(), subject, message);
+            return ServiceResponse.value(emailService.sendGroupEmail(emailAddresses, senderUserProfile.getEmail(), subject, message));
         }
 
         if (group.getMembers().contains(senderUserProfile.getUserId())) {
@@ -468,10 +468,10 @@ public class GroupService {
                     .filter(email -> email != null && !email.isEmpty())
                     .collect(Collectors.toList());
 
-            return emailService.sendGroupEmail(emailAddresses, senderUserProfile.getEmail(), subject, message);
+            return ServiceResponse.value(emailService.sendGroupEmail(emailAddresses, senderUserProfile.getEmail(), subject, message));
         }
 
-        return false;
+        return logAndReturnError("User doesn't have permission to email group", "permission_denied");
     }
 
     private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {

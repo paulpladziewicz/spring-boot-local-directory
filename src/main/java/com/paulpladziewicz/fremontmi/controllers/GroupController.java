@@ -268,14 +268,16 @@ public class GroupController {
     @PostMapping("/email/group")
     @ResponseBody
     public ResponseEntity<String> handleEmailGroup(@RequestBody EmailGroupRequest emailGroupRequest) {
-        boolean emailSent = groupService.emailGroup(
+        ServiceResponse<Boolean> response = groupService.emailGroup(
                 emailGroupRequest.getSlug(),
                 emailGroupRequest.getSubject(),
                 emailGroupRequest.getMessage()
         );
 
-        if (emailSent) {
+        if (!response.hasError() && response.value()) {
             return ResponseEntity.ok("Email sent successfully!");
+        } else if ("email_limit_reached".equals(response.errorCode())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You have reached the maximum number of emails you can send.");
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email. Please try again.");
         }
