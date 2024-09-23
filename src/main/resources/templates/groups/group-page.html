@@ -93,7 +93,7 @@
                         <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.slug}" class="btn btn-outline-primary me-2">Edit Group</a>
 
                     </div>
-                    <a href="javascript:void(0);" id="emailAdministratorsLink" th:if="${!isAdmin && isMember}" type="button" class="d-block btn btn-link p-0" onclick="openEmailForm('administrators')">Email Administrators</a>
+                    <a href="javascript:void(0);" id="emailAdministratorsLink" th:if="${!isAdmin && isMember}" type="button" class="btn btn-link p-0" onclick="openEmailForm('administrators')">Email Administrators</a>
                     <a href="javascript:void(0);" id="emailMembersLink" th:if="${isAdmin}" type="button" class="btn btn-link p-0" onclick="openEmailForm('members')">Email Members</a>                </div>
 
                 <div id="emailGroupFormContainer" style="display: none; margin-top: 20px;">
@@ -214,16 +214,7 @@
                 document.getElementById('emailGroupFormContainer').parentNode.appendChild(successMessage);
 
                 // Hide the email links after successful submission
-                const emailAdministratorsLink = document.getElementById('emailAdministratorsLink');
-                const emailMembersLink = document.getElementById('emailMembersLink');
-
-                if (emailAdministratorsLink) {
-                    emailAdministratorsLink.style.display = 'none';
-                }
-
-                if (emailMembersLink) {
-                    emailMembersLink.style.display = 'none';
-                }
+                hideEmailLinks();
             } else {
                 // Display an error message
                 const errorMessageText = response.status === 400
@@ -246,6 +237,19 @@
             // Revert the submit button back to its original state
             submitButton.disabled = false;
             submitButton.innerHTML = 'Send Email';
+        }
+    }
+
+    function hideEmailLinks() {
+        const emailAdministratorsLink = document.getElementById('emailAdministratorsLink');
+        const emailMembersLink = document.getElementById('emailMembersLink');
+
+        if (emailAdministratorsLink) {
+            emailAdministratorsLink.style.display = 'none';
+        }
+
+        if (emailMembersLink) {
+            emailMembersLink.style.display = 'none';
         }
     }
 </script>
