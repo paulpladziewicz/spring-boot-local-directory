@@ -130,6 +130,7 @@ public class NeighborServicesProfileController {
         NeighborServicesProfile neighborServicesProfile = optionalNeighborService.get();
 
         model.addAttribute("neighborServicesProfile", neighborServicesProfile);
+        model.addAttribute("myProfile", true);
 
         return "neighborservices/neighbor-services-profile-page";
     }

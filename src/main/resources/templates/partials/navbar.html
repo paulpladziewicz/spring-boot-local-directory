@@ -32,8 +32,8 @@
                 </a>
             </div>
             <div sec:authorize="isAuthenticated()">
-                <a href="/my/settings" class="btn btn-secondary btn-sm fs-sm me-1 ms-3 mb-4 mb-lg-0">
-                    <i class="ai-settings"></i>
+                <a href="/my/settings" class="btn btn-secondary btn-sm fs-sm me-1 ms-3 mb-4 mb-lg-0 px-3 px-1">
+                    <i class="ai-user"></i>
                 </a>
 
                 <form class="d-inline" th:action="@{/logout}" method="post">

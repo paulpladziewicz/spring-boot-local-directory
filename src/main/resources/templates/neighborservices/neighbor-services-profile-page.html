@@ -10,7 +10,7 @@
             <div class="col-lg-10 mx-auto">
                 <nav aria-label="breadcrumb">
                     <ol class="pt-lg-3 pb-lg-4 pb-2 breadcrumb">
-                        <li class="breadcrumb-item"><a href="/neighbor-services">NeighborServices</a></li>
+                        <li class="breadcrumb-item"><a href="/neighbor-services">NeighborServices™</a></li>
                         <li class="breadcrumb-item active" aria-current="page" th:text="${neighborServicesProfile.name}"></li>
                     </ol>
                 </nav>
@@ -46,6 +46,8 @@
                         <p class="text-muted">No services available at this time.</p>
                     </div>
                 </div>
+
+                <a th:if="${myProfile}" th:href="'/edit/neighbor-service/profile/' + ${neighborServicesProfile.slug}" class="d-inline-block btn btn-outline-primary">Edit NeighborServices™ Profile</a>
 
             </div>
 
