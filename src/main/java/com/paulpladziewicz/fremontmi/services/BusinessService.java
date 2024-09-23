@@ -97,20 +97,15 @@ public class BusinessService {
         return business.getAdministrators().contains(userId);
     }
 
-    // TODO make this more efficient
     public String createUniqueSlug(String name) {
-        // Clean up the name to form the base slug
         String baseSlug = name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
 
-        // Find all slugs that start with the base slug
-        List<Content> matchingSlugs = contentRepository.findBySlugRegex("^" + baseSlug + "(-\\d+)?$");
+        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.BUSINESS.getContentType());
 
-        // If no matching slugs, return the base slug
         if (matchingSlugs.isEmpty()) {
             return baseSlug;
         }
 
-        // Extract slugs that match the baseSlug-<number> format
         Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
 
         int maxNumber = 0;
@@ -119,12 +114,10 @@ public class BusinessService {
         for (Content content : matchingSlugs) {
             String slug = content.getSlug();
 
-            // Check if the base slug without a number already exists
             if (slug.equals(baseSlug)) {
                 baseSlugExists = true;
             }
 
-            // Find the slugs with numbers at the end and get the max number
             Matcher matcher = pattern.matcher(slug);
             if (matcher.find()) {
                 int number = Integer.parseInt(matcher.group(1));
@@ -132,13 +125,12 @@ public class BusinessService {
             }
         }
 
-        // If the base slug already exists, start numbering from 1
         if (baseSlugExists) {
             return baseSlug + "-" + (maxNumber + 1);
         } else if (maxNumber > 0) {
             return baseSlug + "-" + (maxNumber + 1);
         } else {
-            return baseSlug;  // No suffix needed if base slug doesn't exist
+            return baseSlug;
         }
     }
 
@@ -191,7 +183,7 @@ public class BusinessService {
 
     public Optional<Business> findBusinessBySlug(String slug) {
         try {
-            Optional<Content> contentOpt = contentRepository.findBySlug(slug);
+            Optional<Content> contentOpt = contentRepository.findBySlugAndType(slug, ContentTypes.BUSINESS.getContentType());
 
             return contentOpt
                     .filter(content -> content instanceof Business)
@@ -333,5 +325,25 @@ public class BusinessService {
     private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode, Exception e) {
         logger.error(message, e);
         return ServiceResponse.error(errorCode);
+    }
+
+    public ServiceResponse<Boolean> handleContactFormSubmission(String slug, String name, String email, String message) {
+        Optional<Business> optionalBusiness = findBusinessBySlug(slug);
+
+        if (optionalBusiness.isEmpty()) {
+            return ServiceResponse.error("business_not_found");
+        }
+
+        Business business = optionalBusiness.get();
+
+        try {
+            // Send email to business owner
+            // emailService.sendContactBusinessEmailAsync(business, name, email, message);
+
+            return ServiceResponse.value(true);
+        } catch (Exception e) {
+            logger.error("Error when trying to send contact form submission email", e);
+            return ServiceResponse.error("unexpected_error");
+        }
     }
 }

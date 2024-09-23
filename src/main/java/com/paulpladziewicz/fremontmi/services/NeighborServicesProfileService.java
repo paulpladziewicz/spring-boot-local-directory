@@ -69,20 +69,15 @@ public class NeighborServicesProfileService {
         return ServiceResponse.value(savedNeighborServicesProfile);
     }
 
-    // TODO make this more efficient
     public String createUniqueSlug(String name) {
-        // Clean up the name to form the base slug
         String baseSlug = name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
 
-        // Find all slugs that start with the base slug
-        List<Content> matchingSlugs = contentRepository.findBySlugRegex("^" + baseSlug + "(-\\d+)?$");
+        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
 
-        // If no matching slugs, return the base slug
         if (matchingSlugs.isEmpty()) {
             return baseSlug;
         }
 
-        // Extract slugs that match the baseSlug-<number> format
         Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
 
         int maxNumber = 0;
@@ -91,12 +86,10 @@ public class NeighborServicesProfileService {
         for (Content content : matchingSlugs) {
             String slug = content.getSlug();
 
-            // Check if the base slug without a number already exists
             if (slug.equals(baseSlug)) {
                 baseSlugExists = true;
             }
 
-            // Find the slugs with numbers at the end and get the max number
             Matcher matcher = pattern.matcher(slug);
             if (matcher.find()) {
                 int number = Integer.parseInt(matcher.group(1));
@@ -104,13 +97,12 @@ public class NeighborServicesProfileService {
             }
         }
 
-        // If the base slug already exists, start numbering from 1
         if (baseSlugExists) {
             return baseSlug + "-" + (maxNumber + 1);
         } else if (maxNumber > 0) {
             return baseSlug + "-" + (maxNumber + 1);
         } else {
-            return baseSlug;  // No suffix needed if base slug doesn't exist
+            return baseSlug;
         }
     }
 
@@ -170,7 +162,7 @@ public class NeighborServicesProfileService {
 
     public Optional<NeighborServicesProfile> findNeighborServiceProfileBySlug(String neighborServiceProfileSlug) {
         try {
-            Optional<Content> optionalContent = contentRepository.findBySlug(neighborServiceProfileSlug);
+            Optional<Content> optionalContent = contentRepository.findBySlugAndType(neighborServiceProfileSlug, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
 
             return optionalContent
                     .filter(content -> content instanceof NeighborServicesProfile)

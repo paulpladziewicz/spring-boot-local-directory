@@ -20,7 +20,7 @@ public class Content {
 
     private String pathname;
 
-    private String slug; // unique index with type & slug
+    private String slug;
 
     private String visibility = ContentVisibility.PUBLIC.getVisibility(); // enum PUBLIC, RESTRICTED, HIDDEN
 

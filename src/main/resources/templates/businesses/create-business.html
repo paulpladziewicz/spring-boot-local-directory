@@ -54,7 +54,7 @@
 
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="website">Website</label>
-                        <input type="url" class="form-control" id="website" th:field="*{website}" placeholder="Enter business website">
+                        <input type="text" class="form-control" id="website" th:field="*{website}" placeholder="Enter business website">
                         <div th:if="${#fields.hasErrors('website')}" th:errors="*{website}" class="alert alert-danger"></div>
                     </div>
 

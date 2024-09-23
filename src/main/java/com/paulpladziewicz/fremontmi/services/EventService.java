@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -48,6 +47,7 @@ public class EventService {
 
             event.setCreatedBy(userId);
             populateFormattedTimes(event);
+            event.setType(ContentTypes.EVENT.getContentType());
             event.setSlug(createUniqueSlug(event.getName()));
             event.setPathname("/events/" + event.getSlug());
 
@@ -82,20 +82,15 @@ public class EventService {
         }
     }
 
-    // TODO make this more efficient
     public String createUniqueSlug(String name) {
-        // Clean up the name to form the base slug
         String baseSlug = name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
 
-        // Find all slugs that start with the base slug
-        List<Content> matchingSlugs = contentRepository.findBySlugRegex("^" + baseSlug + "(-\\d+)?$");
+        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.EVENT.getContentType());
 
-        // If no matching slugs, return the base slug
         if (matchingSlugs.isEmpty()) {
             return baseSlug;
         }
 
-        // Extract slugs that match the baseSlug-<number> format
         Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
 
         int maxNumber = 0;
@@ -104,12 +99,10 @@ public class EventService {
         for (Content content : matchingSlugs) {
             String slug = content.getSlug();
 
-            // Check if the base slug without a number already exists
             if (slug.equals(baseSlug)) {
                 baseSlugExists = true;
             }
 
-            // Find the slugs with numbers at the end and get the max number
             Matcher matcher = pattern.matcher(slug);
             if (matcher.find()) {
                 int number = Integer.parseInt(matcher.group(1));
@@ -117,13 +110,12 @@ public class EventService {
             }
         }
 
-        // If the base slug already exists, start numbering from 1
         if (baseSlugExists) {
             return baseSlug + "-" + (maxNumber + 1);
         } else if (maxNumber > 0) {
             return baseSlug + "-" + (maxNumber + 1);
         } else {
-            return baseSlug;  // No suffix needed if base slug doesn't exist
+            return baseSlug;
         }
     }
 
@@ -166,7 +158,7 @@ public class EventService {
 
     public ServiceResponse<Event> findEventBySlug(String slug) {
         try {
-            return contentRepository.findBySlug(slug)
+            return contentRepository.findBySlugAndType(slug, ContentTypes.EVENT.getContentType())
                     .filter(content -> content instanceof Event)
                     .map(content -> (Event) content)
                     .map(ServiceResponse::value)

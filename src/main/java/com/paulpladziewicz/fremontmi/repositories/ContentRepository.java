@@ -10,9 +10,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ContentRepository extends MongoRepository<Content, String> {
-    Optional<Content> findBySlug(String slug);
+    @Query("{ 'slug': ?0, 'type': ?1 }")
+    Optional<Content> findBySlugAndType(String slug, String contentType);
 
-    List<Content> findBySlugRegex(String slugPattern);
+    @Query("{ 'slug': { $regex: ?0 }, 'type': ?1 }")
+    List<Content> findBySlugRegexAndType(String slugPattern, String contentType);
 
     @Query("{ 'type': ?0, 'visibility': 'public' }")
     List<Content> findAllByType(String contentType);

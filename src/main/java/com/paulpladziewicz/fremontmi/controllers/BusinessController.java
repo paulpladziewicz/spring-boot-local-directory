@@ -78,7 +78,7 @@ public class BusinessController {
 
         if (serviceResponse.hasError()) {
             model.addAttribute("error", true);
-            return "businesses/business-listing-overview";
+            return "businesses/create-business-overview";
         }
 
         List<Business> businesses = serviceResponse.value();
@@ -174,5 +174,25 @@ public class BusinessController {
         }
 
         return "redirect:/my/businesses";
+    }
+
+    @PostMapping("/contact/business")
+    public String handleContactForm(
+            @RequestParam("slug") String slug,
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("message") String message,
+            RedirectAttributes redirectAttributes) {
+
+        ServiceResponse<Boolean> contactFormSubmissionResponse = businessService.handleContactFormSubmission(slug, name, email, message);
+
+        if (contactFormSubmissionResponse.hasError()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while trying to send your message. Please try again later.");
+            return "redirect:/businesses/" + slug;
+        }
+
+        redirectAttributes.addFlashAttribute("successMessage", "Thank you for reaching out. We will get back to you shortly.");
+
+        return "redirect:/businesses/" + slug;
     }
 }
