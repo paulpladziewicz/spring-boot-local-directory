@@ -100,7 +100,7 @@
                             <button type="submit" class="btn btn-outline-danger">Cancel Event</button>
                         </form>
 
-                        <form method="post" th:action="@{/reactivate/event}" th:if="${event.status == 'cancelled'}" class="mb-3" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                        <form method="post" th:action="@{/reactivate/event}" th:if="${event.status == 'canceled'}" class="mb-3" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                             <input type="hidden" name="slug" th:value="${event.slug}"/>
                             <button type="submit" class="btn btn-outline-primary">Reactivate Event</button>
                         </form>

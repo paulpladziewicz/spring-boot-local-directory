@@ -127,8 +127,8 @@ public class EventController {
 
         String userId = userIdOpt.get();
 
-        if ("cancelled".equals(event.getStatus())) {
-            model.addAttribute("cancelled", "This event has been cancelled.");
+        if ("canceled".equals(event.getStatus())) {
+            model.addAttribute("canceled", "This event has been canceled.");
         }
 
         model.addAttribute("event", event);

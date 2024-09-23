@@ -27,7 +27,7 @@
 
                 <section th:if="${event != null}">
 
-                    <p class="fw-semibold text-danger" th:if="${cancelled}">This event has been cancelled.</p>
+                    <p class="fw-semibold text-danger" th:if="${canceled}">This event has been canceled.</p>
 
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h1 class="display-4 mb-0" th:text="${event.name}">Event Name</h1>

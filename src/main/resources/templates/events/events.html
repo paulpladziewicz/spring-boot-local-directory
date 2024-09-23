@@ -39,7 +39,7 @@
             <div th:each="event : ${events}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <p class="fw-semibold text-danger mt-0 mb-1" th:if="${event.status == 'cancelled'}">Cancelled</p>
+                        <p class="fw-semibold text-danger mt-0 mb-1" th:if="${event.status == 'canceled'}">canceled</p>
                         <h4 class="h3 mb-1" th:text="${event.name}">Event Title</h4>
 
                         <div th:if="${event.nextAvailableDayEvent != null}">

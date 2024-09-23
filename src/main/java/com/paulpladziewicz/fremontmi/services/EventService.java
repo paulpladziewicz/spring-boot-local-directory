@@ -283,7 +283,7 @@ public class EventService {
     }
 
     public ServiceResponse<Boolean> cancelEvent(String slug) {
-        return updateEventStatus(slug, "cancelled", "Failed to cancel event.");
+        return updateEventStatus(slug, "canceled", "Failed to cancel event.");
     }
 
     public ServiceResponse<Boolean> reactivateEvent(String slug) {

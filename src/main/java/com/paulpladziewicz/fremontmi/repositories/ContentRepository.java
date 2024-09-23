@@ -29,10 +29,10 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     @Query("{ 'reviewed': false }")
     List<Content> contentNotReviewed();
 
-    @Query("{'visibility': 'public', 'days': { $elemMatch: { 'endTime': { $gt: ?0 } } }, 'status': { $in: ['active', 'cancelled'] } }")
+    @Query("{'visibility': 'public', 'days': { $elemMatch: { 'endTime': { $gt: ?0 } } }, 'status': { $in: ['active', 'canceled'] } }")
     List<Event> findByAnyFutureDayEvent(LocalDateTime now);
 
-    @Query("{ 'visibility': 'public', 'tags': { $in: [?0] }, 'days': { $elemMatch: { 'endTime': { $gt: ?1 } } }, 'status': { $in: ['active', 'cancelled'] } }")
+    @Query("{ 'visibility': 'public', 'tags': { $in: [?0] }, 'days': { $elemMatch: { 'endTime': { $gt: ?1 } } }, 'status': { $in: ['active', 'canceled'] } }")
     List<Event> findByTagAndAnyFutureDayEvent(String tag, LocalDateTime now);
 
     @Query("{ 'stripeDetails.subscriptionId': ?0 }")

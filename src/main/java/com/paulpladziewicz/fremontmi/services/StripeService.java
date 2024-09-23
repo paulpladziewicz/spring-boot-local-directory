@@ -82,16 +82,6 @@ public class StripeService {
         return ServiceResponse.value(customerId);
     }
 
-    public ServiceResponse<PaymentIntent> retrievePaymentIntent(String paymentIntentId) {
-        try {
-            PaymentIntent paymentIntent = PaymentIntent.retrieve(paymentIntentId);
-            return ServiceResponse.value(paymentIntent);
-        } catch (StripeException e) {
-            logger.error("Error retrieving payment intent from Stripe: ", e);
-            return ServiceResponse.error("STRIPE_PAYMENT_INTENT_RETRIEVAL_FAILED");
-        }
-    }
-
     public ServiceResponse<String> createCustomer(UserProfile userProfile) {
         Customer customer = null;
         try {
