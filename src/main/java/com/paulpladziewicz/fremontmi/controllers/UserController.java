@@ -200,5 +200,19 @@ public class UserController {
         redirectAttributes.addFlashAttribute("message", "An email has been sent with your username.");
         return "auth/login";
     }
+
+    @GetMapping("/confirm")
+    public String confirm(@RequestParam("token") String token, RedirectAttributes redirectAttributes) {
+        ServiceResponse<Boolean> serviceResponse = userService.confirmUser(token);
+
+        if (serviceResponse.hasError()) {
+            redirectAttributes.addFlashAttribute("confirmationFail", true);
+            return "auth/login";
+        }
+
+        redirectAttributes.addAttribute("confirmationSuccess", true);
+
+        return "redirect:/login";
+    }
 }
 

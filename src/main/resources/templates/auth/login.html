@@ -16,10 +16,13 @@
                 <h1>Sign in</h1>
                 <p class="pb-3 mb-3">Don't have an account yet?&nbsp;&nbsp;<a href="/register">Register here!</a></p>
 
-                <div th:if="${param.error}" class="alert alert-danger" role="alert">
-<!--                    <p>[[${session.SPRING_SECURITY_LAST_EXCEPTION.message}]]</p>-->
-                    Invalid username or password. Please try again.
+                <div th:if="${param.error}">
+                    <div th:if="${param.error == 'true'}" style="color: red;">Invalid username or password. Please try again.</div>
+                    <div th:if="${param.error == 'locked'}" style="color: red;">Your account is locked. Please try again after 15 minutes.</div>
+                    <div th:if="${param.error == 'notConfirmed'}" style="color: red;">Your account is not confirmed. Please check your email.</div>
                 </div>
+
+                <div th:if="${confirmationFail}">Confirmation failed.</div>
 
                 <form th:action="@{/login}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                     <div class="mb-3">

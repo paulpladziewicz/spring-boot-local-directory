@@ -54,7 +54,7 @@ public class UserService {
             UserProfile savedUserProfile = createUserProfile(userRegistrationDto, savedUser.getUserId());
             userProfileRepository.save(savedUserProfile);
 
-            emailService.sendWelcomeEmailAsync(userRegistrationDto.getEmail());
+            emailService.sendWelcomeEmailAsync(userRegistrationDto.getEmail(), savedUser.getConfirmationToken());
 
             logger.info("Successfully created user {} with email {}", savedUser.getUsername(), savedUserProfile.getEmail());
             return ServiceResponse.value(true);
@@ -205,6 +205,7 @@ public class UserService {
         UserRecord userRecord = new UserRecord();
         userRecord.setUsername(dto.getUsername());
         userRecord.setPassword(passwordEncoder.encode(dto.getPassword()));
+        userRecord.setConfirmationToken(UUID.randomUUID().toString());
         return userRecord;
     }
 
@@ -237,5 +238,17 @@ public class UserService {
 
     public List<UserProfile> getUserProfiles(List<String> members) {
         return userProfileRepository.findAllById(members);
+    }
+
+    public ServiceResponse<Boolean> confirmUser(String token) {
+        UserRecord user = userRepository.findByConfirmationToken(token);
+        if (user != null) {
+            user.setEnabled(true);
+            user.setConfirmationToken(null);
+            userRepository.save(user);
+            return ServiceResponse.value(true);
+        } else {
+            return ServiceResponse.error("invalid_token");
+        }
     }
 }

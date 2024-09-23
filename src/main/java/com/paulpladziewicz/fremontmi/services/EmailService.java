@@ -34,12 +34,12 @@ public class EmailService {
     }
 
     @Async
-    public void sendWelcomeEmailAsync(String email) {
+    public void sendWelcomeEmailAsync(String email, String confirmationToken) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
 
-            // needs to include a confirm account button
             Context context = new Context();
+            context.setVariable("confirmationLink", "https://fremontmi.com/confirm?token=" + confirmationToken);
 
             String html = templateEngine.process("auth/email/welcome-email", context);
 
