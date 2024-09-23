@@ -30,6 +30,7 @@
 
 
                 <div class="row mt-4">
+
                     <h3 class="mb-3 fs-1">NeighborServices™</h3>
 
                     <div th:if="${neighborServicesProfile.neighborServices.size() > 0}">
@@ -46,13 +47,12 @@
                     </div>
                 </div>
 
-                <a th:href="'/edit/neighbor-service/profile/' + ${neighborServicesProfile.slug}" class="d-inline-block btn btn-outline-primary">Edit NeighborService</a>
-
-
-
             </div>
+
         </div>
+
     </div>
+
 </main>
 
 <footer th:replace="~{partials/footer}"></footer>

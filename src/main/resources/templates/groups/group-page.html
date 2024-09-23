@@ -19,9 +19,6 @@
 
         <div class="row">
             <div class="col-md-10 col-lg-8 mx-auto">
-                <section sec:authorize="!isAuthenticated()">
-                    <p><a class="link-primary" href="/register">Register</a> or <a href="/login">Login</a> to join.</p>
-                </section>
                 <section>
                     <h1 class="display-4 mb-0" th:text="${group.name}">Group Name</h1>
 
@@ -31,6 +28,9 @@
                         <span th:text="${memberCount}"></span>
                         <span th:text="${memberCount == 1 ? 'Member' : 'Members'}"></span>
                     </p>
+                    <section sec:authorize="!isAuthenticated()">
+                        <p><a class="link-primary" href="/register">Register</a> or <a href="/login">Login</a> to join.</p>
+                    </section>
 
                     <form sec:authorize="isAuthenticated()" th:if="${!isMember}" th:action="@{/groups/join}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
@@ -93,7 +93,7 @@
                         <a th:if="${isAdmin}" th:href="'/edit/group/' + ${group.slug}" class="btn btn-outline-primary me-2">Edit Group</a>
 
                     </div>
-                    <a href="javascript:void(0);" id="emailAdministratorsLink" th:if="${!isAdmin}" type="button" class="d-block btn btn-link p-0" onclick="openEmailForm('administrators')">Email Administrators</a>
+                    <a href="javascript:void(0);" id="emailAdministratorsLink" th:if="${!isAdmin && isMember}" type="button" class="d-block btn btn-link p-0" onclick="openEmailForm('administrators')">Email Administrators</a>
                     <a href="javascript:void(0);" id="emailMembersLink" th:if="${isAdmin}" type="button" class="btn btn-link p-0" onclick="openEmailForm('members')">Email Members</a>                </div>
 
                 <div id="emailGroupFormContainer" style="display: none; margin-top: 20px;">
