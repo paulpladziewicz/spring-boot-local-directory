@@ -173,11 +173,11 @@
 
         // Get the email type and group slug
         const emailType = formData.get('emailType');
-        const groupId = /*[[${group.id}]]*/ ''; // Thymeleaf will inject the group ID
+        const slug = /*[[${group.slug}]]*/ ''; // Thymeleaf will inject the group ID
 
         // Create the JSON payload
         const payload = {
-            slug: groupId,
+            slug,
             subject: formData.get('subject'),
             message: formData.get('message')
         };
