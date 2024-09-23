@@ -51,6 +51,7 @@ public class GroupService {
             group.setAdministrators(List.of(userProfile.getUserId()));
             group.setType(ContentTypes.GROUP.getContentType());
             group.setSlug(createUniqueSlug(group.getName()));
+            group.setPathname("/groups/" + group.getSlug());
             group.setCreatedBy(userProfile.getUserId());
 
             List<String> validatedTags = tagService.addTags(group.getTags(), ContentTypes.GROUP.getContentType());
