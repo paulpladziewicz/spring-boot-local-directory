@@ -38,7 +38,7 @@
 
             <section class="my-5">
                 <h3>Delete Group</h3>
-                <p>The action is not reversible.</p>
+                <p>Once deleted, this action cannot be undone, and all group data will be permanently lost.</p>
                 <form method="post" th:action="@{/delete/group}" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                     <input type="hidden" name="groupId" th:value="${group.id}" />
                     <button type="submit" class="btn btn-danger">Delete Group</button>

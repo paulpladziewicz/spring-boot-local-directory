@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -23,10 +24,13 @@ public class NeighborServicesProfileService {
 
     private final StripeService stripeService;
 
-    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, StripeService stripeService) {
+    private final TagService tagService;
+
+    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, StripeService stripeService, TagService tagService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.stripeService = stripeService;
+        this.tagService = tagService;
     }
 
     public ServiceResponse<NeighborServicesProfile> createNeighborServiceProfile(NeighborServicesProfile neighborServicesProfile) {
@@ -232,6 +236,7 @@ public class NeighborServicesProfileService {
         return ServiceResponse.value(saveResponse.value());
     }
 
+    @Transactional
     public ServiceResponse<Boolean> deleteNeighborService(String neighborServiceId) {
         Optional<String> optionalUserId = userService.getUserId();
 
@@ -253,7 +258,15 @@ public class NeighborServicesProfileService {
             return ServiceResponse.error("permission_denied");
         }
 
-        // TODO check if Stripe subscription is still active and cancel it
+        if (neighborServicesProfile.getSubscriptionId() != null && !neighborServicesProfile.getSubscriptionId().isEmpty()) {
+            ServiceResponse<Boolean> cancelSubscriptionResponse = stripeService.cancelSubscriptionAtPeriodEnd(neighborServicesProfile.getSubscriptionId());
+
+            if (cancelSubscriptionResponse.hasError()) {
+                return ServiceResponse.error(cancelSubscriptionResponse.errorCode());
+            }
+        }
+
+        tagService.removeTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
 
         try {
             contentRepository.deleteById(neighborServiceId);

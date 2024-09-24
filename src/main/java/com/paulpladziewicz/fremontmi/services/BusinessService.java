@@ -26,10 +26,13 @@ public class BusinessService {
 
     private final StripeService stripeService;
 
-    public BusinessService(ContentRepository contentRepository, UserService userService, StripeService stripeService) {
+    private final TagService tagService;
+
+    public BusinessService(ContentRepository contentRepository, UserService userService, StripeService stripeService, TagService tagService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.stripeService = stripeService;
+        this.tagService = tagService;
     }
 
     public ServiceResponse<Business> createBusiness(Business business) {
@@ -269,6 +272,14 @@ public class BusinessService {
     }
 
     public ServiceResponse<Boolean> deleteBusiness(String businessId) {
+        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+
+        if (optionalUserProfile.isEmpty()) {
+            return ServiceResponse.error("user_profile_not_found");
+        }
+
+        UserProfile userProfile = optionalUserProfile.get();
+
         Optional<Business> optionalBusiness = findBusinessById(businessId);
 
         if (optionalBusiness.isEmpty()) {
@@ -278,16 +289,19 @@ public class BusinessService {
         Business business = optionalBusiness.get();
 
         if (business.getSubscriptionId() != null && !business.getSubscriptionId().isEmpty()) {
-            ServiceResponse<Boolean> isSubscriptionActiveResponse = stripeService.isSubscriptionActive(business.getSubscriptionId());
+            ServiceResponse<Boolean> cancelSubscriptionResponse = stripeService.cancelSubscriptionAtPeriodEnd(business.getSubscriptionId());
 
-            if (isSubscriptionActiveResponse.hasError()) {
-                return ServiceResponse.error(isSubscriptionActiveResponse.errorCode());
-            }
-
-            if (isSubscriptionActiveResponse.value()) {
-                return ServiceResponse.error("subscription_still_active");
+            if (cancelSubscriptionResponse.hasError()) {
+                return ServiceResponse.error(cancelSubscriptionResponse.errorCode());
             }
         }
+
+        tagService.removeTags(business.getTags(), ContentTypes.BUSINESS.getContentType());
+
+        List<String> businessIds = userProfile.getBusinessIds();
+        businessIds.remove(business.getId());
+        userProfile.setBusinessIds(businessIds);
+        userService.saveUserProfile(userProfile);
 
         try {
             contentRepository.deleteById(businessId);

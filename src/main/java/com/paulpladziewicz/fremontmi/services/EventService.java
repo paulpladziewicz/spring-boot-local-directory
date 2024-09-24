@@ -26,10 +26,12 @@ public class EventService {
     private final ContentRepository contentRepository;
 
     private final UserService userService;
+    private final TagService tagService;
 
-    public EventService(ContentRepository contentRepository, UserService userService) {
+    public EventService(ContentRepository contentRepository, UserService userService, TagService tagService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
+        this.tagService = tagService;
     }
 
     @Transactional
@@ -259,6 +261,13 @@ public class EventService {
             if (!hasPermission(userProfile.getUserId(), existingEvent)) {
                 return logAndReturnError("User does not have permission to update event: " + eventId, "permission_denied");
             }
+
+            tagService.removeTags(existingEvent.getTags(), ContentTypes.EVENT.getContentType());
+
+            List<String> eventIds = userProfile.getEventIds();
+            eventIds.remove(existingEvent.getId());
+            userProfile.setEventIds(eventIds);
+            userService.saveUserProfile(userProfile);
 
             contentRepository.deleteById(eventId);
 

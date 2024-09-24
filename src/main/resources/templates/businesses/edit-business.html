@@ -62,7 +62,7 @@
 
             <section class="my-5">
                 <h3>Delete Business</h3>
-                <p>The action is not reversible.</p>
+                <p>Once deleted, this action cannot be undone, and all business data will be permanently lost. Any existing subscription related to this business listing will not renew.</p>
                 <form method="post" th:action="@{/delete/business}" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                     <input type="hidden" name="businessId" th:value="${business.id}" />
                     <button type="submit" class="btn btn-danger">Delete Business</button>

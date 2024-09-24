@@ -27,6 +27,7 @@ public class GroupService {
     private final UserService userService;
 
     private final TagService tagService;
+
     private final EmailService emailService;
 
     public GroupService(ContentRepository contentRepository, UserService userService, TagService tagService, EmailService emailService) {
@@ -247,8 +248,13 @@ public class GroupService {
                 return logAndReturnError("User doesn't have permission to delete group", "permission_denied");
             }
 
-            // Remove group from user profile
-            // Need to decide if I am really deleting the group or just removing it from the user profile & changing visibility and status
+            tagService.removeTags(groupContent.getTags(), ContentTypes.GROUP.getContentType());
+
+            List<String> groupIds = userProfile.getGroupIds();
+            groupIds.remove(contentId);
+            userProfile.setGroupIds(groupIds);
+            userService.saveUserProfile(userProfile);
+
             contentRepository.deleteById(contentId);
             logger.info("Successfully deleted group with content id: {}", contentId);
             return ServiceResponse.value(null);
