@@ -3,6 +3,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 import com.paulpladziewicz.fremontmi.services.EmailService;
 import com.paulpladziewicz.fremontmi.services.SubscribeService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,9 +26,9 @@ public class HomeController {
         return "home";
     }
 
-    @GetMapping("/tags")
-    public String getTags() {
-        return "tagsinput";
+    @GetMapping("/tagging-guidelines")
+    public String getTags(Model model) {
+        return "tagging-guidelines";
     }
 
     @GetMapping("/error")
