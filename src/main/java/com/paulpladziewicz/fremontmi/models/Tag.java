@@ -31,4 +31,8 @@ public class Tag {
     public void incrementCountForContentType(String contentType) {
         this.countByContentType.put(contentType, this.countByContentType.getOrDefault(contentType, 0) + 1);
     }
+
+    public void decrementCountForContentType(String contentType) {
+        this.countByContentType.computeIfPresent(contentType, (key, count) -> Math.max(count - 1, 0));
+    }
 }

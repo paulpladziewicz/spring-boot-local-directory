@@ -148,6 +148,39 @@ public class TagService {
         return validatedDisplayNames;  // Return the validated display names
     }
 
+    @Transactional
+    public void removeTags(List<String> displayNames, String contentType) {
+        Set<String> processedCanonicalTags = new HashSet<>();  // Track processed canonical versions of tags
+
+        for (String displayName : displayNames) {
+            // Generate the canonical name (lowercase, no spaces, but keep special characters)
+            String canonicalName = generateCanonicalName(displayName);
+
+            // Skip if this canonical name has already been processed
+            if (processedCanonicalTags.contains(canonicalName)) {
+                continue;
+            }
+            processedCanonicalTags.add(canonicalName);
+
+            // Check if the tag exists in the database
+            Optional<Tag> optionalTag = tagRepository.findByName(canonicalName);
+
+            if (optionalTag.isPresent()) {
+                Tag existingTag = optionalTag.get();
+
+                // Decrement the overall count
+                int updatedCount = existingTag.getCount() - 1;
+                existingTag.setCount(Math.max(0, updatedCount));  // Ensure count doesn't go below 0
+
+                // Decrement the count for the specific content type
+                existingTag.decrementCountForContentType(contentType);
+
+                // Save changes if counts are updated
+                tagRepository.save(existingTag);
+            }
+        }
+    }
+
     // Helper method to generate the canonical form of a tag
     private String generateCanonicalName(String displayName) {
         // Remove all characters except lowercase letters, spaces, and hyphens

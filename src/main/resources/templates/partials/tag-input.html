@@ -8,7 +8,7 @@
         </div>
 
         <small class="form-text text-muted">
-            Max 3 tags. Separate words allowed (e.g., "Ice Cream").
+            Max 5 tags. Examples: Cleaning, Language Learning, Self-Improvement, ACT Prep.
             <a href="/tagging-guidelines" target="_blank">Learn how to tag well.</a>
         </small>
 
@@ -28,7 +28,7 @@
             const hiddenTagInput = document.getElementById('hidden-tag-input');
             let tags = hiddenTagInput.value ? hiddenTagInput.value.split(',') : [];
             let canonicalTags = tags.map(formatCanonicalTag);
-            const tagMax = 3;
+            const tagMax = 5;
 
             // Display the initial tags
             tags.forEach(addTagPill);
