@@ -441,8 +441,50 @@ public class StripeService {
         }
 
         Content content = optionalContent.get();
+        Map<String, Object> stripeDetails = content.getStripeDetails();
+        String subscriptionId = (String) stripeDetails.get("subscriptionId");
 
-        return ServiceResponse.value(content.getStripeDetails());
+        if (subscriptionId != null && !subscriptionId.isEmpty()) {
+            try {
+                // TODO: I could potentially store the timestamps in the database to avoid a stripe call
+                Subscription subscription = Subscription.retrieve(subscriptionId);
+
+                long billingCycleAnchor = subscription.getBillingCycleAnchor();
+                long currentTimestamp = System.currentTimeMillis() / 1000; // Current time in seconds
+                long timeUntilBillingCycleAnchor = billingCycleAnchor - currentTimestamp;
+                long thresholdTimeInSeconds = 20 * 3600; // 20 hours in seconds
+                boolean isTooCloseToAutoCancel = timeUntilBillingCycleAnchor <= thresholdTimeInSeconds;
+
+                if (isTooCloseToAutoCancel) {
+                    String priceId = (String) stripeDetails.get("priceId");
+                    ServiceResponse<Map<String, Object>> newSubscriptionResponse = createSubscription(priceId);
+
+                    if (newSubscriptionResponse.hasError()) {
+                        return ServiceResponse.error(newSubscriptionResponse.errorCode());
+                    }
+
+                    Map<String, Object> newSubscriptionData = newSubscriptionResponse.value();
+                    stripeDetails.put("subscriptionId", newSubscriptionData.get("subscriptionId"));
+                    stripeDetails.put("clientSecret", newSubscriptionData.get("clientSecret"));
+                    stripeDetails.put("displayName", newSubscriptionData.get("displayName"));
+                    stripeDetails.put("displayPrice", newSubscriptionData.get("displayPrice"));
+                    stripeDetails.put("priceId", newSubscriptionData.get("priceId"));
+                    stripeDetails.put("invoiceId", newSubscriptionData.get("invoiceId"));
+
+                    content.setStripeDetails(stripeDetails);
+                    contentRepository.save(content);
+
+                    return ServiceResponse.value(stripeDetails);
+                } else {
+                    return ServiceResponse.value(stripeDetails);
+                }
+            } catch (StripeException e) {
+                logger.error("Error retrieving subscription details: ", e);
+                return ServiceResponse.error("stripe_subscription_retrieval_error");
+            }
+        } else {
+            return ServiceResponse.error("no_subscription_id_found");
+        }
     }
 }
 

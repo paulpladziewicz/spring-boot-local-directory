@@ -36,7 +36,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
             int failedAttempts = user.get().getFailedLoginAttempts() + 1;
             user.get().setFailedLoginAttempts(failedAttempts);
 
-            if (failedAttempts >= 3) {
+            if (failedAttempts > 3) {
                 user.get().setAccountNonLocked(false);
                 user.get().setLockTime(LocalDateTime.now());
             }
@@ -44,14 +44,16 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
             userRepository.save(user.get());
         }
 
-        if ("User is disabled".equalsIgnoreCase(exception.getMessage())) {
-            setDefaultFailureUrl("/login?error=notConfirmed");
-        } if ("Your account is locked. Please try again after 15 minutes.".equalsIgnoreCase(exception.getMessage())) {
-            setDefaultFailureUrl("/login?error=locked");
-        } else {
-            System.out.println(exception.getMessage());
-            setDefaultFailureUrl("/login?error=true");
-        }
+        setDefaultFailureUrl(switch (exception.getMessage().toLowerCase()) {
+            case "user is disabled" -> "/login?error=notConfirmed";
+            case "your account is locked. please try again after 15 minutes." -> "/login?error=locked";
+            case "account expired" -> "/login?error=expired";
+            case "credentials expired" -> "/login?error=credentialsExpired";
+            case "bad credentials" -> "/login?error=badCredentials";
+            case "too many failed login attempts" -> "/login?error=tooManyAttempts";
+            case "account disabled due to security concerns" -> "/login?error=disabledSecurity";
+            default -> "/login?error=true";
+        });
 
         super.onAuthenticationFailure(request, response, exception);
     }

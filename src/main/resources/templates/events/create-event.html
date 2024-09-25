@@ -58,13 +58,26 @@
 </main>
 
 <script>
-    document.addEventListener('htmx:afterSwap', function(event) {
+    function reinitializeFlatpickr() {
+        // Destroy existing flatpickr instances
+        document.querySelectorAll('.date-picker').forEach(function (element) {
+            if (element._flatpickr) {
+                element._flatpickr.destroy();
+            }
+        });
+
+        // Reinitialize flatpickr on all date-picker elements
         flatpickr('.date-picker', {
             enableTime: true,
             altInput: true,
             altFormat: "F j, Y h:i K",
-            dateFormat: "Y-m-d h:i K"
+            dateFormat: "Y-m-d H:i K"
         });
+    }
+
+    // Listen to HTMX after swap events and reinitialize flatpickr
+    document.addEventListener('htmx:afterSwap', function(event) {
+        reinitializeFlatpickr();
     });
 </script>
 

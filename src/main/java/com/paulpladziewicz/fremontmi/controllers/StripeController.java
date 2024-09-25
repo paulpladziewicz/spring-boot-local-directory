@@ -32,7 +32,16 @@ public class StripeController {
         ServiceResponse<Map<String, Object>> serviceResponse = stripeService.getContentDetails(contentId);
 
         if (serviceResponse.hasError()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            switch (serviceResponse.errorCode()) {
+                case "content_not_found":
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Content not found."));
+                case "subscription_inactive":
+                    return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(Map.of("error", "Your subscription is no longer active. Please renew."));
+                case "no_subscription_id_found":
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "No subscription details found for this content."));
+                default:
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "An unexpected error occurred."));
+            }
         }
 
         return ResponseEntity.ok(serviceResponse.value());
