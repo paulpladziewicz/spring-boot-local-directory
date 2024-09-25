@@ -104,6 +104,7 @@ public class BusinessController {
 
         Business business = businessOptional.get();
 
+        // TODO add isAdmin attribute to model
         model.addAttribute("business", business);
 
         return "businesses/business-page";

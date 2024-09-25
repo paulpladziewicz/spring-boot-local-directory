@@ -332,6 +332,7 @@ public class BusinessService {
         existingBusiness.setPhoneNumber(updatedBusiness.getPhoneNumber());
         existingBusiness.setEmail(updatedBusiness.getEmail());
         existingBusiness.setWebsite(updatedBusiness.getWebsite());
+        existingBusiness.setDisplayEmail(updatedBusiness.isDisplayEmail());
     }
 
     private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {

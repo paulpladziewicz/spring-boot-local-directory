@@ -40,5 +40,7 @@ public class Business extends Content {
 
     private String email;
 
+    private boolean displayEmail;
+
     private String website;
 }
