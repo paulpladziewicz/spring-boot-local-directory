@@ -90,17 +90,17 @@
                     <h3>Removing An Event</h3>
                     <p>If the event is no longer needed, you can permanently delete it. If you only wish to cancel it, consider using the cancel option instead.</p>
 
-                    <div class="d-flex">
+                    <div class="d-flex flex-wrap">
                         <form method="post" th:action="@{/delete/event}" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                             <input type="hidden" name="eventId" th:value="${event.id}"/>
-                            <button type="submit" class="btn btn-danger me-2">Delete Event Permanently</button>
+                            <button type="submit" class="btn btn-danger my-2 me-2">Delete Event Permanently</button>
                         </form>
-                        <form method="post" th:action="@{/cancel/event}" th:if="${event.status == 'active'}" class="mb-3" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                        <form method="post" th:action="@{/cancel/event}" th:if="${event.status == 'active'}" class="my-2 me-2" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                             <input type="hidden" name="slug" th:value="${event.slug}"/>
                             <button type="submit" class="btn btn-outline-danger">Cancel Event</button>
                         </form>
 
-                        <form method="post" th:action="@{/reactivate/event}" th:if="${event.status == 'canceled'}" class="mb-3" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                        <form method="post" th:action="@{/reactivate/event}" th:if="${event.status == 'canceled'}" class="my-2 me-2" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                             <input type="hidden" name="slug" th:value="${event.slug}"/>
                             <button type="submit" class="btn btn-outline-primary">Reactivate Event</button>
                         </form>
