@@ -21,8 +21,8 @@
 
                 <!-- Payment info will be shown here after loading -->
                 <div id="payment-info" style="display:none;">
-                    <p class="mb-2">You are paying for a <strong id="displayName"></strong> at <strong id="displayPrice"></strong>.</p>
-<!--                    <p><a href="/create/business/overview" class="btn btn-link fw-semibold fs-sm p-0">Change Subscription</a></p>-->
+                    <p class="mb-2">You are paying for a <strong id="displayName"></strong> at <strong id="displayPrice"></strong> per billing cycle. You can cancel your subscription at any time through your account settings. Payments are non-refundable.</p>
+
                     <form id="payment-form" class="my-4">
                         <div id="payment-element"></div>
                         <div id="error-message" class="alert alert-danger mt-3" role="alert" style="display:none;"></div>
@@ -42,7 +42,6 @@
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
 
-        // Fetch content information using the contentId
         try {
             const response = await fetch(`/api/get-content/${contentId}`, {
                 method: 'GET',
