@@ -58,7 +58,7 @@ public class StripeController {
 
         Content content = serviceResponse.value();
 
-        String redirectUrl = content.getPathname();
+        String redirectUrl = content.getPathname() + "?subscribed=true";
 
         return ResponseEntity.ok("{\"redirectUrl\": \"" + redirectUrl + "\"}");
     }
