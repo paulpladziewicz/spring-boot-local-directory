@@ -175,4 +175,27 @@ public class NeighborServicesProfileController {
 
         return "redirect:/neighbor-services/" + updatedNeighborServicesProfile.getSlug();
     }
+
+    // TODO delete neighbor service profile
+
+
+    @PostMapping("/contact/neighbor-services-profile")
+    public String handleContactForm(
+            @RequestParam("slug") String slug,
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("message") String message,
+            RedirectAttributes redirectAttributes) {
+
+//        ServiceResponse<Boolean> contactFormSubmissionResponse = neighborServicesProfileService.handleContactFormSubmission(slug, name, email, message);
+
+//        if (contactFormSubmissionResponse.hasError()) {
+//            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while trying to send your message. Please try again later.");
+//            return "redirect:/businesses/" + slug;
+//        }
+//
+//        redirectAttributes.addFlashAttribute("successMessage", "Thank you for reaching out. We will get back to you shortly.");
+
+        return "redirect:/businesses/" + slug;
+    }
 }

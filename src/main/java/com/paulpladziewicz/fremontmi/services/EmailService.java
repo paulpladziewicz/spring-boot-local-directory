@@ -165,4 +165,26 @@ public class EmailService {
             logger.error("Failed to send dispute created email to {}", email, e);
         }
     }
+
+    public void sendContactBusinessEmail(String toEmail, String name, String fromEmail, String message) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+            Context context = new Context();
+            context.setVariable("name", name);
+            context.setVariable("fromEmail", fromEmail);
+            context.setVariable("message", message);
+
+            String html = templateEngine.process("businesses/email/contact-business-email", context);
+
+            mimeMessage.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
+            mimeMessage.setRecipients(MimeMessage.RecipientType.TO, toEmail);
+            mimeMessage.setSubject("Business Contact Form Submission");
+            mimeMessage.setContent(html, "text/html; charset=utf-8");
+
+
+        } catch (MessagingException | MailException | UnsupportedEncodingException e) {
+            logger.error("Failed to send business contact email to {} from {} with message: {} and name: {}", toEmail, fromEmail, message, name, e);
+        }
+    }
 }

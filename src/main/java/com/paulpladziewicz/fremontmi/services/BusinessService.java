@@ -28,11 +28,14 @@ public class BusinessService {
 
     private final TagService tagService;
 
-    public BusinessService(ContentRepository contentRepository, UserService userService, StripeService stripeService, TagService tagService) {
+    private final EmailService emailService;
+
+    public BusinessService(ContentRepository contentRepository, UserService userService, StripeService stripeService, TagService tagService, EmailService emailService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.stripeService = stripeService;
         this.tagService = tagService;
+        this.emailService = emailService;
     }
 
     public ServiceResponse<Business> createBusiness(Business business) {
@@ -351,8 +354,7 @@ public class BusinessService {
         Business business = optionalBusiness.get();
 
         try {
-            // Send email to business owner
-            // emailService.sendContactBusinessEmailAsync(business, name, email, message);
+             emailService.sendContactBusinessEmail(business.getEmail(), name, email, message);
 
             return ServiceResponse.value(true);
         } catch (Exception e) {
