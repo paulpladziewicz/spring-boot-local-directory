@@ -1,4 +1,4 @@
-<!DOCTYPE html >
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>FremontMI</title>
@@ -6,18 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <style type="text/css">
-
-        /* CLIENT-SPECIFIC STYLES */
         body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
         table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
         img { -ms-interpolation-mode: bicubic; }
-
-        /* RESET STYLES */
         img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
         table { border-collapse: collapse !important; }
         body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
-
-        /* iOS BLUE LINKS */
         a[x-apple-data-detectors] {
             color: inherit !important;
             text-decoration: none !important;
@@ -26,80 +20,37 @@
             font-weight: inherit !important;
             line-height: inherit !important;
         }
-
-        /* GMAIL BLUE LINKS */
-        u + #body a {
-            color: inherit;
-            text-decoration: none;
-            font-size: inherit;
-            font-family: inherit;
-            font-weight: inherit;
-            line-height: inherit;
-        }
-
-        /* SAMSUNG MAIL BLUE LINKS */
-        #MessageViewBody a {
-            color: inherit;
-            text-decoration: none;
-            font-size: inherit;
-            font-family: inherit;
-            font-weight: inherit;
-            line-height: inherit;
-        }
-
-        /* Universal styles for links and stuff */
         a { color: #229efd; font-weight: bold; }
         a:hover { color: #fd6350; text-decoration: none; }
-        a.button:hover { background-color: #fd6350 !important; }
-
-        /* Responsive styles */
         @media screen and (max-width: 600px) {
             h1 { font-size: 24px !important; }
         }
-
     </style>
 </head>
-<body id="body" style="margin: 0 !important; padding: 0 !important;">
-
-<!-- Preview text for the inbox -->
-<!-- This will be displayed underneath the subject line. Use it wisely. -->
+<body id="body" style="margin: 0; padding: 0; background-color: #f7f7f7;">
 <div style="display: none; max-height: 0; overflow: hidden;">
     Here is your username reminder from FremontMI.
 </div>
-
-<!--[if (gte mso 9)|(IE)]>
-<table cellspacing="0" cellpadding="0" border="0" width="600" align="center" role="presentation"><tr><td>
-<![endif]-->
-
-<div style="background-color: white; color: #000000; font-family: sans-serif; font-size: 18px; line-height: 36px; margin: 0 auto; max-width: 600px; padding: 40px 20px 40px 20px;">
-
-    <h1 style="font-size: 28px; margin-bottom: 20px; color: #333333; text-align: center;">Hello!</h1>
-
-    <p style="margin-bottom: 20px; text-align: center;">
+<div style="background-color: white; color: #222222; font-family: sans-serif; font-size: 18px; line-height: 1.6; margin: 0 auto; max-width: 600px; padding: 40px 20px;">
+    <h1 style="font-size: 32px; margin-bottom: 25px; color: #333333; text-align: center; font-weight: 700;">Hello!</h1>
+    <p style="margin-bottom: 25px; text-align: center;">
         You requested a reminder for your username. Here it is:
     </p>
-
-    <p style="font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 30px;">
-        <span th:text="${username}">[username]</span>
-    </p>
-
-    <p style="text-align: center; margin-bottom: 20px;">
+    <!-- Username container with full-width background -->
+    <div style="background-color: #f7f7f7; padding: 10px 0; margin: 0 -20px 30px -20px;">
+        <p style="font-size: 26px; font-weight: bold; text-align: center; margin: 0;">
+            <span th:text="${username}">[username]</span>
+        </p>
+    </div>
+    <p style="text-align: center; margin-bottom: 25px;">
         If you did not request this, please <a href="https://fremontmi.com/#contact-us" style="color: #448C74">contact us</a> immediately.
     </p>
-
     <p style="text-align: center; margin-bottom: 40px;">
         Thank you for being a part of FremontMI!
     </p>
-
-    <p style="text-align: center; font-size: 14px; color: #666666;">
+    <p style="text-align: center; font-size: 12px; color: #666666; margin-top: 20px;">
         This is an automated message, please do not reply.
     </p>
-
 </div>
-
-<!--[if (gte mso 9)|(IE)]>
-</td></tr></table>
-<![endif]-->
-
 </body>
 </html>
