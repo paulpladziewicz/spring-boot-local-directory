@@ -56,6 +56,39 @@
 
     </div>
 
+    <section class="bg-secondary container pt-5 pb-3 pb-xl-4 py-xxl-5 my-5">
+
+        <div class="row pb-1 pb-sm-3 pb-lg-4">
+
+            <div class="col-lg-8 col-xl-7 offset-xl-1 mx-auto">
+                <!-- Page title -->
+                <h1 class="display-6 text-center" th:text="'Contact ' + ${neighborServicesProfile.name}">Contact Us</h1>
+                <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">If you have any questions, inquiries, or would like more information about
+                    <span th:text="${neighborServicesProfile.name}">our business</span>, please fill out the form below.</p>
+                <!-- Contact form -->
+                <form class="row g-4 needs-validation" novalidate="">
+                    <div class="col-sm-6">
+                        <label class="form-label fs-base" for="name">Name</label>
+                        <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
+                        <div class="invalid-feedback">Please enter your name!</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label fs-base" for="email">Email</label>
+                        <input class="form-control form-control-lg" type="email" placeholder="Email address" required="" id="email">
+                        <div class="invalid-feedback">Please provide a valid email address!</div>
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form-label fs-base" for="message">How can we help?</label>
+                        <textarea class="form-control form-control-lg" rows="5" placeholder="Enter your message here..." required="" id="message"></textarea>
+                        <div class="invalid-feedback">Please enter your message!</div>
+                    </div>
+                    <div class="col-sm-12 pt-2">
+                        <button class="btn btn-lg btn-primary" type="submit">Send message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <script th:inline="javascript">

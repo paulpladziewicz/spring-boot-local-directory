@@ -75,7 +75,7 @@
 
     </div>
 
-    <section class="bg-secondary container pt-5 pb-lg-2 pb-xl-4 py-xxl-5 my-5">
+    <section class="bg-secondary container pt-5 pb-3 pb-xl-4 py-xxl-5 my-5">
 
         <div class="row pb-1 pb-sm-3 pb-lg-4">
 
@@ -109,39 +109,6 @@
         </div>
     </section>
 </main>
-
-<!-- Tooltip container -->
-<div id="tooltip" style="display: none; position: absolute; background: #333; color: #fff; padding: 5px; border-radius: 3px;">
-    Copied!
-</div>
-
-<script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', () => {
-        const copyButton = document.getElementById('copy-button');
-
-        // Initialize Bootstrap tooltip
-        const tooltip = new bootstrap.Tooltip(copyButton);
-
-        copyButton.addEventListener('click', async function() {
-            const businessId = /*[[${business.id}]]*/ 'default-id';
-            const fullUrl = window.location.origin + '/businesses/' + businessId;
-
-            try {
-                await navigator.clipboard.writeText(fullUrl);
-
-                // Show the tooltip
-                tooltip.show();
-
-                // Hide the tooltip after 2 seconds
-                setTimeout(() => {
-                    tooltip.hide();
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy: ', err);
-            }
-        });
-    });
-</script>
 
 <footer th:replace="~{partials/footer}"></footer>
 <script th:replace="~{partials/theme-js}"></script>
