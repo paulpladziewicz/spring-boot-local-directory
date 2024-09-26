@@ -102,13 +102,70 @@
                         <div class="invalid-feedback">Please enter your message!</div>
                     </div>
                     <div class="col-sm-12 pt-2">
-                        <button class="btn btn-lg btn-primary" type="submit">Send message</button>
+                        <button id="submit-button" class="btn btn-lg btn-primary" type="button" onclick="submitContactForm()">Send message</button>
+                        <button id="loading-button" class="btn btn-lg btn-primary pe-none" type="button" style="display: none;">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Loading...
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </section>
 </main>
+
+
+<script th:inline="javascript">
+    function submitContactForm() {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const message = document.getElementById('message').value;
+        const slug = /*[[${business.slug}]]*/ '';
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+
+        // Validate required fields
+        if (!name || !email || !message) {
+            alert("All fields are required.");
+            return;
+        }
+
+        // Show loading button
+        document.getElementById('submit-button').style.display = 'none';
+        document.getElementById('loading-button').style.display = 'inline-block';
+
+        // Send data to the server using fetch
+        fetch('/contact/business', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify({ slug, name, email, message })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    document.getElementById('success-message').style.display = 'block';
+                    // Reset form
+                    document.querySelector('.needs-validation').reset();
+                } else {
+                    alert('An error occurred while trying to send your message. Please try again later.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+            })
+            .finally(() => {
+                // Reset buttons
+                document.getElementById('submit-button').style.display = 'inline-block';
+                document.getElementById('loading-button').style.display = 'none';
+            });
+    }
+</script>
+
 
 <footer th:replace="~{partials/footer}"></footer>
 <script th:replace="~{partials/theme-js}"></script>

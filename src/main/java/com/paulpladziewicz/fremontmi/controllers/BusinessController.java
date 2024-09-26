@@ -1,12 +1,11 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.models.Business;
-import com.paulpladziewicz.fremontmi.models.Content;
-import com.paulpladziewicz.fremontmi.models.ServiceResponse;
-import com.paulpladziewicz.fremontmi.models.TagUsage;
+import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.BusinessService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -178,22 +177,26 @@ public class BusinessController {
     }
 
     @PostMapping("/contact/business")
-    public String handleContactForm(
-            @RequestParam("slug") String slug,
-            @RequestParam("name") String name,
-            @RequestParam("email") String email,
-            @RequestParam("message") String message,
-            RedirectAttributes redirectAttributes) {
+    public ResponseEntity<Map<String, Object>> handleContactForm(
+            @RequestBody ContactFormRequest contactFormRequest) {
 
-        ServiceResponse<Boolean> contactFormSubmissionResponse = businessService.handleContactFormSubmission(slug, name, email, message);
+        ServiceResponse<Boolean> contactFormSubmissionResponse = businessService.handleContactFormSubmission(
+                contactFormRequest.getSlug(),
+                contactFormRequest.getName(),
+                contactFormRequest.getEmail(),
+                contactFormRequest.getMessage()
+        );
+
+        Map<String, Object> response = new HashMap<>();
 
         if (contactFormSubmissionResponse.hasError()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while trying to send your message. Please try again later.");
-            return "redirect:/businesses/" + slug;
+            response.put("success", false);
+            response.put("message", "An error occurred while trying to send your message. Please try again later.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Thank you for reaching out. We will get back to you shortly.");
-
-        return "redirect:/businesses/" + slug;
+        response.put("success", true);
+        response.put("message", "Thank you for reaching out. We will get back to you shortly.");
+        return ResponseEntity.ok(response);
     }
 }
