@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -202,7 +203,7 @@ public class EventService {
             Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
             if (optionalUserProfile.isEmpty()) {
-                return logAndReturnError("Failed to create business: user profile not found.", "user_profile_not_found");
+                return logAndReturnError("Failed to update event: user profile not found.", "user_profile_not_found");
             }
 
             UserProfile userProfile = optionalUserProfile.get();
@@ -221,6 +222,13 @@ public class EventService {
 
             validateEventTimes(updatedEvent);
 
+            List<String> oldTags = existingEvent.getTags();
+            List<String> newTags = updatedEvent.getTags();
+
+            if (newTags != null) {
+                tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.EVENT.getContentType());
+            }
+
             updateExistingEvent(existingEvent, updatedEvent);
 
             ServiceResponse<Event> saveEventResponse = saveEvent(existingEvent);
@@ -238,6 +246,7 @@ public class EventService {
             return logAndReturnError("Unexpected error while updating event.", "unexpected_error", e);
         }
     }
+
 
     @Transactional
     public ServiceResponse<Boolean> deleteEvent(String eventId) {

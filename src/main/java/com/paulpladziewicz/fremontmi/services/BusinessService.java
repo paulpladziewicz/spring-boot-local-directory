@@ -6,8 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -231,12 +233,13 @@ public class BusinessService {
         }
     }
 
+    @Transactional
     public ServiceResponse<Business> updateBusiness(Business updatedBusiness) {
         try {
             Optional<String> optionalUserId = userService.getUserId();
 
             if (optionalUserId.isEmpty()) {
-                return logAndReturnError("Failed to delete neighbor service: user id not found.", "user_id_not_found");
+                return logAndReturnError("Failed to update business: user id not found.", "user_id_not_found");
             }
 
             String userId = optionalUserId.get();
@@ -251,6 +254,13 @@ public class BusinessService {
 
             if (!hasPermission(userId, existingBusiness)) {
                 return logAndReturnError("User does not have permission to update this business", "permission_denied");
+            }
+
+            List<String> oldTags = existingBusiness.getTags();
+            List<String> newTags = updatedBusiness.getTags();
+
+            if (newTags != null) {
+                tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.BUSINESS.getContentType());
             }
 
             updateBusinessProperties(existingBusiness, updatedBusiness);
@@ -273,6 +283,7 @@ public class BusinessService {
             return ServiceResponse.error("unexpected_error");
         }
     }
+
 
     public ServiceResponse<Boolean> deleteBusiness(String businessId) {
         Optional<UserProfile> optionalUserProfile = userService.getUserProfile();

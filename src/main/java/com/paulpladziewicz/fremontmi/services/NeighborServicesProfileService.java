@@ -204,11 +204,12 @@ public class NeighborServicesProfileService {
         }
     }
 
+    @Transactional
     public ServiceResponse<NeighborServicesProfile> updateNeighborServiceProfile(NeighborServicesProfile neighborServiceProfile) {
         Optional<String> optionalUserId = userService.getUserId();
 
         if (optionalUserId.isEmpty()) {
-            return logAndReturnError("Failed to delete neighbor service: user id not found.", "user_id_not_found");
+            return logAndReturnError("Failed to update neighbor service: user id not found.", "user_id_not_found");
         }
 
         String userId = optionalUserId.get();
@@ -225,6 +226,13 @@ public class NeighborServicesProfileService {
             return ServiceResponse.error("permission_denied");
         }
 
+        List<String> oldTags = existingProfile.getTags();
+        List<String> newTags = neighborServiceProfile.getTags();
+
+        if (newTags != null) {
+            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+        }
+
         updateExistingNeighborServiceProfile(existingProfile, neighborServiceProfile);
 
         ServiceResponse<NeighborServicesProfile> saveResponse = saveNeighborServiceProfile(existingProfile);
@@ -235,6 +243,7 @@ public class NeighborServicesProfileService {
 
         return ServiceResponse.value(saveResponse.value());
     }
+
 
     @Transactional
     public ServiceResponse<Boolean> deleteNeighborService(String neighborServiceId) {
