@@ -211,10 +211,13 @@ public class GroupService {
                 return logAndReturnError("User doesn't have permission to delete group", "permission_denied");
             }
 
-            // TODO: make it's own function for updating group properties
+            List<String> existingTags = existingGroup.getTags();
+            List<String> newTags = group.getTags();
+            tagService.updateTags(newTags, existingTags, ContentTypes.GROUP.getContentType());
+
             existingGroup.setName(group.getName());
             existingGroup.setDescription(group.getDescription());
-            existingGroup.setTags(group.getTags());
+            existingGroup.setTags(newTags);
 
             return ServiceResponse.value(contentRepository.save(existingGroup));
 

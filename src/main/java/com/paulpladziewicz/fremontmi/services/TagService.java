@@ -149,6 +149,43 @@ public class TagService {
     }
 
     @Transactional
+    public void updateTags(List<String> newDisplayNames, List<String> oldDisplayNames, String contentType) {
+        // Generate canonical names for both old and new tags
+        Set<String> newCanonicalTags = newDisplayNames.stream()
+                .map(this::generateCanonicalName)
+                .collect(Collectors.toSet());
+
+        Set<String> oldCanonicalTags = oldDisplayNames.stream()
+                .map(this::generateCanonicalName)
+                .collect(Collectors.toSet());
+
+        // Determine which tags need to be added and removed
+        Set<String> tagsToAdd = new HashSet<>(newCanonicalTags);
+        tagsToAdd.removeAll(oldCanonicalTags); // Tags that exist in new but not in old
+
+        Set<String> tagsToRemove = new HashSet<>(oldCanonicalTags);
+        tagsToRemove.removeAll(newCanonicalTags); // Tags that exist in old but not in new
+
+        // Add new tags
+        if (!tagsToAdd.isEmpty()) {
+            List<String> tagsToAddDisplayNames = newDisplayNames.stream()
+                    .filter(tag -> tagsToAdd.contains(generateCanonicalName(tag)))
+                    .collect(Collectors.toList());
+
+            addTags(tagsToAddDisplayNames, contentType);
+        }
+
+        // Remove old tags
+        if (!tagsToRemove.isEmpty()) {
+            List<String> tagsToRemoveDisplayNames = oldDisplayNames.stream()
+                    .filter(tag -> tagsToRemove.contains(generateCanonicalName(tag)))
+                    .collect(Collectors.toList());
+
+            removeTags(tagsToRemoveDisplayNames, contentType);
+        }
+    }
+
+    @Transactional
     public void removeTags(List<String> displayNames, String contentType) {
         Set<String> processedCanonicalTags = new HashSet<>();  // Track processed canonical versions of tags
 
