@@ -268,6 +268,12 @@ public class BusinessService {
                 tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.BUSINESS.getContentType());
             }
 
+            if (!existingBusiness.getName().equals(updatedBusiness.getName())) {
+                String newSlug = createUniqueSlug(updatedBusiness.getName());
+                existingBusiness.setSlug(newSlug);
+                existingBusiness.setPathname("/businesses/" + newSlug);
+            }
+
             updateBusinessProperties(existingBusiness, updatedBusiness);
 
             existingBusiness.setUpdatedBy(userId);
@@ -288,6 +294,7 @@ public class BusinessService {
             return ServiceResponse.error("unexpected_error");
         }
     }
+
 
 
     public ServiceResponse<Boolean> deleteBusiness(String businessId) {
