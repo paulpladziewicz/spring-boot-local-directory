@@ -9,6 +9,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -86,8 +87,11 @@ public class EventService {
     }
 
     public String createUniqueSlug(String name) {
-        String baseSlug = name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
-
+        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
+        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-|-$", "");
         List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.EVENT.getContentType());
 
         if (matchingSlugs.isEmpty()) {
@@ -227,6 +231,12 @@ public class EventService {
 
             if (newTags != null) {
                 tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.EVENT.getContentType());
+            }
+
+            if (!existingEvent.getName().equals(updatedEvent.getName())) {
+                String newSlug = createUniqueSlug(updatedEvent.getName());
+                existingEvent.setSlug(newSlug);
+                existingEvent.setPathname("/events/" + newSlug);
             }
 
             updateExistingEvent(existingEvent, updatedEvent);

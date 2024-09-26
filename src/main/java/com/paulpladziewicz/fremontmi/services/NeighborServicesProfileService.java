@@ -8,6 +8,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -74,8 +75,11 @@ public class NeighborServicesProfileService {
     }
 
     public String createUniqueSlug(String name) {
-        String baseSlug = name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
-
+        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
+        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-|-$", "");
         List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
 
         if (matchingSlugs.isEmpty()) {
@@ -231,6 +235,12 @@ public class NeighborServicesProfileService {
 
         if (newTags != null) {
             tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+        }
+
+        if (!existingProfile.getName().equals(neighborServiceProfile.getName())) {
+            String newSlug = createUniqueSlug(neighborServiceProfile.getName());
+            existingProfile.setSlug(newSlug);
+            existingProfile.setPathname("/neighbor-services/" + newSlug);
         }
 
         updateExistingNeighborServiceProfile(existingProfile, neighborServiceProfile);

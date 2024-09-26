@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.AbstractDocument;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -73,7 +74,11 @@ public class GroupService {
     }
 
     public String createUniqueSlug(String name) {
-        String baseSlug = name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
+        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-|-$", "");
 
         List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.GROUP.getContentType());
 
@@ -214,6 +219,12 @@ public class GroupService {
             List<String> existingTags = existingGroup.getTags();
             List<String> newTags = group.getTags();
             tagService.updateTags(newTags, existingTags, ContentTypes.GROUP.getContentType());
+
+            if (!existingGroup.getName().equals(group.getName())) {
+                String newSlug = createUniqueSlug(group.getName());
+                existingGroup.setSlug(newSlug);
+                existingGroup.setPathname("/groups/" + newSlug);
+            }
 
             existingGroup.setName(group.getName());
             existingGroup.setDescription(group.getDescription());
