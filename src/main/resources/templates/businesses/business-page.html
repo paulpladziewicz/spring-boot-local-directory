@@ -146,10 +146,13 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Show success message
-                    document.getElementById('success-message').style.display = 'block';
-                    // Reset form
-                    document.querySelector('.needs-validation').reset();
+                    // Remove the form from the DOM
+                    const formContainer = document.querySelector('.needs-validation').parentElement;
+                    formContainer.innerHTML = `
+                    <div class="alert alert-success" role="alert">
+                        ${data.message}
+                    </div>
+                `;
                 } else {
                     alert('An error occurred while trying to send your message. Please try again later.');
                 }
