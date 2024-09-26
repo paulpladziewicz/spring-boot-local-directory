@@ -32,7 +32,8 @@
                 </div>
                 <div class="d-none d-md-flex flex-column flex-sm-row justify-content-between align-items-center mb-2">
                     <h1 th:text="${business.name}" class="display-3 mb-0">Fremont Business Name</h1>
-                    <div class="d-none d-md-block">
+                    <!-- Edit button only shown if isAdmin is true -->
+                    <div class="d-none d-md-block" th:if="${isAdmin}">
                         <a th:href="'/edit/business/' + ${business.slug}" class="btn btn-secondary btn-icon" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
                             <i class="ai-edit-alt"></i>
                         </a>
@@ -40,7 +41,8 @@
                 </div>
                 <div class="d-md-none">
                     <h1 th:text="${business.name}" class="display-3 mb-0">Fremont Business Name</h1>
-                    <a th:href="'/edit/business/' + ${business.slug}" class="d-md-none btn btn-link p-0" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">Edit Business Listing</a>
+                    <!-- Edit link only shown if isAdmin is true -->
+                    <a th:if="${isAdmin}" th:href="'/edit/business/' + ${business.slug}" class="d-md-none btn btn-link p-0" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">Edit Business Listing</a>
                 </div>
             </div>
         </div>

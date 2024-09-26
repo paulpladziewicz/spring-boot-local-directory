@@ -3,6 +3,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.BusinessService;
 import com.paulpladziewicz.fremontmi.services.TagService;
+import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,12 @@ public class BusinessController {
 
     private final TagService tagService;
 
-    public BusinessController(BusinessService businessService, TagService tagService) {
+    private final UserService userService;
+
+    public BusinessController(BusinessService businessService, TagService tagService, UserService userService) {
         this.businessService = businessService;
         this.tagService = tagService;
+        this.userService = userService;
     }
 
     @GetMapping("/create/business/overview")
@@ -103,7 +107,18 @@ public class BusinessController {
 
         Business business = businessOptional.get();
 
-        // TODO add isAdmin attribute to model
+        Optional<String> userIdOpt = userService.getUserId();
+
+        if (userIdOpt.isEmpty()) {
+            model.addAttribute("error", true);
+            return "events/events";
+        }
+
+        String userId = userIdOpt.get();
+
+        boolean isAdmin = business.getAdministrators().contains(userId);
+
+        model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("business", business);
 
         return "businesses/business-page";
