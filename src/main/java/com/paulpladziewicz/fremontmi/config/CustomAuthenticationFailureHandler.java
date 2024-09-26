@@ -33,15 +33,21 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         Optional<UserRecord> user = userRepository.findByUsername(username);
 
         if (user.isPresent()) {
-            int failedAttempts = user.get().getFailedLoginAttempts() + 1;
-            user.get().setFailedLoginAttempts(failedAttempts);
+            UserRecord userRecord = user.get();
+            int failedAttempts = userRecord.getFailedLoginAttempts() + 1;
+            userRecord.setFailedLoginAttempts(failedAttempts);
 
             if (failedAttempts > 3) {
-                user.get().setAccountNonLocked(false);
-                user.get().setLockTime(LocalDateTime.now());
+                userRecord.setAccountNonLocked(false);
+                userRecord.setLockTime(LocalDateTime.now());
+                userRepository.save(userRecord);
+
+                setDefaultFailureUrl("/login?error=locked");
+                super.onAuthenticationFailure(request, response, exception);
+                return;
             }
 
-            userRepository.save(user.get());
+            userRepository.save(userRecord);
         }
 
         setDefaultFailureUrl(switch (exception.getMessage().toLowerCase()) {

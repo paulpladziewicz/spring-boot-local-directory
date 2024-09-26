@@ -48,7 +48,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String handleRegistration(@ModelAttribute("userRegistrationDto") @Valid UserRegistrationDto userRegistrationDto, BindingResult result, Model model) {
+    public String handleRegistration(@ModelAttribute("userRegistrationDto") @Valid UserRegistrationDto userRegistrationDto, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("userRegistrationDto", userRegistrationDto);
             return "auth/register";
@@ -61,22 +61,24 @@ public class UserController {
         if (serviceResponse.hasError()) {
             switch (serviceResponse.errorCode()) {
                 case "username_exists":
-                    result.rejectValue("username", "error.userRegistrationDto", "messageToShowUser");
+                    result.rejectValue("username", "error.userRegistrationDto", "The username is already taken. Please choose a different username.");
                     break;
                 case "email_exists":
-                    result.rejectValue("email", "error.userRegistrationDto", "messageToShowUser");
+                    result.rejectValue("email", "error.userRegistrationDto", "The email address is already in use. If you already have an account, please log in or use the 'Forgot password' option.");
                     break;
                 case "password_mismatch":
-                    result.rejectValue("matchingPassword", "error.userRegistrationDto", "messageToShowUser");
+                    result.rejectValue("matchingPassword", "error.userRegistrationDto", "The passwords do not match. Please ensure both passwords are the same.");
                     break;
                 default:
-                    model.addAttribute("unexpectedError", "An unexpected error occurred. Please try again later.");
+                    model.addAttribute("unexpectedError", "An unexpected error occurred. Please try again later or contact support if the issue persists.");
                     break;
             }
 
             model.addAttribute("userRegistrationDto", userRegistrationDto);
             return "auth/register";
         }
+
+        redirectAttributes.addFlashAttribute("confirmationMessage", "Registration successful! Please check your email to confirm your account before logging in.");
 
         return "redirect:/login";
     }

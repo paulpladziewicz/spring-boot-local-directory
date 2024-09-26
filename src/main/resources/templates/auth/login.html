@@ -16,10 +16,41 @@
                 <h1>Sign in</h1>
                 <p class="pb-3 mb-3">Don't have an account yet?&nbsp;&nbsp;<a href="/register">Register here!</a></p>
 
+                <div th:if="${confirmationMessage}" class="alert d-flex alert-primary" role="alert">
+                    <i class="ai-mail fs-xl pe-1 me-2"></i>
+                    <div th:text="${confirmationMessage}">Confirm account via email.</div>
+                </div>
+
+                <div th:if="${param.confirmationSuccess}" class="alert d-flex alert-primary" role="alert">
+                    <i class="ai-check fs-xl pe-1 me-2"></i>
+                    <div>Your account has been successfully confirmed. You can now log in.</div>
+                </div>
+
                 <div th:if="${param.error}">
-                    <div th:if="${param.error == 'true'}" style="color: red;">Invalid username or password. Please try again.</div>
-                    <div th:if="${param.error == 'locked'}" style="color: red;">Your account is locked. Please try again after 15 minutes.</div>
-                    <div th:if="${param.error == 'notConfirmed'}" style="color: red;">Your account is not confirmed. Please check your email.</div>
+                    <div th:if="${param.error == 'true'}">
+                        <div class="alert d-flex alert-danger" role="alert">
+                            <i class="ai-circle-slash fs-xl pe-1 me-2"></i>
+                            <div>An error occurred when logging in. Please try again later.</div>
+                        </div>
+                    </div>
+                    <div th:if="${param.error.contains('locked')}">
+                        <div class="alert d-flex alert-danger" role="alert">
+                            <i class="ai-circle-slash fs-xl pe-1 me-2"></i>
+                            <div>You have reached the maximum number of failed attempts within 15 minutes. Please reset your password or wait.</div>
+                        </div>
+                    </div>
+                    <div th:if="${param.error.contains('notConfirmed')}">
+                        <div class="alert d-flex alert-danger" role="alert">
+                            <i class="ai-circle-slash fs-xl pe-1 me-2"></i>
+                            <div>Please confirm your account via email before logging in.</div>
+                        </div>
+                    </div>
+                    <div th:if="${param.error.contains('badCredentials')}">
+                        <div class="alert d-flex alert-danger" role="alert">
+                            <i class="ai-circle-slash fs-xl pe-1 me-2"></i>
+                            <div>Invalid credentials! Please check your username and password.</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div th:if="${confirmationFail}">Confirmation failed.</div>
