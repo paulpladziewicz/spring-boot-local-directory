@@ -58,11 +58,14 @@
                                 <textarea class="form-control" th:field="*{neighborServices[0].description}" rows="3" placeholder="Service description" required></textarea>
                                 <span class="text-danger mt-1" th:if="${#fields.hasErrors('neighborServices[0].description')}" th:errors="*{neighborServices[0].description}"></span>
                             </div>
+                            <!-- Remove button link styled -->
+                            <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0" onclick="removeNeighborService(this)">Remove</a>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-secondary" onclick="addNeighborService()">Add Another Service</button>
+                    <!-- Add Another Service button link styled -->
+                    <div class="d-flex justify-content-start" style="margin-top: -16px">
+                        <a href="javascript:void(0);" class="btn btn-link p-0" onclick="addNeighborService()">+ Add Another Service</a>
                     </div>
 
                     <p th:if="${errorMessage}" th:text="${errorMessage}" class="text-danger my-3"></p>
@@ -93,9 +96,15 @@
                 <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="neighborServices[${serviceIndex}].description">Service Description</label>
                 <textarea class="form-control" name="neighborServices[${serviceIndex}].description" rows="3" placeholder="Service description" required></textarea>
             </div>
+            <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0" onclick="removeNeighborService(this)">Remove</a>
         `;
         container.appendChild(newService);
         serviceIndex++;
+    }
+
+    function removeNeighborService(button) {
+        const serviceItem = button.closest('.neighbor-service-item');
+        serviceItem.remove();
     }
 </script>
 
