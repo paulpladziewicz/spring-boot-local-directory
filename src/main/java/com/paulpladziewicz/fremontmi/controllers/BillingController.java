@@ -7,7 +7,6 @@ import com.paulpladziewicz.fremontmi.models.SubscriptionDTO;
 import com.paulpladziewicz.fremontmi.services.StripeService;
 import com.stripe.model.Invoice;
 import com.stripe.model.Subscription;
-import com.stripe.model.SubscriptionItem;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

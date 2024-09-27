@@ -244,7 +244,6 @@ public class StripeService {
         }
 
         UserProfile userProfile = userProfileOptional.get();
-
         String stripeCustomerId = userProfile.getStripeCustomerId();
 
         if (stripeCustomerId == null || stripeCustomerId.isEmpty()) {
@@ -258,7 +257,12 @@ public class StripeService {
 
             InvoiceCollection invoiceCollection = Invoice.list(params);
 
-            return ServiceResponse.value(invoiceCollection.getData());
+            // Filter only paid invoices
+            List<Invoice> paidInvoices = invoiceCollection.getData().stream()
+                    .filter(invoice -> "paid".equals(invoice.getStatus())) // Check if the invoice status is 'paid'
+                    .collect(Collectors.toList());
+
+            return ServiceResponse.value(paidInvoices);
         } catch (StripeException e) {
             logger.error("Error retrieving invoices from Stripe: ", e);
             return ServiceResponse.error("STRIPE_INVOICE_RETRIEVAL_FAILED");
