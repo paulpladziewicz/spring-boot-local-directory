@@ -211,7 +211,7 @@ public class BusinessController {
         }
 
         response.put("success", true);
-        response.put("message", "Thank you for reaching out. We will get back to you shortly.");
+        response.put("message", "We've passed your message along! We hope you hear back soon.");
         return ResponseEntity.ok(response);
     }
 }

@@ -23,7 +23,7 @@
 
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="displayName">Display name</label>
-                        <textarea class="form-control" id="displayName" th:field="*{name}" rows="3" placeholder="Display name"></textarea>
+                        <input type="text" class="form-control" id="displayName" th:field="*{name}" rows="3" placeholder="Display name">
                         <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="alert alert-danger"></div>
                     </div>
 

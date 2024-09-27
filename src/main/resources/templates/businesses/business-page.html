@@ -130,17 +130,14 @@
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
 
-        // Validate required fields
         if (!name || !email || !message) {
             alert("All fields are required.");
             return;
         }
 
-        // Show loading button
         document.getElementById('submit-button').style.display = 'none';
         document.getElementById('loading-button').style.display = 'inline-block';
 
-        // Send data to the server using fetch
         fetch('/contact/business', {
             method: 'POST',
             headers: {
@@ -152,13 +149,13 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Remove the form from the DOM
-                    const formContainer = document.querySelector('.needs-validation').parentElement;
-                    formContainer.innerHTML = `
-                    <div class="alert alert-success" role="alert">
-                        ${data.message}
-                    </div>
-                `;
+                    const formElement = document.querySelector('.needs-validation');
+                    formElement.innerHTML = `
+                <div class="alert alert-primary" role="alert">
+                    <i class="ai-mail fs-xl pe-1 me-2"></i>
+                    ${data.message}
+                </div>
+            `;
                 } else {
                     alert('An error occurred while trying to send your message. Please try again later.');
                 }
@@ -168,7 +165,6 @@
                 alert('An error occurred. Please try again later.');
             })
             .finally(() => {
-                // Reset buttons
                 document.getElementById('submit-button').style.display = 'inline-block';
                 document.getElementById('loading-button').style.display = 'none';
             });

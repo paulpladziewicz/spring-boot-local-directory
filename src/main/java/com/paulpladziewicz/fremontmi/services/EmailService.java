@@ -178,11 +178,12 @@ public class EmailService {
             String html = templateEngine.process("businesses/email/contact-business-email", context);
 
             mimeMessage.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
+            mimeMessage.setReplyTo(new Address[]{new InternetAddress(fromEmail)});
             mimeMessage.setRecipients(MimeMessage.RecipientType.TO, toEmail);
             mimeMessage.setSubject("Business Contact Form Submission");
             mimeMessage.setContent(html, "text/html; charset=utf-8");
 
-
+            mailSender.send(mimeMessage);
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
             logger.error("Failed to send business contact email to {} from {} with message: {} and name: {}", toEmail, fromEmail, message, name, e);
         }
