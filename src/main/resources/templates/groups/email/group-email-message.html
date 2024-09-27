@@ -85,9 +85,21 @@
 <div style="background-color: white; color: #000000; font-family: sans-serif; font-size: 18px; line-height: 36px; margin: 0 auto; max-width: 600px; padding: 40px 20px 40px 20px;">
 
     <h1 style="font-size: 28px; margin-bottom: 20px; color: #333333; text-align: center;"><span>Fremont<span style="color: #448C74;">MI</span></span> Group Message</h1>
+    <h3 style="text-align: center" th:text="${groupName}">Group Name</h3>
 
-    <p style="margin-bottom: 20px; text-align: center;" th:text="${message}">
-        Thank you for joining. We are thrilled to have you on board!
+    <p style="margin-bottom: 25px;">
+        You have received a new contact message from <strong th:text="${name}">[Name]</strong>.
+    </p>
+    <p style="margin-bottom: 25px;">
+        <strong>Email:</strong> <a th:href="'mailto:'+${replyTo}" style="color: #229efd;" th:text="${replyTo}">[replyTo]</a>
+    </p>
+
+    <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin-bottom: 30px;">
+        <p style="margin: 0; white-space: pre-wrap;" th:text="${message}">[User's message goes here]</p>
+    </div>
+
+    <p style="margin-bottom: 25px; text-align: center;">
+        Feel free to reply directly to this email.
     </p>
 </div>
 

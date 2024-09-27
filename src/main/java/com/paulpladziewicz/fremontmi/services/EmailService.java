@@ -122,14 +122,23 @@ public class EmailService {
         }
     }
 
-    public Boolean sendGroupEmail(List<String> recipients, String replyTo, String subject, String messageBody) {
+    public Boolean sendGroupEmail(List<String> recipients, String replyTo, String replyName, String groupName, String subject, String messageBody) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
+
+            Context context = new Context();
+            context.setVariable("name", replyName);
+            context.setVariable("groupName", groupName);
+            context.setVariable("replyTo", replyTo);
+            context.setVariable("message", messageBody);
+
+            String html = templateEngine.process("groups/email/group-email-message", context);
 
             message.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
             message.setReplyTo(new Address[]{new InternetAddress(replyTo)});
             message.setSubject("Group Message: " + subject);
-            message.setContent(messageBody, "text/html; charset=utf-8");
+            message.setContent(html, "text/html; charset=utf-8");
+
 
             for (String recipient : recipients) {
                 message.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress(recipient));

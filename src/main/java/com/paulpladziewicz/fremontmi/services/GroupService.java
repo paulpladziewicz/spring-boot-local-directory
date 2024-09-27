@@ -386,7 +386,7 @@ public class GroupService {
         return ServiceResponse.value(announcements);
     }
 
-    public ServiceResponse<Boolean> deleteAnnouncement(String slug, int announcementId) {
+    public ServiceResponse<Boolean> deleteAnnouncement(String id, int announcementId) {
         Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
 
         if (optionalUserProfile.isEmpty()) {
@@ -395,7 +395,7 @@ public class GroupService {
 
         UserProfile userProfile = optionalUserProfile.get();
 
-        ServiceResponse<Group> findGroupResponse = findBySlug(slug);
+        ServiceResponse<Group> findGroupResponse = findGroupById(id);
 
         if (findGroupResponse.hasError()) {
             return ServiceResponse.error(findGroupResponse.errorCode());
@@ -471,7 +471,7 @@ public class GroupService {
                     .filter(email -> email != null && !email.isEmpty())
                     .collect(Collectors.toList());
 
-            return ServiceResponse.value(emailService.sendGroupEmail(emailAddresses, senderUserProfile.getEmail(), subject, message));
+            return ServiceResponse.value(emailService.sendGroupEmail(emailAddresses, senderUserProfile.getEmail(), senderUserProfile.getFirstName() + ' ' + senderUserProfile.getLastName(), group.getName(), subject, message));
         }
 
         if (group.getMembers().contains(senderUserProfile.getUserId())) {
@@ -482,7 +482,7 @@ public class GroupService {
                     .filter(email -> email != null && !email.isEmpty())
                     .collect(Collectors.toList());
 
-            return ServiceResponse.value(emailService.sendGroupEmail(emailAddresses, senderUserProfile.getEmail(), subject, message));
+            return ServiceResponse.value(emailService.sendGroupEmail(emailAddresses, senderUserProfile.getEmail(), senderUserProfile.getFirstName() + ' ' + senderUserProfile.getLastName(), group.getName(), subject, message));
         }
 
         return logAndReturnError("User doesn't have permission to email group", "permission_denied");
