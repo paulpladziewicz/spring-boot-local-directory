@@ -21,6 +21,11 @@
                     <div th:text="${confirmationMessage}">Confirm account via email.</div>
                 </div>
 
+                <div th:if="${forgotUsernameMessage}" class="alert d-flex alert-primary" role="alert">
+                    <i class="ai-mail fs-xl pe-1 me-2"></i>
+                    <div th:text="${forgotUsernameMessage}">An email has been sent with your username.</div>
+                </div>
+
                 <div th:if="${param.confirmationSuccess}" class="alert d-flex alert-primary" role="alert">
                     <i class="ai-check fs-xl pe-1 me-2"></i>
                     <div>Your account has been successfully confirmed. You can now log in.</div>

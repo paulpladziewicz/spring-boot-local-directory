@@ -48,7 +48,7 @@
                     <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="form-text text-danger"></div>
                 </div>
 
-                <div th:if="${isSuccess != null}" class="alert alert-success col-12" role="alert">
+                <div th:if="${isSuccess != null}" class="alert alert-primary col-12" role="alert">
                     Your settings have been updated successfully!
                 </div>
 

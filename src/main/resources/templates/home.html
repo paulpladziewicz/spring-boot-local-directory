@@ -242,7 +242,8 @@
                     <h2 class="h1" id="contact-us">Contact us</h2>
                     <p>We're here to help with any questions, suggestions, or feedback you might have. Whether you're
                         looking for more information or need assistance with our platform, feel free to reach out.</p>
-                    <div th:if="${successMessage}" class="alert alert-success" role="alert">
+                    <div th:if="${successMessage}" class="alert alert-primary d-flex align-items-center" role="alert">
+                        <i class="ai-mail fs-xl pe-1 me-2"></i>
                         <p class="m-0" th:text="${successMessage}"></p>
                     </div>
                     <form th:action="@{/contact}" method="post" class="row g-4" onsubmit="disableSubmitButtonWhileSubmitting(this)">

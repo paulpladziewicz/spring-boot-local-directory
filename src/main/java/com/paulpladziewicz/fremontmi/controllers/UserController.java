@@ -195,11 +195,11 @@ public class UserController {
         ServiceResponse<Boolean> serviceResponse = userService.forgotUsername(email);
 
         if (serviceResponse.hasError()) {
-            model.addAttribute("isSuccess", false);
+            redirectAttributes.addFlashAttribute("forgotUsernameMessage", "No email found with that address.");
             return "auth/login";
         }
 
-        redirectAttributes.addFlashAttribute("message", "An email has been sent with your username.");
+        redirectAttributes.addFlashAttribute("forgotUsernameMessage", "An email has been sent with your username.");
         return "auth/login";
     }
 
