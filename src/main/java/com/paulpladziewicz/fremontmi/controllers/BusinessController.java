@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.BusinessService;
+import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
@@ -18,13 +19,16 @@ import java.util.*;
 @Controller
 public class BusinessController {
 
+    private final HtmlSanitizationService htmlSanitizationService;
+
     private final BusinessService businessService;
 
     private final TagService tagService;
 
     private final UserService userService;
 
-    public BusinessController(BusinessService businessService, TagService tagService, UserService userService) {
+    public BusinessController(HtmlSanitizationService htmlSanitizationService, BusinessService businessService, TagService tagService, UserService userService) {
+        this.htmlSanitizationService = htmlSanitizationService;
         this.businessService = businessService;
         this.tagService = tagService;
         this.userService = userService;
@@ -107,11 +111,15 @@ public class BusinessController {
 
         Business business = businessOptional.get();
 
+        business.setDescription(htmlSanitizationService.sanitizeHtml(business.getDescription().replace("\n", "<br/>")));
+
         Optional<String> userIdOpt = userService.getUserId();
 
         if (userIdOpt.isEmpty()) {
-            model.addAttribute("error", true);
-            return "events/events";
+            model.addAttribute("isAdmin", false);
+            model.addAttribute("business", business);
+
+            return "businesses/business-page";
         }
 
         String userId = userIdOpt.get();

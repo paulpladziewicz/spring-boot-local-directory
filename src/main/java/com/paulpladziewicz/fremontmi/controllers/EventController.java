@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.EventService;
+import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
@@ -21,13 +22,16 @@ import java.util.stream.Collectors;
 @Controller
 public class EventController {
 
+    private final HtmlSanitizationService htmlSanitizationService;
+
     private final EventService eventService;
 
     private final UserService userService;
 
     private final TagService tagService;
 
-    public EventController(EventService eventService, UserService userService, TagService tagService) {
+    public EventController(HtmlSanitizationService htmlSanitizationService, EventService eventService, UserService userService, TagService tagService) {
+        this.htmlSanitizationService = htmlSanitizationService;
         this.eventService = eventService;
         this.userService = userService;
         this.tagService = tagService;
@@ -117,6 +121,8 @@ public class EventController {
         }
 
         Event event = serviceResponse.value();
+
+        event.setDescription(htmlSanitizationService.sanitizeHtml(event.getDescription().replace("\n", "<br/>")));
 
         Optional<String> userIdOpt = userService.getUserId();
 

@@ -1,6 +1,7 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.*;
+import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.NeighborServicesProfileService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import jakarta.validation.Valid;
@@ -17,13 +18,16 @@ import java.util.*;
 @Controller
 public class NeighborServicesProfileController {
 
+    private final HtmlSanitizationService htmlSanitizationService;
+
     private final NeighborServicesProfileService neighborServicesProfileService;
 
     private final TagService tagService;
 
-    public NeighborServicesProfileController(NeighborServicesProfileService neighborServicesProfileService, TagService tagService) {
+    public NeighborServicesProfileController(NeighborServicesProfileService neighborServicesProfileService, TagService tagService, HtmlSanitizationService htmlSanitizationService) {
         this.neighborServicesProfileService = neighborServicesProfileService;
         this.tagService = tagService;
+        this.htmlSanitizationService = htmlSanitizationService;
     }
 
     @GetMapping("/create/neighbor-services-profile/overview")
@@ -114,6 +118,8 @@ public class NeighborServicesProfileController {
         }
 
         NeighborServicesProfile neighborServicesProfile = optionalNeighborService.get();
+
+        neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));
 
         model.addAttribute("neighborServicesProfile", neighborServicesProfile);
 

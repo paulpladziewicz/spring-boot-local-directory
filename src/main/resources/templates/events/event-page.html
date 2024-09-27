@@ -34,7 +34,7 @@
                     </div>
 
 
-                    <p th:text="${event.description}">Event description here...</p>
+                    <p th:utext="${event.description}">Event description here...</p>
 
                     <div th:if="${event.locationName != null}">
                         <strong>Location:</strong> <span th:text="${event.locationName}">Location Name</span>
