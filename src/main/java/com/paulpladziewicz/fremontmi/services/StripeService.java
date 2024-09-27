@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class StripeService {
@@ -203,7 +204,6 @@ public class StripeService {
         }
 
         UserProfile userProfile = userProfileOptional.get();
-
         String stripeCustomerId = userProfile.getStripeCustomerId();
 
         if (stripeCustomerId == null || stripeCustomerId.isEmpty()) {
@@ -212,12 +212,24 @@ public class StripeService {
 
         try {
             SubscriptionListParams params = SubscriptionListParams.builder()
-                    .setStatus(SubscriptionListParams.Status.ALL)
+                    .setStatus(SubscriptionListParams.Status.ACTIVE) // Only fetch active subscriptions
                     .setCustomer(userProfile.getStripeCustomerId())
                     .addExpand("data.default_payment_method")
+                    .addExpand("data.latest_invoice") // Ensure latest invoice is fetched
                     .build();
+
             SubscriptionCollection subscriptions = Subscription.list(params);
-            return ServiceResponse.value(subscriptions.getData());
+
+            // Filter subscriptions that have a 'paid' invoice status
+            List<Subscription> activePaidSubscriptions = subscriptions.getData().stream()
+                    .filter(subscription -> "active".equals(subscription.getStatus())) // Check active status correctly
+                    .filter(subscription -> {
+                        Invoice latestInvoice = subscription.getLatestInvoiceObject(); // Use getLatestInvoiceObject()
+                        return latestInvoice != null && "paid".equals(latestInvoice.getStatus());
+                    })
+                    .collect(Collectors.toList());
+
+            return ServiceResponse.value(activePaidSubscriptions);
         } catch (StripeException e) {
             logger.error("Error retrieving subscriptions from Stripe: ", e);
             return ServiceResponse.error("STRIPE_SUBSCRIPTION_RETRIEVAL_FAILED");
