@@ -37,7 +37,7 @@
                     </div>
 
                     <div id="neighborServiceContainer">
-                        <div th:each="service, iterStat : ${neighborServicesProfile.neighborServices}" class="neighbor-service-item">
+                        <div th:each="service, iterStat : ${neighborServicesProfile.neighborServices}" class="neighbor-service-item mb-3">
                             <h4 th:text="'Neighbor Service ' + (iterStat.index + 1)"></h4>
 
                             <div class="form-group mb-2">
@@ -51,11 +51,13 @@
                                 <textarea class="form-control" th:field="*{neighborServices[__${iterStat.index}__].description}" rows="3" placeholder="Service description" required></textarea>
                                 <span class="text-danger" th:if="${#fields.hasErrors('neighborServices[' + iterStat.index + '].description')}" th:errors="*{neighborServices[__${iterStat.index}__].description}"></span>
                             </div>
+
+                            <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)" style="display: block;">Remove</a>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <button type="button" class="btn btn-secondary" onclick="addNeighborService()">Add Another Service</button>
+                        <button type="button" class="btn btn-secondary" onclick="addNeighborService()">+ Add Another Service</button>
                     </div>
 
                     <p th:if="${errorMessage}" th:text="${errorMessage}" class="text-danger my-3"></p>
@@ -71,12 +73,12 @@
 </main>
 
 <script th:inline="javascript">
-    let serviceIndex = /*[[${neighborServicesProfile.neighborServices.size()}]]*/ 'undefined';
+    let serviceIndex = /*[[${neighborServicesProfile.neighborServices.size()}]]*/ 0; // Initialize correctly
 
     function addNeighborService() {
         const container = document.getElementById('neighborServiceContainer');
         const newService = document.createElement('div');
-        newService.classList.add('neighbor-service-item');
+        newService.classList.add('neighbor-service-item', 'mb-3');
         newService.innerHTML = `
             <h4>Neighbor Service ${serviceIndex + 1}</h4>
             <div class="form-group mb-2">
@@ -87,9 +89,76 @@
                 <label for="neighborServices[${serviceIndex}].description">Service Description</label>
                 <textarea class="form-control" name="neighborServices[${serviceIndex}].description" rows="3" placeholder="Service description" required></textarea>
             </div>
+            <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)">Remove</a>
         `;
         container.appendChild(newService);
         serviceIndex++;
+
+        updateRemoveButtons();
+        updateServiceIndexes();
+    }
+
+    function removeNeighborService(button) {
+        const serviceItem = button.closest('.neighbor-service-item');
+        const container = document.getElementById('neighborServiceContainer');
+
+        if (container.children.length > 1) {
+            serviceItem.remove();
+        }
+
+        updateRemoveButtons();
+        updateServiceIndexes();
+    }
+
+    function updateServiceIndexes() {
+        const serviceItems = document.querySelectorAll('.neighbor-service-item');
+        serviceItems.forEach((item, index) => {
+            const nameInput = item.querySelector('input[name^="neighborServices"]');
+            const descInput = item.querySelector('textarea[name^="neighborServices"]');
+
+            if (nameInput) {
+                nameInput.name = `neighborServices[${index}].name`;
+                nameInput.id = `neighborServices[${index}].name`;
+                nameInput.previousElementSibling.setAttribute('for', `neighborServices[${index}].name`);
+            }
+
+            if (descInput) {
+                descInput.name = `neighborServices[${index}].description`;
+                descInput.id = `neighborServices[${index}].description`;
+                descInput.previousElementSibling.setAttribute('for', `neighborServices[${index}].description`);
+            }
+        });
+
+        serviceIndex = serviceItems.length;
+    }
+
+    function cleanUpEmptyEntries(event) {
+        const container = document.getElementById('neighborServiceContainer');
+        const serviceItems = container.querySelectorAll('.neighbor-service-item');
+        serviceItems.forEach(item => {
+            const nameInput = item.querySelector('input[name^="neighborServices"]');
+            const descInput = item.querySelector('textarea[name^="neighborServices"]');
+
+            if (!nameInput.value.trim() && !descInput.value.trim()) {
+                item.remove();
+            }
+        });
+
+        updateServiceIndexes();
+    }
+
+    document.getElementById('edit-business-form').addEventListener('submit', cleanUpEmptyEntries);
+    document.addEventListener('DOMContentLoaded', updateRemoveButtons);
+
+    function updateRemoveButtons() {
+        const serviceItems = document.querySelectorAll('.neighbor-service-item');
+        const removeButtons = document.querySelectorAll('.remove-button');
+
+        if (serviceItems.length > 1) {
+            removeButtons.forEach(button => button.style.display = 'block');
+        } else {
+            removeButtons.forEach(button => button.style.display = 'none');
+        }
     }
 </script>
 
