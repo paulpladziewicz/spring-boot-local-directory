@@ -3,16 +3,23 @@
 <head th:replace="~{partials/head :: head('FremontMI - Groups')}"></head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
-<main class="bg-secondary">
+<main class="bg-secondary pt-4 pb-5">
 
     <div class="container">
 
-        <div class="d-flex justify-content-between align-items-center my-4">
+        <div class="d-none d-sm-flex justify-content-between align-items-center my-4">
             <h1 class="display-3 mb-0">My Groups</h1>
             <div>
                 <a href="/groups" class="btn btn-link fw-semibold fs-lg text-primary">View All Groups</a>
-                <a href="/create/group" class="btn btn-primary">Create Group</a>
+                <a href="/create/group" class="btn btn-primary">Create</a>
             </div>
+        </div>
+        <div class="d-sm-none mb-4">
+            <div class="d-flex justify-content-end">
+                <a href="/create/group" class="btn btn-primary fw-semibold py-2 px-3">Create</a>
+            </div>
+            <h1 class="display-3 mb-0">Groups</h1>
+            <a href="/groups" class="btn btn-link fw-semibold p-0">View All Groups</a>
         </div>
 
         <div class="row">
