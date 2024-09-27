@@ -16,13 +16,13 @@
                     <input type="hidden" name="id" th:value="*{id}">
                     <input type="hidden" name="slug" th:value="*{slug}">
 
-                    <div class="form-group mb-2">
+                    <div class="form-group mb-3">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="displayName">Display name</label>
                         <textarea class="form-control" id="displayName" th:field="*{name}" rows="3" placeholder="Display name"></textarea>
                         <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="alert alert-danger"></div>
                     </div>
 
-                    <div class="form-group mb-2">
+                    <div class="form-group mb-3">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="description">Description</label>
                         <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Business description"></textarea>
                         <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="alert alert-danger"></div>
@@ -30,16 +30,17 @@
 
                     <div th:replace="~{partials/tag-input}"></div>
 
-                    <div class="form-group mb-2">
+                    <div class="form-group mb-3">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="email">Email</label>
                         <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="Enter email">
                         <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="alert alert-danger"></div>
                     </div>
 
-                    <div id="neighborServiceContainer">
-                        <div th:each="service, iterStat : ${neighborServicesProfile.neighborServices}" class="neighbor-service-item mb-3">
-                            <h4 th:text="'Neighbor Service ' + (iterStat.index + 1)"></h4>
+                    <!-- Neighbor Services Subheading -->
+                    <h3 class="mb-3">Neighbor Services</h3>
 
+                    <div id="neighborServiceContainer">
+                        <div th:each="service, iterStat : ${neighborServicesProfile.neighborServices}" class="neighbor-service-item">
                             <div class="form-group mb-2">
                                 <label th:for="'neighborServices.' + iterStat.index + '.name'">Service Name</label>
                                 <input type="text" class="form-control" th:field="*{neighborServices[__${iterStat.index}__].name}" placeholder="Service name" required>
@@ -56,8 +57,8 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-secondary" onclick="addNeighborService()">+ Add Another Service</button>
+                    <div class="d-flex justify-content-start mb-3">
+                        <a href="javascript:void(0);" class="btn btn-link p-0" onclick="addNeighborService()">+ Add Another Service</a>
                     </div>
 
                     <p th:if="${errorMessage}" th:text="${errorMessage}" class="text-danger my-3"></p>
@@ -73,14 +74,13 @@
 </main>
 
 <script th:inline="javascript">
-    let serviceIndex = /*[[${neighborServicesProfile.neighborServices.size()}]]*/ 0; // Initialize correctly
+    let serviceIndex = /*[[${neighborServicesProfile.neighborServices.size()}]]*/ 0;
 
     function addNeighborService() {
         const container = document.getElementById('neighborServiceContainer');
         const newService = document.createElement('div');
         newService.classList.add('neighbor-service-item', 'mb-3');
         newService.innerHTML = `
-            <h4>Neighbor Service ${serviceIndex + 1}</h4>
             <div class="form-group mb-2">
                 <label for="neighborServices[${serviceIndex}].name">Service Name</label>
                 <input type="text" class="form-control" name="neighborServices[${serviceIndex}].name" placeholder="Service name" required>

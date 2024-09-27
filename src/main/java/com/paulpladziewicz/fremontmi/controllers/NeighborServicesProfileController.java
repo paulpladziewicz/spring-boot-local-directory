@@ -175,7 +175,7 @@ public class NeighborServicesProfileController {
 
         model.addAttribute("neighborService", updatedNeighborServicesProfile);
 
-        return "redirect:/neighbor-services/" + updatedNeighborServicesProfile.getSlug();
+        return "redirect:/my/neighbor-services/profile";
     }
 
     // TODO delete neighbor service profile

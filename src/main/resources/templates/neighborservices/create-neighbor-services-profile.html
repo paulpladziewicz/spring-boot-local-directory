@@ -58,7 +58,7 @@
                                 <textarea class="form-control" th:field="*{neighborServices[0].description}" rows="3" placeholder="Service description" required></textarea>
                                 <span class="text-danger mt-1" th:if="${#fields.hasErrors('neighborServices[0].description')}" th:errors="*{neighborServices[0].description}"></span>
                             </div>
-                            <!-- Remove button link styled (initially hidden if only one service) -->
+
                             <a href="javascript:void(0);" class="d-none text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)" style="display: none;">Remove</a>
                         </div>
                     </div>
