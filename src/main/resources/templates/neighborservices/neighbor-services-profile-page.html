@@ -21,19 +21,16 @@
             <div class="col-lg-10 mx-auto">
                 <div class="mb-3" th:if="${neighborServicesProfile.status == 'requires_active_subscription'}">
                     <span class="badge bg-danger bg-opacity-10 text-danger fs-sm">Not Active - Requires Subscription</span>
-                    <p class="m-0"><a th:href="'/pay/subscription?contentId=' + ${business.getId()}" class="p-0 ms-2 btn btn-link">Pay Subscription</a></p>
+                    <p class="m-0"><a th:href="'/pay/subscription?contentId=' + ${neighborServicesProfile.getId()}" class="p-0 ms-2 btn btn-link">Pay Subscription</a></p>
                 </div>
-                <h1 th:text="${neighborServicesProfile.name}" class="display-3 mb-0">Fremont Business Name</h1>
+                <h1 th:text="${neighborServicesProfile.name}" class="display-3 mb-0">Fremont NeighborService Name</h1>
 
                 <div class="row mt-4">
-                    <p th:text="${neighborServicesProfile.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
+                    <p th:text="${neighborServicesProfile.description}" class="fs-xl">Description about the service...</p>
                 </div>
 
-
                 <div class="row mt-4">
-
                     <h3 class="mb-3 fs-1">NeighborServices™</h3>
-
                     <div th:if="${neighborServicesProfile.neighborServices.size() > 0}">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item" th:each="service : ${neighborServicesProfile.neighborServices}">
@@ -42,29 +39,22 @@
                             </li>
                         </ul>
                     </div>
-
                     <div th:if="${neighborServicesProfile.neighborServices.size() == 0}">
                         <p class="text-muted">No services available at this time.</p>
                     </div>
                 </div>
 
                 <a th:if="${myProfile}" th:href="'/edit/neighbor-service/profile/' + ${neighborServicesProfile.slug}" class="d-inline-block btn btn-outline-primary">Edit NeighborServices™ Profile</a>
-
             </div>
-
         </div>
-
     </div>
 
     <section class="bg-secondary container pt-5 pb-3 pb-xl-4 py-xxl-5 my-5">
-
         <div class="row pb-1 pb-sm-3 pb-lg-4">
-
             <div class="col-lg-8 col-xl-7 offset-xl-1 mx-auto">
-                <!-- Page title -->
                 <h1 class="display-6 text-center" th:text="'Contact ' + ${neighborServicesProfile.name}">Contact Us</h1>
                 <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">If you have any questions, inquiries, or would like more information about
-                    <span th:text="${neighborServicesProfile.name}">our business</span>, please fill out the form below.</p>
+                    <span th:text="${neighborServicesProfile.name}">our service</span>, please fill out the form below.</p>
                 <!-- Contact form -->
                 <form class="row g-4 needs-validation" novalidate="">
                     <div class="col-sm-6">
@@ -83,60 +73,68 @@
                         <div class="invalid-feedback">Please enter your message!</div>
                     </div>
                     <div class="col-sm-12 pt-2">
-                        <button class="btn btn-lg btn-primary" type="submit">Send message</button>
+                        <button id="submit-button" class="btn btn-lg btn-primary" type="button" onclick="submitContactForm()">Send message</button>
+                        <button id="loading-button" class="btn btn-lg btn-primary pe-none" type="button" style="display: none;">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Loading...
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </section>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
 <script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const success = urlParams.get('subscribed');
+    function submitContactForm() {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const message = document.getElementById('message').value;
+        const slug = /*[[${neighborServicesProfile.slug}]]*/ '';
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
 
-        if (success === 'true') {
-            // Show the success message
-            // document.getElementById('success-message').style.display = 'block';
-
-            // Trigger confetti effect
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
-
-            // Optionally, add a more extended confetti burst
-            const duration = 5 * 1000; // 5 seconds
-            const animationEnd = Date.now() + duration;
-            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-            function randomInRange(min, max) {
-                return Math.random() * (max - min) + min;
-            }
-
-            const interval = setInterval(function() {
-                const timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
-
-                const particleCount = 50 * (timeLeft / duration);
-                // since particles fall down, start a bit higher than random
-                confetti(Object.assign({}, defaults, {
-                    particleCount,
-                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-                }));
-                confetti(Object.assign({}, defaults, {
-                    particleCount,
-                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-                }));
-            }, 250);
+        if (!name || !email || !message) {
+            alert("All fields are required.");
+            return;
         }
-    });
+
+        document.getElementById('submit-button').style.display = 'none';
+        document.getElementById('loading-button').style.display = 'inline-block';
+
+        fetch('/contact/neighbor-services-profile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify({ slug, name, email, message })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const formElement = document.querySelector('.needs-validation');
+                    formElement.innerHTML = `
+                <div class="alert alert-primary" role="alert">
+                    <i class="ai-mail fs-xl pe-1 me-2"></i>
+                    ${data.message}
+                </div>
+            `;
+                } else {
+                    alert('An error occurred while trying to send your message. Please try again later.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+            })
+            .finally(() => {
+                document.getElementById('submit-button').style.display = 'inline-block';
+                document.getElementById('loading-button').style.display = 'none';
+            });
+    }
 </script>
+
 <footer th:replace="~{partials/footer}"></footer>
 <script th:replace="~{partials/theme-js}"></script>
 </body>

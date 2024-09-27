@@ -5,6 +5,9 @@ import jakarta.mail.Address;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
@@ -181,6 +184,29 @@ public class EmailService {
             mimeMessage.setReplyTo(new Address[]{new InternetAddress(fromEmail)});
             mimeMessage.setRecipients(MimeMessage.RecipientType.TO, toEmail);
             mimeMessage.setSubject("Business Contact Form Submission");
+            mimeMessage.setContent(html, "text/html; charset=utf-8");
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException | MailException | UnsupportedEncodingException e) {
+            logger.error("Failed to send business contact email to {} from {} with message: {} and name: {}", toEmail, fromEmail, message, name, e);
+        }
+    }
+
+    public void sendContactNeighborServiceProfileEmail(String toEmail, String name, String fromEmail, String message) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+            Context context = new Context();
+            context.setVariable("name", name);
+            context.setVariable("fromEmail", fromEmail);
+            context.setVariable("message", message);
+
+            String html = templateEngine.process("neighborservices/email/contact-neighbor-service-profile-email", context);
+
+            mimeMessage.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
+            mimeMessage.setReplyTo(new Address[]{new InternetAddress(fromEmail)});
+            mimeMessage.setRecipients(MimeMessage.RecipientType.TO, toEmail);
+            mimeMessage.setSubject("NeighborServices™ Contact Form Submission");
             mimeMessage.setContent(html, "text/html; charset=utf-8");
 
             mailSender.send(mimeMessage);

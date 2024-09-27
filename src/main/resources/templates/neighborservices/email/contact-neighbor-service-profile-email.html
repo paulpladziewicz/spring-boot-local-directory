@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Contact Form Submission</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <style type="text/css">
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; }
+        img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        table { border-collapse: collapse !important; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        a[x-apple-data-detectors] {
+            color: inherit !important;
+            text-decoration: none !important;
+            font-size: inherit !important;
+            font-family: inherit !important;
+            font-weight: inherit !important;
+            line-height: inherit !important;
+        }
+        a { color: #229efd; font-weight: bold; }
+        a:hover { color: #fd6350; text-decoration: none; }
+        @media screen and (max-width: 600px) {
+            h1 { font-size: 24px !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f7f7f7;">
+<div style="display: none; max-height: 0; overflow: hidden;">
+    You have received a new contact message from FremontMI.
+</div>
+<div style="background-color: white; color: #222222; font-family: sans-serif; font-size: 18px; line-height: 1.6; margin: 0 auto; max-width: 600px; padding: 40px 20px;">
+    <h1 style="font-size: 32px; margin-bottom: 25px; color: #333333; text-align: center; font-weight: 700;">New NeighborServices™ Contact Form Submission from <span>Fremont<span style="color: #448C74;">MI</span></span></h1>
+
+    <p style="margin-bottom: 25px;">
+        You have received a new contact message from <strong th:text="${name}">[Name]</strong>.
+    </p>
+    <p style="margin-bottom: 25px;">
+        <strong>Sender's Email:</strong> <a th:href="'mailto:'+${fromEmail}" style="color: #229efd;" th:text="${fromEmail}">[fromEmail]</a>
+    </p>
+    <p style="margin-bottom: 25px;">
+        <strong>Message:</strong>
+    </p>
+    <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin-bottom: 30px;">
+        <p style="margin: 0; white-space: pre-wrap;" th:text="${message}">[User's message goes here]</p>
+    </div>
+
+    <p style="margin-bottom: 25px; text-align: center;">
+        Feel free to reply directly to this email.
+    </p>
+
+    <div style="padding: 20px; margin-top: 20px; border-radius: 5px;">
+        <p style="text-align: center; font-size: 12px; color: #666666; margin-top: 10px;">
+            This message was sent via a business listing contact form via FremontMI.com.
+        </p>
+    </div>
+</div>
+</body>
+</html>

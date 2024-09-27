@@ -4,6 +4,8 @@ import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.NeighborServicesProfileService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -178,24 +180,27 @@ public class NeighborServicesProfileController {
 
     // TODO delete neighbor service profile
 
-
     @PostMapping("/contact/neighbor-services-profile")
-    public String handleContactForm(
-            @RequestParam("slug") String slug,
-            @RequestParam("name") String name,
-            @RequestParam("email") String email,
-            @RequestParam("message") String message,
-            RedirectAttributes redirectAttributes) {
+    public ResponseEntity<Map<String, Object>> handleContactForm(
+            @RequestBody ContactFormRequest contactFormRequest) {
 
-//        ServiceResponse<Boolean> contactFormSubmissionResponse = neighborServicesProfileService.handleContactFormSubmission(slug, name, email, message);
+        ServiceResponse<Boolean> contactFormSubmissionResponse = neighborServicesProfileService.handleContactFormSubmission(
+                contactFormRequest.getSlug(),
+                contactFormRequest.getName(),
+                contactFormRequest.getEmail(),
+                contactFormRequest.getMessage()
+        );
 
-//        if (contactFormSubmissionResponse.hasError()) {
-//            redirectAttributes.addFlashAttribute("errorMessage", "An error occurred while trying to send your message. Please try again later.");
-//            return "redirect:/businesses/" + slug;
-//        }
-//
-//        redirectAttributes.addFlashAttribute("successMessage", "Thank you for reaching out. We will get back to you shortly.");
+        Map<String, Object> response = new HashMap<>();
 
-        return "redirect:/businesses/" + slug;
+        if (contactFormSubmissionResponse.hasError()) {
+            response.put("success", false);
+            response.put("message", "An error occurred while trying to send your message. Please try again later.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+        response.put("success", true);
+        response.put("message", "We've passed your message along! We hope you hear back soon.");
+        return ResponseEntity.ok(response);
     }
 }

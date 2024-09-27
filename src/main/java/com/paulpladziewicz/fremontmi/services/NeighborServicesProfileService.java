@@ -27,11 +27,14 @@ public class NeighborServicesProfileService {
 
     private final TagService tagService;
 
-    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, StripeService stripeService, TagService tagService) {
+    private final EmailService emailService;
+
+    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, StripeService stripeService, TagService tagService, EmailService emailService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.stripeService = stripeService;
         this.tagService = tagService;
+        this.emailService = emailService;
     }
 
     public ServiceResponse<NeighborServicesProfile> createNeighborServiceProfile(NeighborServicesProfile neighborServicesProfile) {
@@ -332,5 +335,24 @@ public class NeighborServicesProfileService {
     private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode, Exception e) {
         logger.error(message, e);
         return ServiceResponse.error(errorCode);
+    }
+
+    public ServiceResponse<Boolean> handleContactFormSubmission(String slug, String name, String email, String message) {
+        Optional<NeighborServicesProfile> optionalNeighborServicesProfile = findNeighborServiceProfileBySlug(slug);
+
+        if (optionalNeighborServicesProfile.isEmpty()) {
+            return ServiceResponse.error("neighbor_service_not_found");
+        }
+
+        NeighborServicesProfile neighborServicesProfile = optionalNeighborServicesProfile.get();
+
+        try {
+            emailService.sendContactNeighborServiceProfileEmail(neighborServicesProfile.getEmail(), name, email, message);
+
+            return ServiceResponse.value(true);
+        } catch (Exception e) {
+            logger.error("Error when trying to send contact form submission email", e);
+            return ServiceResponse.error("unexpected_error");
+        }
     }
 }
