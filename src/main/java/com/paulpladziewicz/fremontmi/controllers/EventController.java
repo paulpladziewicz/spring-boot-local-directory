@@ -126,18 +126,19 @@ public class EventController {
 
         Optional<String> userIdOpt = userService.getUserId();
 
-        if (userIdOpt.isEmpty()) {
-            model.addAttribute("error", true);
-            return "events/events";
-        }
-
-        String userId = userIdOpt.get();
-
         if ("canceled".equals(event.getStatus())) {
             model.addAttribute("canceled", "This event has been canceled.");
         }
 
         model.addAttribute("event", event);
+
+        if (userIdOpt.isEmpty()) {
+            model.addAttribute("isAdmin", false);
+            return "events/event-page";
+        }
+
+        String userId = userIdOpt.get();
+
         model.addAttribute("isAdmin", event.getCreatedBy().equals(userId));
 
         return "events/event-page";
