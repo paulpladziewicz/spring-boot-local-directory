@@ -25,20 +25,20 @@ public class S3Controller {
 
     private final String bucketName = "fremontmi";
 
-    @GetMapping("/s3")
-    public String index(Model model) {
-        List<String> files = s3Service.listFiles(bucketName);
-        model.addAttribute("files", files);
-        return "s3";
-    }
-
-    @PostMapping("/upload")
-    public String uploadFile(@RequestParam("file") MultipartFile file, Model model) throws IOException {
-        Path tempFile = Files.createTempFile("temp", file.getOriginalFilename());
-        file.transferTo(tempFile.toFile());
-
-        s3Service.uploadFile(bucketName, file.getOriginalFilename(), tempFile);
-
-        return "redirect:/s3";
-    }
+//    @GetMapping("/s3")
+//    public String index(Model model) {
+//        List<String> files = s3Service.listFiles(bucketName);
+//        model.addAttribute("files", files);
+//        return "s3";
+//    }
+//
+//    @PostMapping("/upload")
+//    public String uploadFile(@RequestParam("file") MultipartFile file, Model model) throws IOException {
+//        Path tempFile = Files.createTempFile("temp", file.getOriginalFilename());
+//        file.transferTo(tempFile.toFile());
+//
+//        s3Service.uploadFile(bucketName, file.getOriginalFilename(), tempFile);
+//
+//        return "redirect:/s3";
+//    }
 }

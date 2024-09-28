@@ -17,9 +17,9 @@ public class TagController {
         this.tagService = tagService;
     }
 
-    @GetMapping("/autocomplete/tags")
-    public List<String> getTags(@RequestParam("query") String query) {
-
-        return tagService.autocompleteList(query);
-    }
+//    @GetMapping("/autocomplete/tags")
+//    public List<String> getTags(@RequestParam("query") String query) {
+//
+//        return tagService.autocompleteList(query);
+//    }
 }
