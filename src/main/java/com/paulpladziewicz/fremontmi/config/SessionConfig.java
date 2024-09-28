@@ -4,6 +4,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.session.data.mongo.config.annotation.web.http.EnableMongoHttpSession;
 
 @Configuration
-@EnableMongoHttpSession(maxInactiveIntervalInSeconds = 3600) // Sets session timeout to 1 hour
+@EnableMongoHttpSession(maxInactiveIntervalInSeconds = 28800) // Sets session timeout to 8 hours
 public class SessionConfig {
 }
