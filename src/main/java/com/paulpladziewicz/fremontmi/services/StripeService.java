@@ -30,6 +30,9 @@ public class StripeService {
 
     private final ContentRepository contentRepository;
 
+    @Value("${stripe.webhook-secret}")
+    private String webhookSecret;
+
     @Value("${stripe.secret.key}")
     private String stripeApiKey;
 
@@ -332,7 +335,6 @@ public class StripeService {
     }
 
     public ResponseEntity<String> handleStripeWebhook(String payload, String sigHeader) {
-        String webhookSecret = "whsec_d4808bcf47b6151388a0ea88df2544f4a1f16072523a4ae7fecbef42c6d90250";  // Replace with your actual secret
         try {
             // Verify the Stripe event
             Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
