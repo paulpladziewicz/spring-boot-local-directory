@@ -56,11 +56,11 @@
                         <ul class="list-unstyled mb-0">
                             <li class="nav flex-nowrap mb-3" th:if="${business.phoneNumber} != null and !${#strings.isEmpty(business.phoneNumber)}">
                                 <i class="ai-phone lead text-primary me-2"></i>
-                                <a class="nav-link fw-normal p-0 mt-n1" href="tel:${business.phoneNumber}" th:text="${business.phoneNumber}">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;40</a>
+                                <a class="nav-link fw-normal p-0 mt-n1" th:href="tel:${business.phoneNumber}" th:text="${business.phoneNumber}">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;40</a>
                             </li>
                             <li class="nav flex-nowrap mb-3" th:if="${business.displayEmail} and ${business.email} != null and !${#strings.isEmpty(business.email)}">
                                 <i class="ai-mail lead text-primary me-2"></i>
-                                <a class="nav-link fw-normal p-0 mt-n1" href="mailto:${business.email}" th:text="${business.email}">orlando@example.com</a>
+                                <a class="nav-link fw-normal p-0 mt-n1" th:href="mailto:${business.email}" th:text="${business.email}">orlando@example.com</a>
                             </li>
                             <li class="nav flex-nowrap mb-3" th:if="${business.address} != null and !${#strings.isEmpty(business.address)}">
                                 <i class="ai-map-pin lead text-primary me-2"></i>
@@ -68,7 +68,7 @@
                             </li>
                             <li class="nav flex-nowrap mb-3" th:if="${business.website} != null and !${#strings.isEmpty(business.website)}">
                                 <i class="ai-globe lead text-primary me-2"></i>
-                                <a class="nav-link fw-normal p-0 mt-n1" href="#" th:href="${business.website}" target="_blank" rel="noopener noreferrer" th:text="${business.website}">www.example.com</a>
+                                <a class="nav-link fw-normal p-0 mt-n1" th:href="${business.website}" target="_blank" rel="noopener noreferrer" th:text="${business.website}">www.example.com</a>
                             </li>
                         </ul>
                     </div>
