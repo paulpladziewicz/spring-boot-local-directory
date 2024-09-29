@@ -53,6 +53,9 @@ public class NeighborServicesProfileService {
         neighborServicesProfile.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
         neighborServicesProfile.setCreatedBy(userProfile.getUserId());
 
+        List<String> validatedTags = tagService.addTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+        neighborServicesProfile.setTags(validatedTags);
+
         ServiceResponse<Map<String, Object>> createSubscriptionResponse = stripeService.createSubscription(neighborServicesProfile.getPriceId());
 
         if (createSubscriptionResponse.hasError()) {

@@ -58,6 +58,9 @@ public class BusinessService {
         business.setCreatedBy(userProfile.getUserId());
         business.setAdministrators(List.of(userProfile.getUserId()));
 
+        List<String> validatedTags = tagService.addTags(business.getTags(), ContentTypes.BUSINESS.getContentType());
+        business.setTags(validatedTags);
+
         ServiceResponse<Map<String, Object>> createSubscriptionResponse = stripeService.createSubscription(business.getPriceId());
 
         if (createSubscriptionResponse.hasError()) {

@@ -28,6 +28,7 @@ public class EventService {
     private final ContentRepository contentRepository;
 
     private final UserService userService;
+
     private final TagService tagService;
 
     public EventService(ContentRepository contentRepository, UserService userService, TagService tagService) {
@@ -54,6 +55,9 @@ public class EventService {
             event.setType(ContentTypes.EVENT.getContentType());
             event.setSlug(createUniqueSlug(event.getName()));
             event.setPathname("/events/" + event.getSlug());
+
+            List<String> validatedTags = tagService.addTags(event.getTags(), ContentTypes.EVENT.getContentType());
+            event.setTags(validatedTags);
 
             ServiceResponse<Event> saveEventResponse = saveEvent(event);
 

@@ -27,6 +27,7 @@ public class StripeController {
 
     @GetMapping("/pay/subscription")
     public String paySubscription(Model model) {
+        model.addAttribute("stripePublicKey", stripePublicKey);
         return "stripe/pay-subscription";
     }
 
