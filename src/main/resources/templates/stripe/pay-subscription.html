@@ -41,6 +41,7 @@
         const contentId = urlParams.get('contentId');
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+        const stripePublicKey = /*[[${stripePublicKey}]]*/ 'default';
 
         try {
             const response = await fetch(`/api/get-content/${contentId}`, {
@@ -57,7 +58,7 @@
                 document.getElementById('displayName').textContent = data.displayName;
                 document.getElementById('displayPrice').textContent = data.displayPrice;
 
-                const stripe = Stripe("pk_test_51KCrhcBCHBXtJFxOMYJo8xRymfT9m3PvrruBp7gZmcvCV2vpYnMH8EdkwVeibCrtj5bwNhhuAj5MzWU1NXtq6iBs000IzgImdE");
+                const stripe = Stripe(stripePublicKey);
                 const elements = stripe.elements({ clientSecret: data.clientSecret });
                 const paymentElement = elements.create("payment");
                 paymentElement.mount("#payment-element");

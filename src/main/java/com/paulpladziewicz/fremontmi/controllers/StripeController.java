@@ -4,6 +4,7 @@ import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.PaymentRequest;
 import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.services.StripeService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,9 @@ import java.util.Map;
 
 @Controller
 public class StripeController {
+
+    @Value("${stripe.publicKey}")
+    private String stripePublicKey;
 
     private final StripeService stripeService;
 
