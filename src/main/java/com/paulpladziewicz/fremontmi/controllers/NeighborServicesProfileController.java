@@ -5,6 +5,7 @@ import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.NeighborServicesProfileService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,12 @@ import java.util.*;
 
 @Controller
 public class NeighborServicesProfileController {
+
+    @Value("${stripe.price.monthly.neighborservice}")
+    private String monthlyPriceId;
+
+    @Value("${stripe.price.annual.neighborservice}")
+    private String annualPriceId;
 
     private final HtmlSanitizationService htmlSanitizationService;
 
@@ -32,6 +39,8 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/create/neighbor-services-profile/overview")
     public String createNeighborServicesProfileOverview(Model model) {
+        model.addAttribute("monthlyPriceId", monthlyPriceId);
+        model.addAttribute("annualPriceId", annualPriceId);
         return "neighborservices/create-neighbor-services-profile-overview";
     }
 

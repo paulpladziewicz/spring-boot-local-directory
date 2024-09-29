@@ -65,7 +65,7 @@
                         <div class="mb-4">per month</div>
                         <p class="mb-4 pb-4">Perfect for those who want flexibility without a long-term commitment.</p>
                         <form th:action="@{/setup/create/neighbor-services-profile}" method="post" id="monthly-subscription-form">
-                            <input type="hidden" name="priceId" value="price_1Pv7TzBCHBXtJFxOWmV5PE4h" />
+                            <input type="hidden" name="priceId" th:value="${monthlyPriceId}" />
                             <button class="btn btn-primary w-100" type="submit">Proceed with Monthly Subscription</button>
                         </form>
                     </div>
@@ -80,7 +80,7 @@
                         <div class="text-light opacity-70 mb-4">per year</div>
                         <p class="text-light opacity-70 mb-4 pb-4">Save money with the annual plan.</p>
                         <form th:action="@{/setup/create/neighbor-services-profile}" method="post" id="annual-subscription-form">
-                            <input type="hidden" name="priceId" value="price_1PELXZBCHBXtJFxO4FchTfAv" />
+                            <input type="hidden" name="priceId" th:value="${annualPriceId}" />
                             <button class="btn btn-light w-100" type="submit">Proceed with Annual Subscription</button>
                         </form>
                     </div>
