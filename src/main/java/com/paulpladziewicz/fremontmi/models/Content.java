@@ -16,17 +16,17 @@ public class Content {
     @Id
     private String id;
 
-    private String type; // enum GROUP, EVENT, ANNOUNCEMENT, RESOURCE, USER, etc.
+    private String type;
 
     private String pathname;
 
     private String slug;
 
-    private String visibility = ContentVisibility.PUBLIC.getVisibility(); // enum PUBLIC, RESTRICTED, HIDDEN
+    private String visibility = ContentVisibility.PUBLIC.getVisibility();
 
-    private String status = ContentStatus.ACTIVE.getStatus(); // enum REQUIRES_ACTIVE_SUBSCRIPTION, DELETED
+    private String status = ContentStatus.ACTIVE.getStatus();
 
-    private List<String> relatedContentIds; // future use
+    private List<String> relatedContentIds;
 
     private String createdBy;
 
@@ -34,7 +34,7 @@ public class Content {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    private LocalDateTime updatedAt; // user made changes
+    private LocalDateTime updatedAt;
 
     private Boolean reviewed = false;
 
