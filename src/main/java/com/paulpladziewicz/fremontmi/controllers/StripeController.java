@@ -16,7 +16,7 @@ import java.util.Map;
 @Controller
 public class StripeController {
 
-    @Value("${stripe.publicKey}")
+    @Value("${stripe.publishable.key}")
     private String stripePublicKey;
 
     private final StripeService stripeService;
