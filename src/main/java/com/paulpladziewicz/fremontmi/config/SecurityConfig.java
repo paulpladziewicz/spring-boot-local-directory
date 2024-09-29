@@ -55,7 +55,7 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .permitAll()
                 .failureHandler(customAuthenticationFailureHandler())
-                .successHandler(savedRequestAwareAuthenticationSuccessHandler())
+                .successHandler(customSavedRequestAwareAuthenticationSuccessHandler())
         );
         http.requestCache(requestCacheCustomizer -> requestCacheCustomizer
                 .requestCache(new CustomRequestCache())
@@ -73,28 +73,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SavedRequestAwareAuthenticationSuccessHandler savedRequestAwareAuthenticationSuccessHandler() {
-        return new SavedRequestAwareAuthenticationSuccessHandler() {
-            @Override
-            protected void handle(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                RequestCache requestCache = new HttpSessionRequestCache();
-                SavedRequest savedRequest = requestCache.getRequest(request, response);
-
-                // If the session has expired or no saved request is found
-                if (savedRequest == null) {
-                    // Log this scenario for debugging purposes
-                    System.out.println("Session expired or no saved request found; redirecting to default target URL.");
-
-                    // Redirect to the default URL
-                    clearAuthenticationAttributes(request);
-                    getRedirectStrategy().sendRedirect(request, response, getDefaultTargetUrl());
-                    return;
-                }
-
-                // Otherwise, proceed as usual
-                super.handle(request, response, authentication);
-            }
-        };
+    public CustomSavedRequestAwareAuthenticationSuccessHandler customSavedRequestAwareAuthenticationSuccessHandler() {
+        return new CustomSavedRequestAwareAuthenticationSuccessHandler(userRepository);
     }
 
     @Bean
