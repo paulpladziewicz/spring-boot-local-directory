@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - My Events')}"></head>
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>My Events - FremontMI</title>
+    <meta name="description" content="View events you have created." />
+</head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 <main class="bg-secondary pt-4 pb-5">

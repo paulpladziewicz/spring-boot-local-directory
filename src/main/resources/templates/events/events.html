@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - Events')}"><title>Placeholder Title</title></head>
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>Events - FremontMI</title>
+    <meta name="description" content="Events happening in Fremont, MI. View events in chronological order." />
+</head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 <main class="bg-secondary pt-4 pb-5">
