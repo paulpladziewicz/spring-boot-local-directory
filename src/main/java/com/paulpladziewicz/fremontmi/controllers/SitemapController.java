@@ -30,7 +30,6 @@ public class SitemapController {
 
         // Add your main pages
         writer.println("<url><loc>https://fremontmi.com/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>");
-        writer.println("<url><loc>https://fremontmi.com/about</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>");
 
         // Add URLs from content entities
         for (String url : urls) {
