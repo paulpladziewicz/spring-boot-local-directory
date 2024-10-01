@@ -48,7 +48,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers(HttpMethod.POST, "/register", "/contact", "/subscribe", "/api/stripe/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/stripe/**").permitAll()
-                .requestMatchers("/groups/","/groups/**","/events","/events/**", "/register", "/forgot-password", "/reset-password", "/forgot-username", "/css/**", "/privacy-policy", "/terms-of-service", "/js/**", "/images/**", "/favicon.ico", "/error", "/login", "/login?error", "/login?error=*", "/login?logout", "/businesses", "/businesses/**", "/neighbor-services", "/neighbor-services/**", "/confirm", "/tagging-guidelines", "/create/neighbor-services-profile/overview", "/create/business/overview", "/", "/robots.txt", "/sitemap.xml").permitAll()
+                .requestMatchers("/groups/","/groups/**","/events","/events/**", "/register", "/forgot-password", "/reset-password", "/forgot-username", "/css/**", "/privacy-policy", "/terms-of-service", "/js/**", "/images/**", "/favicon.ico", "/error", "/login", "/login?error", "/login?error=*", "/login?logout", "/businesses", "/businesses/**", "/neighbor-services", "/neighbor-services/**", "/confirm", "/tagging-guidelines", "/create/neighbor-services-profile/overview", "/create/business/overview", "/", "/robots.txt", "/sitemap.xml", "/health").permitAll()
                 .anyRequest().authenticated()
         );
         http.formLogin(formLogin -> formLogin
