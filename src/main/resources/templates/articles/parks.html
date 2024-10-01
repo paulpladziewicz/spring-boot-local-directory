@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>Exploring the Best Parks in Fremont, MI – Nature, Recreation, and More</title>
+    <meta name="description" content="Discover the top parks in Fremont, MI, including Branstrom Park, Fremont Lake Park, Arboretum Park, Veterans Memorial Park, and Fremont Dog Park. Find out what each park offers for nature enthusiasts, families, and pet owners." />
+    <meta name="keywords" content="Fremont MI parks, Branstrom Park, Fremont Lake Park, Arboretum Park, Veterans Memorial Park, Fremont Dog Park, family parks, nature parks, recreation, outdoor activities, Michigan parks" />
+</head>
+
+
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<main class="container py-5">
+    <div class="row">
+        <div class="col-lg-9 col-xl-8 pe-lg-4 pe-xl-0">
+            <!-- Park 1: Branstrom Park -->
+            <h1 class="pb-2 pb-lg-3">Branstrom Park</h1>
+            <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom mb-4">
+                <div class="d-flex align-items-center mb-4 me-4">
+                    <span class="fs-sm me-2">By:</span>
+                    <a class="nav-link position-relative fw-semibold p-0" href="#author" data-scroll="" data-scroll-offset="80">
+                        Fremont Parks Department
+                        <span class="d-block position-absolute start-0 bottom-0 w-100" style="background-color: currentColor; height: 1px;"></span>
+                    </a>
+                </div>
+            </div>
+            <p class="fs-lg pt-2 pt-sm-3">Branstrom Park is the largest park in Fremont, offering over 100 acres of woodlands and various amenities such as trails, a lodge, and a playground.</p>
+            <figure class="figure">
+                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?forest" alt="Branstrom Park">
+                <figcaption class="figure-caption">A serene view of Branstrom Park.</figcaption>
+            </figure>
+
+            <!-- Park 2: Fremont Lake Park -->
+            <h2 class="h4 mb-lg-4 pt-3 pt-md-4 pt-xl-5">Fremont Lake Park</h2>
+            <p class="fs-lg">Fremont Lake Park is a 17-acre park featuring a bathhouse, playground equipment, sand volleyball court, shelters, and more. It also has a boat launch and camping facilities.</p>
+            <figure class="figure">
+                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?lake" alt="Fremont Lake Park">
+                <figcaption class="figure-caption">Beautiful sunset at Fremont Lake Park.</figcaption>
+            </figure>
+
+            <!-- Park 3: Arboretum Park -->
+            <h2 class="h4 mb-lg-4 pt-3 pt-md-4 pt-xl-5">Arboretum Park</h2>
+            <p class="fs-lg">This seven-acre park is devoted to native Michigan trees, shrubs, and wildflowers, making it an ideal spot for nature enthusiasts and families.</p>
+            <figure class="figure">
+                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?arboretum" alt="Arboretum Park">
+                <figcaption class="figure-caption">Nature walk through Arboretum Park.</figcaption>
+            </figure>
+
+            <!-- Park 4: Veterans Memorial Park -->
+            <h2 class="h4 mb-lg-4 pt-3 pt-md-4 pt-xl-5">Veterans Memorial Park</h2>
+            <p class="fs-lg">Located in the heart of downtown, Veterans Memorial Park is designed for various events, festivals, and activities, making it a central gathering space for the community.</p>
+            <figure class="figure">
+                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?veteran" alt="Veterans Memorial Park">
+                <figcaption class="figure-caption">A tribute at Veterans Memorial Park.</figcaption>
+            </figure>
+
+            <!-- Park 5: Fremont Dog Park -->
+            <h2 class="h4 mb-lg-4 pt-3 pt-md-4 pt-xl-5">Fremont Dog Park</h2>
+            <p class="fs-lg">A secure off-leash park where well-behaved dogs can play and exercise, providing a safe environment for pets and their owners.</p>
+            <figure class="figure">
+                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?dog-park" alt="Fremont Dog Park">
+                <figcaption class="figure-caption">Dogs having fun at Fremont Dog Park.</figcaption>
+            </figure>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>
