@@ -6,6 +6,7 @@ import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,14 +135,15 @@ public class EventService {
         try {
             LocalDateTime now = LocalDateTime.now();
             List<Event> events;
+            Sort sort = Sort.by("days.startTime").ascending(); // Sort by start time of the DayEvent
 
             if (tag != null && !tag.trim().isEmpty()) {
-                // Fetch events filtered by the tag and having future day events
-                events = contentRepository.findByTagAndAnyFutureDayEvent(tag, now);
+                // Fetch events filtered by the tag and having future day events, sorted by start time
+                events = contentRepository.findByTagAndAnyFutureDayEventOrderBySoonestStartTimeAsc(tag, now, sort);
                 logger.info("Fetched {} events with tag '{}'", events.size(), tag);
             } else {
-                // Fetch all events with future day events without tag filtering
-                events = contentRepository.findByAnyFutureDayEvent(now);
+                // Fetch all events with future day events, sorted by start time
+                events = contentRepository.findByAnyFutureDayEventOrderBySoonestStartTimeAsc(now, sort);
                 logger.info("Fetched {} events without any tag filtering", events.size());
             }
 

@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.repositories;
 
 import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.Event;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -42,4 +43,11 @@ public interface ContentRepository extends MongoRepository<Content, String> {
 
     @Query("{ 'stripeDetails.invoiceId': ?0 }")
     Optional<Content> findByStripeDetails_InvoiceId(String invoiceId);
+
+    @Query("{'visibility': 'public', 'days': { $elemMatch: { 'endTime': { $gt: ?0 } } }, 'status': { $in: ['active', 'canceled'] }}")
+    List<Event> findByAnyFutureDayEventOrderBySoonestStartTimeAsc(LocalDateTime now, Sort sort);
+
+    @Query("{ 'visibility': 'public', 'tags': { $in: [?0] }, 'days': { $elemMatch: { 'endTime': { $gt: ?1 } } }, 'status': { $in: ['active', 'canceled'] }}")
+    List<Event> findByTagAndAnyFutureDayEventOrderBySoonestStartTimeAsc(String tag, LocalDateTime now, Sort sort);
+
 }
