@@ -2,6 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js"></script>
     <title>Best Parks in Fremont, MI</title>
     <meta name="description" content="Discover the top parks in Fremont, MI, including Branstrom Park, Fremont Lake Park, Arboretum Park, Veterans Memorial Park, and Fremont Dog Park. Find out what each park offers for nature enthusiasts, families, and pet owners." />
     <meta name="keywords" content="Fremont MI parks, Branstrom Park, Fremont Lake Park, Arboretum Park, Veterans Memorial Park, Fremont Dog Park, family parks, nature parks, recreation, outdoor activities, Michigan parks" />
@@ -10,6 +12,9 @@
 
 <body>
 <header th:insert="~{partials/navbar}"></header>
+
+<div id="map" style="width: 100%; min-height: 350px;"></div>
+
 
 <main class="container py-5">
     <div class="row">
@@ -35,7 +40,7 @@
             </div>
 
             <h2 class="h4 mb-2 pt-3 pt-md-4 pt-xl-5">Veterans Memorial Park</h2>
-            <p class="my-2"><strong>Address:</strong> 101 E Main St, Fremont, MI 49412</p>
+            <p class="my-2"><strong>Address:</strong> 119 W Main St, Fremont, Michigan 49412</p>
             <p class="fs-lg">Located in the heart of downtown, Veterans Memorial Park is designed for various events, festivals, and activities, making it a central gathering space for the community.</p>
             <figure class="figure">
                 <img class="figure-img rounded-5 mb-3" src="/images/veterans-park-altered.webp" alt="Veterans Memorial Park">
@@ -115,6 +120,61 @@
         </div>
     </section>
 </main>
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoicHBsYWR6aWV3aWN6IiwiYSI6ImNtMXMwdmdsNDAxOXcyc29teTh3NW51MW8ifQ.2nbMyJSSmrTH6VrZtWMmSA';
+
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-85.954, 43.465],
+        zoom: 12,
+        minZoom: 12,
+        maxZoom: 16,
+        attributionControl: false
+    });
+
+    map.addControl(new mapboxgl.AttributionControl({
+        compact: true
+    }));
+
+    const parks = [
+        {
+            name: 'Veterans Memorial Park',
+            address: '119 W Main St, Fremont, Michigan 49412',
+            coordinates: [-85.948311, 43.467507]
+        },
+        {
+            name: 'Branstrom Park',
+            address: '666 Park St, Fremont, MI 49412',
+            coordinates: [-85.942605, 43.467436]
+        },
+        {
+            name: 'Fremont Lake Park',
+            address: '501 W Lake Dr, Fremont, MI 49412',
+            coordinates: [-85.9764, 43.4497]
+        },
+        {
+            name: 'Arboretum Park',
+            address: '801 S Stewart Ave, Fremont, MI 49412',
+            coordinates: [-85.9511, 43.4489]
+        },
+        {
+            name: 'Fremont Dog Park',
+            address: '1000 S Stewart Ave, Fremont, MI 49412',
+            coordinates: [-85.9508, 43.4482]
+        }
+    ];
+
+    parks.forEach(function (park) {
+        let marker = new mapboxgl.Marker()
+            .setLngLat(park.coordinates)
+            .setPopup(new mapboxgl.Popup({ offset: 25 })
+                .setHTML('<h3 class="h5 mb-1">' + park.name + '</h3><p class="m-0">' + park.address + '</p>'))
+            .addTo(map);
+    });
+</script>
+
 
 <footer th:replace="~{partials/footer}"></footer>
 <script th:replace="~{partials/theme-js}"></script>
