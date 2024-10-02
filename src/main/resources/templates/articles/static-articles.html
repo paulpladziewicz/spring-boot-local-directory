@@ -7,85 +7,33 @@
 </head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
-<main class="bg-secondary pt-4 pb-5">
+<main class="pt-4 pb-5">
 
     <div class="container">
 
-        <div class="d-none d-sm-flex justify-content-between align-items-center mb-4">
+        <div class="mb-4">
             <h1 class="display-3 mb-0">Articles</h1>
-            <div>
-                <a href="/my/articles" class="btn btn-link fw-semibold fs-lg text-primary">My Articles</a>
-                <a href="/create/article" class="btn btn-primary">Create</a>
-            </div>
-        </div>
-        <div class="d-sm-none mb-4">
-            <div class="d-flex justify-content-end">
-                <a href="/create/article" class="btn btn-primary fw-semibold py-2 px-3">Create</a>
-            </div>
-            <h1 class="display-3 mb-0">Articles</h1>
-            <a href="/my/articles" class="btn btn-link fw-semibold p-0">My Articles</a>
         </div>
 
         <div class="row">
 
-            <!-- Article Card 1 -->
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="h3 mb-1">Discovering Branstrom Park</h4>
-                        <p class="text-muted fw-semibold mb-2">Published on September 20, 2024</p>
-                        <p>Branstrom Park is one of Fremont's largest parks, offering a wide range of outdoor activities. Learn about its history, trails, and more in this comprehensive guide.</p>
-                        <a href="/articles/branstron-park" class="btn btn-lg btn-link p-0">Read Article<i class="ai-arrow-right ms-2"></i></a>
+            <div class="col-md-4 col-lg-4">
+                <article class="card border-0 bg-secondary">
+                    <a href="/articles/parks">
+                        <img src="/images/veterans-park-altered.webp" class="card-img-top" alt="Post image">
+                    </a>
+                    <div class="card-body pb-4">
+                        <div class="d-flex align-items-center mb-4 mt-n1">
+                            <span class="fs-sm text-body-secondary">12 hours ago</span>
+                            <span class="fs-xs opacity-20 mx-3">|</span>
+                            <a href="#" class="badge text-nav fs-xs border">Outdoors</a>
+                        </div>
+                        <h3 class="h4 card-title">
+                            <a href="/articles/parks">Top books for inspiration</a>
+                        </h3>
+                        <p class="card-text">Vulputate auctor lacus imperdiet facilisi tristique nisl pulvinar porta diam duis odio</p>
                     </div>
-                </div>
-            </div>
-
-            <!-- Article Card 2 -->
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="h3 mb-1">Fremont Lake Park Adventures</h4>
-                        <p class="text-muted fw-semibold mb-2">Published on October 5, 2024</p>
-                        <p>Explore Fremont Lake Park's recreational opportunities, from boating and fishing to relaxing on the beach. Find out why it's a must-visit for families.</p>
-                        <a href="/articles/fremont-lake-park" class="btn btn-lg btn-link p-0">Read Article<i class="ai-arrow-right ms-2"></i></a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Article Card 3 -->
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="h3 mb-1">Nature Walks at Arboretum Park</h4>
-                        <p class="text-muted fw-semibold mb-2">Published on August 30, 2024</p>
-                        <p>Arboretum Park is a hidden gem for nature lovers. Discover its beautiful collection of Michigan trees, plants, and trails, perfect for a peaceful walk.</p>
-                        <a href="/articles/arboretum-park" class="btn btn-lg btn-link p-0">Read Article<i class="ai-arrow-right ms-2"></i></a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Article Card 4 -->
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="h3 mb-1">Events at Veterans Memorial Park</h4>
-                        <p class="text-muted fw-semibold mb-2">Published on November 10, 2024</p>
-                        <p>Learn about the events held at Veterans Memorial Park throughout the year. From festivals to community gatherings, this park is the heart of Fremont's social life.</p>
-                        <a href="/articles/veterans-memorial-park" class="btn btn-lg btn-link p-0">Read Article<i class="ai-arrow-right ms-2"></i></a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Article Card 5 -->
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="h3 mb-1">Fremont Dog Park: A Pet-Friendly Haven</h4>
-                        <p class="text-muted fw-semibold mb-2">Published on October 15, 2024</p>
-                        <p>Discover why Fremont Dog Park is a favorite spot for pet owners. Find tips on how to enjoy this space with your furry friend and meet other dog lovers.</p>
-                        <a href="/articles/fremont-dog-park" class="btn btn-lg btn-link p-0">Read Article<i class="ai-arrow-right ms-2"></i></a>
-                    </div>
-                </div>
+                </article>
             </div>
 
         </div>

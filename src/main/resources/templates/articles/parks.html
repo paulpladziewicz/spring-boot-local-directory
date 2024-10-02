@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
-    <title>Exploring the Best Parks in Fremont, MI – Nature, Recreation, and More</title>
+    <title>Best Parks in Fremont, MI</title>
     <meta name="description" content="Discover the top parks in Fremont, MI, including Branstrom Park, Fremont Lake Park, Arboretum Park, Veterans Memorial Park, and Fremont Dog Park. Find out what each park offers for nature enthusiasts, families, and pet owners." />
     <meta name="keywords" content="Fremont MI parks, Branstrom Park, Fremont Lake Park, Arboretum Park, Veterans Memorial Park, Fremont Dog Park, family parks, nature parks, recreation, outdoor activities, Michigan parks" />
 </head>
@@ -13,57 +13,106 @@
 
 <main class="container py-5">
     <div class="row">
-        <div class="col-lg-9 col-xl-8 pe-lg-4 pe-xl-0">
-            <!-- Park 1: Branstrom Park -->
-            <h1 class="pb-2 pb-lg-3">Branstrom Park</h1>
+        <div class="col-lg-9 col-xl-8 mx-auto">
+
+            <h1 class="pb-2 pb-lg-3">Parks in Fremont, MI</h1>
+            <p class="lead">A comprehensive guide to what parks are available to the public right within our community.</p>
             <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom mb-4">
                 <div class="d-flex align-items-center mb-4 me-4">
-                    <span class="fs-sm me-2">By:</span>
-                    <a class="nav-link position-relative fw-semibold p-0" href="#author" data-scroll="" data-scroll-offset="80">
-                        Fremont Parks Department
-                        <span class="d-block position-absolute start-0 bottom-0 w-100" style="background-color: currentColor; height: 1px;"></span>
-                    </a>
+                </div>
+                <div class="d-flex align-items-center mb-4">
+                    <span class="fs-sm me-2">Share post:</span>
+                    <div class="d-flex">
+                        <a class="nav-link p-2 me-2" href="#" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Facebook" data-bs-original-title="Facebook">
+                            <i class="ai-facebook"></i>
+                        </a>
+                        <a class="nav-link p-2 me-2" href="#" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Instagram" data-bs-original-title="Instagram">
+                            <i class="ai-instagram"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <p class="fs-lg pt-2 pt-sm-3">Branstrom Park is the largest park in Fremont, offering over 100 acres of woodlands and various amenities such as trails, a lodge, and a playground.</p>
-            <figure class="figure">
-                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?forest" alt="Branstrom Park">
-                <figcaption class="figure-caption">A serene view of Branstrom Park.</figcaption>
-            </figure>
 
-            <!-- Park 2: Fremont Lake Park -->
-            <h2 class="h4 mb-lg-4 pt-3 pt-md-4 pt-xl-5">Fremont Lake Park</h2>
-            <p class="fs-lg">Fremont Lake Park is a 17-acre park featuring a bathhouse, playground equipment, sand volleyball court, shelters, and more. It also has a boat launch and camping facilities.</p>
-            <figure class="figure">
-                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?lake" alt="Fremont Lake Park">
-                <figcaption class="figure-caption">Beautiful sunset at Fremont Lake Park.</figcaption>
-            </figure>
-
-            <!-- Park 3: Arboretum Park -->
-            <h2 class="h4 mb-lg-4 pt-3 pt-md-4 pt-xl-5">Arboretum Park</h2>
-            <p class="fs-lg">This seven-acre park is devoted to native Michigan trees, shrubs, and wildflowers, making it an ideal spot for nature enthusiasts and families.</p>
-            <figure class="figure">
-                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?arboretum" alt="Arboretum Park">
-                <figcaption class="figure-caption">Nature walk through Arboretum Park.</figcaption>
-            </figure>
-
-            <!-- Park 4: Veterans Memorial Park -->
-            <h2 class="h4 mb-lg-4 pt-3 pt-md-4 pt-xl-5">Veterans Memorial Park</h2>
+            <h2 class="h4 mb-2 pt-3 pt-md-4 pt-xl-5">Veterans Memorial Park</h2>
+            <p class="my-2"><strong>Address:</strong> 101 E Main St, Fremont, MI 49412</p>
             <p class="fs-lg">Located in the heart of downtown, Veterans Memorial Park is designed for various events, festivals, and activities, making it a central gathering space for the community.</p>
             <figure class="figure">
-                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?veteran" alt="Veterans Memorial Park">
-                <figcaption class="figure-caption">A tribute at Veterans Memorial Park.</figcaption>
+                <img class="figure-img rounded-5 mb-3" src="/images/veterans-park-altered.webp" alt="Veterans Memorial Park">
             </figure>
+            
 
-            <!-- Park 5: Fremont Dog Park -->
-            <h2 class="h4 mb-lg-4 pt-3 pt-md-4 pt-xl-5">Fremont Dog Park</h2>
+            <h2 class="h4 pt-3 pt-md-4 pt-xl-5">Branstrom Park</h2>
+            <p><strong>Address:</strong> 666 Park St, Fremont, MI 49412</p>
+            <p class="fs-lg pt-2 pt-sm-3">Branstrom Park is the largest park in Fremont, offering over 100 acres of woodlands and various amenities such as trails, a lodge, and a playground.</p>
+            <!--            <figure class="figure">-->
+<!--                <img class="figure-img rounded-5 mb-3" src="" alt="Branstrom Park">-->
+<!--            </figure>-->
+
+            <!-- Park 2: Fremont Lake Park -->
+            <h2 class="h4 pt-3 pt-md-4 pt-xl-5">Fremont Lake Park</h2>
+            <p class="fs-lg">Fremont Lake Park is a 17-acre park featuring a bathhouse, playground equipment, sand volleyball court, shelters, and more. It also has a boat launch and camping facilities.</p>
+            <p><strong>Address:</strong> 501 W Lake Dr, Fremont, MI 49412</p>
+            <!--            <figure class="figure">-->
+<!--                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?lake" alt="Fremont Lake Park">-->
+<!--                <figcaption class="figure-caption">Beautiful sunset at Fremont Lake Park.</figcaption>-->
+<!--            </figure>-->
+
+            <!-- Park 3: Arboretum Park -->
+            <h2 class="h4 pt-3 pt-md-4 pt-xl-5">Arboretum Park</h2>
+            <p class="fs-lg">This seven-acre park is devoted to native Michigan trees, shrubs, and wildflowers, making it an ideal spot for nature enthusiasts and families.</p>
+            <p><strong>Address:</strong> 801 S Stewart Ave, Fremont, MI 49412</p>
+            <!--            <figure class="figure">-->
+<!--                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?arboretum" alt="Arboretum Park">-->
+<!--                <figcaption class="figure-caption">Nature walk through Arboretum Park.</figcaption>-->
+<!--            </figure>-->
+
+
+            <h2 class="h4 pt-3 pt-md-4 pt-xl-5">Fremont Dog Park</h2>
             <p class="fs-lg">A secure off-leash park where well-behaved dogs can play and exercise, providing a safe environment for pets and their owners.</p>
-            <figure class="figure">
-                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?dog-park" alt="Fremont Dog Park">
-                <figcaption class="figure-caption">Dogs having fun at Fremont Dog Park.</figcaption>
-            </figure>
+            <p><strong>Address:</strong> 1000 S Stewart Ave, Fremont, MI 49412</p>
+            <!--            <figure class="figure">-->
+<!--                <img class="figure-img rounded-5 mb-3" src="https://source.unsplash.com/random/800x600?dog-park" alt="Fremont Dog Park">-->
+<!--                <figcaption class="figure-caption">Dogs having fun at Fremont Dog Park.</figcaption>-->
+<!--            </figure>-->
         </div>
     </div>
+
+    <section class="bg-secondary container pt-5 pb-3 pb-xl-4 py-xxl-5 my-5">
+
+        <div class="row pb-1 pb-sm-3 pb-lg-4">
+
+            <div class="col-lg-8 col-xl-7 offset-xl-1 mx-auto">
+                <!-- Page title -->
+                <h1 class="display-6 text-center">Did we miss one?</h1>
+                <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">Feel free to send us your feedback so we can improve this article.</p>
+                <!-- Contact form -->
+                <form class="row g-4 needs-validation" novalidate="">
+                    <div class="col-sm-6">
+                        <label class="form-label fs-base" for="name">Name</label>
+                        <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
+                        <div class="invalid-feedback">Please enter your name!</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label fs-base" for="email">Email</label>
+                        <input class="form-control form-control-lg" type="email" placeholder="Email address" required="" id="email">
+                        <div class="invalid-feedback">Please provide a valid email address!</div>
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form-label fs-base" for="message">How can we improve this article?</label>
+                        <textarea class="form-control form-control-lg" rows="5" placeholder="Enter your message here..." required="" id="message"></textarea>
+                        <div class="invalid-feedback">Please enter your message!</div>
+                    </div>
+                    <div class="col-sm-12 pt-2">
+                        <button id="submit-button" class="btn btn-lg btn-primary" type="button" onclick="submitContactForm()">Send message</button>
+                        <button id="loading-button" class="btn btn-lg btn-primary pe-none" type="button" style="display: none;">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Loading...
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
 </main>
 
 <footer th:replace="~{partials/footer}"></footer>

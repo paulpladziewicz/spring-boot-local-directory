@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{partials/head :: head('Create New Event')}">
+    <title>Create Group</title>
+</head>
+<body>
+<header th:replace="~{partials/navbar}"></header>
+
+<div class="flatpickr-wrapper">
+    <input type="text" id="flatpickr" placeholder="Select Date.." data-input>
+
+    <a class="input-button" title="toggle" data-toggle>
+        <i class="icon-calendar">📅</i>
+    </a>
+
+    <a class="input-button" title="clear" data-clear>
+        <i class="icon-close">❌</i>
+    </a>
+</div>
+
+
+
+<script th:src="@{/js/flatpickr.min.js}"></script>
+
+<script>
+    flatpickr(".flatpickr-wrapper", {
+        mode: "multiple",
+        wrap: true,
+        onReady: function(selectedDates, dateStr, instance) {
+            const calendarContainer = instance.calendarContainer;
+
+            // Create and style the duplicate button
+            const duplicateButton = document.createElement("button");
+            duplicateButton.textContent = "Add Days";
+            duplicateButton.id = "duplicate-button";
+            duplicateButton.style.marginTop = "10px";
+            duplicateButton.style.width = "100%";
+
+            // Attach an event listener to the duplicate button
+            duplicateButton.addEventListener("click", function() {
+                alert("Duplicate action triggered");
+            });
+
+            // Append the duplicate button to the calendar popup
+            calendarContainer.appendChild(duplicateButton);
+        }
+    });
+
+</script>
+
+<script th:replace="~{partials/theme-js}"></script>
+<footer th:replace="~{partials/footer}"></footer>
+</body>
+</html>
