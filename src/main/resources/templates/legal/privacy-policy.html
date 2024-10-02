@@ -1,7 +1,13 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - Home')}"></head>
+<head>
+    <th:block th:insert="~{partials/layout :: minimalHead}"></th:block>
+    <title>Privacy Policy - FremontMI</title>
+    <meta name="description" content="Your privacy is important to us. This privacy policy explains what information we collect, how we collect it, how we use and share that information, how users can access and control their information, our data retention practices, and how we protect users' data.">
+    <meta name="keywords" content="privacy policy, data collection, data sharing, data protection, data retention, user rights, data security">
+</head>
 <body>
+
 <header th:insert="~{partials/navbar}"></header>
 
 <div class="container mt-3">
@@ -21,11 +27,10 @@
     <ul>
         <li><strong>Personal Information:</strong> Information that identifies you as an individual, such as your name,
             email address, phone number, and other contact details. This information is typically collected when you
-            create an account, join a group, post an event, or interact with other features of our platform.
+            create an account, create a business listing, post an event, or interact with other features of our platform.
         </li>
         <li><strong>Non-Personal Information:</strong> Information that does not directly identify you, such as your IP
-            address, browser type, operating system, and the pages you visit on our platform. This information is
-            collected through cookies, log files, and similar technologies to help us understand how our platform is
+            address, browser type, operating system, and the pages you visit on our platform. This information helps us understand how our platform is
             being used.
         </li>
         <li><strong>Activity Information:</strong> Information about your interactions with the platform, such as group
@@ -33,7 +38,7 @@
         </li>
         <li><strong>Payment Information:</strong> If you make transactions through our platform, such as paying for
             premium features or advertising, we may collect payment information, including credit card details or other
-            payment methods. This information is processed securely through our payment processor and is not stored on
+            payment methods. This information is processed securely through our payment third-party provider and is not stored on
             our servers.
         </li>
     </ul>
@@ -43,18 +48,15 @@
         <li><strong>Directly from You:</strong> When you create an account, post content, or interact with other users,
             you provide us with personal information directly.
         </li>
-        <li><strong>Automatically:</strong> We use cookies, log files, and similar technologies to automatically collect
+        <li><strong>Automatically:</strong> We use analytics, log files, and similar technologies to automatically collect
             non-personal information about your interactions with our platform.
-        </li>
-        <li><strong>From Third Parties:</strong> We may receive information from third-party services that you use to
-            connect to our platform, such as social media logins or payment processors.
         </li>
     </ul>
     <h2>How We Use Your Information</h2>
     <p>We may use the information we collect for various purposes, including:</p>
     <ul>
         <li><strong>Providing Services:</strong> To operate, maintain, and improve our platform, including managing your
-            account, facilitating group memberships, and allowing you to create or join events.
+            account and facilitating content.
         </li>
         <li><strong>Communication:</strong> To communicate with you about your account, respond to inquiries, provide
             customer support, and send updates or notifications related to your activities on the platform.
@@ -72,7 +74,7 @@
     <h2>How We Share Your Information</h2>
     <p>We may share your information in the following circumstances:</p>
     <ul>
-        <li><strong>With Other Users:</strong> Information you post publicly, such as in groups or event pages, will be
+        <li><strong>With Other Users:</strong> Information you post publicly, such as in groups, event pages, etc., will be
             visible to other users of the platform.
         </li>
         <li><strong>With Service Providers:</strong> We may share your information with third-party service providers
@@ -123,6 +125,7 @@
     <p>Email: ppladziewicz@gmail.com</p>
     <p>Mailing Address: 729 N Stewart Ave, Fremont, MI, 49412</p>
 </div>
+
 <script th:replace="~{partials/theme-js}"></script>
 <footer th:replace="~{partials/footer}"></footer>
 </body>

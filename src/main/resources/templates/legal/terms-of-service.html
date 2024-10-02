@@ -1,7 +1,13 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - Home')}"></head>
+<head>
+    <th:block th:insert="~{partials/layout :: minimalHead}"></th:block>
+    <title>Terms of Service - FremontMI</title>
+    <meta name="description" content="These Terms of Service govern your use of our website and services. By accessing or using our services, you agree to be bound by these Terms.">
+    <meta name="keywords" content="terms of service, user eligibility, account management, user responsibilities, acceptable use, intellectual property rights, third-party links, dispute resolution, limitation of liability, changes to the terms, termination, governing law, contact information">
+</head>
 <body>
+
 <header th:insert="~{partials/navbar}"></header>
 
 <div class="container mt-3">
@@ -55,12 +61,12 @@
 
     <h2>Dispute Resolution</h2>
     <p>Any disputes arising from these Terms or your use of the platform will be resolved through binding
-        arbitration in accordance with the rules of [Arbitration Association]. The arbitration will take place in
-        [City, State], and the decision of the arbitrator will be final and binding. Each party will bear its own
+        arbitration in accordance with the rules of the American Arbitration Association. The arbitration will take place in
+        Fremont, Michigan, and the decision of the arbitrator will be final and binding. Each party will bear its own
         costs of arbitration, except that the arbitrator may, in their discretion, award costs and fees to the
         prevailing party.</p>
     <p>If arbitration is not permitted by law, any disputes will be resolved exclusively in the state and federal
-        courts located in [City, State], and you consent to the jurisdiction of such courts.</p>
+        courts located in Fremont, Michigan, and you consent to the jurisdiction of such courts.</p>
 
     <h2>Limitation of Liability</h2>
     <p>To the maximum extent permitted by law, we are not liable for any direct, indirect, incidental, special, or
@@ -85,9 +91,9 @@
         ownership provisions, warranty disclaimers, indemnity, and limitations of liability.</p>
 
     <h2>Governing Law</h2>
-    <p>These Terms are governed by and construed in accordance with the laws of the State of [State], without regard
+    <p>These Terms are governed by and construed in accordance with the laws of the State of Michigan, without regard
         to its conflict of law principles. You agree to submit to the personal and exclusive jurisdiction of the
-        courts located within [City, State] to resolve any disputes or claims arising from these Terms.</p>
+        courts located within Fremont, Michigan to resolve any disputes or claims arising from these Terms.</p>
 
     <h2>Contact Information</h2>
     <p>If you have any questions about these Terms, please contact us at:</p>
