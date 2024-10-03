@@ -28,10 +28,13 @@ public class SitemapController {
         writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         writer.println("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
 
-        // Add your main pages
+        // Main Pages
         writer.println("<url><loc>https://fremontmi.com/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>");
 
-        // Add URLs from content entities
+        // Articles
+        writer.println("<url><loc>https://fremontmi.com/articles/parks</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>");
+
+        // Content entities
         for (String url : urls) {
             writer.println("<url>");
             writer.println("<loc>" + url + "</loc>");

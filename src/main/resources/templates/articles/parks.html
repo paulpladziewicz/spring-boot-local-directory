@@ -46,38 +46,39 @@
                 <img class="figure-img rounded-5 mb-3" src="/images/veterans-park-altered.webp" alt="Veterans Memorial Park">
             </figure>
 
-            <h2 class="h4 pt-3 pt-md-4 pt-xl-5">Branstrom Park</h2>
-            <p><strong>Address:</strong> Branstrom Dr, Fremont, MI 49412</p>
-            <p class="fs-lg pt-2 pt-sm-3">Branstrom Park is the largest park in Fremont, offering over 100 acres of woodlands and various amenities such as trails, a lodge, and a playground.</p>
+            <h2 class="h4 mb-2 pt-3 pt-md-4 pt-xl-5">Branstrom Park</h2>
+            <p class="my-2"><strong>Address:</strong> Branstrom Dr, Fremont, MI 49412</p>
+            <p class="fs-lg">Branstrom Park is the largest park in Fremont, offering over 100 acres of woodlands and various amenities such as trails, a lodge, and a playground.</p>
 
-            <h2 class="h4 pt-3 pt-md-4 pt-xl-5">Fremont Lake Park</h2>
+            <h2 class="h4 mb-2 pt-3 pt-md-4 pt-xl-5">Fremont Lake Park</h2>
+            <p class="my-2"><strong>Address:</strong> 955 Cottage Grove, Fremont, MI 49412</p>
             <p class="fs-lg">Fremont Lake Park is a 17-acre park featuring a bathhouse, playground equipment, sand volleyball court, shelters, and more. It also has a boat launch and camping facilities.</p>
-            <p><strong>Address:</strong> 955 Cottage Grove, Fremont, MI 49412</p>
 
-            <h2 class="h4 pt-3 pt-md-4 pt-xl-5">Arboretum Park</h2>
+            <h2 class="h4 mb-2 pt-3 pt-md-4 pt-xl-5">Arboretum Park</h2>
+            <p class="my-2"><strong>Address:</strong> 529 Iroquois Dr, Fremont, MI 49412</p>
             <p class="fs-lg">This seven-acre park is devoted to native Michigan trees, shrubs, and wildflowers, making it an ideal spot for nature enthusiasts and families.</p>
-            <p><strong>Address:</strong> 529 Iroquois Dr, Fremont, MI 49412</p>
 
-            <h2 class="h4 pt-3 pt-md-4 pt-xl-5">Fremont Dog Park</h2>
+            <h2 class="h4 mb-2 pt-3 pt-md-4 pt-xl-5">Fremont Dog Park</h2>
+            <p class="my-2"><strong>Address:</strong> 320 Lake Dr, Fremont, MI 49412</p>
             <p class="fs-lg">A secure off-leash park where well-behaved dogs can play and exercise, providing a safe environment for pets and their owners.</p>
-            <p><strong>Address:</strong> 320 Lake Dr, Fremont, MI 49412</p>
             <figure class="figure">
                 <img class="figure-img rounded-5 mb-3" src="/images/dog-park-altered.webp" alt="Fremont Dog Park">
             </figure>
 
-            <h2 class="h4 pt-3 pt-md-4 pt-xl-5">Fremont Christian Park</h2>
-            <p class="fs-lg">A secure off-leash park where well-behaved dogs can play and exercise, providing a safe environment for pets and their owners.</p>
-            <p><strong>Address:</strong> 110 N Decker Ave, Fremont, MI, 49412</p>
+            <h2 class="h4 mb-2 pt-3 pt-md-4 pt-xl-5">Fremont Christian Park</h2>
+            <p class="my-2"><strong>Address:</strong> 110 N Decker Ave, Fremont, MI, 49412</p>
+            <p class="fs-lg">The park features multiple swings, a rock climbing structure that leads to exciting slides, and plenty of open space for kids to run and play freely. It’s a perfect spot for families looking for a fun and safe environment for their children to enjoy outdoor activities.</p>
             <figure class="figure">
-                <img class="figure-img rounded-5 mb-3" src="/images/christian-school-altered.webp" alt="Fremont Dog Park">
+                <img class="figure-img rounded-5 mb-3" src="/images/christian-school-altered.webp" alt="Fremont Christian Park">
             </figure>
 
-            <h2 class="h4 pt-3 pt-md-4 pt-xl-5">Church of the Living Christ Park</h2>
-            <p class="fs-lg">Mostly sand for terrain with lots of toys to play with.</p>
-            <p><strong>Address:</strong> 605 Hemlock St, Fremont, MI 49412</p>
+            <h2 class="h4 mb-2 pt-3 pt-md-4 pt-xl-5">Church of the Living Christ Park</h2>
+            <p class="my-2"><strong>Address:</strong> 605 Hemlock St, Fremont, MI 49412</p>
+            <p class="fs-lg">Designed with younger children in mind, it features a unique sand-covered terrain that’s perfect for imaginative play. The park is filled with various toys and play structures, providing endless entertainment for kids to explore, dig, and create.</p>
             <figure class="figure">
-                <img class="figure-img rounded-5 mb-3" src="/images/sand-park-altered.webp" alt="Fremont Dog Park">
+                <img class="figure-img rounded-5 mb-3" src="/images/sand-park-altered.webp" alt="Church of the Living Christ Park">
             </figure>
+
 
         </div>
     </div>
@@ -91,7 +92,7 @@
                 <h1 class="display-6 text-center">Did we miss one?</h1>
                 <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">Feel free to send us your feedback so we can improve this article.</p>
                 <!-- Contact form -->
-                <form class="row g-4 needs-validation" novalidate="">
+                <form class="row g-4 needs-validation" novalidate="" id="contactForm">
                     <div class="col-sm-6">
                         <label class="form-label fs-base" for="name">Name</label>
                         <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
@@ -115,6 +116,8 @@
                         </button>
                     </div>
                 </form>
+
+                <div id="form-message" class="alert mt-4" style="display: none;"></div>
             </div>
         </div>
     </section>
@@ -182,6 +185,62 @@
                 .setHTML('<h3 class="h5 mb-1">' + park.name + '</h3><p class="m-0">' + park.address + '</p>'))
             .addTo(map);
     });
+</script>
+
+<script>
+    async function submitContactForm() {
+        const form = document.getElementById('contactForm');
+        const submitButton = document.getElementById('submit-button');
+        const loadingButton = document.getElementById('loading-button');
+        const formMessage = document.getElementById('form-message');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+
+        const formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            message: document.getElementById('message').value
+        };
+
+        submitButton.style.display = 'none';
+        loadingButton.style.display = 'block';
+
+        try {
+            const response = await fetch('/article-contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                formMessage.style.display = 'block';
+                formMessage.classList.remove('alert-danger');
+                formMessage.classList.add('alert-primary');
+                formMessage.innerText = 'Thank you for your feedback! We have received your message.';
+
+                form.reset();
+                form.classList.remove('was-validated');
+            } else {
+                throw new Error('Submission failed');
+            }
+        } catch (error) {
+            formMessage.style.display = 'block';
+            formMessage.classList.remove('alert-success');
+            formMessage.classList.add('alert-danger');
+            formMessage.innerText = 'Failed to submit the form. Please try again later.';
+        } finally {
+            loadingButton.style.display = 'none';
+            submitButton.style.display = 'block';
+        }
+    }
 </script>
 
 
