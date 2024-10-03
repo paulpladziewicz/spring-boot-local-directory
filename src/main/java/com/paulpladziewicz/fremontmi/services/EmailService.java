@@ -99,7 +99,6 @@ public class EmailService {
         }
     }
 
-    @Async
     public void sendContactUsEmailAsync(String name, String email, String contactMessage) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

@@ -61,4 +61,9 @@ public class HomeController {
 
         return "redirect:/#subscribe";
     }
+
+    @GetMapping("/test")
+    public String test () {
+        return "test";
+    }
 }
