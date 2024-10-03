@@ -123,8 +123,8 @@
     </section>
 </main>
 
-<script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoicHBsYWR6aWV3aWN6IiwiYSI6ImNtMXMwdmdsNDAxOXcyc29teTh3NW51MW8ifQ.2nbMyJSSmrTH6VrZtWMmSA';
+<script th:inline="javascript">
+    mapboxgl.accessToken = /*[[${mapboxSecret}]]*/ 'default';
 
     var map = new mapboxgl.Map({
         container: 'map',
