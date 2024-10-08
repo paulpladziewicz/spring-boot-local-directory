@@ -1,10 +1,11 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
+import com.paulpladziewicz.fremontmi.exceptions.PermissionDeniedException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +38,7 @@ public class NeighborServicesProfileService {
         this.emailService = emailService;
     }
 
-    public ServiceResponse<NeighborServicesProfile> createNeighborServiceProfile(NeighborServicesProfile neighborServicesProfile) {
+    public NeighborServicesProfile createNeighborServiceProfile(NeighborServicesProfile neighborServicesProfile) {
         UserProfile userProfile = userService.getUserProfile();
 
         neighborServicesProfile.setType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
@@ -54,17 +55,115 @@ public class NeighborServicesProfileService {
 
         neighborServicesProfile.setStripeDetails(stripeDetails);
 
-        ServiceResponse<NeighborServicesProfile> saveResponse = saveNeighborServiceProfile(neighborServicesProfile);
+        return contentRepository.save(neighborServicesProfile);
+    }
 
-        if (saveResponse.hasError()) {
-            logger.error("Error when trying to save a NeighborServicesProfile");
-            return ServiceResponse.error(saveResponse.errorCode());
+    public List<NeighborServicesProfile> findAllActiveNeighborServices(String tag) {
+        List<Content> contents;
+
+        if (tag != null && !tag.isEmpty()) {
+            contents = contentRepository.findByTagAndType(tag, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+        } else {
+            contents = contentRepository.findAllByType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
         }
 
-        NeighborServicesProfile savedNeighborServicesProfile = saveResponse.value();
+        return contents.stream()
+                .filter(content -> content instanceof NeighborServicesProfile) // Ensure type safety
+                .map(content -> (NeighborServicesProfile) content)
+                .collect(Collectors.toList());
+    }
+
+    public NeighborServicesProfile findNeighborServiceProfileById(String id) {
+            return contentRepository.findById(id, NeighborServicesProfile.class)
+                    .orElseThrow(() -> new ContentNotFoundException("Business with id '" + id + "' not found."));
+    }
+
+    public NeighborServicesProfile findNeighborServiceProfileBySlug(String slug) {
+            return contentRepository.findBySlugAndType(slug, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType(), NeighborServicesProfile.class)
+                    .orElseThrow(() -> new ContentNotFoundException("Business with slug '" + slug + "' not found."));
+    }
+
+    public Optional<NeighborServicesProfile> findNeighborServiceProfileByUserId() {
+        String userId = userService.getUserId();
+
+        Optional<Content> optionalContent = contentRepository.findByCreatedBy(userId);
+
+        return optionalContent
+                .filter(content -> content instanceof NeighborServicesProfile)
+                .map(content -> (NeighborServicesProfile) content);
+    }
+
+    @Transactional
+    public NeighborServicesProfile updateNeighborServiceProfile(NeighborServicesProfile neighborServiceProfile) {
+        String userId = userService.getUserId();
+
+        NeighborServicesProfile existingProfile = findNeighborServiceProfileById(neighborServiceProfile.getId());
+
+        checkPermission(userId, existingProfile);
+
+        List<String> oldTags = existingProfile.getTags();
+        List<String> newTags = neighborServiceProfile.getTags();
+
+        if (newTags != null) {
+            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+        }
+
+        if (!existingProfile.getName().equals(neighborServiceProfile.getName())) {
+            String newSlug = createUniqueSlug(neighborServiceProfile.getName());
+            existingProfile.setSlug(newSlug);
+            existingProfile.setPathname("/neighbor-services/" + newSlug);
+        }
+
+        updateExistingNeighborServiceProfile(existingProfile, neighborServiceProfile);
+
+        return contentRepository.save(existingProfile);
+    }
 
 
-        return ServiceResponse.value(savedNeighborServicesProfile);
+    @Transactional
+    public void deleteNeighborService(String neighborServiceId) {
+        String userId = userService.getUserId();
+
+        NeighborServicesProfile neighborServicesProfile = findNeighborServiceProfileById(neighborServiceId);
+
+        checkPermission(userId, neighborServicesProfile);
+
+        if (neighborServicesProfile.getSubscriptionId() != null && !neighborServicesProfile.getSubscriptionId().isEmpty()) {
+            stripeService.cancelSubscriptionAtPeriodEnd(neighborServicesProfile.getSubscriptionId());
+        }
+
+        tagService.removeTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+
+        contentRepository.deleteById(neighborServiceId);
+    }
+
+    private void checkPermission(String userId, NeighborServicesProfile neighborServicesProfile) {
+        if (!neighborServicesProfile.getCreatedBy().equals(userId)) {
+            throw new PermissionDeniedException("User does not have permission to modify this event.");
+        }
+    }
+
+    private void updateExistingNeighborServiceProfile(NeighborServicesProfile existingProfile, NeighborServicesProfile updatedProfile) {
+        existingProfile.setName(updatedProfile.getName());
+        existingProfile.setDescription(updatedProfile.getDescription());
+        existingProfile.setEmail(updatedProfile.getEmail());
+        existingProfile.setTags(updatedProfile.getTags());
+
+        if (updatedProfile.getTags() != null && !updatedProfile.getTags().isEmpty()) {
+            existingProfile.setTags(updatedProfile.getTags()); // Update the existing business's tags
+        }
+
+        if (updatedProfile.getNeighborServices() != null) {
+            existingProfile.setNeighborServices(updatedProfile.getNeighborServices());
+        }
+
+        existingProfile.setUpdatedAt(LocalDateTime.now());
+    }
+
+    public void handleContactFormSubmission(String slug, String name, String email, String message) {
+        NeighborServicesProfile neighborServicesProfile = findNeighborServiceProfileBySlug(slug);
+
+        emailService.sendContactNeighborServiceProfileEmail(neighborServicesProfile.getEmail(), name, email, message);
     }
 
     public String createUniqueSlug(String name) {
@@ -104,164 +203,6 @@ public class NeighborServicesProfileService {
             return baseSlug + "-" + (maxNumber + 1);
         } else {
             return baseSlug;
-        }
-    }
-
-    public ServiceResponse<NeighborServicesProfile> saveNeighborServiceProfile(NeighborServicesProfile neighborServicesProfile) {
-            NeighborServicesProfile savedNeighborServicesProfile = contentRepository.save(neighborServicesProfile);
-            return ServiceResponse.value(savedNeighborServicesProfile);
-    }
-
-    public ServiceResponse<List<NeighborServicesProfile>> findAllActiveNeighborServices(String tag) {
-        List<Content> contents;
-
-        if (tag != null && !tag.isEmpty()) {
-            contents = contentRepository.findByTagAndType(tag, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
-        } else {
-            contents = contentRepository.findAllByType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
-        }
-
-        List<NeighborServicesProfile> profiles = contents.stream()
-                .filter(content -> content instanceof NeighborServicesProfile) // Ensure type safety
-                .map(content -> (NeighborServicesProfile) content)
-                .collect(Collectors.toList());
-
-        return ServiceResponse.value(profiles);
-    }
-
-    public Optional<NeighborServicesProfile> findNeighborServiceProfileById(String neighborServiceProfileId) {
-            Optional<Content> optionalContent = contentRepository.findById(neighborServiceProfileId);
-
-            return optionalContent
-                    .filter(content -> content instanceof NeighborServicesProfile)
-                    .map(content -> (NeighborServicesProfile) content);
-    }
-
-    public Optional<NeighborServicesProfile> findNeighborServiceProfileBySlug(String neighborServiceProfileSlug) {
-            Optional<Content> optionalContent = contentRepository.findBySlugAndType(neighborServiceProfileSlug, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
-
-            return optionalContent
-                    .filter(content -> content instanceof NeighborServicesProfile)
-                    .map(content -> (NeighborServicesProfile) content);
-    }
-
-    public Optional<NeighborServicesProfile> findNeighborServiceProfileByUserId() {
-        String userId = userService.getUserId();
-
-        Optional<Content> optionalContent = contentRepository.findByCreatedBy(userId);
-
-        return optionalContent
-                .filter(content -> content instanceof NeighborServicesProfile)
-                .map(content -> (NeighborServicesProfile) content);
-    }
-
-    @Transactional
-    public ServiceResponse<NeighborServicesProfile> updateNeighborServiceProfile(NeighborServicesProfile neighborServiceProfile) {
-        String userId = userService.getUserId();
-
-        Optional<NeighborServicesProfile> optionalNeighborServiceProfile = findNeighborServiceProfileById(neighborServiceProfile.getId());
-
-        if (optionalNeighborServiceProfile.isEmpty()) {
-            return ServiceResponse.error("neighbor_service_not_found");
-        }
-
-        NeighborServicesProfile existingProfile = optionalNeighborServiceProfile.get();
-
-        if (!hasPermission(userId, existingProfile)) {
-            return ServiceResponse.error("permission_denied");
-        }
-
-        List<String> oldTags = existingProfile.getTags();
-        List<String> newTags = neighborServiceProfile.getTags();
-
-        if (newTags != null) {
-            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
-        }
-
-        if (!existingProfile.getName().equals(neighborServiceProfile.getName())) {
-            String newSlug = createUniqueSlug(neighborServiceProfile.getName());
-            existingProfile.setSlug(newSlug);
-            existingProfile.setPathname("/neighbor-services/" + newSlug);
-        }
-
-        updateExistingNeighborServiceProfile(existingProfile, neighborServiceProfile);
-
-        ServiceResponse<NeighborServicesProfile> saveResponse = saveNeighborServiceProfile(existingProfile);
-
-        if (saveResponse.hasError()) {
-            return ServiceResponse.error(saveResponse.errorCode());
-        }
-
-        return ServiceResponse.value(saveResponse.value());
-    }
-
-
-    @Transactional
-    public ServiceResponse<Boolean> deleteNeighborService(String neighborServiceId) {
-        String userId = userService.getUserId();
-
-        Optional<NeighborServicesProfile> optionalNeighborServiceProfile = findNeighborServiceProfileById(neighborServiceId);
-
-        if (optionalNeighborServiceProfile.isEmpty()) {
-            return ServiceResponse.error("neighbor_service_not_found");
-        }
-
-        NeighborServicesProfile neighborServicesProfile = optionalNeighborServiceProfile.get();
-
-        if (!hasPermission(userId, neighborServicesProfile)) {
-            return ServiceResponse.error("permission_denied");
-        }
-
-        if (neighborServicesProfile.getSubscriptionId() != null && !neighborServicesProfile.getSubscriptionId().isEmpty()) {
-            stripeService.cancelSubscriptionAtPeriodEnd(neighborServicesProfile.getSubscriptionId());
-        }
-
-        tagService.removeTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
-
-        contentRepository.deleteById(neighborServiceId);
-        return ServiceResponse.value(true);
-    }
-
-    private Boolean hasPermission(String userId, NeighborServicesProfile neighborServicesProfile) {
-        return neighborServicesProfile.getCreatedBy().equals(userId);
-    }
-
-    private void updateExistingNeighborServiceProfile(NeighborServicesProfile existingProfile, NeighborServicesProfile updatedProfile) {
-        // Update basic fields
-        existingProfile.setName(updatedProfile.getName());
-        existingProfile.setDescription(updatedProfile.getDescription());
-        existingProfile.setEmail(updatedProfile.getEmail());
-        existingProfile.setTags(updatedProfile.getTags());
-
-        if (updatedProfile.getTags() != null && !updatedProfile.getTags().isEmpty()) {
-            existingProfile.setTags(updatedProfile.getTags()); // Update the existing business's tags
-        }
-
-        // Update neighbor services if provided
-        if (updatedProfile.getNeighborServices() != null) {
-            existingProfile.setNeighborServices(updatedProfile.getNeighborServices());
-        }
-
-        // Set updatedAt to the current time
-        existingProfile.setUpdatedAt(LocalDateTime.now());
-    }
-
-    public ServiceResponse<Boolean> handleContactFormSubmission(String slug, String name, String email, String message) {
-        Optional<NeighborServicesProfile> optionalNeighborServicesProfile = findNeighborServiceProfileBySlug(slug);
-
-        if (optionalNeighborServicesProfile.isEmpty()) {
-            return ServiceResponse.error("neighbor_service_not_found");
-        }
-
-        NeighborServicesProfile neighborServicesProfile = optionalNeighborServicesProfile.get();
-
-        try {
-            emailService.sendContactNeighborServiceProfileEmail(neighborServicesProfile.getEmail(), name, email, message);
-
-            return ServiceResponse.value(true);
-        } catch (Exception e) {
-            logger.error("Error when trying to send contact form submission email", e);
-            return ServiceResponse.error("unexpected_error");
         }
     }
 }

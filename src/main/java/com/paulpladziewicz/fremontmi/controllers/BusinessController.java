@@ -77,14 +77,7 @@ public class BusinessController {
             return "businesses/create-business";
         }
 
-        ServiceResponse<Business> createBusinessResponse = businessService.createBusiness(business);
-
-        if (createBusinessResponse.hasError()) {
-            model.addAttribute("errorMessage", "An error occurred while trying to create the business listing. Please try again later.");
-            return "businesses/create-business";
-        }
-
-        Business savedBusiness = createBusinessResponse.value();
+        Business savedBusiness = businessService.createBusiness(business);
 
         return "redirect:/pay/subscription?contentId=" + savedBusiness.getId();
     }
@@ -163,12 +156,7 @@ public class BusinessController {
 
     @PostMapping("/delete/business")
     public String deleteBusiness(@RequestParam("businessId") String businessId, Model model) {
-        ServiceResponse<Boolean> serviceResponse = businessService.deleteBusiness(businessId);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "businesses/my-businesses";
-        }
+        businessService.deleteBusiness(businessId);
 
         return "redirect:/my/businesses";
     }
@@ -177,7 +165,7 @@ public class BusinessController {
     public ResponseEntity<Map<String, Object>> handleContactForm(
             @RequestBody ContactFormRequest contactFormRequest) {
 
-        ServiceResponse<Boolean> contactFormSubmissionResponse = businessService.handleContactFormSubmission(
+        Boolean contactFormSuccess = businessService.handleContactFormSubmission(
                 contactFormRequest.getSlug(),
                 contactFormRequest.getName(),
                 contactFormRequest.getEmail(),
@@ -186,7 +174,7 @@ public class BusinessController {
 
         Map<String, Object> response = new HashMap<>();
 
-        if (contactFormSubmissionResponse.hasError()) {
+        if (!contactFormSuccess) {
             response.put("success", false);
             response.put("message", "An error occurred while trying to send your message. Please try again later.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);

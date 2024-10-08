@@ -140,7 +140,7 @@ public class EventService {
     }
 
     private void checkPermission(String userId, Event event) {
-        if (event.getCreatedBy().equals(userId)) {
+        if (!event.getCreatedBy().equals(userId)) {
             throw new PermissionDeniedException("User does not have permission to modify this event.");
         }
     }

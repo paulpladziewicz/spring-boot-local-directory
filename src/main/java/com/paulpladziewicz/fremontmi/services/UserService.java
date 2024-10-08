@@ -45,8 +45,11 @@ public class UserService {
             return logAndReturnError("Email already exists.", "email_exists");
         }
 
-        // TODO change exception handling here
-        validatePasswords(userRegistrationDto.getPassword(), userRegistrationDto.getMatchingPassword());
+        try {
+            validatePasswords(userRegistrationDto.getPassword(), userRegistrationDto.getMatchingPassword());
+        } catch (ValidationException e) {
+            return ServiceResponse.error("password_invalid");
+        }
 
         UserRecord newUserRecord = createUserRecord(userRegistrationDto);
         UserRecord savedUser = userRepository.save(newUserRecord);

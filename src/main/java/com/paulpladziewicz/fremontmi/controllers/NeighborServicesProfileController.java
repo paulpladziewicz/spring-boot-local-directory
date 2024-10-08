@@ -6,7 +6,6 @@ import com.paulpladziewicz.fremontmi.services.NeighborServicesProfileService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -82,28 +81,14 @@ public class NeighborServicesProfileController {
             return "neighborservices/create-neighbor-services-profile";
         }
 
-        ServiceResponse<NeighborServicesProfile> createNeighborServiceProfileResponse = neighborServicesProfileService.createNeighborServiceProfile(neighborServicesProfile);
-
-        if (createNeighborServiceProfileResponse.hasError()) {
-            model.addAttribute("errorMessage", "An error occurred while trying to create the neighbor service. Please try again later.");
-            return "neighborservices/create-neighbor-services-profile";
-        }
-
-        NeighborServicesProfile createdNeighborServicesProfile = createNeighborServiceProfileResponse.value();
+        NeighborServicesProfile createdNeighborServicesProfile = neighborServicesProfileService.createNeighborServiceProfile(neighborServicesProfile);
 
         return "redirect:/pay/subscription?contentId=" + createdNeighborServicesProfile.getId();
     }
 
     @GetMapping("/neighbor-services")
     public String displayActiveNeighborServices(@RequestParam(value = "tag", required = false) String tag, Model model) {
-        ServiceResponse<List<NeighborServicesProfile>> profilesResponse = neighborServicesProfileService.findAllActiveNeighborServices(tag);
-
-        if (profilesResponse.hasError()) {
-            model.addAttribute("errorMessage", "An error occurred while trying to retrieve the neighbor services. Please try again later.");
-            return "neighborservices/neighbor-services";
-        }
-
-        List<NeighborServicesProfile> profiles = profilesResponse.value();
+        List<NeighborServicesProfile> profiles = neighborServicesProfileService.findAllActiveNeighborServices(tag);
 
         // TODO still displaying profiles that do not have any neighbor services
 
@@ -119,14 +104,7 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/neighbor-services/{slug}")
     public String viewNeighborService(@PathVariable String slug, Model model) {
-        Optional<NeighborServicesProfile> optionalNeighborService = neighborServicesProfileService.findNeighborServiceProfileBySlug(slug);
-
-        if (optionalNeighborService.isEmpty()) {
-            model.addAttribute("errorMessage", "Neighbor service not found. Please try again later.");
-            return "redirect:/neighbor-services";
-        }
-
-        NeighborServicesProfile neighborServicesProfile = optionalNeighborService.get();
+        NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileBySlug(slug);
 
         neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));
 
@@ -154,14 +132,7 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/edit/neighbor-service/profile/{slug}")
     public String editNeighborServiceProfilePage(@PathVariable String slug, Model model) {
-        Optional<NeighborServicesProfile> optionalNeighborService = neighborServicesProfileService.findNeighborServiceProfileBySlug(slug);
-
-        if (optionalNeighborService.isEmpty()) {
-            model.addAttribute("error", true);
-            return "neighborservices/edit-neighbor-services-profile";
-        }
-
-        NeighborServicesProfile neighborServicesProfile = optionalNeighborService.get();
+        NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileBySlug(slug);
 
         String tagsAsString = String.join(",", neighborServicesProfile.getTags());
         model.addAttribute("tagsAsString", tagsAsString);
@@ -179,14 +150,7 @@ public class NeighborServicesProfileController {
             return "neighborservices/edit-neighbor-services-profile";
         }
 
-        ServiceResponse<NeighborServicesProfile> updateNeighborServiceResponse = neighborServicesProfileService.updateNeighborServiceProfile(neighborServicesProfile);
-
-        if (updateNeighborServiceResponse.hasError()) {
-            model.addAttribute("errorMessage", "An error occurred while trying to update the neighbor service. Please try again later.");
-            return "neighborservices/edit-neighbor-services-profile";
-        }
-
-        NeighborServicesProfile updatedNeighborServicesProfile = updateNeighborServiceResponse.value();
+        NeighborServicesProfile updatedNeighborServicesProfile = neighborServicesProfileService.updateNeighborServiceProfile(neighborServicesProfile);
 
         model.addAttribute("neighborService", updatedNeighborServicesProfile);
 
@@ -199,7 +163,7 @@ public class NeighborServicesProfileController {
     public ResponseEntity<Map<String, Object>> handleContactForm(
             @RequestBody ContactFormRequest contactFormRequest) {
 
-        ServiceResponse<Boolean> contactFormSubmissionResponse = neighborServicesProfileService.handleContactFormSubmission(
+        neighborServicesProfileService.handleContactFormSubmission(
                 contactFormRequest.getSlug(),
                 contactFormRequest.getName(),
                 contactFormRequest.getEmail(),
@@ -207,13 +171,6 @@ public class NeighborServicesProfileController {
         );
 
         Map<String, Object> response = new HashMap<>();
-
-        if (contactFormSubmissionResponse.hasError()) {
-            response.put("success", false);
-            response.put("message", "An error occurred while trying to send your message. Please try again later.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-
         response.put("success", true);
         response.put("message", "We've passed your message along! We hope you hear back soon.");
         return ResponseEntity.ok(response);

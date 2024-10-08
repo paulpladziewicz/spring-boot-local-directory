@@ -40,7 +40,7 @@ public class BusinessService {
         this.emailService = emailService;
     }
 
-    public ServiceResponse<Business> createBusiness(Business business) {
+    public Business createBusiness(Business business) {
         UserProfile userProfile = userService.getUserProfile();
 
         business.setType(ContentTypes.BUSINESS.getContentType());
@@ -64,7 +64,7 @@ public class BusinessService {
 
         userService.saveUserProfile(userProfile);
 
-        return ServiceResponse.value(savedBusiness);
+        return savedBusiness;
     }
 
     public Business saveBusiness(Business business) {
@@ -73,47 +73,6 @@ public class BusinessService {
 
     private Boolean hasPermission(String userId, Business business) {
         return business.getAdministrators().contains(userId);
-    }
-
-    public String createUniqueSlug(String name) {
-        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
-        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-                .toLowerCase()
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-|-$", "");
-
-        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.BUSINESS.getContentType());
-
-        if (matchingSlugs.isEmpty()) {
-            return baseSlug;
-        }
-
-        Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
-
-        int maxNumber = 0;
-        boolean baseSlugExists = false;
-
-        for (Content content : matchingSlugs) {
-            String slug = content.getSlug();
-
-            if (slug.equals(baseSlug)) {
-                baseSlugExists = true;
-            }
-
-            Matcher matcher = pattern.matcher(slug);
-            if (matcher.find()) {
-                int number = Integer.parseInt(matcher.group(1));
-                maxNumber = Math.max(maxNumber, number);
-            }
-        }
-
-        if (baseSlugExists) {
-            return baseSlug + "-" + (maxNumber + 1);
-        } else if (maxNumber > 0) {
-            return baseSlug + "-" + (maxNumber + 1);
-        } else {
-            return baseSlug;
-        }
     }
 
     public List<Business> findAllBusinesses(String tag) {
@@ -177,7 +136,7 @@ public class BusinessService {
 
 
 
-    public ServiceResponse<Boolean> deleteBusiness(String businessId) {
+    public void deleteBusiness(String businessId) {
         UserProfile userProfile = userService.getUserProfile();
         Business business = findBusinessById(businessId);
 
@@ -195,7 +154,6 @@ public class BusinessService {
         userService.saveUserProfile(userProfile);
 
         contentRepository.deleteById(businessId);
-        return ServiceResponse.value(true);
     }
 
     private void updateBusinessProperties(Business existingBusiness, Business updatedBusiness) {
@@ -215,16 +173,57 @@ public class BusinessService {
         existingBusiness.setDisplayEmail(updatedBusiness.isDisplayEmail());
     }
 
-    public ServiceResponse<Boolean> handleContactFormSubmission(String slug, String name, String email, String message) {
+    public Boolean handleContactFormSubmission(String slug, String name, String email, String message) {
         Business business = findBusinessBySlug(slug);
 
         try {
              emailService.sendContactBusinessEmail(business.getEmail(), name, email, message);
 
-            return ServiceResponse.value(true);
+            return true;
         } catch (Exception e) {
             logger.error("Error when trying to send contact form submission email", e);
-            return ServiceResponse.error("unexpected_error");
+            return false;
+        }
+    }
+
+    public String createUniqueSlug(String name) {
+        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
+        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-|-$", "");
+
+        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.BUSINESS.getContentType());
+
+        if (matchingSlugs.isEmpty()) {
+            return baseSlug;
+        }
+
+        Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
+
+        int maxNumber = 0;
+        boolean baseSlugExists = false;
+
+        for (Content content : matchingSlugs) {
+            String slug = content.getSlug();
+
+            if (slug.equals(baseSlug)) {
+                baseSlugExists = true;
+            }
+
+            Matcher matcher = pattern.matcher(slug);
+            if (matcher.find()) {
+                int number = Integer.parseInt(matcher.group(1));
+                maxNumber = Math.max(maxNumber, number);
+            }
+        }
+
+        if (baseSlugExists) {
+            return baseSlug + "-" + (maxNumber + 1);
+        } else if (maxNumber > 0) {
+            return baseSlug + "-" + (maxNumber + 1);
+        } else {
+            return baseSlug;
         }
     }
 }
