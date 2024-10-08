@@ -59,14 +59,7 @@ public class EventController {
             return "events/create-event";
         }
 
-        ServiceResponse<Event> serviceResponse = eventService.createEvent(event);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "events/create-event";
-        }
-
-        Event savedEvent = serviceResponse.value();
+        Event savedEvent = eventService.createEvent(event);
 
         return "redirect:/events/" + savedEvent.getSlug();
     }

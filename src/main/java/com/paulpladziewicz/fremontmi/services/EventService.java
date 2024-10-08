@@ -39,7 +39,7 @@ public class EventService {
     }
 
     @Transactional
-    public ServiceResponse<Event> createEvent(Event event) {
+    public Event createEvent(Event event) {
         UserProfile userProfile = userService.getUserProfile();
         String userId = userProfile.getUserId();
 
@@ -59,7 +59,7 @@ public class EventService {
         userProfile.getEventIds().add(savedEvent.getId());
         userService.saveUserProfile(userProfile);
 
-        return ServiceResponse.value(savedEvent);
+        return savedEvent;
     }
 
     public Event saveEvent(Event event) {
