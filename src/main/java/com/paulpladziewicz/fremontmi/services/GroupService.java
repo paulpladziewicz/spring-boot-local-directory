@@ -83,12 +83,7 @@ public class GroupService {
 
     public List<Group> findGroupsByUser() {
         UserProfile userProfile = userService.getUserProfile();
-        List<Content> contentList = contentRepository.findAllById(userProfile.getGroupIds());
-
-        return contentList.stream()
-                .filter(content -> content instanceof Group)
-                .map(content -> (Group) content)
-                .collect(Collectors.toList());
+        return contentRepository.findAllById(userProfile.getGroupIds(), Group.class);
     }
 
     @Transactional

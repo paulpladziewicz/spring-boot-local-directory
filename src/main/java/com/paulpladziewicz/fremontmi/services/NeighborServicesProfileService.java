@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 public class NeighborServicesProfileService {
@@ -59,18 +58,11 @@ public class NeighborServicesProfileService {
     }
 
     public List<NeighborServicesProfile> findAllActiveNeighborServices(String tag) {
-        List<Content> contents;
-
         if (tag != null && !tag.isEmpty()) {
-            contents = contentRepository.findByTagAndType(tag, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+            return contentRepository.findByTagAndType(tag, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType(), NeighborServicesProfile.class);
         } else {
-            contents = contentRepository.findAllByType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+            return contentRepository.findAllByType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType(), NeighborServicesProfile.class);
         }
-
-        return contents.stream()
-                .filter(content -> content instanceof NeighborServicesProfile) // Ensure type safety
-                .map(content -> (NeighborServicesProfile) content)
-                .collect(Collectors.toList());
     }
 
     public NeighborServicesProfile findNeighborServiceProfileById(String id) {
@@ -83,14 +75,11 @@ public class NeighborServicesProfileService {
                     .orElseThrow(() -> new ContentNotFoundException("Business with slug '" + slug + "' not found."));
     }
 
-    public Optional<NeighborServicesProfile> findNeighborServiceProfileByUserId() {
+    public NeighborServicesProfile findNeighborServiceProfileByUserId() {
         String userId = userService.getUserId();
 
-        Optional<Content> optionalContent = contentRepository.findByCreatedBy(userId);
-
-        return optionalContent
-                .filter(content -> content instanceof NeighborServicesProfile)
-                .map(content -> (NeighborServicesProfile) content);
+        return contentRepository.findByCreatedBy(userId, NeighborServicesProfile.class)
+                .orElseThrow(() -> new ContentNotFoundException("NeighborServiceProfile with user id '" + userId + "' not found."));
     }
 
     @Transactional
@@ -118,7 +107,6 @@ public class NeighborServicesProfileService {
 
         return contentRepository.save(existingProfile);
     }
-
 
     @Transactional
     public void deleteNeighborService(String neighborServiceId) {

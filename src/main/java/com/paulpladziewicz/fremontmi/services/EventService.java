@@ -145,15 +145,15 @@ public class EventService {
         }
     }
 
-    public Event cancelEvent(String slug) {
-        return updateEventStatus(slug, "canceled");
+    public void cancelEvent(String slug) {
+        updateEventStatus(slug, "canceled");
     }
 
-    public Event reactivateEvent(String slug) {
-        return updateEventStatus(slug, "active");
+    public void reactivateEvent(String slug) {
+        updateEventStatus(slug, "active");
     }
 
-    private Event updateEventStatus(String slug, String status) {
+    private void updateEventStatus(String slug, String status) {
         UserProfile userProfile = userService.getUserProfile();
 
         Event existingEvent = findEventBySlug(slug);
@@ -162,7 +162,7 @@ public class EventService {
 
         existingEvent.setStatus(status);
 
-        return contentRepository.save(existingEvent);
+        contentRepository.save(existingEvent);
     }
 
     private void validateEventTimes(Event event) {
