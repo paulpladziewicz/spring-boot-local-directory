@@ -51,15 +51,7 @@ public class GroupController {
             return "groups/create-group";
         }
 
-        ServiceResponse<Group> createGroupResponse = groupService.createGroup(group);
-
-        if (createGroupResponse.hasError()) {
-            model.addAttribute("error", true);
-            model.addAttribute("group", group);
-            return "groups/create-group";
-        }
-
-        Content createdGroup = createGroupResponse.value();
+        Group createdGroup = groupService.createGroup(group);
 
         redirectAttributes.addFlashAttribute("successMessage", "Group created successfully!");
 
@@ -103,38 +95,21 @@ public class GroupController {
 
     @PostMapping("/groups/join")
     public String joinGroup(@RequestParam("slug") String slug, Model model) {
-        ServiceResponse<Boolean> serviceResponse = groupService.joinGroup(slug);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "groups/group-page";
-        }
+        groupService.joinGroup(slug);
 
         return "redirect:/groups/" + slug;
     }
 
     @PostMapping("/groups/leave")
     public String leaveGroup(@RequestParam("slug") String slug, Model model) {
-        ServiceResponse<Boolean> serviceResponse = groupService.leaveGroup(slug);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "groups/group-page";
-        }
+        groupService.leaveGroup(slug);
 
         return "redirect:/groups/" + slug;
     }
 
     @GetMapping("/my/groups")
     public String groups(Model model) {
-        ServiceResponse<List<Group>> serviceRequest = groupService.findGroupsByUser();
-
-        if (serviceRequest.hasError()) {
-            model.addAttribute("error", true);
-            return "groups/my-groups";
-        }
-
-        List<Group> groups = serviceRequest.value();
+        List<Group> groups = groupService.findGroupsByUser();
 
         model.addAttribute("groups", groups);
 
@@ -159,14 +134,8 @@ public class GroupController {
         if (result.hasErrors()) {
             return "groups/edit-group";
         }
-        ServiceResponse<Content> serviceResponse = groupService.updateGroup(group);
 
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "groups/edit-group";
-        }
-
-        Content updatedGroup = serviceResponse.value();
+        Group updatedGroup = groupService.updateGroup(group);
 
         redirectAttributes.addFlashAttribute("isSuccess", true);
 
@@ -175,12 +144,7 @@ public class GroupController {
 
     @PostMapping("/delete/group")
     public String deleteGroup(@NotNull @RequestParam("groupId") String groupId, RedirectAttributes redirectAttributes) {
-        ServiceResponse<Void> serviceResponse = groupService.deleteGroup(groupId);
-
-        if (serviceResponse.hasError()) {
-            redirectAttributes.addFlashAttribute("error", true);
-            return "redirect:/groups/" + groupId;
-        }
+        groupService.deleteGroup(groupId);
 
         return "redirect:/groups";
     }
@@ -205,13 +169,8 @@ public class GroupController {
     public String addGroupAnnouncement(@NotNull @PathVariable String groupId, @Valid Announcement announcement, Model model) {
         announcement.setCreationDate(Instant.now());
 
-        ServiceResponse<List<Announcement>> serviceResponse = groupService.addAnnouncement(groupId, announcement);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "groups/edit-group";
-        }
-
+        groupService.addAnnouncement(groupId, announcement);
+        // TODO not performant
         Group group = groupService.findGroupById(groupId);
 
         model.addAttribute("group", group);
@@ -220,11 +179,7 @@ public class GroupController {
 
     @PostMapping("/delete/group/announcement")
     public String deleteGroupAnnouncement(@NotNull @RequestParam("groupId") String groupId, @NotNull @RequestParam("announcementId") String announcementId, Model model) {
-        ServiceResponse<Boolean> serviceResponse = groupService.deleteAnnouncement(groupId, Integer.parseInt(announcementId));
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-        }
+        groupService.deleteAnnouncement(groupId, Integer.parseInt(announcementId));
 
         return "groups/htmx/delete";
     }
@@ -232,16 +187,14 @@ public class GroupController {
     @PostMapping("/email/group")
     @ResponseBody
     public ResponseEntity<String> handleEmailGroup(@RequestBody EmailGroupRequest emailGroupRequest) {
-        ServiceResponse<Boolean> response = groupService.emailGroup(
+        Boolean response = groupService.emailGroup(
                 emailGroupRequest.getSlug(),
                 emailGroupRequest.getSubject(),
                 emailGroupRequest.getMessage()
         );
 
-        if (!response.hasError() && response.value()) {
+        if (response) {
             return ResponseEntity.ok("Email sent successfully!");
-        } else if ("email_limit_reached".equals(response.errorCode())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You have reached the maximum number of emails you can send.");
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email. Please try again.");
         }
