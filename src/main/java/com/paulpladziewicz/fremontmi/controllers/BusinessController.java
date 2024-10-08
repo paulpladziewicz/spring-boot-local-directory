@@ -72,7 +72,7 @@ public class BusinessController {
     }
 
     @PostMapping("/create/business")
-    public String createBusinessListing(@Valid @ModelAttribute("business") Business business, BindingResult result, Model model) {
+    public String createBusinessListing(@Valid @ModelAttribute("business") Business business, BindingResult result) {
         if (result.hasErrors()) {
             return "businesses/create-business";
         }
@@ -155,7 +155,7 @@ public class BusinessController {
     }
 
     @PostMapping("/delete/business")
-    public String deleteBusiness(@RequestParam("businessId") String businessId, Model model) {
+    public String deleteBusiness(@RequestParam("businessId") String businessId) {
         businessService.deleteBusiness(businessId);
 
         return "redirect:/my/businesses";

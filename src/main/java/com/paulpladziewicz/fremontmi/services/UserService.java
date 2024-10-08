@@ -79,8 +79,8 @@ public class UserService {
                 .orElseThrow(() -> new UserProfileNotFoundException("User profile for userId '" + userId + "' could not be retrieved."));
     }
 
-    public UserProfile saveUserProfile(UserProfile userProfile) {
-        return userProfileRepository.save(userProfile);
+    public void saveUserProfile(UserProfile userProfile) {
+        userProfileRepository.save(userProfile);
     }
 
     public ServiceResponse<UserProfile> updateUserProfile(UserProfile updatedUserProfile) {
