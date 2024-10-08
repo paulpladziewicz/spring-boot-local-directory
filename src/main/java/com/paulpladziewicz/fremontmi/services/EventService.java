@@ -1,11 +1,12 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
+import com.paulpladziewicz.fremontmi.exceptions.PermissionDeniedException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,55 +41,30 @@ public class EventService {
 
     @Transactional
     public ServiceResponse<Event> createEvent(Event event) {
-        try {
-            Optional<UserProfile> userProfileOpt = userService.getUserProfile();
-            if (userProfileOpt.isEmpty()) {
-                return logAndReturnError("Failed to create event: user profile not found.", "user_profile_not_found");
-            }
+        UserProfile userProfile = userService.getUserProfile();
+        String userId = userProfile.getUserId();
 
-            UserProfile userProfile = userProfileOpt.get();
-            String userId = userProfile.getUserId();
+        validateEventTimes(event);
 
-            validateEventTimes(event);
+        event.setCreatedBy(userId);
+        populateFormattedTimes(event);
+        event.setType(ContentTypes.EVENT.getContentType());
+        event.setSlug(createUniqueSlug(event.getName()));
+        event.setPathname("/events/" + event.getSlug());
 
-            event.setCreatedBy(userId);
-            populateFormattedTimes(event);
-            event.setType(ContentTypes.EVENT.getContentType());
-            event.setSlug(createUniqueSlug(event.getName()));
-            event.setPathname("/events/" + event.getSlug());
+        List<String> validatedTags = tagService.addTags(event.getTags(), ContentTypes.EVENT.getContentType());
+        event.setTags(validatedTags);
 
-            List<String> validatedTags = tagService.addTags(event.getTags(), ContentTypes.EVENT.getContentType());
-            event.setTags(validatedTags);
+        Event savedEvent = saveEvent(event);
 
-            ServiceResponse<Event> saveEventResponse = saveEvent(event);
+        userProfile.getEventIds().add(savedEvent.getId());
+        userService.saveUserProfile(userProfile);
 
-            if (saveEventResponse.hasError()) {
-                return saveEventResponse;
-            }
-
-            Event savedEvent = saveEventResponse.value();
-
-            userProfile.getEventIds().add(savedEvent.getId());
-            userService.saveUserProfile(userProfile);
-
-            return ServiceResponse.value(savedEvent);
-        } catch (DataAccessException e) {
-            return logAndReturnError("Database error while creating event.", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error while creating event.", "unexpected_error", e);
-        }
+        return ServiceResponse.value(savedEvent);
     }
 
-    public ServiceResponse<Event> saveEvent(Event event) {
-        try {
-            return ServiceResponse.value(contentRepository.save(event));
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to save event", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to save event", e);
-            return ServiceResponse.error("unexpected_error");
-        }
+    public Event saveEvent(Event event) {
+        return contentRepository.save(event);
     }
 
     public String createUniqueSlug(String name) {
@@ -131,222 +107,125 @@ public class EventService {
         }
     }
 
-    public ServiceResponse<List<Event>> findAll(String tag) {
-        try {
-            LocalDateTime now = LocalDateTime.now();
-            List<Event> events;
-            Sort sort = Sort.by("days.startTime").ascending(); // Sort by start time of the DayEvent
+    public List<Event> findAll(String tag) {
+        LocalDateTime now = LocalDateTime.now();
+        Sort sort = Sort.by("days.startTime").ascending();
 
-            if (tag != null && !tag.trim().isEmpty()) {
-                // Fetch events filtered by the tag and having future day events, sorted by start time
-                events = contentRepository.findByTagAndAnyFutureDayEventOrderBySoonestStartTimeAsc(tag, now, sort);
-                logger.info("Fetched {} events with tag '{}'", events.size(), tag);
-            } else {
-                // Fetch all events with future day events, sorted by start time
-                events = contentRepository.findByAnyFutureDayEventOrderBySoonestStartTimeAsc(now, sort);
-                logger.info("Fetched {} events without any tag filtering", events.size());
-            }
-
-            return ServiceResponse.value(events);
-        } catch (DataAccessException e) {
-            return logAndReturnError("Database error while retrieving events.", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error while retrieving events.", "unexpected_error", e);
+        if (tag != null && !tag.trim().isEmpty()) {
+            return contentRepository.findByTagAndAnyFutureDayEventOrderBySoonestStartTimeAsc(tag, now, sort);
+        } else {
+            return contentRepository.findByAnyFutureDayEventOrderBySoonestStartTimeAsc(now, sort);
         }
     }
 
-    public ServiceResponse<Event> findEventById(String id) {
-        try {
-            return contentRepository.findById(id)
-                    .filter(content -> content instanceof Event)
-                    .map(content -> (Event) content)
-                    .map(ServiceResponse::value)
-                    .orElseGet(() -> logAndReturnError("Event not found with id: " + id, "event_not_found"));
-        } catch (DataAccessException e) {
-            return logAndReturnError("Database error while retrieving event.", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error while retrieving event.", "unexpected_error", e);
-        }
+    public Optional<Event> findEventById(String id) {
+        return contentRepository.findById(id, Event.class);
     }
 
-    public ServiceResponse<Event> findEventBySlug(String slug) {
-        try {
-            return contentRepository.findBySlugAndType(slug, ContentTypes.EVENT.getContentType())
-                    .filter(content -> content instanceof Event)
-                    .map(content -> (Event) content)
-                    .map(ServiceResponse::value)
-                    .orElseGet(() -> logAndReturnError("Event not found with slug: " + slug, "event_not_found"));
-        } catch (DataAccessException e) {
-            return logAndReturnError("Database error while retrieving event.", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error while retrieving event.", "unexpected_error", e);
-        }
+    public Optional<Event> findEventBySlug(String slug) {
+        return contentRepository.findBySlugAndType(slug, ContentTypes.EVENT.getContentType(), Event.class);
     }
 
-    public ServiceResponse<List<Event>> findEventsByUser() {
-        try {
-            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
-            if (optionalUserProfile.isEmpty()) {
-                return logAndReturnError("Failed to retrieve events: user profile not found.", "user_profile_not_found");
-            }
+    public List<Event> findEventsByUser() {
+        UserProfile userProfile = userService.getUserProfile();
 
-            UserProfile userProfile = optionalUserProfile.get();
-
-            List<Content> contents = contentRepository.findAllById(userProfile.getEventIds());
-
-            List<Event> events = contents.stream()
-                    .filter(content -> content instanceof Event)
-                    .map(content -> (Event) content)
-                    .collect(Collectors.toList());
-
-            return ServiceResponse.value(events);
-        } catch (DataAccessException e) {
-            return logAndReturnError("Database error while retrieving events.", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error while retrieving events.", "unexpected_error", e);
-        }
+        return contentRepository.findAllById(userProfile.getEventIds(), Event.class);
     }
 
     @Transactional
-    public ServiceResponse<Event> updateEvent(Event updatedEvent) {
-        try {
-            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+    public Event updateEvent(Event updatedEvent) {
+        UserProfile userProfile = userService.getUserProfile();
 
-            if (optionalUserProfile.isEmpty()) {
-                return logAndReturnError("Failed to update event: user profile not found.", "user_profile_not_found");
-            }
+        Optional<Event> optionalEvent = findEventBySlug(updatedEvent.getSlug());
 
-            UserProfile userProfile = optionalUserProfile.get();
-
-            ServiceResponse<Event> existingEventResult = findEventBySlug(updatedEvent.getSlug());
-
-            if (existingEventResult.hasError()) {
-                return ServiceResponse.error(existingEventResult.errorCode());
-            }
-
-            Event existingEvent = existingEventResult.value();
-
-            if (!hasPermission(userProfile.getUserId(), existingEvent)) {
-                return logAndReturnError("User does not have permission to update event: " + existingEvent.getId(), "permission_denied");
-            }
-
-            validateEventTimes(updatedEvent);
-
-            List<String> oldTags = existingEvent.getTags();
-            List<String> newTags = updatedEvent.getTags();
-
-            if (newTags != null) {
-                tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.EVENT.getContentType());
-            }
-
-            if (!existingEvent.getName().equals(updatedEvent.getName())) {
-                String newSlug = createUniqueSlug(updatedEvent.getName());
-                existingEvent.setSlug(newSlug);
-                existingEvent.setPathname("/events/" + newSlug);
-            }
-
-            updateExistingEvent(existingEvent, updatedEvent);
-
-            ServiceResponse<Event> saveEventResponse = saveEvent(existingEvent);
-
-            if (saveEventResponse.hasError()) {
-                return saveEventResponse;
-            }
-
-            return ServiceResponse.value(saveEventResponse.value());
-        } catch (DataAccessException e) {
-            return logAndReturnError("Database error while updating event.", "database_error", e);
-        } catch (IllegalArgumentException e) {
-            return logAndReturnError("Invalid argument while updating event: " + e.getMessage(), "invalid_argument");
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error while updating event.", "unexpected_error", e);
+        if (optionalEvent.isEmpty()) {
+            throw new ContentNotFoundException("Event with slug '" + updatedEvent.getSlug() + "' not found.");
         }
+
+        Event existingEvent = optionalEvent.get();
+
+        if (!hasPermission(userProfile.getUserId(), existingEvent)) {
+            throw new PermissionDeniedException("User does not have permission to update this event.");
+        }
+
+        validateEventTimes(updatedEvent);
+
+        List<String> oldTags = existingEvent.getTags();
+        List<String> newTags = updatedEvent.getTags();
+
+        if (newTags != null) {
+            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.EVENT.getContentType());
+        }
+
+        if (!existingEvent.getName().equals(updatedEvent.getName())) {
+            String newSlug = createUniqueSlug(updatedEvent.getName());
+            existingEvent.setSlug(newSlug);
+            existingEvent.setPathname("/events/" + newSlug);
+        }
+
+        updateExistingEvent(existingEvent, updatedEvent);
+
+        return saveEvent(existingEvent);
+
     }
 
-
     @Transactional
-    public ServiceResponse<Boolean> deleteEvent(String eventId) {
-        try {
-            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+    public void deleteEvent(String eventId) {
+        UserProfile userProfile = userService.getUserProfile();
 
-            if (optionalUserProfile.isEmpty()) {
-                return logAndReturnError("Failed to create business: user profile not found.", "user_profile_not_found");
-            }
+        Optional<Event> optionalEvent = findEventById(eventId);
 
-            UserProfile userProfile = optionalUserProfile.get();
+        if (optionalEvent.isEmpty()) {
+            throw new ContentNotFoundException("Could not find event with id '" + eventId + "'.");
 
-            ServiceResponse<Event> existingEventResult = findEventById(eventId);
-
-            if (existingEventResult.hasError()) {
-                return ServiceResponse.error(existingEventResult.errorCode());
-            }
-
-            Event existingEvent = existingEventResult.value();
-
-            if (!hasPermission(userProfile.getUserId(), existingEvent)) {
-                return logAndReturnError("User does not have permission to update event: " + eventId, "permission_denied");
-            }
-
-            tagService.removeTags(existingEvent.getTags(), ContentTypes.EVENT.getContentType());
-
-            List<String> eventIds = userProfile.getEventIds();
-            eventIds.remove(existingEvent.getId());
-            userProfile.setEventIds(eventIds);
-            userService.saveUserProfile(userProfile);
-
-            contentRepository.deleteById(eventId);
-
-            return ServiceResponse.value(true);
-        } catch (DataAccessException e) {
-            return logAndReturnError("Database error while deleting event.", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error while deleting event.", "unexpected_error", e);
         }
+
+        Event existingEvent = optionalEvent.get();
+
+        if (!hasPermission(userProfile.getUserId(), existingEvent)) {
+            throw new PermissionDeniedException("User does not have permission to delete this event.");
+        }
+
+        tagService.removeTags(existingEvent.getTags(), ContentTypes.EVENT.getContentType());
+
+        List<String> eventIds = userProfile.getEventIds();
+        eventIds.remove(existingEvent.getId());
+        userProfile.setEventIds(eventIds);
+        userService.saveUserProfile(userProfile);
+
+        contentRepository.deleteById(eventId);
     }
 
     private Boolean hasPermission(String userId, Event event) {
         return event.getCreatedBy().equals(userId);
     }
 
-    public ServiceResponse<Boolean> cancelEvent(String slug) {
-        return updateEventStatus(slug, "canceled", "Failed to cancel event.");
+    public Event cancelEvent(String slug) {
+        return updateEventStatus(slug, "canceled");
     }
 
-    public ServiceResponse<Boolean> reactivateEvent(String slug) {
-        return updateEventStatus(slug, "active", "Failed to reactivate event.");
+    public Event reactivateEvent(String slug) {
+        return updateEventStatus(slug, "active");
     }
 
-    private ServiceResponse<Boolean> updateEventStatus(String slug, String status, String errorMessage) {
-        try {
-            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+    private Event updateEventStatus(String slug, String status) {
+        UserProfile userProfile = userService.getUserProfile();
 
-            if (optionalUserProfile.isEmpty()) {
-                return logAndReturnError("Failed to create business: user profile not found.", "user_profile_not_found");
-            }
+        Optional<Event> optionalEvent = findEventBySlug(slug);
 
-            UserProfile userProfile = optionalUserProfile.get();
-
-            ServiceResponse<Event> existingEventResult = findEventBySlug(slug);
-
-            if (existingEventResult.hasError()) {
-                return ServiceResponse.error(existingEventResult.errorCode());
-            }
-
-            Event existingEvent = existingEventResult.value();
-
-            if (!hasPermission(userProfile.getUserId(), existingEvent)) {
-                return logAndReturnError("User does not have permission to update event: " + slug, "permission_denied");
-            }
-
-            existingEvent.setStatus(status);
-            contentRepository.save(existingEvent);
-
-            return ServiceResponse.value(true);
-        } catch (DataAccessException e) {
-            return logAndReturnError("Database error while updating event status.", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error while updating event status.", "unexpected_error", e);
+        if (optionalEvent.isEmpty()) {
+            throw new ContentNotFoundException("Event with slug '" + slug + "' not found.");
         }
+
+        Event existingEvent = optionalEvent.get();
+
+        if (!hasPermission(userProfile.getUserId(), existingEvent)) {
+            throw new PermissionDeniedException("User does not have permission to update this event.");
+        }
+
+        existingEvent.setStatus(status);
+
+        return contentRepository.save(existingEvent);
     }
 
     private void validateEventTimes(Event event) {
@@ -400,21 +279,11 @@ public class EventService {
         if (day >= 11 && day <= 13) {
             return "th";
         }
-        switch (day % 10) {
-            case 1: return "st";
-            case 2: return "nd";
-            case 3: return "rd";
-            default: return "th";
-        }
-    }
-
-    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
-        logger.error(message);
-        return ServiceResponse.error(errorCode);
-    }
-
-    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode, Exception e) {
-        logger.error(message, e);
-        return ServiceResponse.error(errorCode);
+        return switch (day % 10) {
+            case 1 -> "st";
+            case 2 -> "nd";
+            case 3 -> "rd";
+            default -> "th";
+        };
     }
 }
