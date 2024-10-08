@@ -16,7 +16,6 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -67,46 +66,6 @@ public class EventService {
         return contentRepository.save(event);
     }
 
-    public String createUniqueSlug(String name) {
-        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
-        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-                .toLowerCase()
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-|-$", "");
-        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.EVENT.getContentType());
-
-        if (matchingSlugs.isEmpty()) {
-            return baseSlug;
-        }
-
-        Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
-
-        int maxNumber = 0;
-        boolean baseSlugExists = false;
-
-        for (Content content : matchingSlugs) {
-            String slug = content.getSlug();
-
-            if (slug.equals(baseSlug)) {
-                baseSlugExists = true;
-            }
-
-            Matcher matcher = pattern.matcher(slug);
-            if (matcher.find()) {
-                int number = Integer.parseInt(matcher.group(1));
-                maxNumber = Math.max(maxNumber, number);
-            }
-        }
-
-        if (baseSlugExists) {
-            return baseSlug + "-" + (maxNumber + 1);
-        } else if (maxNumber > 0) {
-            return baseSlug + "-" + (maxNumber + 1);
-        } else {
-            return baseSlug;
-        }
-    }
-
     public List<Event> findAll(String tag) {
         LocalDateTime now = LocalDateTime.now();
         Sort sort = Sort.by("days.startTime").ascending();
@@ -118,12 +77,14 @@ public class EventService {
         }
     }
 
-    public Optional<Event> findEventById(String id) {
-        return contentRepository.findById(id, Event.class);
+    public Event findEventById(String id) {
+        return contentRepository.findById(id, Event.class)
+                .orElseThrow(() -> new ContentNotFoundException("Event with id '" + id + "' not found."));
     }
 
-    public Optional<Event> findEventBySlug(String slug) {
-        return contentRepository.findBySlugAndType(slug, ContentTypes.EVENT.getContentType(), Event.class);
+    public Event findEventBySlug(String slug) {
+        return contentRepository.findBySlugAndType(slug, ContentTypes.EVENT.getContentType(), Event.class)
+                .orElseThrow(() -> new ContentNotFoundException("Event with slug '" + slug + "' not found."));
     }
 
     public List<Event> findEventsByUser() {
@@ -136,17 +97,9 @@ public class EventService {
     public Event updateEvent(Event updatedEvent) {
         UserProfile userProfile = userService.getUserProfile();
 
-        Optional<Event> optionalEvent = findEventBySlug(updatedEvent.getSlug());
+        Event existingEvent = findEventBySlug(updatedEvent.getSlug());
 
-        if (optionalEvent.isEmpty()) {
-            throw new ContentNotFoundException("Event with slug '" + updatedEvent.getSlug() + "' not found.");
-        }
-
-        Event existingEvent = optionalEvent.get();
-
-        if (!hasPermission(userProfile.getUserId(), existingEvent)) {
-            throw new PermissionDeniedException("User does not have permission to update this event.");
-        }
+        checkPermission(userProfile.getUserId(), existingEvent);
 
         validateEventTimes(updatedEvent);
 
@@ -166,25 +119,15 @@ public class EventService {
         updateExistingEvent(existingEvent, updatedEvent);
 
         return saveEvent(existingEvent);
-
     }
 
     @Transactional
     public void deleteEvent(String eventId) {
         UserProfile userProfile = userService.getUserProfile();
 
-        Optional<Event> optionalEvent = findEventById(eventId);
+        Event existingEvent = findEventById(eventId);
 
-        if (optionalEvent.isEmpty()) {
-            throw new ContentNotFoundException("Could not find event with id '" + eventId + "'.");
-
-        }
-
-        Event existingEvent = optionalEvent.get();
-
-        if (!hasPermission(userProfile.getUserId(), existingEvent)) {
-            throw new PermissionDeniedException("User does not have permission to delete this event.");
-        }
+        checkPermission(userProfile.getUserId(), existingEvent);
 
         tagService.removeTags(existingEvent.getTags(), ContentTypes.EVENT.getContentType());
 
@@ -196,8 +139,10 @@ public class EventService {
         contentRepository.deleteById(eventId);
     }
 
-    private Boolean hasPermission(String userId, Event event) {
-        return event.getCreatedBy().equals(userId);
+    private void checkPermission(String userId, Event event) {
+        if (event.getCreatedBy().equals(userId)) {
+            throw new PermissionDeniedException("User does not have permission to modify this event.");
+        }
     }
 
     public Event cancelEvent(String slug) {
@@ -211,17 +156,9 @@ public class EventService {
     private Event updateEventStatus(String slug, String status) {
         UserProfile userProfile = userService.getUserProfile();
 
-        Optional<Event> optionalEvent = findEventBySlug(slug);
+        Event existingEvent = findEventBySlug(slug);
 
-        if (optionalEvent.isEmpty()) {
-            throw new ContentNotFoundException("Event with slug '" + slug + "' not found.");
-        }
-
-        Event existingEvent = optionalEvent.get();
-
-        if (!hasPermission(userProfile.getUserId(), existingEvent)) {
-            throw new PermissionDeniedException("User does not have permission to update this event.");
-        }
+        checkPermission(userProfile.getUserId(), existingEvent);
 
         existingEvent.setStatus(status);
 
@@ -260,7 +197,7 @@ public class EventService {
         List<String> formattedTimes = event.getDays().stream()
                 .flatMap(dayEvent -> Stream.of(
                         formatDateTime(dayEvent.getStartTime()),
-                        dayEvent.getEndTime() != null ? formatDateTime(dayEvent.getEndTime()) : "No End Time"
+                        formatDateTime(dayEvent.getEndTime())
                 ))
                 .collect(Collectors.toList());
 
@@ -268,6 +205,9 @@ public class EventService {
     }
 
     private String formatDateTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return "No End Time";
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d h:mm a");
         String formattedDate = dateTime.format(formatter);
         int day = dateTime.getDayOfMonth();
@@ -285,5 +225,45 @@ public class EventService {
             case 3 -> "rd";
             default -> "th";
         };
+    }
+
+    public String createUniqueSlug(String name) {
+        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
+        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-|-$", "");
+
+        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.EVENT.getContentType());
+
+        return generateSlugFromMatches(baseSlug, matchingSlugs);
+    }
+
+    private String generateSlugFromMatches(String baseSlug, List<Content> matchingSlugs) {
+        if (matchingSlugs.isEmpty()) {
+            return baseSlug;
+        }
+
+        Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
+        int maxNumber = 0;
+        boolean baseSlugExists = false;
+
+        for (Content content : matchingSlugs) {
+            String slug = content.getSlug();
+            if (slug.equals(baseSlug)) {
+                baseSlugExists = true;
+            }
+
+            Matcher matcher = pattern.matcher(slug);
+            if (matcher.find()) {
+                maxNumber = Math.max(maxNumber, Integer.parseInt(matcher.group(1)));
+            }
+        }
+
+        if (baseSlugExists || maxNumber > 0) {
+            return baseSlug + "-" + (maxNumber + 1);
+        }
+
+        return baseSlug;
     }
 }

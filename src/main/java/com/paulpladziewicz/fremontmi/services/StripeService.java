@@ -63,13 +63,7 @@ public class StripeService {
     }
 
     public ServiceResponse<String> getCustomerId() {
-        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
-
-        if (userProfileOptional.isEmpty()) {
-            return ServiceResponse.error("No user profile found");
-        }
-
-        UserProfile userProfile = userProfileOptional.get();
+        UserProfile userProfile = userService.getUserProfile();
 
         if (userProfile.getStripeCustomerId() != null) {
             return ServiceResponse.value(userProfile.getStripeCustomerId());
@@ -105,12 +99,7 @@ public class StripeService {
 
         userProfile.setStripeCustomerId(customer.getId());
 
-        ServiceResponse<UserProfile> saveUserProfile = userService.saveUserProfile(userProfile);
-
-        if (saveUserProfile.hasError()) {
-            logger.error("Failed to save user profile when creating a Stripe customer");
-            ServiceResponse.error(saveUserProfile.errorCode());
-        }
+        userService.saveUserProfile(userProfile);
 
         return ServiceResponse.value(customer.getId());
     }
@@ -200,13 +189,7 @@ public class StripeService {
     }
 
     public ServiceResponse<List<Subscription>> getSubscriptions() {
-        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
-
-        if (userProfileOptional.isEmpty()) {
-            return ServiceResponse.error("No user profile found");
-        }
-
-        UserProfile userProfile = userProfileOptional.get();
+        UserProfile userProfile = userService.getUserProfile();
         String stripeCustomerId = userProfile.getStripeCustomerId();
 
         if (stripeCustomerId == null || stripeCustomerId.isEmpty()) {
@@ -240,13 +223,7 @@ public class StripeService {
     }
 
     public ServiceResponse<List<Invoice>> getInvoices() {
-        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
-
-        if (userProfileOptional.isEmpty()) {
-            return ServiceResponse.error("No user profile found");
-        }
-
-        UserProfile userProfile = userProfileOptional.get();
+        UserProfile userProfile = userService.getUserProfile();
         String stripeCustomerId = userProfile.getStripeCustomerId();
 
         if (stripeCustomerId == null || stripeCustomerId.isEmpty()) {
@@ -283,20 +260,13 @@ public class StripeService {
     }
 
     public ServiceResponse<Boolean> cancelSubscriptionAtPeriodEnd(String subscriptionId) {
-        Optional<UserProfile> userProfileOptional = userService.getUserProfile();
-
-        if (userProfileOptional.isEmpty()) {
-            return ServiceResponse.error("No user profile found");
-        }
-
-        UserProfile userProfile = userProfileOptional.get();
+        UserProfile userProfile = userService.getUserProfile();
 
         if (userProfile.getStripeCustomerId() == null) {
             return ServiceResponse.error("No Stripe customer ID found");
         }
 
         try {
-            // Retrieve the subscription
             Subscription subscription = Subscription.retrieve(subscriptionId);
 
             // Set the cancel_at_period_end flag to true
@@ -314,7 +284,6 @@ public class StripeService {
 
     public ServiceResponse<Boolean> resumeSubscription(String subscriptionId) {
         try {
-            // Retrieve the subscription
             Subscription subscription = Subscription.retrieve(subscriptionId);
 
             if (subscription.getCancelAtPeriodEnd()) {
@@ -336,13 +305,10 @@ public class StripeService {
 
     public ResponseEntity<String> handleStripeWebhook(String payload, String sigHeader) {
         try {
-            // Verify the Stripe event
             Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
 
-            // Deserialize the event's data object
             EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
 
-            // Handle different types of events
             switch (event.getType()) {
                 case "invoice.payment_failed":
                     Invoice failedInvoice = (Invoice) dataObjectDeserializer.getObject().orElse(null);
@@ -405,13 +371,11 @@ public class StripeService {
     private void handlePaymentFailed(Invoice failedInvoice) {
         String invoiceId = failedInvoice.getId();
 
-        // Retrieve the content by invoiceId from the repository
         Optional<Content> optionalContent = contentRepository.findByStripeDetails_InvoiceId(invoiceId);
 
         if (optionalContent.isPresent()) {
             Content content = optionalContent.get();
 
-            // Mark the content or subscription as having failed payment, e.g., set status or flag
             content.setStatus(ContentStatus.PAYMENT_FAILED.getStatus());
             contentRepository.save(content);
 

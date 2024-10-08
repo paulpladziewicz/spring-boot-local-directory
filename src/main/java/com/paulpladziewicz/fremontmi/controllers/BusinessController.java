@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
+import com.paulpladziewicz.fremontmi.exceptions.UserNotAuthenticatedException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.BusinessService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
@@ -90,14 +91,7 @@ public class BusinessController {
 
     @GetMapping("/businesses")
     public String displayActiveBusinesses(@RequestParam(value = "tag", required = false) String tag, Model model) {
-        ServiceResponse<List<Business>> serviceResponse = businessService.findAllBusinesses(tag);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "businesses/create-business-overview";
-        }
-
-        List<Business> businesses = serviceResponse.value();
+        List<Business> businesses = businessService.findAllBusinesses(tag);
 
         List<Content> contentList = new ArrayList<>(businesses);
         List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 15);
@@ -111,27 +105,19 @@ public class BusinessController {
 
     @GetMapping("/businesses/{slug}")
     public String viewBusiness(@PathVariable String slug, Model model) {
-        Optional<Business> businessOptional = businessService.findBusinessBySlug(slug);
-
-        if (businessOptional.isEmpty()) {
-            model.addAttribute("error", true);
-            return "businesses/businesses";
-        }
-
-        Business business = businessOptional.get();
+        Business business = businessService.findBusinessBySlug(slug);
 
         business.setDescription(htmlSanitizationService.sanitizeHtml(business.getDescription().replace("\n", "<br/>")));
 
-        Optional<String> userIdOpt = userService.getUserId();
+        String userId;
 
-        if (userIdOpt.isEmpty()) {
+        try {
+           userId = userService.getUserId();
+        } catch (UserNotAuthenticatedException e) {
             model.addAttribute("isAdmin", false);
             model.addAttribute("business", business);
-
             return "businesses/business-page";
         }
-
-        String userId = userIdOpt.get();
 
         boolean isAdmin = business.getAdministrators().contains(userId);
 
@@ -143,14 +129,7 @@ public class BusinessController {
 
     @GetMapping("/my/businesses")
     public String getMyBusinesses(Model model) {
-        ServiceResponse<List<Business>> serviceResponse = businessService.findBusinessesByUser();
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("generalError", true);
-            return "businesses/businesses";
-        }
-
-        List<Business> businesses = serviceResponse.value();
+        List<Business> businesses = businessService.findBusinessesByUser();
 
         model.addAttribute("businesses", businesses);
 
@@ -159,14 +138,7 @@ public class BusinessController {
 
     @GetMapping("/edit/business/{slug}")
     public String editBusiness(@PathVariable String slug, Model model) {
-        Optional<Business> businessOptional = businessService.findBusinessBySlug(slug);
-
-        if (businessOptional.isEmpty()) {
-            model.addAttribute("error", true);
-            return "businesses/businesses";
-        }
-
-        Business business = businessOptional.get();
+        Business business = businessService.findBusinessBySlug(slug);
 
         String tagsAsString = String.join(",", business.getTags());
         model.addAttribute("tagsAsString", tagsAsString);
@@ -182,14 +154,7 @@ public class BusinessController {
             return "businesses/edit-business";
         }
 
-        ServiceResponse<Business> serviceResponse = businessService.updateBusiness(business);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "businesses/edit-business";
-        }
-
-        Business updatedBusiness = serviceResponse.value();
+        Business updatedBusiness = businessService.updateBusiness(business);
 
         model.addAttribute("business", updatedBusiness);
 

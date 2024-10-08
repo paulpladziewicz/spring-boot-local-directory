@@ -1,12 +1,12 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
+import com.paulpladziewicz.fremontmi.exceptions.UserNotAuthenticatedException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.GroupService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 public class GroupController {
@@ -69,13 +68,7 @@ public class GroupController {
 
     @GetMapping("/groups")
     public String displayGroups(@RequestParam(value = "tag", required = false) String tag, Model model) {
-        ServiceResponse<List<Group>> findAllResponse = groupService.findAll(tag);
-
-        if (findAllResponse.hasError()) {
-            model.addAttribute("error", true);
-        }
-
-        List<Group> groups = findAllResponse.value();
+        List<Group> groups = groupService.findAll(tag);
         model.addAttribute("groups", groups);
 
         List<Content> contentList = new ArrayList<>(groups);
@@ -88,14 +81,7 @@ public class GroupController {
 
     @GetMapping("/groups/{slug}")
     public String displayGroup(@PathVariable String slug, Model model) {
-        ServiceResponse<Group> findBySlugResponse = groupService.findBySlug(slug);
-
-        if (findBySlugResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "groups/group-page";
-        }
-
-        Group group = findBySlugResponse.value();
+        Group group = groupService.findBySlug(slug);
 
         group.setDescription(htmlSanitizationService.sanitizeHtml(group.getDescription().replace("\n", "<br/>")));
 
@@ -103,12 +89,11 @@ public class GroupController {
         model.addAttribute("adminCount", group.getAdministrators().size());
         model.addAttribute("memberCount", group.getMembers().size());
 
-        Optional<String> userId = userService.getUserId();
-
-        if (userId.isPresent()) {
-            model.addAttribute("isMember", group.getMembers().contains(userId.get()));
-            model.addAttribute("isAdmin", group.getAdministrators().contains(userId.get()));
-        } else {
+        try {
+            String userId = userService.getUserId();
+            model.addAttribute("isMember", group.getMembers().contains(userId));
+            model.addAttribute("isAdmin", group.getAdministrators().contains(userId));
+        } catch (UserNotAuthenticatedException e) {
             model.addAttribute("isMember", false);
             model.addAttribute("isAdmin", false);
         }
@@ -159,14 +144,7 @@ public class GroupController {
 
     @GetMapping("/edit/group/{slug}")
     public String getEditGroupForm(@NotNull @PathVariable String slug, Model model) {
-        ServiceResponse<Group> serviceResponse = groupService.findBySlug(slug);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "groups/edit-group";
-        }
-
-        Group group = serviceResponse.value();
+        Group group = groupService.findBySlug(slug);
 
         String tagsAsString = String.join(",", group.getTags());
         model.addAttribute("tagsAsString", tagsAsString);
@@ -209,14 +187,7 @@ public class GroupController {
 
     @GetMapping("/announcements/group/{groupId}")
     public String getGroupAnnouncementHtml(@NotNull @PathVariable String groupId, Model model) {
-        ServiceResponse<Group> serviceResponse = groupService.findGroupById(groupId);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "groups/edit-group";
-        }
-
-        Group group = serviceResponse.value();
+        Group group = groupService.findGroupById(groupId);
 
         model.addAttribute("group", group);
 
@@ -241,14 +212,7 @@ public class GroupController {
             return "groups/edit-group";
         }
 
-        ServiceResponse<Group> secondServiceResponse = groupService.findGroupById(groupId);
-
-        if (secondServiceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "groups/edit-group";
-        }
-
-        Group group = secondServiceResponse.value();
+        Group group = groupService.findGroupById(groupId);
 
         model.addAttribute("group", group);
         return "groups/htmx/group-announcements";

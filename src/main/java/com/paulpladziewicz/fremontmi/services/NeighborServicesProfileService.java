@@ -38,13 +38,7 @@ public class NeighborServicesProfileService {
     }
 
     public ServiceResponse<NeighborServicesProfile> createNeighborServiceProfile(NeighborServicesProfile neighborServicesProfile) {
-        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
-
-        if (optionalUserProfile.isEmpty()) {
-            return logAndReturnError("Failed to create neighbor service profile: user profile not found.", "user_profile_not_found");
-        }
-
-        UserProfile userProfile = optionalUserProfile.get();
+        UserProfile userProfile = userService.getUserProfile();
 
         neighborServicesProfile.setType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
         neighborServicesProfile.setSlug(createUniqueSlug(neighborServicesProfile.getName()));
@@ -191,38 +185,18 @@ public class NeighborServicesProfileService {
     }
 
     public Optional<NeighborServicesProfile> findNeighborServiceProfileByUserId() {
-        Optional<String> optionalUserId = userService.getUserId();
+        String userId = userService.getUserId();
 
-        if (optionalUserId.isEmpty()) {
-            return Optional.empty();
-        }
+        Optional<Content> optionalContent = contentRepository.findByCreatedBy(userId);
 
-        String userId = optionalUserId.get();
-
-        try {
-            Optional<Content> optionalContent = contentRepository.findByCreatedBy(userId);
-
-            return optionalContent
-                    .filter(content -> content instanceof NeighborServicesProfile)
-                    .map(content -> (NeighborServicesProfile) content);
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to find a neighbor service by user id", e);
-            return Optional.empty();
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to find a neighbor service by user id", e);
-            return Optional.empty();
-        }
+        return optionalContent
+                .filter(content -> content instanceof NeighborServicesProfile)
+                .map(content -> (NeighborServicesProfile) content);
     }
 
     @Transactional
     public ServiceResponse<NeighborServicesProfile> updateNeighborServiceProfile(NeighborServicesProfile neighborServiceProfile) {
-        Optional<String> optionalUserId = userService.getUserId();
-
-        if (optionalUserId.isEmpty()) {
-            return logAndReturnError("Failed to update neighbor service: user id not found.", "user_id_not_found");
-        }
-
-        String userId = optionalUserId.get();
+        String userId = userService.getUserId();
 
         Optional<NeighborServicesProfile> optionalNeighborServiceProfile = findNeighborServiceProfileById(neighborServiceProfile.getId());
 
@@ -263,13 +237,7 @@ public class NeighborServicesProfileService {
 
     @Transactional
     public ServiceResponse<Boolean> deleteNeighborService(String neighborServiceId) {
-        Optional<String> optionalUserId = userService.getUserId();
-
-        if (optionalUserId.isEmpty()) {
-            return logAndReturnError("Failed to delete neighbor service: user id not found.", "user_id_not_found");
-        }
-
-        String userId = optionalUserId.get();
+        String userId = userService.getUserId();
 
         Optional<NeighborServicesProfile> optionalNeighborServiceProfile = findNeighborServiceProfileById(neighborServiceId);
 
@@ -293,16 +261,8 @@ public class NeighborServicesProfileService {
 
         tagService.removeTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
 
-        try {
-            contentRepository.deleteById(neighborServiceId);
-            return ServiceResponse.value(true);
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to delete a business", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to delete a business", e);
-            return ServiceResponse.error("unexpected_error");
-        }
+        contentRepository.deleteById(neighborServiceId);
+        return ServiceResponse.value(true);
     }
 
     private Boolean hasPermission(String userId, NeighborServicesProfile neighborServicesProfile) {
@@ -327,17 +287,6 @@ public class NeighborServicesProfileService {
 
         // Set updatedAt to the current time
         existingProfile.setUpdatedAt(LocalDateTime.now());
-    }
-
-
-    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
-        logger.error(message);
-        return ServiceResponse.error(errorCode);
-    }
-
-    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode, Exception e) {
-        logger.error(message, e);
-        return ServiceResponse.error(errorCode);
     }
 
     public ServiceResponse<Boolean> handleContactFormSubmission(String slug, String name, String email, String message) {

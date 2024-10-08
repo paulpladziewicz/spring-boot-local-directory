@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
+import com.paulpladziewicz.fremontmi.exceptions.UserNotAuthenticatedException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.EventService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
@@ -72,14 +73,7 @@ public class EventController {
 
     @GetMapping("/events")
     public String displayEvents(@RequestParam(value = "tag", required = false) String tag, Model model) {
-        ServiceResponse<List<Event>> serviceResponse = eventService.findAll(tag);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "events/events";
-        }
-
-        List<Event> events = serviceResponse.value();
+        List<Event> events = eventService.findAll(tag);
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -113,18 +107,9 @@ public class EventController {
 
     @GetMapping("/events/{slug}")
     public String displayEvent(@PathVariable String slug, Model model) {
-        ServiceResponse<Event> serviceResponse = eventService.findEventBySlug(slug);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "events/events";
-        }
-
-        Event event = serviceResponse.value();
+        Event event = eventService.findEventBySlug(slug);
 
         event.setDescription(htmlSanitizationService.sanitizeHtml(event.getDescription().replace("\n", "<br/>")));
-
-        Optional<String> userIdOpt = userService.getUserId();
 
         if ("canceled".equals(event.getStatus())) {
             model.addAttribute("canceled", "This event has been canceled.");
@@ -132,28 +117,19 @@ public class EventController {
 
         model.addAttribute("event", event);
 
-        if (userIdOpt.isEmpty()) {
+        try {
+            String userId = userService.getUserId();
+            model.addAttribute("isAdmin", event.getCreatedBy().equals(userId));
+        } catch (UserNotAuthenticatedException e) {
             model.addAttribute("isAdmin", false);
-            return "events/event-page";
         }
-
-        String userId = userIdOpt.get();
-
-        model.addAttribute("isAdmin", event.getCreatedBy().equals(userId));
 
         return "events/event-page";
     }
 
     @GetMapping("/edit/event/{slug}")
     public String displayEditForm(@PathVariable String slug, Model model) {
-        ServiceResponse<Event> serviceResponse = eventService.findEventBySlug(slug);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "events/events";
-        }
-
-        Event event = serviceResponse.value();
+        Event event = eventService.findEventBySlug(slug);
 
         String tagsAsString = String.join(",", event.getTags());
         model.addAttribute("tagsAsString", tagsAsString);
@@ -169,28 +145,14 @@ public class EventController {
             return "events/edit-event";
         }
 
-        ServiceResponse<Event> serviceResponse = eventService.updateEvent(event);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "events/edit-event";
-        }
-
-        Event savedEvent = serviceResponse.value();
+        Event savedEvent = eventService.updateEvent(event);
 
         return "redirect:/events/" + savedEvent.getSlug();
     }
 
     @GetMapping("/my/events")
     public String displayMyEvents(Model model) {
-        ServiceResponse<List<Event>> serviceResponse = eventService.findEventsByUser();
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("error", true);
-            return "events/events";
-        }
-
-        List<Event> events = serviceResponse.value();
+        List<Event> events = eventService.findEventsByUser();
 
         model.addAttribute("events", events);
 
@@ -214,34 +176,22 @@ public class EventController {
     }
 
     @PostMapping("/cancel/event")
-    public String cancelEvent(@NotNull @RequestParam("slug") String slug, RedirectAttributes redirectAttributes) {
-        ServiceResponse<Boolean> serviceResponse = eventService.cancelEvent(slug);
-
-        if (serviceResponse.hasError()) {
-            redirectAttributes.addFlashAttribute("error", true);
-        }
+    public String cancelEvent(@NotNull @RequestParam("slug") String slug) {
+        eventService.cancelEvent(slug);
 
         return "redirect:/events/" + slug;
     }
 
     @PostMapping("/reactivate/event")
-    public String uncancelEvent(@NotNull @RequestParam("slug") String slug, RedirectAttributes redirectAttributes) {
-        ServiceResponse<Boolean> serviceResponse = eventService.reactivateEvent(slug);
-
-        if (serviceResponse.hasError()) {
-            redirectAttributes.addFlashAttribute("error", true);
-        }
+    public String uncancelEvent(@NotNull @RequestParam("slug") String slug) {
+        eventService.reactivateEvent(slug);
 
         return "redirect:/events/" + slug;
     }
 
     @PostMapping("/delete/event")
-    public String deleteGroup(@NotNull @RequestParam("eventId") String eventId, RedirectAttributes redirectAttributes) {
-        ServiceResponse<Boolean> serviceResponse = eventService.deleteEvent(eventId);
-
-        if (serviceResponse.hasError()) {
-            redirectAttributes.addFlashAttribute("error", true);
-        }
+    public String deleteGroup(@NotNull @RequestParam("eventId") String eventId) {
+        eventService.deleteEvent(eventId);
 
         return "redirect:/events";
     }

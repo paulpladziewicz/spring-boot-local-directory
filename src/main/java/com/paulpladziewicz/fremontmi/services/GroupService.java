@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import org.slf4j.Logger;
@@ -40,37 +41,24 @@ public class GroupService {
 
     @Transactional
     public ServiceResponse<Group> createGroup(Group group) {
-        try {
-            Optional<UserProfile> userProfileOpt = userService.getUserProfile();
+        UserProfile userProfile = userService.getUserProfile();
 
-            if (userProfileOpt.isEmpty()) {
-                return logAndReturnError("Failed to create group: user profile not found.", "user_profile_not_found");
-            }
+        group.setMembers(List.of(userProfile.getUserId()));
+        group.setAdministrators(List.of(userProfile.getUserId()));
+        group.setType(ContentTypes.GROUP.getContentType());
+        group.setSlug(createUniqueSlug(group.getName()));
+        group.setPathname("/groups/" + group.getSlug());
+        group.setCreatedBy(userProfile.getUserId());
 
-            UserProfile userProfile = userProfileOpt.get();
+        List<String> validatedTags = tagService.addTags(group.getTags(), ContentTypes.GROUP.getContentType());
+        group.setTags(validatedTags);
 
-            group.setMembers(List.of(userProfile.getUserId()));
-            group.setAdministrators(List.of(userProfile.getUserId()));
-            group.setType(ContentTypes.GROUP.getContentType());
-            group.setSlug(createUniqueSlug(group.getName()));
-            group.setPathname("/groups/" + group.getSlug());
-            group.setCreatedBy(userProfile.getUserId());
+        Group savedGroup = contentRepository.save(group);
 
-            List<String> validatedTags = tagService.addTags(group.getTags(), ContentTypes.GROUP.getContentType());
-            group.setTags(validatedTags);
+        userProfile.getGroupIds().add(savedGroup.getId());
+        userService.saveUserProfile(userProfile);
 
-            Group savedGroup = contentRepository.save(group);
-
-            userProfile.getGroupIds().add(savedGroup.getId());
-            userService.saveUserProfile(userProfile);
-
-            return ServiceResponse.value(savedGroup);
-
-        } catch (DataAccessException e) {
-            return logAndReturnError("Failed to save group due to a database error", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while creating group.", "unexpected_error", e);
-        }
+        return ServiceResponse.value(savedGroup);
     }
 
     public String createUniqueSlug(String name) {
@@ -114,170 +102,87 @@ public class GroupService {
         }
     }
 
-    public ServiceResponse<List<Group>> findAll(String tag) {
-        try {
-            List<Content> contentList;
+    public Group saveGroup(Group group) {
+        return contentRepository.save(group);
+    }
 
-            if (tag != null && !tag.isEmpty()) {
-                contentList = contentRepository.findByTagAndType(tag, ContentTypes.GROUP.getContentType());
-            } else {
-                contentList = contentRepository.findAllByType(ContentTypes.GROUP.getContentType());
-            }
-
-            // Filter content to ensure only Group objects are returned
-            List<Group> groupList = contentList.stream()
-                    .filter(content -> content instanceof Group)  // Ensure type safety
-                    .map(content -> (Group) content)
-                    .collect(Collectors.toList());
-
-            return ServiceResponse.value(groupList);
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to find active groups", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to find active groups", e);
-            return ServiceResponse.error("unexpected_error");
+    public List<Group> findAll(String tag) {
+        if (tag != null && !tag.isEmpty()) {
+            return contentRepository.findByTagAndType(tag, ContentTypes.GROUP.getContentType(), Group.class);
+        } else {
+            return contentRepository.findAllByType(ContentTypes.GROUP.getContentType(), Group.class);
         }
     }
 
-
-    public ServiceResponse<Group> findBySlug(String slug) {
-        try {
-            Optional<Content> groupOpt = contentRepository.findBySlugAndType(slug, ContentTypes.GROUP.getContentType());
-            return groupOpt
-                    .map(content -> (Group) content)
-                    .map(ServiceResponse::value)
-                    .orElseGet(() -> logAndReturnError("Group not found with slug: " + slug, "group_not_found"));
-        } catch (DataAccessException e) {
-            return logAndReturnError("Failed to retrieve group with slug " + slug + " due to a database error", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while retrieving group with slug " + slug, "unexpected_error", e);
-        }
+    public Group findBySlug(String slug) {
+        return contentRepository.findBySlugAndType(slug, ContentTypes.GROUP.getContentType(), Group.class)
+                .orElseThrow(() -> new ContentNotFoundException("Group with slug '" + slug + "' not found."));
     }
 
-    public ServiceResponse<Group> findGroupById(String id) {
-        try {
-            Optional<Content> optionalGroupContent = contentRepository.findById(id);
-            return optionalGroupContent
-                    .map(content -> (Group) content)
-                    .map(ServiceResponse::value)
-                    .orElseGet(() -> logAndReturnError("Group not found with content id: " + id, "group_not_found"));
-        } catch (DataAccessException e) {
-            return logAndReturnError("Failed to retrieve group with content id " + id + " due to a database error", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while retrieving group with content id " + id, "unexpected_error", e);
-        }
+    public Group findGroupById(String id) {
+        return contentRepository.findById(id, Group.class)
+                .orElseThrow(() -> new ContentNotFoundException("Group with id '" + id + "' not found."));
     }
 
     public ServiceResponse<List<Group>> findGroupsByUser() {
-        try {
-            Optional<UserProfile> userProfileOpt = userService.getUserProfile();
-            if (userProfileOpt.isEmpty()) {
-                return logAndReturnError("Failed to retrieve groups: user profile not found.", "user_profile_not_found");
-            }
+        UserProfile userProfile = userService.getUserProfile();
+        List<Content> contentList = contentRepository.findAllById(userProfile.getGroupIds());
 
-            UserProfile userProfile = userProfileOpt.get();
-            List<Content> contentList = contentRepository.findAllById(userProfile.getGroupIds());
+        List<Group> groups = contentList.stream()
+                .filter(content -> content instanceof Group)
+                .map(content -> (Group) content)
+                .collect(Collectors.toList());
 
-            List<Group> groups = contentList.stream()
-                    .filter(content -> content instanceof Group)
-                    .map(content -> (Group) content)
-                    .collect(Collectors.toList());
-
-            return ServiceResponse.value(groups);
-
-        } catch (DataAccessException e) {
-            return logAndReturnError("Failed to retrieve groups for user due to a database error", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while retrieving groups for user.", "unexpected_error", e);
-        }
+        return ServiceResponse.value(groups);
     }
 
     @Transactional
     public ServiceResponse<Content> updateGroup(Group group) {
-        try {
-            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+        UserProfile userProfile = userService.getUserProfile();
 
-            if (optionalUserProfile.isEmpty()) {
-                return logAndReturnError("User profile not found", "user_profile_not_found");
-            }
+        Group existingGroup = findGroupById(group.getId());
 
-            UserProfile userProfile = optionalUserProfile.get();
-
-            ServiceResponse<Group> findGroupResponse = findGroupById(group.getId());
-
-            if (findGroupResponse.hasError()) {
-                return ServiceResponse.error(findGroupResponse.errorCode());
-            }
-
-            Group existingGroup = findGroupResponse.value();
-
-            if (!hasPermission(userProfile, existingGroup)) {
-                return logAndReturnError("User doesn't have permission to delete group", "permission_denied");
-            }
-
-            List<String> existingTags = existingGroup.getTags();
-            List<String> newTags = group.getTags();
-            tagService.updateTags(newTags, existingTags, ContentTypes.GROUP.getContentType());
-
-            if (!existingGroup.getName().equals(group.getName())) {
-                String newSlug = createUniqueSlug(group.getName());
-                existingGroup.setSlug(newSlug);
-                existingGroup.setPathname("/groups/" + newSlug);
-            }
-
-            existingGroup.setName(group.getName());
-            existingGroup.setDescription(group.getDescription());
-            existingGroup.setTags(newTags);
-
-            return ServiceResponse.value(contentRepository.save(existingGroup));
-
-        } catch (DataAccessException e) {
-            return logAndReturnError("Failed to update group due to a database error", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while updating group.", "unexpected_error", e);
+        if (!hasPermission(userProfile, existingGroup)) {
+            return logAndReturnError("User doesn't have permission to delete group", "permission_denied");
         }
+
+        List<String> existingTags = existingGroup.getTags();
+        List<String> newTags = group.getTags();
+        tagService.updateTags(newTags, existingTags, ContentTypes.GROUP.getContentType());
+
+        if (!existingGroup.getName().equals(group.getName())) {
+            String newSlug = createUniqueSlug(group.getName());
+            existingGroup.setSlug(newSlug);
+            existingGroup.setPathname("/groups/" + newSlug);
+        }
+
+        existingGroup.setName(group.getName());
+        existingGroup.setDescription(group.getDescription());
+        existingGroup.setTags(newTags);
+
+        return ServiceResponse.value(contentRepository.save(existingGroup));
     }
 
     @Transactional
-    public ServiceResponse<Void> deleteGroup(String contentId) {
-        try {
-            Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+    public ServiceResponse<Void> deleteGroup(String groupId) {
+        UserProfile userProfile = userService.getUserProfile();
 
-            if (optionalUserProfile.isEmpty()) {
-                return logAndReturnError("User profile not found", "user_profile_not_found");
-            }
+        Group groupContent = findGroupById(groupId);
 
-            UserProfile userProfile = optionalUserProfile.get();
-
-            ServiceResponse<Group> findGroupResponse = findGroupById(contentId);
-
-            if (findGroupResponse.hasError()) {
-                return ServiceResponse.error(findGroupResponse.errorCode());
-            }
-
-            Group groupContent = findGroupResponse.value();
-
-            if (!hasPermission(userProfile, groupContent)) {
-                return logAndReturnError("User doesn't have permission to delete group", "permission_denied");
-            }
-
-            tagService.removeTags(groupContent.getTags(), ContentTypes.GROUP.getContentType());
-
-            List<String> groupIds = userProfile.getGroupIds();
-            groupIds.remove(contentId);
-            userProfile.setGroupIds(groupIds);
-            userService.saveUserProfile(userProfile);
-
-            contentRepository.deleteById(contentId);
-            logger.info("Successfully deleted group with content id: {}", contentId);
-            return ServiceResponse.value(null);
-
-        } catch (DataAccessException e) {
-            return logAndReturnError("Failed to delete group due to a database error", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while deleting group.", "unexpected_error", e);
+        if (!hasPermission(userProfile, groupContent)) {
+            return logAndReturnError("User doesn't have permission to delete group", "permission_denied");
         }
+
+        tagService.removeTags(groupContent.getTags(), ContentTypes.GROUP.getContentType());
+
+        List<String> groupIds = userProfile.getGroupIds();
+        groupIds.remove(groupId);
+        userProfile.setGroupIds(groupIds);
+        userService.saveUserProfile(userProfile);
+
+        contentRepository.deleteById(groupId);
+        logger.info("Successfully deleted group with content id: {}", groupId);
+        return ServiceResponse.value(null);
     }
 
     private Boolean hasPermission(UserProfile userProfile, Group group) {
@@ -286,21 +191,9 @@ public class GroupService {
 
     @Transactional
     public ServiceResponse<Boolean> joinGroup(String slug) {
-        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+        UserProfile userProfile = userService.getUserProfile();
 
-        if (optionalUserProfile.isEmpty()) {
-            return logAndReturnError("User profile not found", "user_profile_not_found");
-        }
-
-        UserProfile userProfile = optionalUserProfile.get();
-
-        ServiceResponse<Group> findGroupResponse = findBySlug(slug);
-
-        if (findGroupResponse.hasError()) {
-            return ServiceResponse.error(findGroupResponse.errorCode());
-        }
-
-        Group group = findGroupResponse.value();
+        Group group = findBySlug(slug);
 
         List<String> members = group.getMembers();
         if (!members.contains(userProfile.getUserId())) {
@@ -320,21 +213,9 @@ public class GroupService {
 
     @Transactional
     public ServiceResponse<Boolean> leaveGroup(String slug) {
-        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+        UserProfile userProfile = userService.getUserProfile();
 
-        if (optionalUserProfile.isEmpty()) {
-            return logAndReturnError("User profile not found", "user_profile_not_found");
-        }
-
-        UserProfile userProfile = optionalUserProfile.get();
-
-        ServiceResponse<Group> findGroupResponse = findBySlug(slug);
-
-        if (findGroupResponse.hasError()) {
-            return ServiceResponse.error(findGroupResponse.errorCode());
-        }
-
-        Group group = findGroupResponse.value();
+        Group group = findBySlug(slug);
 
         List<String> members = new ArrayList<>(group.getMembers());
         members.remove(userProfile.getUserId());
@@ -349,22 +230,10 @@ public class GroupService {
         return ServiceResponse.value(true);
     }
 
-    public ServiceResponse<List<Announcement>> addAnnouncement(String contentId, Announcement announcement) {
-        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+    public ServiceResponse<List<Announcement>> addAnnouncement(String groupId, Announcement announcement) {
+        UserProfile userProfile = userService.getUserProfile();
 
-        if (optionalUserProfile.isEmpty()) {
-            return logAndReturnError("User profile not found", "user_profile_not_found");
-        }
-
-        UserProfile userProfile = optionalUserProfile.get();
-
-        ServiceResponse<Group> findGroupResponse = findGroupById(contentId);
-
-        if (findGroupResponse.hasError()) {
-            return ServiceResponse.error(findGroupResponse.errorCode());
-        }
-
-        Group group = findGroupResponse.value();
+        Group group = findGroupById(groupId);
 
         if (!hasPermission(userProfile, group)) {
             return logAndReturnError("User doesn't have permission to delete group", "permission_denied");
@@ -375,33 +244,16 @@ public class GroupService {
         announcements.addFirst(announcement);
         group.setAnnouncements(announcements);
 
-        try {
-            contentRepository.save(group);
-        } catch (DataIntegrityViolationException e) {
-            return logAndReturnError("Failed to add an announcement due to a database error when saving the group.", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while deleting group.", "unexpected_error", e);
-        }
+        contentRepository.save(group);
+
 
         return ServiceResponse.value(announcements);
     }
 
     public ServiceResponse<Boolean> deleteAnnouncement(String id, int announcementId) {
-        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+        UserProfile userProfile = userService.getUserProfile();
 
-        if (optionalUserProfile.isEmpty()) {
-            return logAndReturnError("User profile not found", "user_profile_not_found");
-        }
-
-        UserProfile userProfile = optionalUserProfile.get();
-
-        ServiceResponse<Group> findGroupResponse = findGroupById(id);
-
-        if (findGroupResponse.hasError()) {
-            return ServiceResponse.error(findGroupResponse.errorCode());
-        }
-
-        Group group = findGroupResponse.value();
+        Group group = findGroupById(id);
 
         if (!hasPermission(userProfile, group)) {
             return logAndReturnError("User doesn't have permission to delete group", "permission_denied");
@@ -425,25 +277,13 @@ public class GroupService {
 
         group.setAnnouncements(announcements);
 
-        try {
-            contentRepository.save(group);
-        } catch (DataIntegrityViolationException e) {
-            return logAndReturnError("Failed to delete an announcement due to a database error when saving the group.", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while deleting an announcement.", "unexpected_error", e);
-        }
+        contentRepository.save(group);
 
         return ServiceResponse.value(true);
     }
 
     public ServiceResponse<Boolean> emailGroup(String slug, String subject, String message) {
-        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
-
-        if (optionalUserProfile.isEmpty()) {
-            return logAndReturnError("User profile not found", "user_profile_not_found");
-        }
-
-        UserProfile senderUserProfile = optionalUserProfile.get();
+        UserProfile senderUserProfile = userService.getUserProfile();
 
         if (senderUserProfile.getEmailSendCount() >= 5) {
             return logAndReturnError("User has reached the email limit", "email_limit_reached");

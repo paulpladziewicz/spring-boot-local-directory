@@ -1,10 +1,10 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -42,13 +41,7 @@ public class BusinessService {
     }
 
     public ServiceResponse<Business> createBusiness(Business business) {
-        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
-
-        if (optionalUserProfile.isEmpty()) {
-            return logAndReturnError("Failed to create business: user profile not found.", "user_profile_not_found");
-        }
-
-        UserProfile userProfile = optionalUserProfile.get();
+        UserProfile userProfile = userService.getUserProfile();
 
         business.setType(ContentTypes.BUSINESS.getContentType());
         business.setSlug(createUniqueSlug(business.getName()));
@@ -72,37 +65,17 @@ public class BusinessService {
 
         business.setStripeDetails(stripeDetails);
 
-        ServiceResponse<Business> saveResponse = saveBusiness(business);
-
-        if (saveResponse.hasError()) {
-            logger.error("Error when trying to save a Businesss");
-            return ServiceResponse.error(saveResponse.errorCode());
-        }
-
-        Business savedBusiness = saveResponse.value();
+        Business savedBusiness = saveBusiness(business);
 
         userProfile.getBusinessIds().add(savedBusiness.getId());
 
-        ServiceResponse<UserProfile> saveUserProfileResponse = userService.saveUserProfile(userProfile);
-
-        if (saveUserProfileResponse.hasError()) {
-            logger.error("Error when trying to save a UserProfile");
-            return ServiceResponse.error(saveUserProfileResponse.errorCode());
-        }
+        userService.saveUserProfile(userProfile);
 
         return ServiceResponse.value(savedBusiness);
     }
 
-    public ServiceResponse<Business> saveBusiness(Business business) {
-        try {
-            return ServiceResponse.value(contentRepository.save(business));
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to create a business", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to create a business", e);
-            return ServiceResponse.error("unexpected_error");
-        }
+    public Business saveBusiness(Business business) {
+        return contentRepository.save(business);
     }
 
     private Boolean hasPermission(String userId, Business business) {
@@ -150,172 +123,72 @@ public class BusinessService {
         }
     }
 
-    public ServiceResponse<List<Business>> findAllBusinesses(String tag) {
-        try {
-            List<Content> contentList;
-
-            // Check if the tag is provided and not empty
-            if (tag != null && !tag.isEmpty()) {
-                // Fetch content by tag and type BUSINESS
-                contentList = contentRepository.findByTagAndType(tag, ContentTypes.BUSINESS.getContentType());
-            } else {
-                // Fetch all content of type BUSINESS
-                contentList = contentRepository.findAllByType(ContentTypes.BUSINESS.getContentType());
-            }
-
-            // Filter the list to ensure only Business objects are returned
-            List<Business> businesses = contentList.stream()
-                    .filter(content -> content instanceof Business)  // Ensure type safety
-                    .map(content -> (Business) content)
-                    .collect(Collectors.toList());
-
-            return ServiceResponse.value(businesses);
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to find active businesses", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to find active businesses", e);
-            return ServiceResponse.error("unexpected_error");
+    public List<Business> findAllBusinesses(String tag) {
+        if (tag != null && !tag.isEmpty()) {
+            return contentRepository.findByTagAndType(tag, ContentTypes.BUSINESS.getContentType(), Business.class);
+        } else {
+            return contentRepository.findAllByType(ContentTypes.BUSINESS.getContentType(), Business.class);
         }
     }
 
+    public Business findBusinessById(String id) {
+        return contentRepository.findById(id, Business.class)
+                .orElseThrow(() -> new ContentNotFoundException("Business with id '" + id + "' not found."));
 
-    public Optional<Business> findBusinessById(String businessId) {
-        try {
-            Optional<Content> contentOpt = contentRepository.findById(businessId);
-
-            return contentOpt
-                    .filter(content -> content instanceof Business)
-                    .map(content -> (Business) content);
-
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to find a business by id", e);
-            return Optional.empty();
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to find a business by id", e);
-            return Optional.empty();
-        }
     }
 
-    public Optional<Business> findBusinessBySlug(String slug) {
-        try {
-            Optional<Content> contentOpt = contentRepository.findBySlugAndType(slug, ContentTypes.BUSINESS.getContentType());
-
-            return contentOpt
-                    .filter(content -> content instanceof Business)
-                    .map(content -> (Business) content);
-
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to find a business by id", e);
-            return Optional.empty();
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to find a business by id", e);
-            return Optional.empty();
-        }
+    public Business findBusinessBySlug(String slug) {
+        return contentRepository.findBySlugAndType(slug, ContentTypes.BUSINESS.getContentType(), Business.class)
+                .orElseThrow(() -> new ContentNotFoundException("Business with slug '" + slug + "' not found."));
     }
 
-    public ServiceResponse<List<Business>> findBusinessesByUser () {
-        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+    public List<Business> findBusinessesByUser () {
+        UserProfile userProfile = userService.getUserProfile();
 
-        if (optionalUserProfile.isEmpty()) {
-            return ServiceResponse.error("user_profile_not_found");
-        }
+        List<Content> contents = contentRepository.findAllById(userProfile.getBusinessIds());
 
-        UserProfile userProfile = optionalUserProfile.get();
-
-        try {
-            List<Content> contents = contentRepository.findAllById(userProfile.getBusinessIds());
-
-            List<Business> businesses = contents.stream()
-                    .filter(content -> content instanceof Business)
-                    .map(content -> (Business) content)
-                    .collect(Collectors.toList());
-
-            return ServiceResponse.value(businesses);
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to retrieve all businesses for the user", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to retrieve all businesses for the user", e);
-            return ServiceResponse.error("unexpected_error");
-        }
+        return contents.stream()
+                .filter(content -> content instanceof Business)
+                .map(content -> (Business) content)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public ServiceResponse<Business> updateBusiness(Business updatedBusiness) {
-        try {
-            Optional<String> optionalUserId = userService.getUserId();
+    public Business updateBusiness(Business updatedBusiness) {
+        String userId = userService.getUserId();
 
-            if (optionalUserId.isEmpty()) {
-                return logAndReturnError("Failed to update business: user id not found.", "user_id_not_found");
-            }
+        Business existingBusiness = findBusinessById(updatedBusiness.getId());
 
-            String userId = optionalUserId.get();
+        // TODO checkPermissions
 
-            Optional<Business> optionalBusiness = findBusinessById(updatedBusiness.getId());
+        List<String> oldTags = existingBusiness.getTags();
+        List<String> newTags = updatedBusiness.getTags();
 
-            if (optionalBusiness.isEmpty()) {
-                return logAndReturnError("Business not found", "business_not_found");
-            }
-
-            Business existingBusiness = optionalBusiness.get();
-
-            if (!hasPermission(userId, existingBusiness)) {
-                return logAndReturnError("User does not have permission to update this business", "permission_denied");
-            }
-
-            List<String> oldTags = existingBusiness.getTags();
-            List<String> newTags = updatedBusiness.getTags();
-
-            if (newTags != null) {
-                tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.BUSINESS.getContentType());
-            }
-
-            if (!existingBusiness.getName().equals(updatedBusiness.getName())) {
-                String newSlug = createUniqueSlug(updatedBusiness.getName());
-                existingBusiness.setSlug(newSlug);
-                existingBusiness.setPathname("/businesses/" + newSlug);
-            }
-
-            updateBusinessProperties(existingBusiness, updatedBusiness);
-
-            existingBusiness.setUpdatedBy(userId);
-            existingBusiness.setUpdatedAt(LocalDateTime.now());
-
-            ServiceResponse<Business> savedBusinessResponse = saveBusiness(existingBusiness);
-
-            if (savedBusinessResponse.hasError()) {
-                return ServiceResponse.error(savedBusinessResponse.errorCode());
-            }
-
-            return ServiceResponse.value(savedBusinessResponse.value());
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to update a business", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to update a business", e);
-            return ServiceResponse.error("unexpected_error");
+        if (newTags != null) {
+            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.BUSINESS.getContentType());
         }
+
+        if (!existingBusiness.getName().equals(updatedBusiness.getName())) {
+            String newSlug = createUniqueSlug(updatedBusiness.getName());
+            existingBusiness.setSlug(newSlug);
+            existingBusiness.setPathname("/businesses/" + newSlug);
+        }
+
+        updateBusinessProperties(existingBusiness, updatedBusiness);
+
+        existingBusiness.setUpdatedBy(userId);
+        existingBusiness.setUpdatedAt(LocalDateTime.now());
+
+        return saveBusiness(existingBusiness);
     }
 
 
 
     public ServiceResponse<Boolean> deleteBusiness(String businessId) {
-        Optional<UserProfile> optionalUserProfile = userService.getUserProfile();
+        UserProfile userProfile = userService.getUserProfile();
+        Business business = findBusinessById(businessId);
 
-        if (optionalUserProfile.isEmpty()) {
-            return ServiceResponse.error("user_profile_not_found");
-        }
-
-        UserProfile userProfile = optionalUserProfile.get();
-
-        Optional<Business> optionalBusiness = findBusinessById(businessId);
-
-        if (optionalBusiness.isEmpty()) {
-            return ServiceResponse.error("business_not_found");
-        }
-
-        Business business = optionalBusiness.get();
+        // TODO checkPermissions
 
         if (business.getSubscriptionId() != null && !business.getSubscriptionId().isEmpty()) {
             ServiceResponse<Boolean> cancelSubscriptionResponse = stripeService.cancelSubscriptionAtPeriodEnd(business.getSubscriptionId());
@@ -332,16 +205,8 @@ public class BusinessService {
         userProfile.setBusinessIds(businessIds);
         userService.saveUserProfile(userProfile);
 
-        try {
-            contentRepository.deleteById(businessId);
-            return ServiceResponse.value(true);
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to delete a business", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to delete a business", e);
-            return ServiceResponse.error("unexpected_error");
-        }
+        contentRepository.deleteById(businessId);
+        return ServiceResponse.value(true);
     }
 
     private void updateBusinessProperties(Business existingBusiness, Business updatedBusiness) {
@@ -361,24 +226,8 @@ public class BusinessService {
         existingBusiness.setDisplayEmail(updatedBusiness.isDisplayEmail());
     }
 
-    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
-        logger.error(message);
-        return ServiceResponse.error(errorCode);
-    }
-
-    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode, Exception e) {
-        logger.error(message, e);
-        return ServiceResponse.error(errorCode);
-    }
-
     public ServiceResponse<Boolean> handleContactFormSubmission(String slug, String name, String email, String message) {
-        Optional<Business> optionalBusiness = findBusinessBySlug(slug);
-
-        if (optionalBusiness.isEmpty()) {
-            return ServiceResponse.error("business_not_found");
-        }
-
-        Business business = optionalBusiness.get();
+        Business business = findBusinessBySlug(slug);
 
         try {
              emailService.sendContactBusinessEmail(business.getEmail(), name, email, message);

@@ -85,14 +85,7 @@ public class UserController {
 
     @GetMapping("/my/settings")
     public String settings(Model model) {
-        Optional<UserProfile> userProfile = userService.getUserProfile();
-
-        if (userProfile.isEmpty()) {
-            model.addAttribute("error", true);
-            return "settings/profile";
-        }
-
-        model.addAttribute("userProfile", userProfile.get());
+        model.addAttribute("userProfile", userService.getUserProfile());
 
         return "settings/profile";
     }
