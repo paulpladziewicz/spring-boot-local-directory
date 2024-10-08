@@ -152,12 +152,12 @@ public class StripeService {
         }
     }
 
-    public ServiceResponse<List<Subscription>> getSubscriptions() {
+    public List<Subscription> getSubscriptions() {
         UserProfile userProfile = userService.getUserProfile();
         String stripeCustomerId = userProfile.getStripeCustomerId();
 
         if (stripeCustomerId == null || stripeCustomerId.isEmpty()) {
-            return ServiceResponse.value(Collections.emptyList());
+            return Collections.emptyList();
         }
 
         try {
@@ -170,28 +170,25 @@ public class StripeService {
 
             SubscriptionCollection subscriptions = Subscription.list(params);
 
-            // Filter subscriptions that have a 'paid' invoice status
-            List<Subscription> activePaidSubscriptions = subscriptions.getData().stream()
+            return subscriptions.getData().stream()
                     .filter(subscription -> "active".equals(subscription.getStatus())) // Check active status correctly
                     .filter(subscription -> {
                         Invoice latestInvoice = subscription.getLatestInvoiceObject(); // Use getLatestInvoiceObject()
                         return latestInvoice != null && "paid".equals(latestInvoice.getStatus());
                     })
                     .collect(Collectors.toList());
-
-            return ServiceResponse.value(activePaidSubscriptions);
         } catch (StripeException e) {
-            logger.error("Error retrieving subscriptions from Stripe: ", e);
-            return ServiceResponse.error("STRIPE_SUBSCRIPTION_RETRIEVAL_FAILED");
+            logger.error("Failed to retrieve subscriptions due to a Stripe exception", e);
+            throw new StripeServiceException("Failed to retrieve subscriptions with Stripe.", e);
         }
     }
 
-    public ServiceResponse<List<Invoice>> getInvoices() {
+    public List<Invoice> getInvoices() {
         UserProfile userProfile = userService.getUserProfile();
         String stripeCustomerId = userProfile.getStripeCustomerId();
 
         if (stripeCustomerId == null || stripeCustomerId.isEmpty()) {
-            return ServiceResponse.value(Collections.emptyList());
+            return Collections.emptyList();
         }
 
         try {
@@ -201,52 +198,38 @@ public class StripeService {
 
             InvoiceCollection invoiceCollection = Invoice.list(params);
 
-            // Filter only paid invoices
-            List<Invoice> paidInvoices = invoiceCollection.getData().stream()
+            return invoiceCollection.getData().stream()
                     .filter(invoice -> "paid".equals(invoice.getStatus())) // Check if the invoice status is 'paid'
                     .collect(Collectors.toList());
-
-            return ServiceResponse.value(paidInvoices);
         } catch (StripeException e) {
-            logger.error("Error retrieving invoices from Stripe: ", e);
-            return ServiceResponse.error("STRIPE_INVOICE_RETRIEVAL_FAILED");
+            logger.error("Failed to retrieve invoices due to a Stripe exception", e);
+            throw new StripeServiceException("Failed to retrieve invoices with Stripe.", e);
         }
     }
 
-    public ServiceResponse<Boolean> isSubscriptionActive(String subscriptionId) {
-        try {
-            Subscription subscription = Subscription.retrieve(subscriptionId);
-            return ServiceResponse.value(subscription.getStatus().equals("active"));
-        } catch (StripeException e) {
-            logger.error("Error retrieving subscription from Stripe: ", e);
-            return ServiceResponse.error("STRIPE_SUBSCRIPTION_RETRIEVAL_FAILED");
-        }
-    }
-
-    public ServiceResponse<Boolean> cancelSubscriptionAtPeriodEnd(String subscriptionId) {
+    public void cancelSubscriptionAtPeriodEnd(String subscriptionId) {
         UserProfile userProfile = userService.getUserProfile();
 
         if (userProfile.getStripeCustomerId() == null) {
-            return ServiceResponse.error("No Stripe customer ID found");
+            throw new StripeServiceException("No Stripe customer ID associated with this user.");
         }
 
         try {
             Subscription subscription = Subscription.retrieve(subscriptionId);
 
-            // Set the cancel_at_period_end flag to true
             SubscriptionUpdateParams updateParams = SubscriptionUpdateParams.builder()
                     .setCancelAtPeriodEnd(true)
                     .build();
 
             subscription.update(updateParams);
-            return ServiceResponse.value(true);
+
         } catch (StripeException e) {
             logger.error("Error setting cancel_at_period_end flag for subscription: ", e);
-            return ServiceResponse.error("STRIPE_SUBSCRIPTION_CANCELLATION_FAILED");
+            throw new StripeServiceException("Failed to cancel subscription at period end.", e);
         }
     }
 
-    public ServiceResponse<Boolean> resumeSubscription(String subscriptionId) {
+    public void resumeSubscription(String subscriptionId) {
         try {
             Subscription subscription = Subscription.retrieve(subscriptionId);
 
@@ -257,15 +240,17 @@ public class StripeService {
                         .build();
 
                 subscription.update(updateParams);
-                return ServiceResponse.value(true);
+
             } else {
-                return ServiceResponse.error("Subscription is not set to cancel at period end.");
+                throw new StripeServiceException("Subscription is not set to cancel at period end.");
             }
+
         } catch (StripeException e) {
             logger.error("Error resuming subscription: ", e);
-            return ServiceResponse.error("STRIPE_SUBSCRIPTION_RESUME_FAILED");
+            throw new StripeServiceException("Failed to resume subscription with Stripe.", e);
         }
     }
+
 
     public ResponseEntity<String> handleStripeWebhook(String payload, String sigHeader) {
         try {

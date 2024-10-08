@@ -184,11 +184,7 @@ public class BusinessService {
         // TODO checkPermissions
 
         if (business.getSubscriptionId() != null && !business.getSubscriptionId().isEmpty()) {
-            ServiceResponse<Boolean> cancelSubscriptionResponse = stripeService.cancelSubscriptionAtPeriodEnd(business.getSubscriptionId());
-
-            if (cancelSubscriptionResponse.hasError()) {
-                return ServiceResponse.error(cancelSubscriptionResponse.errorCode());
-            }
+            stripeService.cancelSubscriptionAtPeriodEnd(business.getSubscriptionId());
         }
 
         tagService.removeTags(business.getTags(), ContentTypes.BUSINESS.getContentType());

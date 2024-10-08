@@ -213,11 +213,7 @@ public class NeighborServicesProfileService {
         }
 
         if (neighborServicesProfile.getSubscriptionId() != null && !neighborServicesProfile.getSubscriptionId().isEmpty()) {
-            ServiceResponse<Boolean> cancelSubscriptionResponse = stripeService.cancelSubscriptionAtPeriodEnd(neighborServicesProfile.getSubscriptionId());
-
-            if (cancelSubscriptionResponse.hasError()) {
-                return ServiceResponse.error(cancelSubscriptionResponse.errorCode());
-            }
+            stripeService.cancelSubscriptionAtPeriodEnd(neighborServicesProfile.getSubscriptionId());
         }
 
         tagService.removeTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());

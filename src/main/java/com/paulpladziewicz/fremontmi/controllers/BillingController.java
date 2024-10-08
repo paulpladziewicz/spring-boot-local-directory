@@ -32,13 +32,7 @@ public class BillingController {
 
     @GetMapping("/subscriptions")
     public ResponseEntity<List<SubscriptionDTO>> getSubscriptions() {
-        ServiceResponse<List<Subscription>> getSubscriptionsResponse = stripeService.getSubscriptions();
-
-        if (getSubscriptionsResponse.hasError()) {
-            return ResponseEntity.status(500).body(null);
-        }
-
-        List<SubscriptionDTO> subscriptionDTOs = getSubscriptionsResponse.value().stream()
+        List<SubscriptionDTO> subscriptionDTOs = stripeService.getSubscriptions().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
 
@@ -47,13 +41,7 @@ public class BillingController {
 
     @GetMapping("/invoices")
     public ResponseEntity<List<InvoiceDTO>> getInvoices() {
-        ServiceResponse<List<Invoice>> getInvoicesResponse = stripeService.getInvoices();
-
-        if (getInvoicesResponse.hasError()) {
-            return ResponseEntity.status(500).body(null);
-        }
-
-        List<InvoiceDTO> invoiceDTOs = getInvoicesResponse.value().stream()
+        List<InvoiceDTO> invoiceDTOs = stripeService.getInvoices().stream()
                 .map(this::mapInvoiceToDTO)
                 .collect(Collectors.toList());
 
@@ -63,12 +51,7 @@ public class BillingController {
     @PostMapping("/cancel-subscription")
     public ResponseEntity<CustomResponse> cancelSubscription(@RequestBody CancelSubscriptionRequest request) {
         String subscriptionId = request.subscriptionId;
-        ServiceResponse<Boolean> cancelSubscriptionResponse = stripeService.cancelSubscriptionAtPeriodEnd(subscriptionId);
-
-        if (cancelSubscriptionResponse.hasError()) {
-            return ResponseEntity.status(500)
-                    .body(new CustomResponse(false, cancelSubscriptionResponse.errorCode()));
-        }
+        stripeService.cancelSubscriptionAtPeriodEnd(subscriptionId);
 
         return ResponseEntity.ok(new CustomResponse(true, "Subscription cancellation scheduled at period end."));
     }
@@ -76,12 +59,7 @@ public class BillingController {
     @PostMapping("/resume-subscription")
     public ResponseEntity<CustomResponse> resumeSubscription(@RequestBody CancelSubscriptionRequest request) {
         String subscriptionId = request.subscriptionId;
-        ServiceResponse<Boolean> resumeSubscriptionResponse = stripeService.resumeSubscription(subscriptionId);
-
-        if (resumeSubscriptionResponse.hasError()) {
-            return ResponseEntity.status(500)
-                    .body(new CustomResponse(false, resumeSubscriptionResponse.errorCode()));
-        }
+        stripeService.resumeSubscription(subscriptionId);
 
         return ResponseEntity.ok(new CustomResponse(true, "Subscription resumed successfully."));
     }
