@@ -34,10 +34,10 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     <T extends Content> Optional<T> findByCreatedBy(String createdBy, Class<T> clazz);
 
     @Query("{ 'stripeDetails.subscriptionId': ?0 }")
-    <T extends Content> Optional<T> findByStripeDetails_SubscriptionId(String subscriptionId, Class<T> clazz);
+    <T extends Content> Optional<T> findByStripeDetails_SubscriptionId(String subscriptionId);
 
     @Query("{ 'stripeDetails.invoiceId': ?0 }")
-    <T extends Content> Optional<T> findByStripeDetails_InvoiceId(String invoiceId, Class<T> clazz);
+    <T extends Content> Optional<T> findByStripeDetails_InvoiceId(String invoiceId);
 
     @Query("{'visibility': 'public', 'days': { $elemMatch: { 'endTime': { $gt: ?0 } } }, 'status': { $in: ['active', 'canceled'] }}")
     List<Event> findByAnyFutureDayEventOrderBySoonestStartTimeAsc(LocalDateTime now, Sort sort);

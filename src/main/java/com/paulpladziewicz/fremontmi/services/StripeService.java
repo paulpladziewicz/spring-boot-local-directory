@@ -336,7 +336,6 @@ public class StripeService {
 
     public ServiceResponse<Content> handleSubscriptionSuccess(PaymentRequest paymentRequest) {
         String contentId = paymentRequest.getEntityId();
-        String paymentIntentId = paymentRequest.getPaymentIntentId();
         String paymentStatus = paymentRequest.getPaymentStatus();
 
         if (!paymentStatus.equals("succeeded")) {

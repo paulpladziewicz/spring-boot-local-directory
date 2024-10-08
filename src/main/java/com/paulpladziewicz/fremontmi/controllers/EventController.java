@@ -12,12 +12,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -54,7 +52,7 @@ public class EventController {
     }
 
     @PostMapping("/create/event")
-    public String createEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
+    public String createEvent(@Valid @ModelAttribute("event") Event event, BindingResult result) {
         if (result.hasErrors()) {
             return "events/create-event";
         }
@@ -75,12 +73,12 @@ public class EventController {
             // Filter future DayEvents
             List<DayEvent> futureDayEvents = event.getDays().stream()
                     .filter(dayEvent -> dayEvent.getStartTime().isAfter(now))
-                    .collect(Collectors.toList());
+                    .toList();
 
             // Check if there's any future DayEvent
             if (!futureDayEvents.isEmpty()) {
                 // Set the next available DayEvent as the first future day
-                event.setNextAvailableDayEvent(futureDayEvents.get(0));
+                event.setNextAvailableDayEvent(futureDayEvents.getFirst());
                 event.setMoreDayEventsCount(futureDayEvents.size() - 1); // count all future days except the next one
             } else {
                 event.setNextAvailableDayEvent(null);
@@ -133,7 +131,7 @@ public class EventController {
     }
 
     @PostMapping("/edit/event")
-    public String updateEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
+    public String updateEvent(@Valid @ModelAttribute("event") Event event, BindingResult result) {
         if (result.hasErrors()) {
             return "events/edit-event";
         }

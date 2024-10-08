@@ -7,16 +7,12 @@ import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.AbstractDocument;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -174,7 +170,7 @@ public class GroupService {
         userService.saveUserProfile(userProfile);
     }
 
-    public List<Announcement> addAnnouncement(String groupId, Announcement announcement) {
+    public void addAnnouncement(String groupId, Announcement announcement) {
         UserProfile userProfile = userService.getUserProfile();
 
         Group group = findGroupById(groupId);
@@ -189,8 +185,6 @@ public class GroupService {
         group.setAnnouncements(announcements);
 
         contentRepository.save(group);
-
-        return announcements;
     }
 
     public void deleteAnnouncement(String id, int announcementId) {

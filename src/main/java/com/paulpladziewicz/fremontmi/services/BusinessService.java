@@ -1,6 +1,7 @@
 package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
+import com.paulpladziewicz.fremontmi.exceptions.PermissionDeniedException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import org.slf4j.Logger;
@@ -58,21 +59,13 @@ public class BusinessService {
 
         business.setStripeDetails(stripeDetails);
 
-        Business savedBusiness = saveBusiness(business);
+        Business savedBusiness = contentRepository.save(business);
 
         userProfile.getBusinessIds().add(savedBusiness.getId());
 
         userService.saveUserProfile(userProfile);
 
         return savedBusiness;
-    }
-
-    public Business saveBusiness(Business business) {
-        return contentRepository.save(business);
-    }
-
-    private Boolean hasPermission(String userId, Business business) {
-        return business.getAdministrators().contains(userId);
     }
 
     public List<Business> findAllBusinesses(String tag) {
@@ -97,12 +90,7 @@ public class BusinessService {
     public List<Business> findBusinessesByUser () {
         UserProfile userProfile = userService.getUserProfile();
 
-        List<Content> contents = contentRepository.findAllById(userProfile.getBusinessIds());
-
-        return contents.stream()
-                .filter(content -> content instanceof Business)
-                .map(content -> (Business) content)
-                .collect(Collectors.toList());
+        return contentRepository.findAllById(userProfile.getBusinessIds(), Business.class);
     }
 
     @Transactional
@@ -111,7 +99,7 @@ public class BusinessService {
 
         Business existingBusiness = findBusinessById(updatedBusiness.getId());
 
-        // TODO checkPermissions
+        checkPermission(userId, existingBusiness);
 
         List<String> oldTags = existingBusiness.getTags();
         List<String> newTags = updatedBusiness.getTags();
@@ -131,16 +119,14 @@ public class BusinessService {
         existingBusiness.setUpdatedBy(userId);
         existingBusiness.setUpdatedAt(LocalDateTime.now());
 
-        return saveBusiness(existingBusiness);
+        return contentRepository.save(existingBusiness);
     }
-
-
 
     public void deleteBusiness(String businessId) {
         UserProfile userProfile = userService.getUserProfile();
         Business business = findBusinessById(businessId);
 
-        // TODO checkPermissions
+        checkPermission(userProfile.getUserId(), business);
 
         if (business.getSubscriptionId() != null && !business.getSubscriptionId().isEmpty()) {
             stripeService.cancelSubscriptionAtPeriodEnd(business.getSubscriptionId());
@@ -183,6 +169,12 @@ public class BusinessService {
         } catch (Exception e) {
             logger.error("Error when trying to send contact form submission email", e);
             return false;
+        }
+    }
+
+    private void checkPermission(String userId, Business business) {
+        if (!business.getAdministrators().contains(userId)) {
+            throw new PermissionDeniedException("You do not have permission to access this resource");
         }
     }
 

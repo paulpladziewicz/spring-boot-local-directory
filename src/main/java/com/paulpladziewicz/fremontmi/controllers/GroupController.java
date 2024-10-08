@@ -46,7 +46,7 @@ public class GroupController {
     }
 
     @PostMapping("/create/group")
-    public String createGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+    public String createGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "groups/create-group";
         }
@@ -94,14 +94,14 @@ public class GroupController {
     }
 
     @PostMapping("/groups/join")
-    public String joinGroup(@RequestParam("slug") String slug, Model model) {
+    public String joinGroup(@RequestParam("slug") String slug) {
         groupService.joinGroup(slug);
 
         return "redirect:/groups/" + slug;
     }
 
     @PostMapping("/groups/leave")
-    public String leaveGroup(@RequestParam("slug") String slug, Model model) {
+    public String leaveGroup(@RequestParam("slug") String slug) {
         groupService.leaveGroup(slug);
 
         return "redirect:/groups/" + slug;
@@ -130,7 +130,7 @@ public class GroupController {
     }
 
     @PostMapping("/edit/group")
-    public String updateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+    public String updateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "groups/edit-group";
         }
@@ -143,7 +143,7 @@ public class GroupController {
     }
 
     @PostMapping("/delete/group")
-    public String deleteGroup(@NotNull @RequestParam("groupId") String groupId, RedirectAttributes redirectAttributes) {
+    public String deleteGroup(@NotNull @RequestParam("groupId") String groupId) {
         groupService.deleteGroup(groupId);
 
         return "redirect:/groups";
@@ -178,7 +178,7 @@ public class GroupController {
     }
 
     @PostMapping("/delete/group/announcement")
-    public String deleteGroupAnnouncement(@NotNull @RequestParam("groupId") String groupId, @NotNull @RequestParam("announcementId") String announcementId, Model model) {
+    public String deleteGroupAnnouncement(@NotNull @RequestParam("groupId") String groupId, @NotNull @RequestParam("announcementId") String announcementId) {
         groupService.deleteAnnouncement(groupId, Integer.parseInt(announcementId));
 
         return "groups/htmx/delete";

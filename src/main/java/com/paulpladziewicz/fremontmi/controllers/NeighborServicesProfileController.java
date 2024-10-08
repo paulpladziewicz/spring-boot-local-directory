@@ -45,13 +45,14 @@ public class NeighborServicesProfileController {
 
     @PostMapping("/setup/create/neighbor-services-profile")
     public String setupNeighborServicesProfileForm(@RequestParam("priceId") String priceId, RedirectAttributes redirectAttributes) {
-        Optional<NeighborServicesProfile> optionalNeighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
+//        Optional<NeighborServicesProfile> optionalNeighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
 
-        if (optionalNeighborServicesProfile.isPresent()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "You already have a NeighborServices™ Profile. You can only have one profile at a time.");
-            return "redirect:/my/neighbor-services/profile";
-
-        }
+        // TODO this needs to be resolved...
+//        if (optionalNeighborServicesProfile.isPresent()) {
+//            redirectAttributes.addFlashAttribute("errorMessage", "You already have a NeighborServices™ Profile. You can only have one profile at a time.");
+//            return "redirect:/my/neighbor-services/profile";
+//
+//        }
 
         redirectAttributes.addFlashAttribute("priceId", priceId);
         return "redirect:/create/neighbor-services-profile";
@@ -115,14 +116,7 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/my/neighbor-services/profile")
     public String viewMyNeighborServiceProfile(Model model) {
-        Optional<NeighborServicesProfile> optionalNeighborService = neighborServicesProfileService.findNeighborServiceProfileByUserId();
-
-        if (optionalNeighborService.isEmpty()) {
-            model.addAttribute("errorMessage", "You do not currently have a NeighborServices™ Profile. Please create one.");
-            return "redirect:/create/neighbor-services-profile/overview";
-        }
-
-        NeighborServicesProfile neighborServicesProfile = optionalNeighborService.get();
+        NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
 
         model.addAttribute("neighborServicesProfile", neighborServicesProfile);
         model.addAttribute("myProfile", true);

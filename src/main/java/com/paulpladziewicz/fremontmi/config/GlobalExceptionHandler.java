@@ -4,7 +4,6 @@ import com.paulpladziewicz.fremontmi.exceptions.StripeServiceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.http.HttpStatus;
@@ -36,7 +35,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataAccessException.class)
-    public Object handleDataAccessException(DataAccessException ex) {
+    public Object handleDataAccessException(DataAccessException e) {
         String errorMessage = "A database error occurred. Please try again later.";
 
         if (isApiCall()) {
@@ -48,7 +47,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(StripeServiceException.class)
-    public Object handleStripeServiceException(StripeServiceException ex) {
+    public Object handleStripeServiceException(StripeServiceException e) {
         String errorMessage = "An issue occurred with our payment service. Please try again later.";
 //        logger.error("StripeServiceException: ", ex);
 
@@ -61,7 +60,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public Object handleGeneralException(Exception ex) {
+    public Object handleGeneralException(Exception e) {
         String errorMessage = "An unexpected error occurred. Please try again later.";
 
         if (isApiCall()) {

@@ -2,7 +2,6 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.CustomResponse;
 import com.paulpladziewicz.fremontmi.models.InvoiceDTO;
-import com.paulpladziewicz.fremontmi.models.ServiceResponse;
 import com.paulpladziewicz.fremontmi.models.SubscriptionDTO;
 import com.paulpladziewicz.fremontmi.services.StripeService;
 import com.stripe.model.Invoice;
@@ -74,8 +73,8 @@ public class BillingController {
 
         dto.setId(subscription.getId());
 
-        String planName = subscription.getItems().getData().get(0).getPrice().getMetadata().get("displayName");
-        String price = subscription.getItems().getData().get(0).getPrice().getMetadata().get("displayPrice");
+        String planName = subscription.getItems().getData().getFirst().getPrice().getMetadata().get("displayName");
+        String price = subscription.getItems().getData().getFirst().getPrice().getMetadata().get("displayPrice");
 
         Long nextPaymentUnix = subscription.getCurrentPeriodEnd();
         String nextRecurringPayment = Instant.ofEpochSecond(nextPaymentUnix)
@@ -103,7 +102,7 @@ public class BillingController {
         dto.setId(invoice.getId());
 
         // Extract plan name from the line item description
-        String planName = invoice.getLines().getData().get(0).getDescription();
+        String planName = invoice.getLines().getData().getFirst().getDescription();
         dto.setPlanName(planName);
 
         // Amount paid (in smallest currency unit, e.g., cents)

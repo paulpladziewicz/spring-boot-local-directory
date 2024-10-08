@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Controller
 public class UserController {
@@ -111,14 +110,12 @@ public class UserController {
     }
 
     @GetMapping("/my/settings/subscriptions")
-    public String subscriptionSettings(Model model) {
-
+    public String subscriptionSettings() {
         return "settings/subscriptions";
     }
 
     @GetMapping("/my/settings/billing")
-    public String billingSettings(Model model) {
-
+    public String billingSettings() {
         return "settings/billing";
     }
 
