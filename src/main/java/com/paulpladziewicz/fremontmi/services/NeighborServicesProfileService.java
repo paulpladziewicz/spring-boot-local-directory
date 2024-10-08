@@ -50,14 +50,7 @@ public class NeighborServicesProfileService {
         List<String> validatedTags = tagService.addTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
         neighborServicesProfile.setTags(validatedTags);
 
-        ServiceResponse<Map<String, Object>> createSubscriptionResponse = stripeService.createSubscription(neighborServicesProfile.getPriceId());
-
-        if (createSubscriptionResponse.hasError()) {
-            logger.error("Error when trying to create a subscription");
-            return ServiceResponse.error(createSubscriptionResponse.errorCode());
-        }
-
-        Map<String, Object> stripeDetails = createSubscriptionResponse.value();
+        Map<String, Object> stripeDetails  = stripeService.createSubscription(neighborServicesProfile.getPriceId());
 
         neighborServicesProfile.setStripeDetails(stripeDetails);
 
@@ -115,73 +108,41 @@ public class NeighborServicesProfileService {
     }
 
     public ServiceResponse<NeighborServicesProfile> saveNeighborServiceProfile(NeighborServicesProfile neighborServicesProfile) {
-        try {
             NeighborServicesProfile savedNeighborServicesProfile = contentRepository.save(neighborServicesProfile);
             return ServiceResponse.value(savedNeighborServicesProfile);
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to save a NeighborServicesProfile", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to save a NeighborServicesProfile", e);
-            return ServiceResponse.error("unexpected_error");
-        }
     }
 
     public ServiceResponse<List<NeighborServicesProfile>> findAllActiveNeighborServices(String tag) {
-        try {
-            List<Content> contents;
+        List<Content> contents;
 
-            if (tag != null && !tag.isEmpty()) {
-                contents = contentRepository.findByTagAndType(tag, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
-            } else {
-                contents = contentRepository.findAllByType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
-            }
-
-            List<NeighborServicesProfile> profiles = contents.stream()
-                    .filter(content -> content instanceof NeighborServicesProfile) // Ensure type safety
-                    .map(content -> (NeighborServicesProfile) content)
-                    .collect(Collectors.toList());
-
-            return ServiceResponse.value(profiles);
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to find active neighbor services", e);
-            return ServiceResponse.error("database_access_exception");
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to find active neighbor services", e);
-            return ServiceResponse.error("unexpected_error");
+        if (tag != null && !tag.isEmpty()) {
+            contents = contentRepository.findByTagAndType(tag, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+        } else {
+            contents = contentRepository.findAllByType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
         }
+
+        List<NeighborServicesProfile> profiles = contents.stream()
+                .filter(content -> content instanceof NeighborServicesProfile) // Ensure type safety
+                .map(content -> (NeighborServicesProfile) content)
+                .collect(Collectors.toList());
+
+        return ServiceResponse.value(profiles);
     }
 
     public Optional<NeighborServicesProfile> findNeighborServiceProfileById(String neighborServiceProfileId) {
-        try {
             Optional<Content> optionalContent = contentRepository.findById(neighborServiceProfileId);
 
             return optionalContent
                     .filter(content -> content instanceof NeighborServicesProfile)
                     .map(content -> (NeighborServicesProfile) content);
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to find a neighbor service by id", e);
-            return Optional.empty();
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to find a neighbor service by id", e);
-            return Optional.empty();
-        }
     }
 
     public Optional<NeighborServicesProfile> findNeighborServiceProfileBySlug(String neighborServiceProfileSlug) {
-        try {
             Optional<Content> optionalContent = contentRepository.findBySlugAndType(neighborServiceProfileSlug, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
 
             return optionalContent
                     .filter(content -> content instanceof NeighborServicesProfile)
                     .map(content -> (NeighborServicesProfile) content);
-        } catch (DataAccessException e) {
-            logger.error("Database access error when trying to find a neighbor service by id", e);
-            return Optional.empty();
-        } catch (Exception e) {
-            logger.error("Unexpected error when trying to find a neighbor service by id", e);
-            return Optional.empty();
-        }
     }
 
     public Optional<NeighborServicesProfile> findNeighborServiceProfileByUserId() {

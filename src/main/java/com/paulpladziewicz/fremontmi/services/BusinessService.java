@@ -54,14 +54,7 @@ public class BusinessService {
         List<String> validatedTags = tagService.addTags(business.getTags(), ContentTypes.BUSINESS.getContentType());
         business.setTags(validatedTags);
 
-        ServiceResponse<Map<String, Object>> createSubscriptionResponse = stripeService.createSubscription(business.getPriceId());
-
-        if (createSubscriptionResponse.hasError()) {
-            logger.error("Error when trying to create a subscription");
-            return ServiceResponse.error(createSubscriptionResponse.errorCode());
-        }
-
-        Map<String, Object> stripeDetails = createSubscriptionResponse.value();
+        Map<String, Object> stripeDetails = stripeService.createSubscription(business.getPriceId());
 
         business.setStripeDetails(stripeDetails);
 

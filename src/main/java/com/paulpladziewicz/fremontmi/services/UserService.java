@@ -22,9 +22,7 @@ import java.util.UUID;
 
 @Service
 public class UserService {
-
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
@@ -39,35 +37,27 @@ public class UserService {
 
     @Transactional
     public ServiceResponse<Boolean> createUser(UserRegistrationDto userRegistrationDto) {
-        try {
-            if (userRepository.existsByUsername(userRegistrationDto.getUsername())) {
-                return logAndReturnError("Username already exists.", "username_exists");
-            }
-
-            if (userProfileRepository.existsByEmail(userRegistrationDto.getEmail())) {
-                return logAndReturnError("Email already exists.", "email_exists");
-            }
-
-            validatePasswords(userRegistrationDto.getPassword(), userRegistrationDto.getMatchingPassword());
-
-            UserRecord newUserRecord = createUserRecord(userRegistrationDto);
-            UserRecord savedUser = userRepository.save(newUserRecord);
-
-            UserProfile savedUserProfile = createUserProfile(userRegistrationDto, savedUser.getUserId());
-            userProfileRepository.save(savedUserProfile);
-
-            emailService.sendWelcomeEmailAsync(userRegistrationDto.getEmail(), savedUser.getConfirmationToken());
-
-            logger.info("Successfully created user {} with email {}", savedUser.getUsername(), savedUserProfile.getEmail());
-            return ServiceResponse.value(true);
-
-        } catch (ValidationException e) {
-            return logAndReturnError("Password mismatch.", "password_mismatch");
-        } catch (DataAccessException e) {
-            return logAndReturnError("Database error while creating user.", "database_error", e);
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error while creating user.", "unexpected_error", e);
+        if (userRepository.existsByUsername(userRegistrationDto.getUsername())) {
+            return logAndReturnError("Username already exists.", "username_exists");
         }
+
+        if (userProfileRepository.existsByEmail(userRegistrationDto.getEmail())) {
+            return logAndReturnError("Email already exists.", "email_exists");
+        }
+
+        // TODO change exception handling here
+        validatePasswords(userRegistrationDto.getPassword(), userRegistrationDto.getMatchingPassword());
+
+        UserRecord newUserRecord = createUserRecord(userRegistrationDto);
+        UserRecord savedUser = userRepository.save(newUserRecord);
+
+        UserProfile savedUserProfile = createUserProfile(userRegistrationDto, savedUser.getUserId());
+        userProfileRepository.save(savedUserProfile);
+
+        emailService.sendWelcomeEmailAsync(userRegistrationDto.getEmail(), savedUser.getConfirmationToken());
+
+        logger.info("Successfully created user {} with email {}", savedUser.getUsername(), savedUserProfile.getEmail());
+        return ServiceResponse.value(true);
     }
 
     public String getUserId() {
@@ -77,7 +67,6 @@ public class UserService {
             return customUserDetails.getUserId();
         }
 
-        logger.error("Failed to retrieve userId. User is not authenticated.");
         throw new UserNotAuthenticatedException("User is not authenticated.");
     }
 
@@ -183,11 +172,6 @@ public class UserService {
 
     private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
         logger.error(message);
-        return ServiceResponse.error(errorCode);
-    }
-
-    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode, Exception e) {
-        logger.error(message, e);
         return ServiceResponse.error(errorCode);
     }
 

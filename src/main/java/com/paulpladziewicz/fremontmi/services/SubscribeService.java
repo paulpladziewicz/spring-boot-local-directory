@@ -22,36 +22,18 @@ public class SubscribeService {
     }
 
     public ServiceResponse<Void> subscribe(String email) {
-        try {
-            Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmailIgnoreCase(email);
+        Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmailIgnoreCase(email);
 
-            if (existingSubscriber.isPresent()) {
-                logger.info("Subscriber with email {} already exists.", email);
-                return ServiceResponse.value(null); // No action needed, return success with no value
-            }
-
-            Subscriber subscriber = new Subscriber();
-            subscriber.setEmail(email);
-            subscriberRepository.save(subscriber);
-
-            logger.info("Successfully subscribed email: {}", email);
-            return ServiceResponse.value(null); // Successfully subscribed
-
-        } catch (DataAccessException e) {
-            return logAndReturnError("Database error occurred while subscribing email: " + email, "database_error", e);
-
-        } catch (Exception e) {
-            return logAndReturnError("Unexpected error occurred while subscribing email: " + email, "unexpected_error", e);
+        if (existingSubscriber.isPresent()) {
+            logger.info("Subscriber with email {} already exists.", email);
+            return ServiceResponse.value(null); // No action needed, return success with no value
         }
-    }
 
-    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode, Exception e) {
-        logger.error(message, e);
-        return ServiceResponse.error(errorCode);
-    }
+        Subscriber subscriber = new Subscriber();
+        subscriber.setEmail(email);
+        subscriberRepository.save(subscriber);
 
-    private <T> ServiceResponse<T> logAndReturnError(String message, String errorCode) {
-        logger.error(message);
-        return ServiceResponse.error(errorCode);
+        return ServiceResponse.value(null);
+
     }
 }

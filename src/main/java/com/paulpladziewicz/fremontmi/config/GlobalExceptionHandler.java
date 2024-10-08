@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.config;
 
+import com.paulpladziewicz.fremontmi.exceptions.StripeServiceException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -43,6 +44,19 @@ public class GlobalExceptionHandler {
         } else {
             request.setAttribute("errorMessage", errorMessage);
             return "error/database-error";
+        }
+    }
+
+    @ExceptionHandler(StripeServiceException.class)
+    public Object handleStripeServiceException(StripeServiceException ex) {
+        String errorMessage = "An issue occurred with our payment service. Please try again later.";
+//        logger.error("StripeServiceException: ", ex);
+
+        if (isApiCall()) {
+            return new ResponseEntity<>(errorMessage, HttpStatus.SERVICE_UNAVAILABLE);
+        } else {
+            request.setAttribute("errorMessage", errorMessage);
+            return "error/payment-error";
         }
     }
 

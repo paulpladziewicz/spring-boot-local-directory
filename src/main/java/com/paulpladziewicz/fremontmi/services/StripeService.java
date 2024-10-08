@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.exceptions.StripeServiceException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import com.stripe.Stripe;
@@ -50,68 +51,42 @@ public class StripeService {
         Stripe.apiKey = stripeApiKey;
     }
 
-    static class CreateCustomerRequest {
-        public String email;
-    }
-
-    static class CreateSubscriptionRequest {
-        public String priceId;
-    }
-
-    static class CancelSubscriptionRequest {
-        public String subscriptionId;
-    }
-
-    public ServiceResponse<String> getCustomerId() {
+    public String getCustomerId() {
         UserProfile userProfile = userService.getUserProfile();
 
         if (userProfile.getStripeCustomerId() != null) {
-            return ServiceResponse.value(userProfile.getStripeCustomerId());
+            return userProfile.getStripeCustomerId();
         }
 
-        ServiceResponse<String> serviceResponse = createCustomer(userProfile);
-
-        if (serviceResponse.hasError()) {
-            return serviceResponse;
-        }
-
-        String customerId = serviceResponse.value();
-
-        return ServiceResponse.value(customerId);
+        return createCustomer(userProfile);
     }
 
-    public ServiceResponse<String> createCustomer(UserProfile userProfile) {
-        Customer customer = null;
+    public String createCustomer(UserProfile userProfile) {
         try {
             CustomerCreateParams params = CustomerCreateParams.builder()
                     .setName(userProfile.getFirstName() + ' ' + userProfile.getLastName())
                     .setEmail(userProfile.getEmail())
                     .build();
-            customer = Customer.create(params);
+
+            Customer customer = Customer.create(params);
+
+            if (customer == null) {
+                throw new StripeServiceException("Failed to create a Stripe customer. Stripe returned null.");
+            }
+
+            userProfile.setStripeCustomerId(customer.getId());
+            userService.saveUserProfile(userProfile);
+
+            return customer.getId();
+
         } catch (StripeException e) {
             logger.error("Error creating Stripe customer: ", e);
-            return ServiceResponse.error("STRIPE_CUSTOMER_CREATION_FAILED");
+            throw new StripeServiceException("Error occurred while creating a Stripe customer.", e);
         }
-
-        if (customer == null) {
-            return ServiceResponse.error("STRIPE_CUSTOMER_CREATION_FAILED");
-        }
-
-        userProfile.setStripeCustomerId(customer.getId());
-
-        userService.saveUserProfile(userProfile);
-
-        return ServiceResponse.value(customer.getId());
     }
 
-    public ServiceResponse<Map<String, Object>> createSubscription(String priceId) {
-        ServiceResponse<String> serviceResponse = getCustomerId();
-
-        if (serviceResponse.hasError()) {
-            return ServiceResponse.error(serviceResponse.errorCode());
-        }
-
-        String customerId = serviceResponse.value();
+    public Map<String, Object> createSubscription(String priceId) {
+        String customerId = getCustomerId(); // This method should throw an exception if the customer ID cannot be found
 
         SubscriptionCreateParams subCreateParams = SubscriptionCreateParams.builder()
                 .setCustomer(customerId)
@@ -136,7 +111,7 @@ public class StripeService {
 
             if (clientSecret == null) {
                 logger.error("ClientSecret is null for subscription: {}", subscription.getId());
-                return ServiceResponse.error("payment_intent_error");
+                throw new StripeServiceException("Failed to retrieve client secret for payment intent.");
             }
 
             Map<String, Object> subscriptionData = new HashMap<>();
@@ -144,7 +119,7 @@ public class StripeService {
             subscriptionData.put("clientSecret", clientSecret);
 
             if (subscription.getItems() != null && !subscription.getItems().getData().isEmpty()) {
-                SubscriptionItem subscriptionItem = subscription.getItems().getData().getFirst(); // First item
+                SubscriptionItem subscriptionItem = subscription.getItems().getData().getFirst();
 
                 Price price = subscriptionItem.getPrice();
 
@@ -168,23 +143,12 @@ public class StripeService {
                 logger.warn("Latest invoice is null for subscription: {}", subscription.getId());
             }
 
-            // Compute the time remaining until the subscription auto-cancels
-            // We can use the billing_cycle_anchor to understand the time left
-//            long billingCycleAnchor = subscription.getBillingCycleAnchor();
-//            long currentTimestamp = System.currentTimeMillis() / 1000; // Current time in seconds
-//            long timeUntilBillingCycleAnchor = billingCycleAnchor - currentTimestamp;
+            // TODO store when a new subscription should be requested
 
-            // You may decide to consider subscriptions "too close" if they're within a certain time frame (e.g., 48 hours)
-//            long thresholdTimeInSeconds = 48 * 3600; // 48 hours in seconds
-//            boolean isTooCloseToAutoCancel = timeUntilBillingCycleAnchor <= thresholdTimeInSeconds;
-
-//            subscriptionData.put("timeUntilBillingCycleAnchor", timeUntilBillingCycleAnchor);
-//            subscriptionData.put("isTooCloseToAutoCancel", isTooCloseToAutoCancel);
-
-            return ServiceResponse.value(subscriptionData);
+            return subscriptionData;
         } catch (StripeException e) {
             logger.error("Failed to create subscription due to a Stripe exception", e);
-            return ServiceResponse.error("stripe_error");
+            throw new StripeServiceException("Failed to create subscription with Stripe.", e);
         }
     }
 
@@ -439,13 +403,8 @@ public class StripeService {
 
                 if (isTooCloseToAutoCancel) {
                     String priceId = (String) stripeDetails.get("priceId");
-                    ServiceResponse<Map<String, Object>> newSubscriptionResponse = createSubscription(priceId);
+                    Map<String, Object> newSubscriptionData = createSubscription(priceId);
 
-                    if (newSubscriptionResponse.hasError()) {
-                        return ServiceResponse.error(newSubscriptionResponse.errorCode());
-                    }
-
-                    Map<String, Object> newSubscriptionData = newSubscriptionResponse.value();
                     stripeDetails.put("subscriptionId", newSubscriptionData.get("subscriptionId"));
                     stripeDetails.put("clientSecret", newSubscriptionData.get("clientSecret"));
                     stripeDetails.put("displayName", newSubscriptionData.get("displayName"));
