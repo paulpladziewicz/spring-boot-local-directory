@@ -21,4 +21,9 @@ public class ArticleController {
         model.addAttribute("mapboxSecret", mapboxSecret);
         return "articles/parks";
     }
+
+    @GetMapping("/articles/prepare-to-vote")
+    public String registerToVote(Model model) {
+        return "articles/prepare-to-vote";
+    }
 }
