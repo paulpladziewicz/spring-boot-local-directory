@@ -1,6 +1,11 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - Home')}"></head>
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>FremontMI - Local Community Platform</title>
+    <meta name="description" content="A platform where every feature and interaction is designed with Fremont, MI in mind, ensuring that local groups, events, businesses, and NeighborServices™ are easily accessible and celebrated." />
+    <meta name="keywords" content="Fremont, Michigan, community platform, local events, local groups, local businesses, NeighborServices" />
+</head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 

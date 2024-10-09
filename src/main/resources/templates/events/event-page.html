@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
-    <title>Event - [[${event.name}]] - FremontMI</title>
+    <title>[[${event.name}]] - Event in Fremont, MI</title>
     <meta name="description" th:content="${#strings.length(event.description) > 160 ? #strings.substring(event.description, 0, 157) + '...' : event.description}" />
     <th:block th:if="${event.tags != null and #lists.size(event.tags) > 0}">
         <meta name="keywords" th:content="${#strings.arrayJoin(event.tags, ', ')}" />
