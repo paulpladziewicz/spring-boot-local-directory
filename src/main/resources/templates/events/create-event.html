@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('Create New Event')}">
-    <title>Create Group</title>
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>Create Event in Fremont, MI</title>
+    <meta name="description" content="Create a new event that is specific for Fremont, MI." />
+    <link th:href="@{/css/flatpickr.min.css}" rel="stylesheet">
 </head>
 <body>
 <header th:replace="~{partials/navbar}"></header>
@@ -11,18 +14,20 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-10 col-lg-8">
                 <h1>Create New Event</h1>
+                <p>Please only create events that will take place in Fremont, MI. Content on this platform that does not relate to Fremont, Michigan can be removed at any time.</p>
+
                 <form id="create-event-form" th:action="@{/create/event}" th:object="${event}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
 
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="name">Event Name</label>
                         <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter event name">
-                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="alert alert-danger"></div>
+                        <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="mt-1 text-danger"></p>
                     </div>
 
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="description">Description</label>
                         <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Event description"></textarea>
-                        <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="alert alert-danger"></div>
+                        <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></p>
                     </div>
 
                     <div th:replace="~{partials/tag-input}"></div>
@@ -30,12 +35,13 @@
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="locationName">Location Name</label>
                         <input type="text" class="form-control" id="locationName" th:field="*{locationName}" placeholder="Enter location name">
-                        <div th:if="${#fields.hasErrors('locationName')}" th:errors="*{locationName}" class="alert alert-danger"></div>
+                        <p th:if="${#fields.hasErrors('locationName')}" th:errors="*{locationName}" class="mt-1 text-danger"></p>
                     </div>
 
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="address">Address</label>
                         <input type="text" class="form-control" id="address" th:field="*{address}" placeholder="Enter address">
+                        <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="mt-1 text-danger"></p>
                     </div>
 
                     <div class="mt-4">
@@ -44,9 +50,7 @@
                             <div th:replace="~{events/htmx/adjust-day-events :: dayEvents}"></div>
                         </div>
                     </div>
-
-
-                    <p th:if="${errorMessage}" th:text="${errorMessage}" class="text-danger my-3"></p>
+                    <p th:if="${#fields.hasErrors('days')}" th:errors="*{days}" class="mt-1 text-danger"></p>
 
                     <div class="mt-3">
                         <button class="btn btn-primary" type="submit">Create Event</button>
@@ -56,6 +60,10 @@
         </div>
     </div>
 </main>
+
+
+<section class="d-md-none py-5"></section>
+<section class="d-md-none py-4"></section>
 
 <script>
     function reinitializeFlatpickr() {
@@ -83,6 +91,5 @@
 
 <script th:src="@{/js/flatpickr.min.js}"></script>
 <script th:replace="~{partials/theme-js}"></script>
-<footer th:replace="~{partials/footer}"></footer>
 </body>
 </html>

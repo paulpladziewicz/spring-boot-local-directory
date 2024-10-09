@@ -3,7 +3,7 @@
     <div class="form-group position-relative">
         <label for="tag-input" class="mb-1 form-label opacity-75 fw-medium fs-base">Tags</label>
         <div class="input-group">
-            <input type="text" id="tag-input" placeholder="Type tag" class="form-control" autocomplete="off" />
+            <input type="text" id="tag-input" placeholder="Type tag" class="form-control" autocomplete="off" th:value="${tagsAsString}" />
             <button class="btn btn-primary" type="button" id="add-tag-button">Add</button>
         </div>
 
@@ -30,15 +30,13 @@
             let canonicalTags = tags.map(formatCanonicalTag);
             const tagMax = 5;
 
-            // Display the initial tags
             tags.forEach(addTagPill);
+            tagInput.value = '';
 
-            // Event listener for the "Add" button
             addTagButton.addEventListener('click', function () {
                 addTagFromInput();
             });
 
-            // Event listener for pressing Enter in the input field
             tagInput.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();  // Prevent form submission
@@ -53,14 +51,12 @@
                 if (inputValue && !canonicalTags.includes(canonicalTag) && tags.length < tagMax) {
                     const formattedTag = formatTag(inputValue);
                     addTag(formattedTag, canonicalTag);
-                }
 
-                // Clear input field after adding the tag
-                tagInput.value = '';
+                    tagInput.value = '';
+                }
             }
 
             function formatTag(tag) {
-                // Remove invalid characters and properly format tag
                 const cleanedTag = tag.replace(/[^a-zA-Z\s\-]/g, '').trim();
                 return cleanedTag.split('-').map(part => {
                     return part.split(' ').map(word => {
@@ -78,7 +74,6 @@
                 canonicalTags.push(canonicalTag);
                 addTagPill(tag);
 
-                // Disable input and button if max tags reached
                 if (tags.length >= tagMax) {
                     tagInput.disabled = true;
                     addTagButton.disabled = true;
@@ -91,11 +86,9 @@
                 const tagPill = document.createElement('span');
                 tagPill.className = 'badge bg-primary bg-opacity-10 text-primary fs-sm me-1 mb-1 d-inline-flex align-items-center';
 
-                // Add tag text
                 const tagText = document.createElement('span');
                 tagText.textContent = tag;
 
-                // Add remove button
                 const removeButton = document.createElement('button');
                 removeButton.type = 'button';
                 removeButton.className = 'btn-close btn-sm ms-2';
@@ -122,7 +115,6 @@
 
                 updateHiddenInput();
 
-                // Re-enable input and button if the number of tags is less than the max
                 if (tags.length < tagMax) {
                     tagInput.disabled = false;
                     addTagButton.disabled = false;

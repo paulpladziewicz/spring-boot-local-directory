@@ -51,10 +51,17 @@ public class EventController {
     }
 
     @PostMapping("/create/event")
-    public String createEvent(@Valid @ModelAttribute("event") Event event, BindingResult result) {
+    public String createEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
         if (result.hasErrors()) {
+            model.addAttribute("tagsAsString", String.join(",", event.getTags()));
             return "events/create-event";
         }
+
+        if (event.getDays() == null || event.getDays().isEmpty()) {
+            result.rejectValue("days", "error.event", "Please provide at least one date and time for the event.");
+            return "events/create-event";
+        }
+
 
         Event savedEvent = eventService.createEvent(event);
 
@@ -130,8 +137,9 @@ public class EventController {
     }
 
     @PostMapping("/edit/event")
-    public String updateEvent(@Valid @ModelAttribute("event") Event event, BindingResult result) {
+    public String updateEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
         if (result.hasErrors()) {
+            model.addAttribute("tagsAsString", String.join(",", event.getTags()));
             return "events/edit-event";
         }
 

@@ -9,10 +9,11 @@ import java.time.LocalDateTime;
 @Data
 public class DayEvent {
 
-    @NotNull(message = "Event start time cannot be null")
+    @NotNull(message = "Please provide a start date and time")
     @DateTimeFormat(pattern = "yyyy-MM-dd h:mm a")
     private LocalDateTime startTime;
 
+    @NotNull(message = "Please provide an end date and time")
     @DateTimeFormat(pattern = "yyyy-MM-dd h:mm a")
     private LocalDateTime endTime;
 }
