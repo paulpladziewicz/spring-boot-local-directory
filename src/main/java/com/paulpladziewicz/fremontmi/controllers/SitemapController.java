@@ -31,6 +31,9 @@ public class SitemapController {
         // Main Pages
         writer.println("<url><loc>https://fremontmi.com/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>");
 
+        // Articles
+//        writer.println("<url><loc>https://fremontmi.com/articles/parks</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>");
+
         // Content entities
         for (String url : urls) {
             writer.println("<url>");

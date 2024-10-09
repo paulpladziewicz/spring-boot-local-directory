@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>Articles - FremontMI</title>
+    <meta name="description" content="Browse articles about parks, events, and more in Fremont, MI." />
+</head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+<main class="bg-secondary pt-4 pb-5">
+
+    <div class="container">
+
+        <div class="d-none d-sm-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-3 mb-0">Articles</h1>
+            <div>
+                <a href="/my/articles" class="btn btn-link fw-semibold fs-lg text-primary">My Articles</a>
+                <a href="/create/article" class="btn btn-primary">Create</a>
+            </div>
+        </div>
+        <div class="d-sm-none mb-4">
+            <div class="d-flex justify-content-end">
+                <a href="/create/article" class="btn btn-primary fw-semibold py-2 px-3">Create</a>
+            </div>
+            <h1 class="display-3 mb-0">Articles</h1>
+            <a href="/my/articles" class="btn btn-link fw-semibold p-0">My Articles</a>
+        </div>
+
+        <div th:if="${popularTags.size() > 0}" class="mb-4">
+            <div class="d-flex flex-wrap">
+                <a th:each="tag : ${popularTags}"
+                   th:href="'/articles?tag=' + ${tag.name}"
+                   th:classappend="${selectedTag == tag.name} ? 'badge bg-primary bg-opacity-10 text-primary fs-sm m-1' : 'badge bg-secondary fs-sm m-1'"
+                   th:text="${tag.name}">
+                </a>
+            </div>
+            <div th:if="${selectedTag}">
+                <a class="text-dark opacity-50 btn btn-link p-0" href="/articles">Clear Filter</a>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div th:if="${#lists.isEmpty(articles)}" class="my-4">
+                <div>
+                    There are no articles available at the moment.
+                </div>
+            </div>
+
+            <div th:each="article : ${articles}" class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="h3 mb-1" th:text="${article.title}">Article Title</h4>
+                        <p class="text-muted fw-semibold mb-2"
+                           th:text="${#temporals.format(article.publishedDate, 'MMMM dd, yyyy')}">
+                            Published Date
+                        </p>
+
+                        <p th:text="${#strings.length(article.summary) > 120 ? #strings.substring(article.summary, 0, 120) + '...' : article.summary}">
+                            Article Summary
+                        </p>
+                        <a th:href="'/articles/' + ${article.slug}" class="btn btn-lg btn-link p-0">Read Article<i class="ai-arrow-right ms-2"></i></a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+<script th:src="@{/js/theme.min.js}" th:
