@@ -13,29 +13,23 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.text.Normalizer;
 
 @Service
 public class BusinessService {
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessService.class);
-
     private final ContentRepository contentRepository;
-
     private final UserService userService;
-
     private final StripeService stripeService;
-
+    private final SlugService slugService;
     private final TagService tagService;
-
     private final EmailService emailService;
 
-    public BusinessService(ContentRepository contentRepository, UserService userService, StripeService stripeService, TagService tagService, EmailService emailService) {
+    public BusinessService(ContentRepository contentRepository, UserService userService, StripeService stripeService, SlugService slugService, TagService tagService, EmailService emailService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.stripeService = stripeService;
+        this.slugService = slugService;
         this.tagService = tagService;
         this.emailService = emailService;
     }
@@ -44,7 +38,7 @@ public class BusinessService {
         UserProfile userProfile = userService.getUserProfile();
 
         business.setType(ContentTypes.BUSINESS.getContentType());
-        business.setSlug(createUniqueSlug(business.getName()));
+        business.setSlug(slugService.createUniqueSlug(business.getName(), ContentTypes.BUSINESS.getContentType()));
         business.setPathname("/businesses/" + business.getSlug());
         business.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
         business.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
@@ -108,7 +102,7 @@ public class BusinessService {
         }
 
         if (!existingBusiness.getName().equals(updatedBusiness.getName())) {
-            String newSlug = createUniqueSlug(updatedBusiness.getName());
+            String newSlug = slugService.createUniqueSlug(updatedBusiness.getName(), ContentTypes.BUSINESS.getContentType());
             existingBusiness.setSlug(newSlug);
             existingBusiness.setPathname("/businesses/" + newSlug);
         }
@@ -174,47 +168,6 @@ public class BusinessService {
     private void checkPermission(String userId, Business business) {
         if (!business.getAdministrators().contains(userId)) {
             throw new PermissionDeniedException("You do not have permission to access this resource");
-        }
-    }
-
-    public String createUniqueSlug(String name) {
-        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
-        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-                .toLowerCase()
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-|-$", "");
-
-        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.BUSINESS.getContentType());
-
-        if (matchingSlugs.isEmpty()) {
-            return baseSlug;
-        }
-
-        Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
-
-        int maxNumber = 0;
-        boolean baseSlugExists = false;
-
-        for (Content content : matchingSlugs) {
-            String slug = content.getSlug();
-
-            if (slug.equals(baseSlug)) {
-                baseSlugExists = true;
-            }
-
-            Matcher matcher = pattern.matcher(slug);
-            if (matcher.find()) {
-                int number = Integer.parseInt(matcher.group(1));
-                maxNumber = Math.max(maxNumber, number);
-            }
-        }
-
-        if (baseSlugExists) {
-            return baseSlug + "-" + (maxNumber + 1);
-        } else if (maxNumber > 0) {
-            return baseSlug + "-" + (maxNumber + 1);
-        } else {
-            return baseSlug;
         }
     }
 }

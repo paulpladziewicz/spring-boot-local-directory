@@ -10,29 +10,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class GroupService {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
-
     private final ContentRepository contentRepository;
-
     private final UserService userService;
-
+    private final SlugService slugService;
     private final TagService tagService;
-
     private final EmailService emailService;
 
-    public GroupService(ContentRepository contentRepository, UserService userService, TagService tagService, EmailService emailService) {
+    public GroupService(ContentRepository contentRepository, UserService userService, SlugService slugService, TagService tagService, EmailService emailService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
+        this.slugService = slugService;
         this.tagService = tagService;
         this.emailService = emailService;
     }
@@ -44,7 +39,7 @@ public class GroupService {
         group.setMembers(List.of(userProfile.getUserId()));
         group.setAdministrators(List.of(userProfile.getUserId()));
         group.setType(ContentTypes.GROUP.getContentType());
-        group.setSlug(createUniqueSlug(group.getName()));
+        group.setSlug(slugService.createUniqueSlug(group.getName(), ContentTypes.GROUP.getContentType()));
         group.setPathname("/groups/" + group.getSlug());
         group.setCreatedBy(userProfile.getUserId());
 
@@ -83,27 +78,27 @@ public class GroupService {
     }
 
     @Transactional
-    public Group updateGroup(Group group) {
+    public Group updateGroup(Group updatedGroup) {
         UserProfile userProfile = userService.getUserProfile();
 
-        Group existingGroup = findGroupById(group.getId());
+        Group existingGroup = findGroupById(updatedGroup.getId());
 
         if (!hasPermission(userProfile, existingGroup)) {
             throw new PermissionDeniedException("User doesn't have permission to update group.");
         }
 
         List<String> existingTags = existingGroup.getTags();
-        List<String> newTags = group.getTags();
+        List<String> newTags = updatedGroup.getTags();
         tagService.updateTags(newTags, existingTags, ContentTypes.GROUP.getContentType());
 
-        if (!existingGroup.getName().equals(group.getName())) {
-            String newSlug = createUniqueSlug(group.getName());
+        if (!existingGroup.getName().equals(updatedGroup.getName())) {
+            String newSlug = slugService.createUniqueSlug(updatedGroup.getName(), ContentTypes.GROUP.getContentType());
             existingGroup.setSlug(newSlug);
             existingGroup.setPathname("/groups/" + newSlug);
         }
 
-        existingGroup.setName(group.getName());
-        existingGroup.setDescription(group.getDescription());
+        existingGroup.setName(updatedGroup.getName());
+        existingGroup.setDescription(updatedGroup.getDescription());
         existingGroup.setTags(newTags);
 
         return contentRepository.save(existingGroup);
@@ -253,48 +248,6 @@ public class GroupService {
         }
 
         throw new PermissionDeniedException("User doesn't have permission to email the group.");
-    }
-
-
-    public String createUniqueSlug(String name) {
-        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
-        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-                .toLowerCase()
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-|-$", "");
-
-        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.GROUP.getContentType());
-
-        if (matchingSlugs.isEmpty()) {
-            return baseSlug;
-        }
-
-        Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
-
-        int maxNumber = 0;
-        boolean baseSlugExists = false;
-
-        for (Content content : matchingSlugs) {
-            String slug = content.getSlug();
-
-            if (slug.equals(baseSlug)) {
-                baseSlugExists = true;
-            }
-
-            Matcher matcher = pattern.matcher(slug);
-            if (matcher.find()) {
-                int number = Integer.parseInt(matcher.group(1));
-                maxNumber = Math.max(maxNumber, number);
-            }
-        }
-
-        if (baseSlugExists) {
-            return baseSlug + "-" + (maxNumber + 1);
-        } else if (maxNumber > 0) {
-            return baseSlug + "-" + (maxNumber + 1);
-        } else {
-            return baseSlug;
-        }
     }
 }
 

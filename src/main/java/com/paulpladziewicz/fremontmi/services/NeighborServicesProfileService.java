@@ -9,31 +9,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class NeighborServicesProfileService {
+
     private static final Logger logger = LoggerFactory.getLogger(NeighborServicesProfileService.class);
-
     private final ContentRepository contentRepository;
-
     private final UserService userService;
-
     private final StripeService stripeService;
-
     private final TagService tagService;
-
+    private final SlugService slugService;
     private final EmailService emailService;
 
-    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, StripeService stripeService, TagService tagService, EmailService emailService) {
+    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, StripeService stripeService, SlugService slugService, TagService tagService, EmailService emailService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.stripeService = stripeService;
         this.tagService = tagService;
+        this.slugService = slugService;
         this.emailService = emailService;
     }
 
@@ -41,7 +36,7 @@ public class NeighborServicesProfileService {
         UserProfile userProfile = userService.getUserProfile();
 
         neighborServicesProfile.setType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
-        neighborServicesProfile.setSlug(createUniqueSlug(neighborServicesProfile.getName()));
+        neighborServicesProfile.setSlug(slugService.createUniqueSlug(neighborServicesProfile.getName(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType()));
         neighborServicesProfile.setPathname("/neighbor-services/" + neighborServicesProfile.getSlug());
         neighborServicesProfile.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
         neighborServicesProfile.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
@@ -83,27 +78,27 @@ public class NeighborServicesProfileService {
     }
 
     @Transactional
-    public NeighborServicesProfile updateNeighborServiceProfile(NeighborServicesProfile neighborServiceProfile) {
+    public NeighborServicesProfile updateNeighborServiceProfile(NeighborServicesProfile updatedProfile) {
         String userId = userService.getUserId();
 
-        NeighborServicesProfile existingProfile = findNeighborServiceProfileById(neighborServiceProfile.getId());
+        NeighborServicesProfile existingProfile = findNeighborServiceProfileById(updatedProfile.getId());
 
         checkPermission(userId, existingProfile);
 
         List<String> oldTags = existingProfile.getTags();
-        List<String> newTags = neighborServiceProfile.getTags();
+        List<String> newTags = updatedProfile.getTags();
 
         if (newTags != null) {
             tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
         }
 
-        if (!existingProfile.getName().equals(neighborServiceProfile.getName())) {
-            String newSlug = createUniqueSlug(neighborServiceProfile.getName());
+        if (!existingProfile.getName().equals(updatedProfile.getName())) {
+            String newSlug = slugService.createUniqueSlug(updatedProfile.getName(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
             existingProfile.setSlug(newSlug);
             existingProfile.setPathname("/neighbor-services/" + newSlug);
         }
 
-        updateExistingNeighborServiceProfile(existingProfile, neighborServiceProfile);
+        updateExistingNeighborServiceProfile(existingProfile, updatedProfile);
 
         return contentRepository.save(existingProfile);
     }
@@ -152,45 +147,5 @@ public class NeighborServicesProfileService {
         NeighborServicesProfile neighborServicesProfile = findNeighborServiceProfileBySlug(slug);
 
         emailService.sendContactNeighborServiceProfileEmail(neighborServicesProfile.getEmail(), name, email, message);
-    }
-
-    public String createUniqueSlug(String name) {
-        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
-        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-                .toLowerCase()
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-|-$", "");
-        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
-
-        if (matchingSlugs.isEmpty()) {
-            return baseSlug;
-        }
-
-        Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
-
-        int maxNumber = 0;
-        boolean baseSlugExists = false;
-
-        for (Content content : matchingSlugs) {
-            String slug = content.getSlug();
-
-            if (slug.equals(baseSlug)) {
-                baseSlugExists = true;
-            }
-
-            Matcher matcher = pattern.matcher(slug);
-            if (matcher.find()) {
-                int number = Integer.parseInt(matcher.group(1));
-                maxNumber = Math.max(maxNumber, number);
-            }
-        }
-
-        if (baseSlugExists) {
-            return baseSlug + "-" + (maxNumber + 1);
-        } else if (maxNumber > 0) {
-            return baseSlug + "-" + (maxNumber + 1);
-        } else {
-            return baseSlug;
-        }
     }
 }

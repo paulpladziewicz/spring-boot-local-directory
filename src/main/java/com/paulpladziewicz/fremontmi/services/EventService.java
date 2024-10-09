@@ -11,13 +11,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.Normalizer;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,17 +22,16 @@ import java.util.stream.Stream;
 public class EventService {
 
     private static final Logger logger = LoggerFactory.getLogger(EventService.class);
-
     private final ContentRepository contentRepository;
-
     private final UserService userService;
-
     private final TagService tagService;
+    private final SlugService slugService;
 
-    public EventService(ContentRepository contentRepository, UserService userService, TagService tagService) {
+    public EventService(ContentRepository contentRepository, UserService userService, TagService tagService, SlugService slugService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.tagService = tagService;
+        this.slugService = slugService;
     }
 
     @Transactional
@@ -48,7 +44,7 @@ public class EventService {
         event.setCreatedBy(userId);
         populateFormattedTimes(event);
         event.setType(ContentTypes.EVENT.getContentType());
-        event.setSlug(createUniqueSlug(event.getName()));
+        event.setSlug(slugService.createUniqueSlug(event.getName(), ContentTypes.EVENT.getContentType()));
         event.setPathname("/events/" + event.getSlug());
 
         List<String> validatedTags = tagService.addTags(event.getTags(), ContentTypes.EVENT.getContentType());
@@ -111,7 +107,7 @@ public class EventService {
         }
 
         if (!existingEvent.getName().equals(updatedEvent.getName())) {
-            String newSlug = createUniqueSlug(updatedEvent.getName());
+            String newSlug = slugService.createUniqueSlug(updatedEvent.getName(), ContentTypes.EVENT.getContentType());
             existingEvent.setSlug(newSlug);
             existingEvent.setPathname("/events/" + newSlug);
         }
@@ -225,45 +221,5 @@ public class EventService {
             case 3 -> "rd";
             default -> "th";
         };
-    }
-
-    public String createUniqueSlug(String name) {
-        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
-        String baseSlug = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-                .toLowerCase()
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-|-$", "");
-
-        List<Content> matchingSlugs = contentRepository.findBySlugRegexAndType("^" + baseSlug + "(-\\d+)?$", ContentTypes.EVENT.getContentType());
-
-        return generateSlugFromMatches(baseSlug, matchingSlugs);
-    }
-
-    private String generateSlugFromMatches(String baseSlug, List<Content> matchingSlugs) {
-        if (matchingSlugs.isEmpty()) {
-            return baseSlug;
-        }
-
-        Pattern pattern = Pattern.compile(Pattern.quote(baseSlug) + "-(\\d+)$");
-        int maxNumber = 0;
-        boolean baseSlugExists = false;
-
-        for (Content content : matchingSlugs) {
-            String slug = content.getSlug();
-            if (slug.equals(baseSlug)) {
-                baseSlugExists = true;
-            }
-
-            Matcher matcher = pattern.matcher(slug);
-            if (matcher.find()) {
-                maxNumber = Math.max(maxNumber, Integer.parseInt(matcher.group(1)));
-            }
-        }
-
-        if (baseSlugExists || maxNumber > 0) {
-            return baseSlug + "-" + (maxNumber + 1);
-        }
-
-        return baseSlug;
     }
 }
