@@ -37,9 +37,6 @@ public class StripeService {
     @Value("${stripe.secret.key}")
     private String stripeApiKey;
 
-    @Value("${stripe.publishable.key}")
-    private String stripePublishableKey;
-
     public StripeService(UserService userService, EmailService emailService, ContentRepository contentRepository) {
         this.userService = userService;
         this.emailService = emailService;
