@@ -46,8 +46,9 @@ public class GroupController {
     }
 
     @PostMapping("/create/group")
-    public String createGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, RedirectAttributes redirectAttributes) {
+    public String createGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
+            model.addAttribute("tagsAsString", String.join(",", group.getTags()));
             return "groups/create-group";
         }
 
@@ -130,8 +131,9 @@ public class GroupController {
     }
 
     @PostMapping("/edit/group")
-    public String updateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, RedirectAttributes redirectAttributes) {
+    public String updateGroup(@ModelAttribute("group") @Valid Group group, BindingResult result, Model model, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
+            model.addAttribute("tagsAsString", String.join(",", group.getTags()));
             return "groups/edit-group";
         }
 

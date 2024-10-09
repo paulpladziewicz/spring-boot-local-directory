@@ -72,8 +72,9 @@ public class BusinessController {
     }
 
     @PostMapping("/create/business")
-    public String createBusinessListing(@Valid @ModelAttribute("business") Business business, BindingResult result) {
+    public String createBusinessListing(@Valid @ModelAttribute("business") Business business, Model model, BindingResult result) {
         if (result.hasErrors()) {
+            model.addAttribute("tagsAsString", String.join(",", business.getTags()));
             return "businesses/create-business";
         }
 
@@ -144,6 +145,7 @@ public class BusinessController {
     @PostMapping("/edit/business")
     public String updateBusiness(@Valid @ModelAttribute("business") Business business, BindingResult result, Model model) {
         if (result.hasErrors()) {
+            model.addAttribute("tagsAsString", String.join(",", business.getTags()));
             return "businesses/edit-business";
         }
 

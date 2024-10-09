@@ -78,7 +78,7 @@ public class NeighborServicesProfileController {
     @PostMapping("/create/neighbor-services-profile")
     public String createNeighborServiceSubscription(@Valid @ModelAttribute("neighborService") NeighborServicesProfile neighborServicesProfile, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("neighborService", neighborServicesProfile);
+            model.addAttribute("tagsAsString", String.join(",", neighborServicesProfile.getTags()));
             return "neighborservices/create-neighbor-services-profile";
         }
 
@@ -140,7 +140,7 @@ public class NeighborServicesProfileController {
     @PostMapping("/edit/neighbor-service/profile")
     public String editNeighborService(@Valid @ModelAttribute("neighborService") NeighborServicesProfile neighborServicesProfile, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("neighborService", neighborServicesProfile);
+            model.addAttribute("tagsAsString", String.join(",", neighborServicesProfile.getTags()));
             return "neighborservices/edit-neighbor-services-profile";
         }
 
