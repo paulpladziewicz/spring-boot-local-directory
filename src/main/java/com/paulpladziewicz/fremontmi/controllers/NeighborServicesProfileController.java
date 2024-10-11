@@ -32,20 +32,19 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/create/neighbor-services-profile")
     public String createNeighborServicesProfileForm(Model model, RedirectAttributes redirectAttributes) {
-        NeighborServicesProfile profile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
-
-        if (profile != null) {
+        try {
+            neighborServicesProfileService.findNeighborServiceProfileByUserId();
             redirectAttributes.addFlashAttribute("errorMessage", "You already have a NeighborServices™ Profile. You can only have one profile at a time.");
             return "redirect:/my/neighbor-services/profile";
 
+        } catch (ContentNotFoundException e) {
+            NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
+            neighborServicesProfile.getNeighborServices().add(new NeighborService());
+
+            model.addAttribute("neighborServicesProfile", neighborServicesProfile);
+
+            return "neighborservices/create-neighbor-services-profile";
         }
-
-        NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
-        neighborServicesProfile.getNeighborServices().add(new NeighborService());
-
-        model.addAttribute("neighborServicesProfile", neighborServicesProfile);
-
-        return "neighborservices/create-neighbor-services-profile";
     }
 
     @PostMapping("/create/neighbor-services-profile")
