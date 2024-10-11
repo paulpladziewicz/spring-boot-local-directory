@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{partials/layout :: minimalHead}"></th:block>
+    <title>Taqueria De Gallo Coming Soon in Fremont, MI</title>
+    <meta name="description" content="Exciting news for Fremont, MI! Taqueria De Gallo is bringing authentic Mexican flavors, including trompo-cooked tacos, to the heart of town." />
+    <meta name="keywords" content="Fremont MI, Taqueria De Gallo, Mexican restaurant, authentic tacos, trompo cooking, new restaurant opening" />
+</head>
+
+
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<main class="pt-4">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-xl-8 mx-auto">
+
+                <img src="/images/taqueriadegallo.png" class="img-fluid rounded mb-4" alt="Image of Taqueria De Gallo">
+
+
+                <h1 class="pb-2 pb-lg-3">Taqueria De Gallo Coming Soon in Fremont, MI</h1>
+                <p class="lead">Get ready to savor the authentic Mexican flavors at Taqueria De Gallo, set to open soon in Fremont, MI. Specializing in traditional trompo-cooked tacos and other mexican cuisine favorites, this taqueria promises a true taste of Mexico right in the heart of our town.</p>
+                <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom mb-4">
+                    <div class="d-flex align-items-center mb-4 me-4">
+                    </div>
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="fs-sm me-2">Share article:</span>
+                        <div class="d-flex">
+                            <a class="nav-link me-2" href="https://www.facebook.com/sharer/sharer.php?u=https://fremontmi.com/articles/coming-soon-taqueria-de-gallo"
+                               data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Facebook" data-bs-original-title="Facebook" target="_blank">
+                                <i class="ai-facebook"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <section class="mb-5">
+                    <h2>Menu Highlights</h2>
+                    <p>While the full menu is still in development, here are a few dishes you can expect:</p>
+                    <ul>
+                        <li><strong>Tacos Al Pastor:</strong> Juicy pork marinated and cooked on the trompo, served with fresh pineapple and cilantro.</li>
+                        <li><strong>Carne Asada:</strong> Grilled steak tacos topped with onions, cilantro, and salsa verde.</li>
+                        <li><strong>Quesadillas:</strong> Melted cheese and your choice of meat or veggies, grilled to perfection.</li>
+                    </ul>
+                </section>
+
+                <section class="mb-5">
+                    <h2>Visit Us Soon</h2>
+                    <p><strong>Address:</strong> 1061 W Main St, Fremont, MI 49412</p>
+                    <div id="map">
+                        <img src="https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s-marker+ff0000(-85.96371786813803,43.46757178166683)/-85.96371786813803,43.46757178166683,16.68,0/750x400?access_token=pk.eyJ1IjoicHBsYWR6aWV3aWN6IiwiYSI6ImNtMXMwdmdsNDAxOXcyc29teTh3NW51MW8ifQ.2nbMyJSSmrTH6VrZtWMmSA"
+                             alt="Map showing the location of Taqueria De Gallo in Fremont, MI"
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <section class="bg-secondary">
+
+        <div class="container pt-5 pb-3 pb-xl-4 py-xxl-5">
+
+            <div class="row pb-1 pb-sm-3 pb-lg-4">
+
+                <div class="col-lg-8 col-xl-7 offset-xl-1 mx-auto">
+                    <h1 class="display-6 text-center mb-4 text-capitalize">Have a question or feedback for Taqueria De Gallo?</h1>
+
+                    <form class="row g-4 needs-validation" id="contactForm" novalidate>
+                        <div class="col-sm-6">
+                            <label class="form-label fs-base" for="name">Name</label>
+                            <input class="form-control form-control-lg" type="text" placeholder="Your name" required id="name">
+                            <div class="invalid-feedback">Please enter your name!</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fs-base" for="email">Email</label>
+                            <input class="form-control form-control-lg" type="email" placeholder="Email address" required id="email">
+                            <div class="invalid-feedback">Please provide a valid email address!</div>
+                        </div>
+                        <div class="col-sm-12">
+                            <label class="form-label fs-base" for="message">Message</label>
+                            <textarea class="form-control form-control-lg" rows="5" placeholder="Enter your message here..." required id="message"></textarea>
+                            <div class="invalid-feedback">Please enter your message!</div>
+                        </div>
+                        <div class="col-sm-12 pt-2">
+                            <button id="submit-button" class="btn btn-lg btn-primary" type="submit">Send message</button>
+                            <button id="loading-button" class="btn btn-lg btn-primary pe-none" type="button" style="display: none;">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Loading...
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="form-message" class="alert mt-4" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('contactForm');
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            if (!form.checkValidity()) {
+                event.stopPropagation();
+                form.classList.add('was-validated');
+                return;
+            }
+
+            const submitButton = document.getElementById('submit-button');
+            const loadingButton = document.getElementById('loading-button');
+            const formMessage = document.getElementById('form-message');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                message: document.getElementById('message').value
+            };
+
+            submitButton.style.display = 'none';
+            loadingButton.style.display = 'block';
+
+            try {
+                const response = await fetch('/taqueria', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    formMessage.style.display = 'block';
+                    formMessage.classList.remove('alert-danger');
+                    formMessage.classList.add('alert-primary');
+                    formMessage.innerText = 'Thank you for your feedback! We have received your message.';
+
+                    form.reset();
+                    form.classList.remove('was-validated');
+                } else {
+                    throw new Error('Submission failed');
+                }
+            } catch (error) {
+                formMessage.style.display = 'block';
+                formMessage.classList.remove('alert-success');
+                formMessage.classList.add('alert-danger');
+                formMessage.innerText = 'Failed to submit the form. Please try again later.';
+            } finally {
+                loadingButton.style.display = 'none';
+                submitButton.style.display = 'block';
+            }
+        });
+    });
+</script>
+
+<footer th:replace="~{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>
