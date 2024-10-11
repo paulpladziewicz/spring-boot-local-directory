@@ -1,11 +1,11 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
+import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.NeighborServicesProfileService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,12 +17,6 @@ import java.util.*;
 
 @Controller
 public class NeighborServicesProfileController {
-
-    @Value("${stripe.price.monthly.neighborservice}")
-    private String monthlyPriceId;
-
-    @Value("${stripe.price.annual.neighborservice}")
-    private String annualPriceId;
 
     private final HtmlSanitizationService htmlSanitizationService;
 
@@ -36,43 +30,22 @@ public class NeighborServicesProfileController {
         this.htmlSanitizationService = htmlSanitizationService;
     }
 
-    @GetMapping("/create/neighbor-services-profile/overview")
-    public String createNeighborServicesProfileOverview(Model model) {
-        model.addAttribute("monthlyPriceId", monthlyPriceId);
-        model.addAttribute("annualPriceId", annualPriceId);
-        return "neighborservices/create-neighbor-services-profile-overview";
-    }
-
-    @PostMapping("/setup/create/neighbor-services-profile")
-    public String setupNeighborServicesProfileForm(@RequestParam("priceId") String priceId, RedirectAttributes redirectAttributes) {
-//        Optional<NeighborServicesProfile> optionalNeighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
-
-        // TODO this needs to be resolved...
-//        if (optionalNeighborServicesProfile.isPresent()) {
-//            redirectAttributes.addFlashAttribute("errorMessage", "You already have a NeighborServices™ Profile. You can only have one profile at a time.");
-//            return "redirect:/my/neighbor-services/profile";
-//
-//        }
-
-        redirectAttributes.addFlashAttribute("priceId", priceId);
-        return "redirect:/create/neighbor-services-profile";
-    }
-
     @GetMapping("/create/neighbor-services-profile")
-    public String createNeighborServicesProfileForm(Model model) {
-        if (model.containsAttribute("priceId")) {
-            String priceId = (String) model.getAttribute("priceId");
+    public String createNeighborServicesProfileForm(Model model, RedirectAttributes redirectAttributes) {
+        NeighborServicesProfile profile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
 
-            NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
-            neighborServicesProfile.getNeighborServices().add(new NeighborService());
-            neighborServicesProfile.setPriceId(priceId);
+        if (profile != null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "You already have a NeighborServices™ Profile. You can only have one profile at a time.");
+            return "redirect:/my/neighbor-services/profile";
 
-            model.addAttribute("neighborServicesProfile", neighborServicesProfile);
-
-            return "neighborservices/create-neighbor-services-profile";
-        } else {
-            return "redirect:/create/neighbor-services-profile/overview";
         }
+
+        NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
+        neighborServicesProfile.getNeighborServices().add(new NeighborService());
+
+        model.addAttribute("neighborServicesProfile", neighborServicesProfile);
+
+        return "neighborservices/create-neighbor-services-profile";
     }
 
     @PostMapping("/create/neighbor-services-profile")
@@ -82,9 +55,9 @@ public class NeighborServicesProfileController {
             return "neighborservices/create-neighbor-services-profile";
         }
 
-        NeighborServicesProfile createdNeighborServicesProfile = neighborServicesProfileService.createNeighborServiceProfile(neighborServicesProfile);
+        neighborServicesProfileService.createNeighborServiceProfile(neighborServicesProfile);
 
-        return "redirect:/pay/subscription?contentId=" + createdNeighborServicesProfile.getId();
+        return "redirect:/my/neighbor-services/profile";
     }
 
     @GetMapping("/neighbor-services")
@@ -116,12 +89,14 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/my/neighbor-services/profile")
     public String viewMyNeighborServiceProfile(Model model) {
-        NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
-
-        model.addAttribute("neighborServicesProfile", neighborServicesProfile);
-        model.addAttribute("myProfile", true);
-
-        return "neighborservices/neighbor-services-profile-page";
+        try {
+            NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
+            model.addAttribute("neighborServicesProfile", neighborServicesProfile);
+            model.addAttribute("myProfile", true);
+            return "neighborservices/neighbor-services-profile-page";
+        } catch (ContentNotFoundException e) {
+            return "redirect:/create/neighbor-services-profile";
+        }
     }
 
     @GetMapping("/edit/neighbor-service/profile/{slug}")

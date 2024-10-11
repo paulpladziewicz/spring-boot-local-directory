@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
         } else {
             request.setAttribute("errors", errors);
-            return "error/validation-error";
+            return "error";
         }
     }
 
@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
             return new ResponseEntity<>(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
         } else {
             request.setAttribute("errorMessage", errorMessage);
-            return "error/database-error";
+            return "error";
         }
     }
 
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
             return new ResponseEntity<>(errorMessage, HttpStatus.SERVICE_UNAVAILABLE);
         } else {
             request.setAttribute("errorMessage", errorMessage);
-            return "error/payment-error";
+            return "error";
         }
     }
 
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
             return new ResponseEntity<>(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
         } else {
             request.setAttribute("errorMessage", errorMessage);
-            return "error/general-error";
+            return "error";
         }
     }
 

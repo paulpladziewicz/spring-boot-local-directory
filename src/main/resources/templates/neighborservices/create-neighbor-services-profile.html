@@ -9,19 +9,12 @@
 <main>
     <div class="container mt-4">
 
-        <!-- Success message container -->
-        <div id="success-message" class="alert alert-success alert-dismissible fade show" role="alert" style="display:none;">
-            Subscription payment was successful!
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
                 <h1>Create NeighborServices™ Profile</h1>
-                <p>Please provide the details for your NeighborServices™ Profile.</p>
+                <p>Please provide the details for your NeighborServices™ Profile. Please only create content that serve Fremont, MI. Content not related to Fremont, Michigan can be removed at any time.</p>
 
                 <form id="create-business-form" th:action="@{/create/neighbor-services-profile}" th:object="${neighborServicesProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                    <input type="hidden" name="priceId" id="priceId" th:value="*{priceId}">
 
                     <div class="form-group mb-3">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="displayName">Display Name</label>
@@ -40,10 +33,12 @@
                     <div class="form-group mb-3">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="email">Email</label>
                         <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="Enter email" required>
+                        <small class="form-text text-muted">
+                            Email is not publicly displayed. It's used when people reach out via a contact form.
+                        </small>
                         <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="mt-1 text-danger"></div>
                     </div>
 
-                    <!-- Neighbor Services Subheading -->
                     <h3 class="mb-3">Neighbor Services</h3>
 
                     <div id="neighborServiceContainer">
@@ -63,12 +58,9 @@
                         </div>
                     </div>
 
-                    <!-- Add Another Service button link styled -->
                     <div class="d-flex justify-content-start">
                         <a href="javascript:void(0);" class="btn btn-link p-0" onclick="addNeighborService()">+ Add Another Service</a>
                     </div>
-
-                    <p th:if="${errorMessage}" th:text="${errorMessage}" class="text-danger my-3"></p>
 
                     <div class="mt-3">
                         <button class="btn btn-primary" type="submit">Continue</button>
@@ -79,7 +71,6 @@
     </div>
 </main>
 
-<!-- JavaScript to manage NeighborService fields -->
 <script>
     let serviceIndex = 0;
 
@@ -136,7 +127,6 @@
             }
         });
 
-        // Reset the serviceIndex to the current count of services
         serviceIndex = serviceItems.length;
     }
 
@@ -155,11 +145,9 @@
         updateServiceIndexes();
     }
 
-    // Call cleanUpEmptyEntries before form submission to ensure no empty entries
     document.getElementById('create-business-form').addEventListener('submit', cleanUpEmptyEntries);
 </script>
 
-<script th:src="@{/js/custom-validation.js}"></script>
 <script th:replace="~{partials/theme-js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <footer th:replace="~{partials/footer}"></footer>

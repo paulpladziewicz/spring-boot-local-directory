@@ -18,15 +18,13 @@ public class NeighborServicesProfileService {
     private static final Logger logger = LoggerFactory.getLogger(NeighborServicesProfileService.class);
     private final ContentRepository contentRepository;
     private final UserService userService;
-    private final StripeService stripeService;
     private final TagService tagService;
     private final SlugService slugService;
     private final EmailService emailService;
 
-    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, StripeService stripeService, SlugService slugService, TagService tagService, EmailService emailService) {
+    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, SlugService slugService, TagService tagService, EmailService emailService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
-        this.stripeService = stripeService;
         this.tagService = tagService;
         this.slugService = slugService;
         this.emailService = emailService;
@@ -38,16 +36,12 @@ public class NeighborServicesProfileService {
         neighborServicesProfile.setType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
         neighborServicesProfile.setSlug(slugService.createUniqueSlug(neighborServicesProfile.getName(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType()));
         neighborServicesProfile.setPathname("/neighbor-services/" + neighborServicesProfile.getSlug());
-        neighborServicesProfile.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
-        neighborServicesProfile.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
+        neighborServicesProfile.setVisibility(ContentVisibility.PUBLIC.getVisibility());
+        neighborServicesProfile.setStatus(ContentStatus.ACTIVE.getStatus());
         neighborServicesProfile.setCreatedBy(userProfile.getUserId());
 
         List<String> validatedTags = tagService.addTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
         neighborServicesProfile.setTags(validatedTags);
-
-        Map<String, Object> stripeDetails  = stripeService.createSubscription(neighborServicesProfile.getPriceId());
-
-        neighborServicesProfile.setStripeDetails(stripeDetails);
 
         return contentRepository.save(neighborServicesProfile);
     }
@@ -110,10 +104,6 @@ public class NeighborServicesProfileService {
         NeighborServicesProfile neighborServicesProfile = findNeighborServiceProfileById(neighborServiceId);
 
         checkPermission(userId, neighborServicesProfile);
-
-        if (neighborServicesProfile.getSubscriptionId() != null && !neighborServicesProfile.getSubscriptionId().isEmpty()) {
-            stripeService.cancelSubscriptionAtPeriodEnd(neighborServicesProfile.getSubscriptionId());
-        }
 
         tagService.removeTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
 

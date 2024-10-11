@@ -1,12 +1,13 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.models.CustomResponse;
-import com.paulpladziewicz.fremontmi.models.InvoiceDTO;
-import com.paulpladziewicz.fremontmi.models.SubscriptionDTO;
-import com.paulpladziewicz.fremontmi.services.StripeService;
+import com.paulpladziewicz.fremontmi.models.*;
+import com.paulpladziewicz.fremontmi.services.BillingService;
 import com.stripe.model.Invoice;
 import com.stripe.model.Subscription;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -19,19 +20,44 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/stripe")
 public class BillingController {
 
-    private final StripeService stripeService;
+    @Value("${stripe.publishable.key}")
+    private String stripePublicKey;
 
-    public BillingController(StripeService stripeService) {
-        this.stripeService = stripeService;
+    private final BillingService billingService;
+
+    public BillingController(BillingService billingService) {
+        this.billingService = billingService;
     }
 
     public static class CancelSubscriptionRequest {
         public String subscriptionId;
     }
 
+    @GetMapping("/pay/subscription")
+    public String paySubscription(Model model) {
+        model.addAttribute("stripePublicKey", stripePublicKey);
+        return "stripe/pay-subscription";
+    }
+
+    @PostMapping("/subscription-payment-success")
+    @ResponseBody
+    public ResponseEntity<String> subscriptionPaymentSuccess(@RequestBody PaymentRequest paymentRequest) {
+        ServiceResponse<Content> serviceResponse = billingService.handleSubscriptionSuccess(paymentRequest);
+
+        if (serviceResponse.hasError()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
+        Content content = serviceResponse.value();
+
+        String redirectUrl = content.getPathname() + "?subscribed=true";
+
+        return ResponseEntity.ok("{\"redirectUrl\": \"" + redirectUrl + "\"}");
+    }
+
     @GetMapping("/subscriptions")
     public ResponseEntity<List<SubscriptionDTO>> getSubscriptions() {
-        List<SubscriptionDTO> subscriptionDTOs = stripeService.getSubscriptions().stream()
+        List<SubscriptionDTO> subscriptionDTOs = billingService.getSubscriptions().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
 
@@ -40,7 +66,7 @@ public class BillingController {
 
     @GetMapping("/invoices")
     public ResponseEntity<List<InvoiceDTO>> getInvoices() {
-        List<InvoiceDTO> invoiceDTOs = stripeService.getInvoices().stream()
+        List<InvoiceDTO> invoiceDTOs = billingService.getInvoices().stream()
                 .map(this::mapInvoiceToDTO)
                 .collect(Collectors.toList());
 
@@ -50,7 +76,7 @@ public class BillingController {
     @PostMapping("/cancel-subscription")
     public ResponseEntity<CustomResponse> cancelSubscription(@RequestBody CancelSubscriptionRequest request) {
         String subscriptionId = request.subscriptionId;
-        stripeService.cancelSubscriptionAtPeriodEnd(subscriptionId);
+        billingService.cancelSubscriptionAtPeriodEnd(subscriptionId);
 
         return ResponseEntity.ok(new CustomResponse(true, "Subscription cancellation scheduled at period end."));
     }
@@ -58,14 +84,14 @@ public class BillingController {
     @PostMapping("/resume-subscription")
     public ResponseEntity<CustomResponse> resumeSubscription(@RequestBody CancelSubscriptionRequest request) {
         String subscriptionId = request.subscriptionId;
-        stripeService.resumeSubscription(subscriptionId);
+        billingService.resumeSubscription(subscriptionId);
 
         return ResponseEntity.ok(new CustomResponse(true, "Subscription resumed successfully."));
     }
 
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
-        return stripeService.handleStripeWebhook(payload, sigHeader);
+        return billingService.handleStripeWebhook(payload, sigHeader);
     }
 
     private SubscriptionDTO mapToDTO(Subscription subscription) {
@@ -98,20 +124,15 @@ public class BillingController {
     private InvoiceDTO mapInvoiceToDTO(Invoice invoice) {
         InvoiceDTO dto = new InvoiceDTO();
 
-        // Set the invoice ID
         dto.setId(invoice.getId());
 
-        // Extract plan name from the line item description
         String planName = invoice.getLines().getData().getFirst().getDescription();
         dto.setPlanName(planName);
 
-        // Amount paid (in smallest currency unit, e.g., cents)
         dto.setAmountPaid(invoice.getAmountPaid());
 
-        // Customer name
         dto.setCustomerName(invoice.getCustomerName());
 
-        // Convert the paid timestamp to a human-readable date format
         Long paidAtUnix = invoice.getStatusTransitions().getPaidAt();
         if (paidAtUnix != null) {
             String paidDate = Instant.ofEpochSecond(paidAtUnix)
@@ -120,7 +141,6 @@ public class BillingController {
             dto.setPaidDate(paidDate);
         }
 
-        // Set the invoice URL (hosted_invoice_url or invoice_pdf)
         dto.setInvoiceUrl(invoice.getHostedInvoiceUrl() != null ? invoice.getHostedInvoiceUrl() : invoice.getInvoicePdf());
 
         return dto;

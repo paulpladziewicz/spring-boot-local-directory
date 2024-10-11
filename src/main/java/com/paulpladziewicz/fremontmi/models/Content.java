@@ -41,12 +41,6 @@ public class Content {
     @Version
     private Long version;
 
-    private Map<String, Object> stripeDetails;
-
-    private String priceId;
-
-    private String subscriptionId;
-
     public List<String> getTags() {
         return Collections.emptyList();
     }

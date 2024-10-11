@@ -21,9 +21,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class StripeService {
+public class BillingService {
 
-    private static final Logger logger = LoggerFactory.getLogger(StripeService.class);
+    private static final Logger logger = LoggerFactory.getLogger(BillingService.class);
 
     private final UserService userService;
 
@@ -37,7 +37,7 @@ public class StripeService {
     @Value("${stripe.secret.key}")
     private String stripeApiKey;
 
-    public StripeService(UserService userService, EmailService emailService, ContentRepository contentRepository) {
+    public BillingService(UserService userService, EmailService emailService, ContentRepository contentRepository) {
         this.userService = userService;
         this.emailService = emailService;
         this.contentRepository = contentRepository;
@@ -357,55 +357,6 @@ public class StripeService {
         } catch (Exception e) {
             logger.error("Error saving content after handling successful payment: ", e);
             return ServiceResponse.error("content_save_error");
-        }
-    }
-
-    public ServiceResponse<Map<String, Object>> getContentDetails(String contentId) {
-        Optional<Content> optionalContent = contentRepository.findById(contentId);
-
-        if (optionalContent.isEmpty()) {
-            return ServiceResponse.error("content_not_found");
-        }
-
-        Content content = optionalContent.get();
-        Map<String, Object> stripeDetails = content.getStripeDetails();
-        String subscriptionId = (String) stripeDetails.get("subscriptionId");
-
-        if (subscriptionId != null && !subscriptionId.isEmpty()) {
-            try {
-                // TODO: I could potentially store the timestamps in the database to avoid a stripe call
-                Subscription subscription = Subscription.retrieve(subscriptionId);
-
-                long billingCycleAnchor = subscription.getBillingCycleAnchor();
-                long currentTimestamp = System.currentTimeMillis() / 1000; // Current time in seconds
-                long timeUntilBillingCycleAnchor = billingCycleAnchor - currentTimestamp;
-                long thresholdTimeInSeconds = 20 * 3600; // 20 hours in seconds
-                boolean isTooCloseToAutoCancel = timeUntilBillingCycleAnchor <= thresholdTimeInSeconds;
-
-                if (isTooCloseToAutoCancel) {
-                    String priceId = (String) stripeDetails.get("priceId");
-                    Map<String, Object> newSubscriptionData = createSubscription(priceId);
-
-                    stripeDetails.put("subscriptionId", newSubscriptionData.get("subscriptionId"));
-                    stripeDetails.put("clientSecret", newSubscriptionData.get("clientSecret"));
-                    stripeDetails.put("displayName", newSubscriptionData.get("displayName"));
-                    stripeDetails.put("displayPrice", newSubscriptionData.get("displayPrice"));
-                    stripeDetails.put("priceId", newSubscriptionData.get("priceId"));
-                    stripeDetails.put("invoiceId", newSubscriptionData.get("invoiceId"));
-
-                    content.setStripeDetails(stripeDetails);
-                    contentRepository.save(content);
-
-                    return ServiceResponse.value(stripeDetails);
-                } else {
-                    return ServiceResponse.value(stripeDetails);
-                }
-            } catch (StripeException e) {
-                logger.error("Error retrieving subscription details: ", e);
-                return ServiceResponse.error("stripe_subscription_retrieval_error");
-            }
-        } else {
-            return ServiceResponse.error("no_subscription_id_found");
         }
     }
 }

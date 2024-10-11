@@ -44,6 +44,7 @@
         const stripePublicKey = /*[[${stripePublicKey}]]*/ 'default';
 
         try {
+            // TODO broken...
             const response = await fetch(`/api/get-content/${contentId}`, {
                 method: 'GET',
                 headers: {
@@ -114,6 +115,7 @@
         try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+            // TODO broken...
             let response = await fetch("/subscription-payment-success", {
                 method: "POST",
                 headers: {

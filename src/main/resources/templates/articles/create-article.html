@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{partials/layout :: minimalHead}"></th:block>
+    <title>Announcements - FremontMI</title>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script>
+</head>
+
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div id="announcement-editorjs" class="announcement-editor"></div>
+        </div>
+    </div>
+    <button id="addButton" class="btn btn-success mt-3">Add Announcement</button>
+    <button id="saveButton" class="btn btn-primary mt-3">Save Content</button>
+</div>
+
+<script th:inline="javascript">
+    let editor;
+    const announcements = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize the Editor.js instance
+        editor = new EditorJS({
+            holder: 'announcement-editorjs',
+            tools: {
+                header: {
+                    class: Header,
+                    config: {
+                        levels: [2],
+                        defaultLevel: 2
+                    }
+                },
+                paragraph: {
+                    class: Paragraph
+                }
+            },
+            data: {
+                blocks: []
+            },
+            readOnly: true, // Set to true initially to prevent editing until clicked
+            onReady: () => {
+                console.log('Editor.js is ready');
+                renderAnnouncements(); // Render initial announcements
+            }
+        });
+
+        document.getElementById('addButton').addEventListener('click', addAnnouncement);
+        document.getElementById('saveButton').addEventListener('click', saveAnnouncements);
+    });
+
+    function addAnnouncement() {
+        const newAnnouncement = {
+            type: 'header',
+            data: {
+                text: 'New Announcement Title',
+                level: 2
+            }
+        };
+        const newDescription = {
+            type: 'paragraph',
+            data: {
+                text: 'This is the announcement description.'
+            }
+        };
+
+        announcements.push(newAnnouncement, newDescription);
+        renderAnnouncements();
+    }
+
+    function renderAnnouncements() {
+        const editorContainer = document.getElementById('announcement-editorjs');
+        editorContainer.innerHTML = ''; // Clear existing content
+
+        announcements.forEach((block, index) => {
+            const blockElement = document.createElement('div');
+            blockElement.classList.add('mb-3');
+            blockElement.setAttribute('data-index', index);
+
+            if (block.type === 'header') {
+                blockElement.innerHTML = `
+                    <h2>${block.data.text}</h2>
+                    <button class="btn btn-link edit-btn" onclick="editBlock(${index})">Edit</button>
+                    <button class="btn btn-link text-danger delete-btn" onclick="deleteBlock(${index})">Delete</button>
+                `;
+            } else if (block.type === 'paragraph') {
+                blockElement.innerHTML = `
+                    <p>${block.data.text}</p>
+                    <button class="btn btn-link edit-btn" onclick="editBlock(${index})">Edit</button>
+                    <button class="btn btn-link text-danger delete-btn" onclick="deleteBlock(${index})">Delete</button>
+                `;
+            }
+
+            editorContainer.appendChild(blockElement);
+        });
+    }
+
+    function editBlock(index) {
+        // Set Editor.js to editable mode
+        editor.readOnly.toggle();
+
+        // Fetch the block to be edited
+        const block = announcements[index];
+        if (block.type === 'header') {
+            const newTitle = prompt('Edit title:', block.data.text);
+            if (newTitle !== null) {
+                block.data.text = newTitle;
+            }
+        } else if (block.type === 'paragraph') {
+            const newParagraph = prompt('Edit description:', block.data.text);
+            if (newParagraph !== null) {
+                block.data.text = newParagraph;
+            }
+        }
+
+        editor.readOnly.toggle();
+        renderAnnouncements();
+    }
+
+    function deleteBlock(index) {
+        // Remove the block from the array
+        announcements.splice(index, 1);
+        renderAnnouncements();
+    }
+
+    function saveAnnouncements() {
+        console.log('Saved announcements:', announcements);
+
+        fetch('/saveAnnouncements', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ announcements })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Announcements saved successfully:', data);
+            })
+            .catch(error => {
+                console.log('Error saving announcements:', error);
+            });
+    }
+</script>
+</body>
+</html>

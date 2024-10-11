@@ -7,16 +7,15 @@
 <main>
     <div class="container my-4">
 
-        <!-- Success message container -->
-        <div id="success-message" class="alert alert-success alert-dismissible fade show" role="alert" style="display:none;">
-            Subscription payment was successful!
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-
         <div class="row">
-            <div class="col-lg-10 mx-auto">
+            <div class="col-lg-8 mx-auto">
+                <div class="text-end mb-2" th:if="${isAdmin}">
+                    <a th:href="'/edit/business/' + ${business.slug}" class="btn btn-secondary btn-icon" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                        <i class="ai-edit-alt"></i>
+                    </a>
+                </div>
                 <nav aria-label="breadcrumb">
-                    <ol class="pt-lg-3 pb-lg-4 pb-2 breadcrumb">
+                    <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/businesses">Businesses</a></li>
                         <li class="breadcrumb-item active" aria-current="page" th:text="${business.name}"></li>
                     </ol>
@@ -25,151 +24,40 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-10 mx-auto">
-                <div class="mb-3" th:if="${business.status == 'requires_active_subscription'}">
-                    <span class="badge bg-danger bg-opacity-10 text-danger fs-sm">Not Active - Requires Subscription</span>
-                    <p class="m-0"><a th:href="'/pay/subscription?contentId=' + ${business.getId()}" class="p-0 ms-2 btn btn-link">Pay Subscription</a></p>
-                </div>
-                <div class="d-none d-md-flex flex-column flex-sm-row justify-content-between align-items-center mb-2">
-                    <h1 th:text="${business.name}" class="display-3 mb-0">Fremont Business Name</h1>
-                    <!-- Edit button only shown if isAdmin is true -->
-                    <div class="d-none d-md-block" th:if="${isAdmin}">
-                        <a th:href="'/edit/business/' + ${business.slug}" class="btn btn-secondary btn-icon" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
-                            <i class="ai-edit-alt"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="d-md-none">
-                    <h1 th:text="${business.name}" class="display-3 mb-0">Fremont Business Name</h1>
-                    <!-- Edit link only shown if isAdmin is true -->
-                    <a th:if="${isAdmin}" th:href="'/edit/business/' + ${business.slug}" class="d-md-none btn btn-link p-0" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">Edit Business Listing</a>
-                </div>
+            <div class="col-lg-8 mx-auto mb-4">
+                <h1 th:text="${business.name}" class="display-3 mb-3">Fremont Business Name</h1>
+
+                <ul class="list-unstyled">
+                    <li class="nav flex-nowrap mb-3" th:if="${business.address} != null and !${#strings.isEmpty(business.address)}">
+                        <i class="ai-map-pin lead text-primary me-2"></i>
+                        <span class="nav-link fw-normal p-0 mt-n1" th:text="${business.address}">514 S. Magnolia St. Orlando, FL 32806</span>
+                    </li>
+                    <li class="nav flex-nowrap mb-3" th:if="${business.phoneNumber} != null and !${#strings.isEmpty(business.phoneNumber)}">
+                        <i class="ai-phone lead text-primary me-2"></i>
+                        <a class="nav-link fw-normal p-0 mt-n1" th:href="'tel:'+${business.phoneNumber}" th:text="${business.phoneNumber}">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;40</a>
+                    </li>
+                    <li class="nav flex-nowrap mb-3" th:if="${business.displayEmail} and ${business.email} != null and !${#strings.isEmpty(business.email)}">
+                        <i class="ai-mail lead text-primary me-2"></i>
+                        <a class="nav-link fw-normal p-0 mt-n1" th:href="'mailto:' + ${business.email}" th:text="${business.email}">orlando@example.com</a>
+                    </li>
+                    <li class="nav flex-nowrap mb-3" th:if="${business.website} != null and !${#strings.isEmpty(business.website)}">
+                        <i class="ai-globe lead text-primary me-2"></i>
+                        <a class="nav-link fw-normal p-0 mt-n1" th:href="${business.website}" target="_blank" rel="noopener noreferrer" th:text="${business.website}">www.example.com</a>
+                    </li>
+                </ul>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-lg-10 mx-auto">
-                <div class="row mt-4">
-                    <div class="col-lg-6">
-                        <div class="fs-sm text-uppercase mb-3">What we do</div>
-                        <h2 class="display-6" th:text="${business.headline}">We are a team who create marketing strategies</h2>
-                        <ul class="list-unstyled mb-0">
-                            <li class="nav flex-nowrap mb-3" th:if="${business.phoneNumber} != null and !${#strings.isEmpty(business.phoneNumber)}">
-                                <i class="ai-phone lead text-primary me-2"></i>
-                                <a class="nav-link fw-normal p-0 mt-n1" th:href="'tel:'+${business.phoneNumber}" th:text="${business.phoneNumber}">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;40</a>
-                            </li>
-                            <li class="nav flex-nowrap mb-3" th:if="${business.displayEmail} and ${business.email} != null and !${#strings.isEmpty(business.email)}">
-                                <i class="ai-mail lead text-primary me-2"></i>
-                                <a class="nav-link fw-normal p-0 mt-n1" th:href="mailto:${business.email}" th:text="${business.email}">orlando@example.com</a>
-                            </li>
-                            <li class="nav flex-nowrap mb-3" th:if="${business.address} != null and !${#strings.isEmpty(business.address)}">
-                                <i class="ai-map-pin lead text-primary me-2"></i>
-                                <span class="nav-link fw-normal p-0 mt-n1" th:text="${business.address}">514 S. Magnolia St. Orlando, FL 32806</span>
-                            </li>
-                            <li class="nav flex-nowrap mb-3" th:if="${business.website} != null and !${#strings.isEmpty(business.website)}">
-                                <i class="ai-globe lead text-primary me-2"></i>
-                                <a class="nav-link fw-normal p-0 mt-n1" th:href="${business.website}" target="_blank" rel="noopener noreferrer" th:text="${business.website}">www.example.com</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-6 pt-1 pt-sm-2 pt-xl-5">
-                        <p th:utext="${business.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
-                    </div>
-                </div>
+            <div class="col-lg-8 mx-auto">
+                <div class="fs-sm text-uppercase mb-3">What we do</div>
+                <h2 class="display-6" th:text="${business.headline}">We are a team who create marketing strategies</h2>
+                <p th:utext="${business.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
             </div>
         </div>
 
     </div>
-
-    <section class="bg-secondary container pt-5 pb-3 pb-xl-4 py-xxl-5 my-5">
-
-        <div class="row pb-1 pb-sm-3 pb-lg-4">
-
-            <div class="col-lg-8 col-xl-7 offset-xl-1 mx-auto">
-                    <!-- Page title -->
-                    <h1 class="display-6 text-center" th:text="'Contact ' + ${business.name}">Contact Us</h1>
-                    <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">If you have any questions, inquiries, or would like more information about
-                        <span th:text="${business.name}">our business</span>, please fill out the form below.</p>
-                <!-- Contact form -->
-                <form class="row g-4 needs-validation" novalidate="">
-                    <div class="col-sm-6">
-                        <label class="form-label fs-base" for="name">Name</label>
-                        <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
-                        <div class="invalid-feedback">Please enter your name!</div>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="form-label fs-base" for="email">Email</label>
-                        <input class="form-control form-control-lg" type="email" placeholder="Email address" required="" id="email">
-                        <div class="invalid-feedback">Please provide a valid email address!</div>
-                    </div>
-                    <div class="col-sm-12">
-                        <label class="form-label fs-base" for="message">How can we help?</label>
-                        <textarea class="form-control form-control-lg" rows="5" placeholder="Enter your message here..." required="" id="message"></textarea>
-                        <div class="invalid-feedback">Please enter your message!</div>
-                    </div>
-                    <div class="col-sm-12 pt-2">
-                        <button id="submit-button" class="btn btn-lg btn-primary" type="button" onclick="submitContactForm()">Send message</button>
-                        <button id="loading-button" class="btn btn-lg btn-primary pe-none" type="button" style="display: none;">
-                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            Loading...
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </section>
 </main>
-
-
-<script th:inline="javascript">
-    function submitContactForm() {
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const message = document.getElementById('message').value;
-        const slug = /*[[${business.slug}]]*/ '';
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
-
-        if (!name || !email || !message) {
-            alert("All fields are required.");
-            return;
-        }
-
-        document.getElementById('submit-button').style.display = 'none';
-        document.getElementById('loading-button').style.display = 'inline-block';
-
-        fetch('/contact/business', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken
-            },
-            body: JSON.stringify({ slug, name, email, message })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const formElement = document.querySelector('.needs-validation');
-                    formElement.innerHTML = `
-                <div class="alert alert-primary" role="alert">
-                    <i class="ai-mail fs-xl pe-1 me-2"></i>
-                    ${data.message}
-                </div>
-            `;
-                } else {
-                    alert('An error occurred while trying to send your message. Please try again later.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again later.');
-            })
-            .finally(() => {
-                document.getElementById('submit-button').style.display = 'inline-block';
-                document.getElementById('loading-button').style.display = 'none';
-            });
-    }
-</script>
 
 
 <footer th:replace="~{partials/footer}"></footer>
@@ -181,17 +69,12 @@
         const success = urlParams.get('subscribed');
 
         if (success === 'true') {
-            // Show the success message
-            // document.getElementById('success-message').style.display = 'block';
-
-            // Trigger confetti effect
             confetti({
                 particleCount: 100,
                 spread: 70,
                 origin: { y: 0.6 }
             });
 
-            // Optionally, add a more extended confetti burst
             const duration = 5 * 1000; // 5 seconds
             const animationEnd = Date.now() + duration;
             const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
@@ -208,7 +91,6 @@
                 }
 
                 const particleCount = 50 * (timeLeft / duration);
-                // since particles fall down, start a bit higher than random
                 confetti(Object.assign({}, defaults, {
                     particleCount,
                     origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }

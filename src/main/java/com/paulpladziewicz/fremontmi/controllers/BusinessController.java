@@ -7,32 +7,21 @@ import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
 
 @Controller
 public class BusinessController {
 
-    @Value("${stripe.price.monthly.business}")
-    private String monthlyPriceId;
-
-    @Value("${stripe.price.annual.business}")
-    private String annualPriceId;
-
     private final HtmlSanitizationService htmlSanitizationService;
-
     private final BusinessService businessService;
-
     private final TagService tagService;
-
     private final UserService userService;
 
     public BusinessController(HtmlSanitizationService htmlSanitizationService, BusinessService businessService, TagService tagService, UserService userService) {
@@ -42,33 +31,13 @@ public class BusinessController {
         this.userService = userService;
     }
 
-    @GetMapping("/create/business/overview")
-    public String createBusinessListingOverview(Model model) {
-        model.addAttribute("monthlyPriceId", monthlyPriceId);
-        model.addAttribute("annualPriceId", annualPriceId);
-        return "businesses/create-business-overview";
-    }
-
-    @PostMapping("/setup/create/business")
-    public String setupCreateBusinessForm(@RequestParam("priceId") String priceId, RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("priceId", priceId);
-        return "redirect:/create/business";
-    }
-
     @GetMapping("/create/business")
     public String createBusinessListingView(Model model) {
-        if (model.containsAttribute("priceId")) {
-            String priceId = (String) model.getAttribute("priceId");
+        Business business = new Business();
 
-            Business business = new Business();
-            business.setPriceId(priceId);
+        model.addAttribute("business", business);
 
-            model.addAttribute("business", business);
-
-            return "businesses/create-business";
-        } else {
-            return "redirect:/create/business/overview";
-        }
+        return "businesses/create-business";
     }
 
     @PostMapping("/create/business")
@@ -78,14 +47,14 @@ public class BusinessController {
             return "businesses/create-business";
         }
 
-        Business savedBusiness = businessService.createBusiness(business);
+        Business savedBusiness = businessService.create(business);
 
-        return "redirect:/pay/subscription?contentId=" + savedBusiness.getId();
+        return "redirect:/businesses/" + savedBusiness.getSlug();
     }
 
     @GetMapping("/businesses")
     public String displayActiveBusinesses(@RequestParam(value = "tag", required = false) String tag, Model model) {
-        List<Business> businesses = businessService.findAllBusinesses(tag);
+        List<Business> businesses = businessService.findAll(tag);
 
         List<Content> contentList = new ArrayList<>(businesses);
         List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 15);
@@ -99,7 +68,7 @@ public class BusinessController {
 
     @GetMapping("/businesses/{slug}")
     public String viewBusiness(@PathVariable String slug, Model model) {
-        Business business = businessService.findBusinessBySlug(slug);
+        Business business = businessService.findBySlug(slug);
 
         business.setDescription(htmlSanitizationService.sanitizeHtml(business.getDescription().replace("\n", "<br/>")));
 
@@ -123,7 +92,7 @@ public class BusinessController {
 
     @GetMapping("/my/businesses")
     public String getMyBusinesses(Model model) {
-        List<Business> businesses = businessService.findBusinessesByUser();
+        List<Business> businesses = businessService.findAllByUser();
 
         model.addAttribute("businesses", businesses);
 
@@ -132,7 +101,7 @@ public class BusinessController {
 
     @GetMapping("/edit/business/{slug}")
     public String editBusiness(@PathVariable String slug, Model model) {
-        Business business = businessService.findBusinessBySlug(slug);
+        Business business = businessService.findBySlug(slug);
 
         String tagsAsString = String.join(",", business.getTags());
         model.addAttribute("tagsAsString", tagsAsString);
@@ -149,7 +118,7 @@ public class BusinessController {
             return "businesses/edit-business";
         }
 
-        Business updatedBusiness = businessService.updateBusiness(business);
+        Business updatedBusiness = businessService.update(business);
 
         model.addAttribute("business", updatedBusiness);
 
@@ -158,7 +127,7 @@ public class BusinessController {
 
     @PostMapping("/delete/business")
     public String deleteBusiness(@RequestParam("businessId") String businessId) {
-        businessService.deleteBusiness(businessId);
+        businessService.delete(businessId);
 
         return "redirect:/my/businesses";
     }

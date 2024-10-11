@@ -7,9 +7,14 @@
 <main>
     <div class="container my-4">
         <div class="row">
-            <div class="col-lg-10 mx-auto">
+            <div class="col-lg-8 mx-auto">
+                <div class="text-end mb-2" th:if="${myProfile}">
+                    <a th:href="'/edit/neighbor-service/profile/' + ${neighborServicesProfile.slug}" class="btn btn-secondary btn-icon" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                        <i class="ai-edit-alt"></i>
+                    </a>
+                </div>
                 <nav aria-label="breadcrumb">
-                    <ol class="pt-lg-3 pb-lg-4 pb-2 breadcrumb">
+                    <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/neighbor-services">NeighborServices™</a></li>
                         <li class="breadcrumb-item active" aria-current="page" th:text="${neighborServicesProfile.name}"></li>
                     </ol>
@@ -18,11 +23,7 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-10 mx-auto">
-                <div class="mb-3" th:if="${neighborServicesProfile.status == 'requires_active_subscription'}">
-                    <span class="badge bg-danger bg-opacity-10 text-danger fs-sm">Not Active - Requires Subscription</span>
-                    <p class="m-0"><a th:href="'/pay/subscription?contentId=' + ${neighborServicesProfile.getId()}" class="p-0 ms-2 btn btn-link">Pay Subscription</a></p>
-                </div>
+            <div class="col-lg-8 mx-auto">
                 <h1 th:text="${neighborServicesProfile.name}" class="display-3 mb-0">Fremont NeighborService Name</h1>
 
                 <div class="row mt-4">
@@ -44,7 +45,6 @@
                     </div>
                 </div>
 
-                <a th:if="${myProfile}" th:href="'/edit/neighbor-service/profile/' + ${neighborServicesProfile.slug}" class="d-inline-block btn btn-outline-primary">Edit NeighborServices™ Profile</a>
             </div>
         </div>
     </div>
@@ -55,7 +55,7 @@
                 <h1 class="display-6 text-center" th:text="'Contact ' + ${neighborServicesProfile.name}">Contact Us</h1>
                 <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">If you have any questions, inquiries, or would like more information about
                     <span th:text="${neighborServicesProfile.name}">our service</span>, please fill out the form below.</p>
-                <!-- Contact form -->
+
                 <form class="row g-4 needs-validation" novalidate="">
                     <div class="col-sm-6">
                         <label class="form-label fs-base" for="name">Name</label>
@@ -80,6 +80,7 @@
                         </button>
                     </div>
                 </form>
+
             </div>
         </div>
     </section>

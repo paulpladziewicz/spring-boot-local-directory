@@ -34,13 +34,17 @@ public class Business extends Content {
 
     private List<String> administrators = new ArrayList<>();
 
+    @NotBlank(message = "Please provide an address")
     private String address;
+    private boolean displayAddress = false;
 
+    @NotBlank(message = "Please provide a phone number")
     private String phoneNumber;
+    private boolean displayPhoneNumber = false;
 
+    @NotBlank(message = "Please provide an email")
     private String email;
-
-    private boolean displayEmail;
+    private boolean displayEmail = false;
 
     private String website;
 }

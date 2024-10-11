@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class BusinessService {
@@ -20,37 +19,31 @@ public class BusinessService {
     private static final Logger logger = LoggerFactory.getLogger(BusinessService.class);
     private final ContentRepository contentRepository;
     private final UserService userService;
-    private final StripeService stripeService;
     private final SlugService slugService;
     private final TagService tagService;
     private final EmailService emailService;
 
-    public BusinessService(ContentRepository contentRepository, UserService userService, StripeService stripeService, SlugService slugService, TagService tagService, EmailService emailService) {
+    public BusinessService(ContentRepository contentRepository, UserService userService, SlugService slugService, TagService tagService, EmailService emailService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
-        this.stripeService = stripeService;
         this.slugService = slugService;
         this.tagService = tagService;
         this.emailService = emailService;
     }
 
-    public Business createBusiness(Business business) {
+    public Business create(Business business) {
         UserProfile userProfile = userService.getUserProfile();
 
         business.setType(ContentTypes.BUSINESS.getContentType());
         business.setSlug(slugService.createUniqueSlug(business.getName(), ContentTypes.BUSINESS.getContentType()));
         business.setPathname("/businesses/" + business.getSlug());
-        business.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
-        business.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
+        business.setVisibility(ContentVisibility.PUBLIC.getVisibility());
+        business.setStatus(ContentStatus.ACTIVE.getStatus());
         business.setCreatedBy(userProfile.getUserId());
         business.setAdministrators(List.of(userProfile.getUserId()));
 
         List<String> validatedTags = tagService.addTags(business.getTags(), ContentTypes.BUSINESS.getContentType());
         business.setTags(validatedTags);
-
-        Map<String, Object> stripeDetails = stripeService.createSubscription(business.getPriceId());
-
-        business.setStripeDetails(stripeDetails);
 
         Business savedBusiness = contentRepository.save(business);
 
@@ -61,7 +54,7 @@ public class BusinessService {
         return savedBusiness;
     }
 
-    public List<Business> findAllBusinesses(String tag) {
+    public List<Business> findAll(String tag) {
         if (tag != null && !tag.isEmpty()) {
             return contentRepository.findByTagAndType(tag, ContentTypes.BUSINESS.getContentType(), Business.class);
         } else {
@@ -69,28 +62,28 @@ public class BusinessService {
         }
     }
 
-    public Business findBusinessById(String id) {
+    public Business findById(String id) {
         return contentRepository.findById(id, Business.class)
                 .orElseThrow(() -> new ContentNotFoundException("Business with id '" + id + "' not found."));
 
     }
 
-    public Business findBusinessBySlug(String slug) {
+    public Business findBySlug(String slug) {
         return contentRepository.findBySlugAndType(slug, ContentTypes.BUSINESS.getContentType(), Business.class)
                 .orElseThrow(() -> new ContentNotFoundException("Business with slug '" + slug + "' not found."));
     }
 
-    public List<Business> findBusinessesByUser () {
+    public List<Business> findAllByUser() {
         UserProfile userProfile = userService.getUserProfile();
 
         return contentRepository.findAllById(userProfile.getBusinessIds(), Business.class);
     }
 
     @Transactional
-    public Business updateBusiness(Business updatedBusiness) {
+    public Business update(Business updatedBusiness) {
         String userId = userService.getUserId();
 
-        Business existingBusiness = findBusinessById(updatedBusiness.getId());
+        Business existingBusiness = findById(updatedBusiness.getId());
 
         checkPermission(userId, existingBusiness);
 
@@ -115,15 +108,11 @@ public class BusinessService {
         return contentRepository.save(existingBusiness);
     }
 
-    public void deleteBusiness(String businessId) {
+    public void delete(String businessId) {
         UserProfile userProfile = userService.getUserProfile();
-        Business business = findBusinessById(businessId);
+        Business business = findById(businessId);
 
         checkPermission(userProfile.getUserId(), business);
-
-        if (business.getSubscriptionId() != null && !business.getSubscriptionId().isEmpty()) {
-            stripeService.cancelSubscriptionAtPeriodEnd(business.getSubscriptionId());
-        }
 
         tagService.removeTags(business.getTags(), ContentTypes.BUSINESS.getContentType());
 
@@ -153,7 +142,7 @@ public class BusinessService {
     }
 
     public Boolean handleContactFormSubmission(String slug, String name, String email, String message) {
-        Business business = findBusinessBySlug(slug);
+        Business business = findBySlug(slug);
 
         try {
              emailService.sendContactBusinessEmail(business.getEmail(), name, email, message);
