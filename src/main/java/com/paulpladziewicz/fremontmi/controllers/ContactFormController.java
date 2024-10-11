@@ -27,4 +27,18 @@ public class ContactFormController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit the form");
         }
     }
+
+    @PostMapping("/taqueria")
+    public ResponseEntity<String> taqueriaContactForm(@RequestBody ContactFormRequest contactFormRequest) {
+        try {
+            emailService.generalContactForm("ppladziewicz@gmail.com",
+                    contactFormRequest.getName(),
+                    contactFormRequest.getEmail(),
+                    contactFormRequest.getMessage());
+
+            return ResponseEntity.ok("Form submitted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit the form");
+        }
+    }
 }

@@ -70,30 +70,35 @@
 
     </style>
 </head>
-<body id="body" style="margin: 0 !important; padding: 0 !important;">
-
-<!-- Preview text for the inbox -->
-<!-- This will be displayed underneath the subject line. Use it wisely. -->
+<body id="body" style="margin: 0; padding: 0; background-color: #f7f7f7;">
 <div style="display: none; max-height: 0; overflow: hidden;">
-    Welcome to FremontMI! We're glad you're here.
+    You have received a new contact message from FremontMI.
 </div>
+<div style="background-color: white; color: #222222; font-family: sans-serif; font-size: 18px; line-height: 1.6; margin: 0 auto; max-width: 600px; padding: 40px 20px;">
+    <h1 style="font-size: 32px; margin-bottom: 25px; color: #333333; text-align: center; font-weight: 700;">Article Contact Form Submission from <span>Fremont<span style="color: #448C74;">MI</span></span></h1>
 
-<!--[if (gte mso 9)|(IE)]>
-<table cellspacing="0" cellpadding="0" border="0" width="600" align="center" role="presentation"><tr><td>
-<![endif]-->
+    <p style="margin-bottom: 25px;">
+        You have received a new contact message from <strong th:text="${name}">[Name]</strong>.
+    </p>
+    <p style="margin-bottom: 25px;">
+        <strong>Sender's Email:</strong> <a th:href="'mailto:'+${fromEmail}" style="color: #229efd;" th:text="${fromEmail}"></a>
+    </p>
+    <p style="margin-bottom: 25px;">
+        <strong>Message:</strong>
+    </p>
+    <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin-bottom: 30px;">
+        <p style="margin: 0; white-space: pre-wrap;" th:text="${message}">[User's message goes here]</p>
+    </div>
 
-<div style="background-color: white; color: #000000; font-family: sans-serif; font-size: 18px; line-height: 36px; margin: 0 auto; max-width: 600px; padding: 40px 20px 40px 20px;">
+    <p style="margin-bottom: 25px; text-align: center;">
+        Feel free to reply directly to this email.
+    </p>
 
-    <h1 style="font-size: 28px; margin-bottom: 20px; color: #333333; text-align: center;">Contact Form Submission</h1>
-
-    <p th:text="${name}" style="margin-bottom: 20px; text-align: center;"></p>
-    <p th:text="${email}" style="margin-bottom: 20px; text-align: center;"></p>
-    <p th:text="${message}" style="margin-bottom: 20px; text-align: center;"></p>
+    <div style="padding: 20px; margin-top: 20px; border-radius: 5px;">
+        <p style="text-align: center; font-size: 12px; color: #666666; margin-top: 10px;">
+            This message was sent via an article contact form via FremontMI.com.
+        </p>
+    </div>
 </div>
-
-<!--[if (gte mso 9)|(IE)]>
-</td></tr></table>
-<![endif]-->
-
 </body>
 </html>

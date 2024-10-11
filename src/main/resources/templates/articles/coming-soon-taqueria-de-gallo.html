@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:insert="~{partials/layout :: minimalHead}"></th:block>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
     <title>Taqueria De Gallo Coming Soon in Fremont, MI</title>
     <meta name="description" content="Exciting news for Fremont, MI! Taqueria De Gallo is bringing authentic Mexican flavors, including trompo-cooked tacos, to the heart of town." />
     <meta name="keywords" content="Fremont MI, Taqueria De Gallo, Mexican restaurant, authentic tacos, trompo cooking, new restaurant opening" />
@@ -22,7 +22,7 @@
 
                 <h1 class="pb-2 pb-lg-3">Taqueria De Gallo Coming Soon in Fremont, MI</h1>
                 <p class="lead">Get ready to savor the authentic Mexican flavors at Taqueria De Gallo, set to open soon in Fremont, MI. Specializing in traditional trompo-cooked tacos and other mexican cuisine favorites, this taqueria promises a true taste of Mexico right in the heart of our town.</p>
-                <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom mb-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom mb-5">
                     <div class="d-flex align-items-center mb-4 me-4">
                     </div>
                     <div class="d-flex align-items-center mb-4">
@@ -63,32 +63,29 @@
     </div>
 
     <section class="bg-secondary">
-
         <div class="container pt-5 pb-3 pb-xl-4 py-xxl-5">
-
             <div class="row pb-1 pb-sm-3 pb-lg-4">
-
                 <div class="col-lg-8 col-xl-7 offset-xl-1 mx-auto">
                     <h1 class="display-6 text-center mb-4 text-capitalize">Have a question or feedback for Taqueria De Gallo?</h1>
 
-                    <form class="row g-4 needs-validation" id="contactForm" novalidate>
+                    <form class="row g-4 needs-validation" novalidate="" id="contactForm">
                         <div class="col-sm-6">
                             <label class="form-label fs-base" for="name">Name</label>
-                            <input class="form-control form-control-lg" type="text" placeholder="Your name" required id="name">
+                            <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
                             <div class="invalid-feedback">Please enter your name!</div>
                         </div>
                         <div class="col-sm-6">
                             <label class="form-label fs-base" for="email">Email</label>
-                            <input class="form-control form-control-lg" type="email" placeholder="Email address" required id="email">
+                            <input class="form-control form-control-lg" type="email" placeholder="Email address" required="" id="email">
                             <div class="invalid-feedback">Please provide a valid email address!</div>
                         </div>
                         <div class="col-sm-12">
                             <label class="form-label fs-base" for="message">Message</label>
-                            <textarea class="form-control form-control-lg" rows="5" placeholder="Enter your message here..." required id="message"></textarea>
+                            <textarea class="form-control form-control-lg" rows="5" placeholder="Enter your message here..." required="" id="message"></textarea>
                             <div class="invalid-feedback">Please enter your message!</div>
                         </div>
                         <div class="col-sm-12 pt-2">
-                            <button id="submit-button" class="btn btn-lg btn-primary" type="submit">Send message</button>
+                            <button id="submit-button" class="btn btn-lg btn-primary" type="button" onclick="submitContactForm()">Send message</button>
                             <button id="loading-button" class="btn btn-lg btn-primary pe-none" type="button" style="display: none;">
                                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                 Loading...
@@ -97,6 +94,7 @@
                     </form>
 
                     <div id="form-message" class="alert mt-4" style="display: none;"></div>
+
                 </div>
             </div>
         </div>
@@ -104,63 +102,59 @@
 </main>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    async function submitContactForm() {
         const form = document.getElementById('contactForm');
-        form.addEventListener('submit', async function (event) {
-            event.preventDefault();
-            if (!form.checkValidity()) {
-                event.stopPropagation();
-                form.classList.add('was-validated');
-                return;
-            }
+        const submitButton = document.getElementById('submit-button');
+        const loadingButton = document.getElementById('loading-button');
+        const formMessage = document.getElementById('form-message');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
 
-            const submitButton = document.getElementById('submit-button');
-            const loadingButton = document.getElementById('loading-button');
-            const formMessage = document.getElementById('form-message');
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
 
-            const formData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                message: document.getElementById('message').value
-            };
+        const formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            message: document.getElementById('message').value
+        };
 
-            submitButton.style.display = 'none';
-            loadingButton.style.display = 'block';
+        submitButton.style.display = 'none';
+        loadingButton.style.display = 'block';
 
-            try {
-                const response = await fetch('/taqueria', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        [csrfHeader]: csrfToken
-                    },
-                    body: JSON.stringify(formData)
-                });
+        try {
+            const response = await fetch('/taqueria', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(formData)
+            });
 
-                if (response.ok) {
-                    formMessage.style.display = 'block';
-                    formMessage.classList.remove('alert-danger');
-                    formMessage.classList.add('alert-primary');
-                    formMessage.innerText = 'Thank you for your feedback! We have received your message.';
-
-                    form.reset();
-                    form.classList.remove('was-validated');
-                } else {
-                    throw new Error('Submission failed');
-                }
-            } catch (error) {
+            if (response.ok) {
                 formMessage.style.display = 'block';
-                formMessage.classList.remove('alert-success');
-                formMessage.classList.add('alert-danger');
-                formMessage.innerText = 'Failed to submit the form. Please try again later.';
-            } finally {
-                loadingButton.style.display = 'none';
-                submitButton.style.display = 'block';
+                formMessage.classList.remove('alert-danger');
+                formMessage.classList.add('alert-primary');
+                formMessage.innerText = 'Thank you for your feedback! We have received your message.';
+
+                form.reset();
+                form.classList.remove('was-validated');
+            } else {
+                throw new Error('Submission failed');
             }
-        });
-    });
+        } catch (error) {
+            formMessage.style.display = 'block';
+            formMessage.classList.remove('alert-success');
+            formMessage.classList.add('alert-danger');
+            formMessage.innerText = 'Failed to submit the form. Please try again later.';
+        } finally {
+            loadingButton.style.display = 'none';
+            submitButton.style.display = 'block';
+        }
+    }
 </script>
 
 <footer th:replace="~{partials/footer}"></footer>
