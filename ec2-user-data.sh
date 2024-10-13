@@ -8,11 +8,11 @@ sudo yum install -y nginx
 sudo yum install -y java-21-amazon-corretto-headless
 
 # Download the required files
-aws s3 cp s3://westmichigansoftware/deployments/fremontmi-1.1.6.jar /home/ec2-user/fremontmi-1.1.6.jar
+aws s3 cp s3://westmichigansoftware/deployments/fremontmi-1.1.7.jar /home/ec2-user/fremontmi-1.1.7.jar
 sudo aws s3 cp s3://westmichigansoftware/deployments/nginx.conf /etc/nginx/nginx.conf
 
 # Start the application
-sudo bash -c 'nohup java -jar /home/ec2-user/fremontmi-1.1.6.jar > /var/log/app.log 2>&1 &'
+sudo bash -c 'nohup java -jar /home/ec2-user/fremontmi-1.1.7.jar > /var/log/app.log 2>&1 &'
 
 # Start and enable NGINX
 sudo systemctl start nginx
