@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - NeighborService')}"></head>
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>[[${neighborServicesProfile.name}]] - NeighborServices™ Profile in Fremont, MI</title>
+    <meta name="description" th:content="${#strings.length(neighborServicesProfile.description) > 160 ? #strings.substring(neighborServicesProfile.description, 0, 157) + '...' : neighborServicesProfile.description}" />
+    <th:block th:if="${neighborServicesProfile.tags != null and #lists.size(neighborServicesProfile.tags) > 0}">
+        <meta name="keywords" th:content="${#strings.arrayJoin(neighborServicesProfile.tags, ', ')}" />
+    </th:block>
+</head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 

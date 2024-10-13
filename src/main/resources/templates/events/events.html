@@ -65,9 +65,19 @@
 
                         <p th:if="${event.nextAvailableDayEvent == null}" class="text-muted">No upcoming times available</p>
 
-                        <p th:text="${#strings.length(event.description) > 120 ? #strings.substring(event.description, 0, 120) + '...' : event.description}">
+                        <p class="mb-2" th:text="${#strings.length(event.description) > 120 ? #strings.substring(event.description, 0, 120) + '...' : event.description}">
                             Event Description
                         </p>
+
+                        <div th:if="${!#lists.isEmpty(event.tags)}" class="mb-2">
+                            <div class="d-flex flex-wrap">
+                                    <span th:each="tag : ${event.tags}"
+                                          class="badge bg-secondary m-1"
+                                          th:text="${tag}">
+                                    </span>
+                            </div>
+                        </div>
+
                         <a th:href="'/events/' + ${event.slug}" class="btn btn-lg btn-link p-0">View Event<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>

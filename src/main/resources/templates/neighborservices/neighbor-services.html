@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - NeighborServices™')}">
+<head th:replace="~{partials/head :: head('NeighborServices™ in Fremont, MI - Services offered by individuals for the community')}">
     <title>NeighborServices™</title>
 </head>
 <body>
@@ -47,13 +47,11 @@
                         <div class="card-body">
                             <h4 class="h3 mb-1" th:text="${neighborServicesProfile.name}"></h4>
 
-                            <p th:text="${#strings.length(neighborServicesProfile.description) > 120 ? #strings.substring(neighborServicesProfile.description, 0, 120) + '...' : neighborServicesProfile.description}">
+                            <p class="mb-2" th:text="${#strings.length(neighborServicesProfile.description) > 120 ? #strings.substring(neighborServicesProfile.description, 0, 120) + '...' : neighborServicesProfile.description}">
                                 Business Description
                             </p>
-                            <a th:href="'/neighbor-services/' + ${neighborServicesProfile.slug}" class="btn btn-lg btn-link p-0">View Profile<i class="ai-arrow-right ms-2"></i></a>
 
-                            <!-- Display Profile Tags -->
-                            <div th:if="${!#lists.isEmpty(neighborServicesProfile.tags)}" class="mt-3">
+                            <div th:if="${!#lists.isEmpty(neighborServicesProfile.tags)}" class="mb-2">
                                 <div class="d-flex flex-wrap">
                                     <span th:each="tag : ${neighborServicesProfile.tags}"
                                           class="badge bg-secondary m-1"
@@ -61,6 +59,8 @@
                                     </span>
                                 </div>
                             </div>
+
+                            <a th:href="'/neighbor-services/' + ${neighborServicesProfile.slug}" class="btn btn-lg btn-link p-0">View Profile<i class="ai-arrow-right ms-2"></i></a>
                         </div>
                     </div>
                 </div>

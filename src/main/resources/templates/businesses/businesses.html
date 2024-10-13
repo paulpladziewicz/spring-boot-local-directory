@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - Businesses')}"><title>Placeholder Title</title></head>
+<head th:replace="~{partials/head :: head('Businesses in Fremont, MI')}"><title>Placeholder Title</title></head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 
@@ -44,12 +44,19 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="h3 mb-1" th:text="${business.name}">Business Name</h4>
-                        <p class="text-muted fw-semibold mb-2">
-                            <span th:text="${business.address}">Business Address</span>
-                        </p>
-                        <p th:text="${#strings.length(business.headline) > 120 ? #strings.substring(business.headline, 0, 120) + '...' : business.headline}">
+                        <p class="mb-2" th:text="${#strings.length(business.headline) > 120 ? #strings.substring(business.headline, 0, 120) + '...' : business.headline}">
                             Business Description
                         </p>
+
+                        <div th:if="${!#lists.isEmpty(business.tags)}" class="mb-2">
+                            <div class="d-flex flex-wrap">
+                                    <span th:each="tag : ${business.tags}"
+                                          class="badge bg-secondary m-1"
+                                          th:text="${tag}">
+                                    </span>
+                            </div>
+                        </div>
+
                         <a th:href="'/businesses/' + ${business.slug}" class="btn btn-lg btn-link p-0">View Business<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>

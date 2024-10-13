@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - Business')}"></head>
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>[[${business.name}]] - Business in Fremont, MI</title>
+    <meta name="description" th:content="${#strings.length(business.description) > 160 ? #strings.substring(business.description, 0, 157) + '...' : business.description}" />
+    <th:block th:if="${business.tags != null and #lists.size(business.tags) > 0}">
+        <meta name="keywords" th:content="${#strings.arrayJoin(business.tags, ', ')}" />
+    </th:block>
+</head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 
