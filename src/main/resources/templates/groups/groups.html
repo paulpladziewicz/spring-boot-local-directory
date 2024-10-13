@@ -48,16 +48,7 @@
                             <span th:text="${group.members.size()}"></span>
                             <span th:text="${group.members.size() == 1 ? 'Member' : 'Members'}"></span>
                         </p>
-                        <p class="mb-2" th:text="${#strings.length(group.description) > 120 ? #strings.substring(group.description, 0, 120) + '...' : group.description}"></p>
-
-                        <div th:if="${!#lists.isEmpty(group.tags)}" class="mb-2">
-                            <div class="d-flex flex-wrap">
-                                    <span th:each="tag : ${group.tags}"
-                                          class="badge bg-secondary m-1"
-                                          th:text="${tag}">
-                                    </span>
-                            </div>
-                        </div>
+                        <p class="mb-3" th:text="${#strings.length(group.description) > 120 ? #strings.substring(group.description, 0, 120) + '...' : group.description}"></p>
 
                         <a th:href="'/groups/' + ${group.slug}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
                     </div>

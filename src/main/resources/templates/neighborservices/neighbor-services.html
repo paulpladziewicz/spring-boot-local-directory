@@ -47,18 +47,9 @@
                         <div class="card-body">
                             <h4 class="h3 mb-1" th:text="${neighborServicesProfile.name}"></h4>
 
-                            <p class="mb-2" th:text="${#strings.length(neighborServicesProfile.description) > 120 ? #strings.substring(neighborServicesProfile.description, 0, 120) + '...' : neighborServicesProfile.description}">
+                            <p class="mb-3" th:text="${#strings.length(neighborServicesProfile.description) > 120 ? #strings.substring(neighborServicesProfile.description, 0, 120) + '...' : neighborServicesProfile.description}">
                                 Business Description
                             </p>
-
-                            <div th:if="${!#lists.isEmpty(neighborServicesProfile.tags)}" class="mb-2">
-                                <div class="d-flex flex-wrap">
-                                    <span th:each="tag : ${neighborServicesProfile.tags}"
-                                          class="badge bg-secondary m-1"
-                                          th:text="${tag}">
-                                    </span>
-                                </div>
-                            </div>
 
                             <a th:href="'/neighbor-services/' + ${neighborServicesProfile.slug}" class="btn btn-lg btn-link p-0">View Profile<i class="ai-arrow-right ms-2"></i></a>
                         </div>
