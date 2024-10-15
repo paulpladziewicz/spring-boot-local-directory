@@ -49,7 +49,11 @@
                     </li>
                     <li class="nav flex-nowrap mb-3" th:if="${business.website} != null and !${#strings.isEmpty(business.website)}">
                         <i class="ai-globe lead text-primary me-2"></i>
-                        <a class="nav-link fw-normal p-0 mt-n1" th:href="${business.website}" target="_blank" rel="noopener noreferrer" th:text="${business.website}">www.example.com</a>
+                        <a class="nav-link fw-normal p-0 mt-n1"
+                           th:href="${#strings.startsWith(business.website, 'http') ? business.website : 'https://' + business.website}"
+                           target="_blank" rel="noopener noreferrer" th:text="${business.website}">
+                            www.example.com
+                        </a>
                     </li>
                 </ul>
             </div>
