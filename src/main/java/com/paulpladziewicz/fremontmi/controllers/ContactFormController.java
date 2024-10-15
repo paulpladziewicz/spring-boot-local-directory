@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.ContactFormRequest;
 import com.paulpladziewicz.fremontmi.services.EmailService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ public class ContactFormController {
     }
 
     @PostMapping("/article-contact")
-    public ResponseEntity<String> submitContactForm(@RequestBody ContactFormRequest request) {
+    public ResponseEntity<String> submitContactForm(@RequestBody @Valid ContactFormRequest request) {
         try {
             emailService.sendContactUsEmailAsync(request.getName(), request.getEmail(), "Parks article submission: " + request.getMessage());
 
@@ -29,7 +30,7 @@ public class ContactFormController {
     }
 
     @PostMapping("/taqueria")
-    public ResponseEntity<String> taqueriaContactForm(@RequestBody ContactFormRequest contactFormRequest) {
+    public ResponseEntity<String> taqueriaContactForm(@RequestBody @Valid ContactFormRequest contactFormRequest) {
         try {
             emailService.generalContactForm("ppladziewicz@gmail.com",
                     contactFormRequest.getName(),

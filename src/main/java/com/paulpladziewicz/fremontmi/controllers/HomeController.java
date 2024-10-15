@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.services.EmailService;
 import com.paulpladziewicz.fremontmi.services.SubscribeService;
+import jakarta.validation.constraints.Email;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,7 +53,7 @@ public class HomeController {
 
     @PostMapping("/subscribe")
     public String handleSubscribeForm(
-            @RequestParam("email") String email,
+            @RequestParam("email") @Email String email,
             RedirectAttributes redirectAttributes) {
 
         subscribeService.subscribe(email);

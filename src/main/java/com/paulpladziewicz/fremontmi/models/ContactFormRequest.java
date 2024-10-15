@@ -1,5 +1,7 @@
 package com.paulpladziewicz.fremontmi.models;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,7 +9,13 @@ import lombok.Setter;
 @Setter
 public class ContactFormRequest {
     private String slug;
+
+    @NotBlank
     private String name;
+
+    @Email
     private String email;
+
+    @NotBlank
     private String message;
 }
