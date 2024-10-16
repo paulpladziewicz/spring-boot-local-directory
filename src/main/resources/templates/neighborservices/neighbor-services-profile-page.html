@@ -79,6 +79,7 @@
                             <li class="list-group-item" th:each="service : ${neighborServicesProfile.neighborServices}">
                                 <h4 th:text="${service.name}"></h4>
                                 <p th:text="${service.description}"></p>
+                                <p th:text="${service.price}"></p>
                             </li>
                         </ul>
                     </div>

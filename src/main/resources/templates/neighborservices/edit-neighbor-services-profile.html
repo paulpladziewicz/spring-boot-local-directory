@@ -53,6 +53,12 @@
                                 <span class="text-danger" th:if="${#fields.hasErrors('neighborServices[' + iterStat.index + '].description')}" th:errors="*{neighborServices[__${iterStat.index}__].description}"></span>
                             </div>
 
+                            <div class="form-group mb-2">
+                                <label th:for="'neighborServices.' + iterStat.index + '.price'">Service Price</label>
+                                <input type="text" class="form-control" th:field="*{neighborServices[__${iterStat.index}__].price}" placeholder="Service price" required>
+                                <span class="text-danger" th:if="${#fields.hasErrors('neighborServices[' + iterStat.index + '].price')}" th:errors="*{neighborServices[__${iterStat.index}__].price}"></span>
+                            </div>
+
                             <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)" style="display: block;">Remove</a>
                         </div>
                     </div>
@@ -81,16 +87,20 @@
         const newService = document.createElement('div');
         newService.classList.add('neighbor-service-item', 'mb-3');
         newService.innerHTML = `
-            <div class="form-group mb-2">
-                <label for="neighborServices[${serviceIndex}].name">Service Name</label>
-                <input type="text" class="form-control" name="neighborServices[${serviceIndex}].name" placeholder="Service name" required>
-            </div>
-            <div class="form-group mb-2">
-                <label for="neighborServices[${serviceIndex}].description">Service Description</label>
-                <textarea class="form-control" name="neighborServices[${serviceIndex}].description" rows="3" placeholder="Service description" required></textarea>
-            </div>
-            <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)">Remove</a>
-        `;
+        <div class="form-group mb-2">
+            <label for="neighborServices[${serviceIndex}].name">Service Name</label>
+            <input type="text" class="form-control" name="neighborServices[${serviceIndex}].name" placeholder="Service name" required>
+        </div>
+        <div class="form-group mb-2">
+            <label for="neighborServices[${serviceIndex}].description">Service Description</label>
+            <textarea class="form-control" name="neighborServices[${serviceIndex}].description" rows="3" placeholder="Service description" required></textarea>
+        </div>
+        <div class="form-group mb-2">
+            <label for="neighborServices[${serviceIndex}].price">Service Price</label>
+            <input type="text" class="form-control" name="neighborServices[${serviceIndex}].price" placeholder="Service price" required>
+        </div>
+        <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)">Remove</a>
+    `;
         container.appendChild(newService);
         serviceIndex++;
 
@@ -115,6 +125,7 @@
         serviceItems.forEach((item, index) => {
             const nameInput = item.querySelector('input[name^="neighborServices"]');
             const descInput = item.querySelector('textarea[name^="neighborServices"]');
+            const priceInput = item.querySelector('input[name^="neighborServices"][name$="price"]');
 
             if (nameInput) {
                 nameInput.name = `neighborServices[${index}].name`;
@@ -127,6 +138,12 @@
                 descInput.id = `neighborServices[${index}].description`;
                 descInput.previousElementSibling.setAttribute('for', `neighborServices[${index}].description`);
             }
+
+            if (priceInput) {
+                priceInput.name = `neighborServices[${index}].price`;
+                priceInput.id = `neighborServices[${index}].price`;
+                priceInput.previousElementSibling.setAttribute('for', `neighborServices[${index}].price`);
+            }
         });
 
         serviceIndex = serviceItems.length;
@@ -138,8 +155,9 @@
         serviceItems.forEach(item => {
             const nameInput = item.querySelector('input[name^="neighborServices"]');
             const descInput = item.querySelector('textarea[name^="neighborServices"]');
+            const priceInput = item.querySelector('input[name^="neighborServices"][name$="price"]');
 
-            if (!nameInput.value.trim() && !descInput.value.trim()) {
+            if (!nameInput.value.trim() && !descInput.value.trim() && !priceInput.value.trim()) {
                 item.remove();
             }
         });
