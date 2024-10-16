@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>Share the Joy: Give Toys, Spread Smiles | Fremont, MI</title>
+    <meta name="description" content="Donate toys and spread joy this holiday season in Fremont, MI. Support local families by giving to community organizations and gift drives like Toys for Tots.">
+    <meta name="keywords" content="toy donation, holiday giving, Fremont MI, Toys for Tots, donate toys, children's Christmas, community services, gift drives">
+</head>
+
+
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<main class="pt-1">
+
+    <article class="container">
+        <div class="row">
+            <div class="col-lg-9 col-xl-8 mx-auto">
+
+                <img src="/images/toy-drive.webp" class="img-fluid rounded mb-4" alt="Image of Christmas Morning with Toys">
+
+
+                <h1>Share the Joy: Give Toys, Spread Smiles</h1>
+                <p class="lead">As the holiday season nears, share the joy of giving by donating gently used toys to local organizations in Fremont, MI. Help spread smiles and ensure that every child experiences the magic of receiving a gift this year.</p>
+                <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom mb-5">
+                    <div class="d-flex align-items-center mb-4 me-4">
+                    </div>
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="fs-sm me-2">Share article:</span>
+                        <div class="d-flex">
+                            <a class="nav-link me-2" href="https://www.facebook.com/sharer/sharer.php?u=https://fremontmi.com/articles/share-the-joy-give-toys-spread-smiles"
+                               data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Facebook" data-bs-original-title="Facebook" target="_blank">
+                                <i class="ai-facebook"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <section>
+                    <p class="fs-xl">
+                        As the holiday season approaches, many families are filled with excitement. However, for others, the financial burden can make gift-giving a challenge. One meaningful way to support those in need is by donating your gently used toys to local thrift stores and community organizations.
+                    </p>
+
+                    <p class="fs-xl fw-bold text-capitalize">Community organizations</p>
+                    <dl>
+                        <dt>Nest FCS Resale</dt>
+                        <dd>1 E Main St, Fremont, MI 49412</dd>
+                        <dt><a href="https://www.truenorthservices.org/" target="_blank">True North Community Services</a></dt>
+                        <dd>6308 S Warner Ave, Fremont, MI 49412</dd>
+                        <dt><a href="https://www.communityclosetcharities.com/" target="_blank">Community Closet Charities</a></dt>
+                        <dd>201 E Maple St, Fremont, MI 49412</dd>
+                    </dl>
+
+                    <p class="fs-xl fw-bold text-capitalize">local gift drives</p>
+                    <dl>
+                        <dt><a href="https://www.truenorthservices.org/childrens-christmas/" target="_blank">Children's Christmas Programs & Toys for Tots</a></dt>
+                        <dd>True North Community Services</dd>
+                        <dt><a href="https://www.truenorthservices.org/coats-for-kids/" target="_blank">Coats For Kids (& Adults)</a></dt>
+                        <dd>True North Community Services</dd>
+                    </dl>
+
+                    <p class="fs-xl">
+                        Every toy or loved item you donate carries a story and a sense of joy that deserves to be shared. By cleaning out your toy box, closet, or home, you not only create space for new items but also give your well-loved toys a chance to bring happiness to other children. This act of kindness not only helps families in need but also teaches our children the value of generosity and community spirit.
+                    </p>
+
+                    <p class="fs-xl">
+                        Now is the perfect time to make a difference. As you prepare for the holidays, consider gathering gently used items—such as toys, clothes, blankets, hats, gloves, and accessories—to donate before the rush begins.
+                    </p>
+
+                    <p class="fs-xl">
+                        Your contributions can help ensure that every child and family experiences the joy of receiving gifts, while also creating a sense of connection and goodwill in our community.
+                    </p>
+
+                    <p class="fs-xl">
+                        Let’s come together to share the joy this season and make room for new memories by finding good homes for all the items we no longer need, including books, games, and warm winter wear for all ages.
+                    </p>
+                </section>
+
+            </div>
+        </div>
+    </article>
+
+</main>
+
+<footer th:replace="~{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>
