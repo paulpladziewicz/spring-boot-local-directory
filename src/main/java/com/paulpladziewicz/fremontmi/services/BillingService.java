@@ -37,6 +37,12 @@ public class BillingService {
     @Value("${stripe.secret.key}")
     private String stripeApiKey;
 
+    @Value("${stripe.price.monthly.neighborservice}")
+    private String monthlyNeighborServicePriceId;
+
+    @Value("${stripe.price.annual.neighborservice}")
+    private String annualNeighborServicePriceId;
+
     public BillingService(UserService userService, EmailService emailService, ContentRepository contentRepository) {
         this.userService = userService;
         this.emailService = emailService;

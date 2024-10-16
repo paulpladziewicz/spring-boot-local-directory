@@ -17,4 +17,5 @@ public class BillingInfo {
     private Date billingDate;
     private Double amount;
     private String status;
+    private String clientSecret;
 }
