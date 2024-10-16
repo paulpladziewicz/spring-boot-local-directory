@@ -36,13 +36,19 @@
             <div class="col-lg-8 mx-auto">
                 <div class="d-flex justify-content-center">
                     <div class="dropdown">
-                        <a class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="width: 160px; height: 160px; background-color: var(--ar-gray-100);" aria-label="Upload picture">
-                      <span class="d-block text-light text-center lh-1 pb-1" style="background-color: rgba(0,0,0,.5)">
-                        <i class="ai-camera"></i>
-                      </span>
+                        <a th:if="${neighborServicesProfile.profileImageUrl != null}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" th:style="'width: 160px; height: 160px; background-image: url(' + ${neighborServicesProfile.profileImageUrl} + ');'" aria-label="Upload picture">
+                            <span class="d-block text-light text-center lh-1 pb-1" style="background-color: rgba(0,0,0,.5)">
+                                <i class="ai-camera"></i>
+                            </span>
                         </a>
+                        <a th:if="${neighborServicesProfile.profileImageUrl == null}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="width: 160px; height: 160px; background-color: var(--ar-gray-100);" aria-label="Upload picture">
+                          <span class="d-block text-light text-center lh-1 pb-1" style="background-color: rgba(0,0,0,.5)">
+                            <i class="ai-camera"></i>
+                          </span>
+                        </a>
+
                         <div class="dropdown-menu my-1" style="">
-                            <a class="dropdown-item fw-normal" href="#">
+                            <a class="dropdown-item fw-normal" href="#" data-bs-toggle="modal" data-bs-target="#uploadPhotoModal">
                                 <i class="ai-camera fs-base opacity-70 me-2"></i>
                                 Upload new photo
                             </a>
@@ -52,6 +58,7 @@
                             </a>
                         </div>
                     </div>
+
                 </div>
                 <h1 th:text="${neighborServicesProfile.name}" class="display-3 mb-3 text-center">Fremont NeighborService Name</h1>
                 <p th:utext="${neighborServicesProfile.description}" class="fs-xl mb-3">Description about the service...</p>
@@ -121,7 +128,66 @@
             </div>
         </div>
     </section>
+
+    <!-- Full screen modal -->
+    <div class="modal fade" id="uploadPhotoModal" tabindex="-1" aria-labelledby="uploadPhotoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadPhotoModalLabel">Upload New Photo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-6 mx-auto">
+                                <form id="uploadForm" th:action="@{/upload}" method="post" enctype="multipart/form-data">
+                                    <input type="hidden" name="contentType" th:value="${neighborServicesProfile.type}">
+                                    <input type="hidden" name="contentId" th:value="${neighborServicesProfile.id}">
+                                    <div class="mb-3">
+                                        <label for="formFile" class="form-label">Select Photo</label>
+                                        <input class="form-control" type="file" id="formFile" name="files" required multiple>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Upload</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
+
+<!--<script>-->
+<!--    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');-->
+<!--    const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');-->
+
+<!--    function uploadPhoto() {-->
+<!--        const form = document.getElementById('uploadForm');-->
+<!--        const formData = new FormData(form);-->
+<!--        formData.append(csrfHeader, csrfToken);-->
+
+<!--        fetch('/api/upload', {-->
+<!--            method: 'POST',-->
+<!--            body: formData-->
+<!--        })-->
+<!--            .then(response => {-->
+<!--                if (!response.ok) {-->
+<!--                    throw new Error('Upload failed');-->
+<!--                }-->
+<!--                return response.text();-->
+<!--            })-->
+<!--            .then(data => {-->
+<!--                const uploadPhotoModal = new bootstrap.Modal(document.getElementById('uploadPhotoModal'));-->
+<!--                uploadPhotoModal.hide();-->
+<!--            })-->
+<!--            .catch(error => {-->
+<!--                console.error('Error uploading photo:', error);-->
+<!--                alert('Failed to upload photo. Please try again.');-->
+<!--            });-->
+<!--    }-->
+<!--</script>-->
 
 <script th:inline="javascript">
     function submitContactForm() {

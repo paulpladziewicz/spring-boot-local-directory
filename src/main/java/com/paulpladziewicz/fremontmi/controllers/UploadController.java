@@ -1,0 +1,71 @@
+package com.paulpladziewicz.fremontmi.controllers;
+
+import com.paulpladziewicz.fremontmi.exceptions.PermissionDeniedException;
+import com.paulpladziewicz.fremontmi.services.NeighborServicesProfileService;
+import com.paulpladziewicz.fremontmi.services.UploadService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+@Controller
+public class UploadController {
+
+    private final UploadService uploadService;
+    private final NeighborServicesProfileService neighborServicesProfileService;
+
+    public UploadController(UploadService uploadService, NeighborServicesProfileService neighborServicesProfileService) {
+        this.uploadService = uploadService;
+        this.neighborServicesProfileService = neighborServicesProfileService;
+    }
+
+    @PostMapping("/upload")
+    public String uploadFiles(@RequestParam("files") List<MultipartFile> files, @RequestParam("contentType") String contentType, @RequestParam("contentId") String contentId) throws IOException {
+
+        Boolean hasPermission = switch (contentType) {
+            case "neighbor-services-profile" -> neighborServicesProfileService.hasUploadPermission(contentId);
+            default -> false;
+        };
+
+        if (!hasPermission) {
+            throw new PermissionDeniedException("Does not have permission to upload files");
+        }
+
+        CompletableFuture<?>[] uploadFutures = files.stream()
+                .filter(file -> !file.isEmpty())
+                .map(file -> {
+                    String fileName = contentType + "_" + contentId + "_" + files.indexOf(file) + getFileExtension(file.getContentType());
+                    return CompletableFuture.runAsync(() -> {
+                        try {
+                            uploadService.uploadFile(file, fileName);
+                            String cdnUrl = "https://cdn.fremontmi.com/" + fileName;
+                            neighborServicesProfileService.setProfileImageUrl(contentId, cdnUrl);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }).toArray(CompletableFuture[]::new);
+
+        CompletableFuture.allOf(uploadFutures).join();
+
+        return "redirect:/my/neighbor-services/profile";
+    }
+
+    private String getFileExtension(String contentType) {
+        return switch (contentType) {
+            case "image/jpeg" -> ".jpg";
+            case "image/png" -> ".png";
+            case "image/gif" -> ".gif";
+            case "image/webp" -> ".webp";
+            default -> ""; // No extension if the content type is unrecognized
+        };
+    }
+}

@@ -116,6 +116,13 @@ public class NeighborServicesProfileService {
         }
     }
 
+    public boolean hasUploadPermission(String contentId) {
+        String userId = userService.getUserId();
+        NeighborServicesProfile neighborServicesProfile = findNeighborServiceProfileById(contentId);
+
+        return neighborServicesProfile.getCreatedBy().equals(userId);
+    }
+
     private void updateExistingNeighborServiceProfile(NeighborServicesProfile existingProfile, NeighborServicesProfile updatedProfile) {
         existingProfile.setName(updatedProfile.getName());
         existingProfile.setDescription(updatedProfile.getDescription());
@@ -137,5 +144,11 @@ public class NeighborServicesProfileService {
         NeighborServicesProfile neighborServicesProfile = findNeighborServiceProfileBySlug(slug);
 
         emailService.sendContactNeighborServiceProfileEmail(neighborServicesProfile.getEmail(), name, email, message);
+    }
+
+    public void setProfileImageUrl(String contentId, String cdnUrl) {
+        NeighborServicesProfile existingProfile = findNeighborServiceProfileById(contentId);
+        existingProfile.setProfileImageUrl(cdnUrl);
+        contentRepository.save(existingProfile);
     }
 }

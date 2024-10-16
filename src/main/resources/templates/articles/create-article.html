@@ -6,6 +6,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/raw@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
 </head>
 
 <body>
@@ -14,139 +19,103 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-12 mb-4">
-            <div id="announcement-editorjs" class="announcement-editor"></div>
+            <div id="editorjs" class="announcement-editor"></div>
         </div>
     </div>
-    <button id="addButton" class="btn btn-success mt-3">Add Announcement</button>
     <button id="saveButton" class="btn btn-primary mt-3">Save Content</button>
 </div>
 
+
 <script th:inline="javascript">
-    let editor;
-    const announcements = [];
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Initialize the Editor.js instance
-        editor = new EditorJS({
-            holder: 'announcement-editorjs',
-            tools: {
-                header: {
-                    class: Header,
-                    config: {
-                        levels: [2],
-                        defaultLevel: 2
-                    }
-                },
-                paragraph: {
-                    class: Paragraph
-                }
-            },
-            data: {
-                blocks: []
-            },
-            readOnly: true, // Set to true initially to prevent editing until clicked
-            onReady: () => {
-                console.log('Editor.js is ready');
-                renderAnnouncements(); // Render initial announcements
-            }
-        });
-
-        document.getElementById('addButton').addEventListener('click', addAnnouncement);
-        document.getElementById('saveButton').addEventListener('click', saveAnnouncements);
-    });
-
-    function addAnnouncement() {
-        const newAnnouncement = {
-            type: 'header',
-            data: {
-                text: 'New Announcement Title',
-                level: 2
-            }
-        };
-        const newDescription = {
-            type: 'paragraph',
-            data: {
-                text: 'This is the announcement description.'
-            }
-        };
-
-        announcements.push(newAnnouncement, newDescription);
-        renderAnnouncements();
-    }
-
-    function renderAnnouncements() {
-        const editorContainer = document.getElementById('announcement-editorjs');
-        editorContainer.innerHTML = ''; // Clear existing content
-
-        announcements.forEach((block, index) => {
-            const blockElement = document.createElement('div');
-            blockElement.classList.add('mb-3');
-            blockElement.setAttribute('data-index', index);
-
-            if (block.type === 'header') {
-                blockElement.innerHTML = `
-                    <h2>${block.data.text}</h2>
-                    <button class="btn btn-link edit-btn" onclick="editBlock(${index})">Edit</button>
-                    <button class="btn btn-link text-danger delete-btn" onclick="deleteBlock(${index})">Delete</button>
-                `;
-            } else if (block.type === 'paragraph') {
-                blockElement.innerHTML = `
-                    <p>${block.data.text}</p>
-                    <button class="btn btn-link edit-btn" onclick="editBlock(${index})">Edit</button>
-                    <button class="btn btn-link text-danger delete-btn" onclick="deleteBlock(${index})">Delete</button>
-                `;
-            }
-
-            editorContainer.appendChild(blockElement);
-        });
-    }
-
-    function editBlock(index) {
-        // Set Editor.js to editable mode
-        editor.readOnly.toggle();
-
-        // Fetch the block to be edited
-        const block = announcements[index];
-        if (block.type === 'header') {
-            const newTitle = prompt('Edit title:', block.data.text);
-            if (newTitle !== null) {
-                block.data.text = newTitle;
-            }
-        } else if (block.type === 'paragraph') {
-            const newParagraph = prompt('Edit description:', block.data.text);
-            if (newParagraph !== null) {
-                block.data.text = newParagraph;
-            }
+    class StyledParagraph {
+        static get toolbox() {
+            return {
+                title: 'Paragraph',
+                icon: '<svg>...</svg>' // You can add an icon for the tool
+            };
         }
 
-        editor.readOnly.toggle();
-        renderAnnouncements();
-    }
+        constructor({ data }) {
+            this.data = data;
+            this.wrapper = null;
+        }
 
-    function deleteBlock(index) {
-        // Remove the block from the array
-        announcements.splice(index, 1);
-        renderAnnouncements();
-    }
+        render() {
+            this.wrapper = document.createElement('div');
+            const paragraph = document.createElement('p');
+            paragraph.contentEditable = true;
+            paragraph.innerHTML = this.data.text || '';
+            if (this.data.isLead) {
+                paragraph.classList.add('lead'); // Add Bootstrap's lead class
+            }
+            this.wrapper.appendChild(paragraph);
 
-    function saveAnnouncements() {
-        console.log('Saved announcements:', announcements);
-
-        fetch('/saveAnnouncements', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ announcements })
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Announcements saved successfully:', data);
-            })
-            .catch(error => {
-                console.log('Error saving announcements:', error);
+            // Create a button to toggle "lead" class
+            const toggleLeadBtn = document.createElement('button');
+            toggleLeadBtn.innerText = this.data.isLead ? 'Remove Lead' : 'Make Lead';
+            toggleLeadBtn.addEventListener('click', () => {
+                paragraph.classList.toggle('lead');
+                this.data.isLead = paragraph.classList.contains('lead');
+                toggleLeadBtn.innerText = this.data.isLead ? 'Remove Lead' : 'Make Lead';
             });
+
+            this.wrapper.appendChild(toggleLeadBtn);
+            return this.wrapper;
+        }
+
+        save(blockContent) {
+            return {
+                text: blockContent.querySelector('p').innerHTML,
+                isLead: blockContent.querySelector('p').classList.contains('lead')
+            };
+        }
     }
+
+    const editor = new EditorJS({
+        holder: 'editorjs',
+        tools: {
+            header: Header,
+            paragraph: {
+                class: StyledParagraph,
+                inlineToolbar: true,
+            },
+            list: {
+                class: List,
+                inlineToolbar: true,
+                config: {
+                    defaultStyle: 'unordered'
+                }
+            },
+            raw: RawTool,
+            image: {
+                class: ImageTool,
+                config: {
+                    endpoints: {
+                        byFile: 'http://localhost:8008/uploadFile', // Your backend file uploader endpoint
+                        byUrl: 'http://localhost:8008/fetchUrl', // Your endpoint that provides uploading by Url
+                    }
+                }
+            },
+            quote: Quote,
+            embed: {
+                class: Embed,
+                config: {
+                    services: {
+                        youtube: true,
+                        coub: true
+                    }
+                }
+            },
+        }
+    })
+
+    document.getElementById('saveButton').addEventListener('click', () => {
+        editor.save().then((outputData) => {
+            console.log('Article data: ', outputData);
+        }).catch((error) => {
+            console.error('Saving failed: ', error);
+        });
+    });
 </script>
 </body>
 </html>
