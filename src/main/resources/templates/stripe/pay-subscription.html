@@ -1,32 +1,69 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('FremontMI - Businesses')}">
-    <title>Subscription Payment</title>
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>Subscription Payment - FremontMI</title>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
 <main>
-    <div class="container">
+    <div class="container" x-data="subscriptionFlow()">
         <div class="row">
             <div class="col-lg-8 mx-auto">
-                <h1 class="display-4">Subscription Payment</h1>
+                <h1 class="display-5 mb-2">Pay Subscription</h1>
+                <p x-text="getSubscriptionInfo()" class="lead mb-4"></p>
 
-                <!-- Loading state -->
-                <div id="loading-message" class="text-center my-4">
+                <!-- Step 1: Loading while fetching price data -->
+                <div x-show="step === 'loading'" class="text-center my-4">
                     <div class="spinner-border" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p>Fetching subscription details...</p>
+                    <p>Setting up...</p>
                 </div>
 
-                <!-- Payment info will be shown here after loading -->
-                <div id="payment-info" style="display:none;">
-                    <p class="mb-2">You are paying for a <strong id="displayName"></strong> at <strong id="displayPrice"></strong> per billing cycle. You can cancel your subscription at any time through your account settings. Payments are non-refundable.</p>
+                <!-- Step 2: Choose Subscription Plan -->
+                <div x-show="step === 'select'" class="mt-4" x-cloak>
+                    <h3>Select a Subscription Plan</h3>
+                    <div class="row">
+                        <div class="col-md-6 d-flex align-items-stretch">
+                            <div class="card">
+                                <div class="card-body w-100 mx-auto text-center" style="max-width: 23rem;">
+                                    <h3>Monthly</h3>
+                                    <div class="display-2 text-primary" x-text="formatPrice(subscriptionDetails.monthly.displayPrice)"></div>
+                                    <div class="mb-4">per month</div>
+                                    <p class="mb-4 pb-4">Perfect for those who want flexibility without a long-term commitment.</p>
+                                    <button class="btn btn-primary w-100" type="submit" x-on:click="handleSelectSubscription(subscriptionDetails.monthly.priceId)">Proceed with Monthly Subscription</button>
+                                </div>
+                            </div>
+                        </div>
 
-                    <form id="payment-form" class="my-4">
+                        <div class="col-md-6 mt-4 mt-md-0 d-flex align-items-stretch">
+                            <div class="card border-primary bg-primary">
+                                <div class="card-body w-100 mx-auto text-center" style="max-width: 23rem;">
+                                    <h3 class="text-light">Annual</h3>
+                                    <div class="display-2 text-light" x-text="formatPrice(subscriptionDetails.annual.displayPrice)"></div>
+                                    <div class="text-light opacity-70 mb-4">per year</div>
+                                    <p class="text-light opacity-70 mb-4 pb-4">Save money with the annual plan.</p>
+                                    <button class="btn btn-light w-100" type="submit" x-on:click="handleSelectSubscription(subscriptionDetails.annual.priceId)">Proceed with Annual Subscription</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Payment Form -->
+                <div x-show="step === 'payment'" class="" x-cloak>
+                    <p class="mb-2">You are paying for a <strong x-text="subscriptionDetails.displayName"></strong> at <strong x-text="subscriptionDetails.displayPrice"></strong>. You can cancel your subscription at any time through your account settings. Subscription payments are non-refundable.</p>
+                    <button type="button" class="btn btn-link p-0" x-on:click="handleChangeSubscription()">Change Subscription</button>
+
+                    <form id="payment-form" class="my-4" x-on:submit.prevent="submitPayment">
                         <div id="payment-element"></div>
-                        <div id="error-message" class="alert alert-danger mt-3" role="alert" style="display:none;"></div>
-                        <button id="submit-button" class="btn btn-primary mt-4" type="submit" disabled>Submit Payment</button>
+                        <div x-show="errorMessage" class="alert alert-danger mt-3" x-text="errorMessage"></div>
+                        <button class="btn btn-primary mt-4" type="submit" x-bind:disabled="isSubmitting">Submit Payment</button>
                     </form>
                 </div>
             </div>
@@ -36,112 +73,198 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 <script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const contentId = urlParams.get('contentId');
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
-        const stripePublicKey = /*[[${stripePublicKey}]]*/ 'default';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+    const contentId = new URLSearchParams(window.location.search).get('contentId');
+    const contentType = new URLSearchParams(window.location.search).get('contentType');
+    const stripePublicKey = /*[[${stripePublicKey}]]*/ 'default';
 
-        try {
-            // TODO broken...
-            const response = await fetch(`/api/get-content/${contentId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [csrfHeader]: csrfToken,
-                }
-            });
+    function subscriptionFlow() {
+        return {
+            step: 'loading',
+            subscriptionDetails: {},
+            reoccurrence: '',
+            errorMessage: '',
+            isSubmitting: false,
 
-            if (response.ok) {
-                const data = await response.json();
-
-                document.getElementById('displayName').textContent = data.displayName;
-                document.getElementById('displayPrice').textContent = data.displayPrice;
-
-                const stripe = Stripe(stripePublicKey);
-                const elements = stripe.elements({ clientSecret: data.clientSecret });
-                const paymentElement = elements.create("payment");
-                paymentElement.mount("#payment-element");
-
-                document.getElementById('payment-info').style.display = 'block';
-                document.getElementById('loading-message').style.display = 'none';
-                document.getElementById('submit-button').disabled = false;
-
-                document.getElementById('payment-form').addEventListener('submit', async (event) => {
-                    event.preventDefault();
-                    document.getElementById('submit-button').disabled = true;
-
-                    const {error: submitError} = await elements.submit();
-
-                    if (submitError) {
-                        document.getElementById('error-message').innerText = submitError.message;
-                        document.getElementById('error-message').style.display = 'block';
-                        document.getElementById('submit-button').disabled = false;
-                        return;
-                    }
-
-                    const {error, paymentIntent} = await stripe.confirmPayment({
-                        clientSecret: data.clientSecret,
-                        elements,
-                        confirmParams: {
-                            return_url: "http://localhost:8080/payment-success",
-                        },
-                        redirect: "if_required"
+            async init() {
+                try {
+                    const response = await fetch(`/api/stripe/pricing?contentType=${contentType}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
                     });
 
-                    if (paymentIntent.error) {
-                        document.getElementById('error-message').innerText = error.message;
-                        document.getElementById('error-message').style.display = 'block';
-                        document.getElementById('submit-button').disabled = false;
+                    if (response.ok) {
+                        this.subscriptionDetails = await response.json();
+                        this.step = 'select';
                     } else {
-                        await sendPaymentStatusToServer(paymentIntent, contentId);
+                        throw new Error('Failed to load prices');
                     }
+                } catch (error) {
+                    this.errorMessage = error.message;
+                    this.step = 'loading';
+                }
+            },
+
+            async handleSelectSubscription(reoccurrence, priceId) {
+                this.reoccurrence = reoccurrence;
+
+                if (this.subscriptionDetails.priceId) {
+                    if (this.subscriptionDetails.priceId !== priceId) {
+                        this.subscriptionDetails.priceId = priceId;
+                        return await this.updateSubscription();
+                    } else {
+                        return this.step = 'payment';
+                    }
+                }
+
+                this.subscriptionDetails.priceId = priceId;
+                await this.createSubscription();
+            },
+
+            async handleChangeSubscription() {
+                this.step = 'select';
+            },
+
+            async createSubscription() {
+                this.step = 'loading';
+
+                try {
+                    const response = await fetch(`/api/stripe/create/subscription`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [csrfHeader]: csrfToken,
+                        },
+                        body: JSON.stringify({
+                            priceId: this.subscriptionDetails.priceId
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        this.subscriptionDetails = {
+                            ...this.subscriptionDetails,
+                            ...data
+                        };
+
+                        const stripe = Stripe(stripePublicKey);
+                        const elements = stripe.elements({ clientSecret: this.subscriptionDetails.clientSecret });
+                        const paymentElement = elements.create("payment");
+                        paymentElement.mount("#payment-element");
+
+                        this.step = 'payment';
+                    } else {
+                        throw new Error('Failed to create subscription');
+                    }
+                } catch (error) {
+                    this.errorMessage = error.message;
+                }
+            },
+
+            async updateSubscription() {
+                try {
+                    const response = await fetch(`/api/stripe/update/subscription`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [csrfHeader]: csrfToken,
+                        },
+                        body: JSON.stringify({
+                            subscriptionId: this.subscriptionDetails.subscriptionId,
+                            priceId: this.subscriptionDetails.priceId
+                        })
+                    });
+
+                    if (response.ok) {
+                        const { success } = await response.json();
+
+                        if (success) {
+                            const stripe = Stripe(stripePublicKey);
+                            const elements = stripe.elements({ clientSecret: this.subscriptionDetails.clientSecret });
+                            const paymentElement = elements.create("payment");
+                            paymentElement.mount("#payment-element");
+                            this.step = "payment";
+                        } else {
+                            throw new Error('Failed to update subscription');
+                        }
+                    } else {
+                        throw new Error('Failed to update subscription');
+                    }
+                } catch (error) {
+                    this.errorMessage = error.message;
+                }
+            },
+
+            async submitPayment() {
+                this.isSubmitting = true;
+                this.errorMessage = '';
+
+                const stripe = Stripe(stripePublicKey);
+
+                const { error, paymentIntent } = await stripe.confirmPayment({
+                    elements: stripe.elements(),
+                    confirmParams: {
+                        return_url: "https://fremontmi.com/error",
+                    },
                 });
 
-            } else {
-                document.getElementById('error-message').innerText = 'Failed to load subscription details. Please try again later.';
-                document.getElementById('error-message').style.display = 'block';
-                document.getElementById('loading-message').style.display = 'none';
-            }
-        } catch (error) {
-            document.getElementById('error-message').innerText = 'Error fetching subscription details. Please try again.';
-            document.getElementById('error-message').style.display = 'block';
-            document.getElementById('loading-message').style.display = 'none';
-        }
-    });
+                if (error) {
+                    this.errorMessage = error.message;
+                    this.isSubmitting = false;
+                } else {
+                    await this.sendPaymentStatusToServer(paymentIntent);
+                }
+            },
 
-    async function sendPaymentStatusToServer(paymentIntent, contentId) {
-        try {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
-            // TODO broken...
-            let response = await fetch("/subscription-payment-success", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    [csrfHeader]: csrfToken,
-                },
-                body: JSON.stringify({
-                    entityId: contentId,
-                    paymentIntentId: paymentIntent.id,
-                    paymentStatus: paymentIntent.status,
-                }),
-            });
+            async sendPaymentStatusToServer(paymentIntent) {
+                try {
+                    const response = await fetch("/api/stripe/confirm/subscription", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            [csrfHeader]: csrfToken,
+                        },
+                        body: JSON.stringify({
+                            contentId,
+                            contentType,
+                            subscriptionId: this.subscriptionDetails.subscriptionId,
+                            priceId: this.subscriptionDetails.priceId,
+                            paymentIntentId: paymentIntent.id,
+                            paymentStatus: paymentIntent.status,
+                        })
+                    });
 
-            if (response.ok) {
-                const { redirectUrl } = await response.json();
-                window.location.href = redirectUrl;
-            } else {
-                document.getElementById("error-message").innerText = "Payment was successful, but there was an error updating your subscription. Please contact support.";
-                document.getElementById("error-message").style.display = 'block';
+                    if (response.ok) {
+                        const { redirectUrl } = await response.json();
+                        window.location.href = redirectUrl;
+                    } else {
+                        this.errorMessage = 'Payment was successful, but there was an error updating your subscription. Please contact support.';
+                        this.isSubmitting = false;
+                    }
+                } catch (error) {
+                    this.errorMessage = 'There was an issue processing your payment. Please try again.';
+                    this.isSubmitting = false;
+                }
+            },
+
+            formatPrice(price) {
+                if (!price) return '';
+                return price.replace('.00', '').replace('/ month', '').replace('/ year', '');
+            },
+
+            getSubscriptionInfo() {
+                switch (contentType) {
+                    case 'neighbor-services-profile':
+                        return 'A subscription is required to list your NeighborServices™ Profile to be publicly visible and connect with potential customers in the community.';
+                    default:
+                        return '';
+                }
             }
-        } catch (error) {
-            document.getElementById("error-message").innerText = "There was an issue processing your payment. Please try again.";
-            document.getElementById("error-message").style.display = 'block';
-        } finally {
-            document.getElementById('submit-button').disabled = false;
-        }
+        };
     }
 </script>
 

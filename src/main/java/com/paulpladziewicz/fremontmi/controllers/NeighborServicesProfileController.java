@@ -79,6 +79,8 @@ public class NeighborServicesProfileController {
     public String viewNeighborService(@PathVariable String slug, Model model) {
         NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileBySlug(slug);
 
+        // check if the profile is publicly visible, redirect to another page after checking if the user is the user's profile
+
         neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));
 
         model.addAttribute("neighborServicesProfile", neighborServicesProfile);

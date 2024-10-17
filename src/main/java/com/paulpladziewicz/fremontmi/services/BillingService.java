@@ -2,10 +2,12 @@ package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.exceptions.StripeServiceException;
 import com.paulpladziewicz.fremontmi.models.*;
+import com.paulpladziewicz.fremontmi.repositories.BillingRepository;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
+import com.stripe.param.SubscriptionUpdateParams.Item;
 import com.stripe.model.*;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +32,8 @@ public class BillingService {
 
     private final EmailService emailService;
 
+    private final BillingRepository billingRepository;
+
     private final ContentRepository contentRepository;
 
     @Value("${stripe.webhook-secret}")
@@ -39,13 +44,17 @@ public class BillingService {
 
     @Value("${stripe.price.monthly.neighborservice}")
     private String monthlyNeighborServicePriceId;
-
     @Value("${stripe.price.annual.neighborservice}")
     private String annualNeighborServicePriceId;
+    private String monthlyNeighborServiceDisplayPrice = "$5.00 / month";
+    private String monthlyNeighborServiceDisplayName = "Monthly NeighborServices™ Subscription";
+    private String annualNeighborServiceDisplayPrice = "$50.00 / year";
+    private String annualNeighborServiceDisplayName = "Yearly NeighborServices™ Subscription";
 
-    public BillingService(UserService userService, EmailService emailService, ContentRepository contentRepository) {
+    public BillingService(UserService userService, EmailService emailService, BillingRepository billingRepository, ContentRepository contentRepository) {
         this.userService = userService;
         this.emailService = emailService;
+        this.billingRepository = billingRepository;
         this.contentRepository = contentRepository;
     }
 
@@ -89,7 +98,7 @@ public class BillingService {
     }
 
     public Map<String, Object> createSubscription(String priceId) {
-        String customerId = getCustomerId(); // This method should throw an exception if the customer ID cannot be found
+        String customerId = getCustomerId();
 
         SubscriptionCreateParams subCreateParams = SubscriptionCreateParams.builder()
                 .setCustomer(customerId)
@@ -121,37 +130,58 @@ public class BillingService {
             subscriptionData.put("subscriptionId", subscription.getId());
             subscriptionData.put("clientSecret", clientSecret);
 
-            if (subscription.getItems() != null && !subscription.getItems().getData().isEmpty()) {
-                SubscriptionItem subscriptionItem = subscription.getItems().getData().getFirst();
-
-                Price price = subscriptionItem.getPrice();
-
-                String displayName = price.getMetadata().get("displayName");
-                String displayPrice = price.getMetadata().get("displayPrice");
-
-                if (displayName != null) {
-                    subscriptionData.put("displayName", displayName);
-                }
-                if (displayPrice != null) {
-                    subscriptionData.put("displayPrice", displayPrice);
-                }
-
-                subscriptionData.put("priceId", price.getId());
-            }
-
-            Invoice latestInvoice = subscription.getLatestInvoiceObject();
-            if (latestInvoice != null) {
-                subscriptionData.put("invoiceId", latestInvoice.getId());
-            } else {
-                logger.warn("Latest invoice is null for subscription: {}", subscription.getId());
-            }
-
-            // TODO store when a new subscription should be requested
-
             return subscriptionData;
         } catch (StripeException e) {
             logger.error("Failed to create subscription due to a Stripe exception", e);
             throw new StripeServiceException("Failed to create subscription with Stripe.", e);
+        }
+    }
+
+    public Map<String, Object> updateSubscription(String subscriptionId, String newPriceId) {
+        try {
+            Subscription subscription = Subscription.retrieve(subscriptionId);
+
+            if (subscription == null) {
+                throw new StripeServiceException("Subscription not found for ID: " + subscriptionId);
+            }
+
+            String status = subscription.getStatus();
+
+            SubscriptionUpdateParams updateParams;
+
+            if ("incomplete".equals(status)) {
+                updateParams = SubscriptionUpdateParams.builder()
+                        .addItem(Item.builder()
+                                .setId(subscription.getItems().getData().getFirst().getId())
+                                .setPrice(newPriceId)
+                                .build())
+                        .setPaymentBehavior(SubscriptionUpdateParams.PaymentBehavior.DEFAULT_INCOMPLETE)
+                        .addExpand("latest_invoice.payment_intent")
+                        .build();
+            }
+            else if ("active".equals(status)) {
+                updateParams = SubscriptionUpdateParams.builder()
+                        .addItem(Item.builder()
+                                .setId(subscription.getItems().getData().getFirst().getId())
+                                .setPrice(newPriceId)
+                                .build())
+                        .setProrationBehavior(SubscriptionUpdateParams.ProrationBehavior.CREATE_PRORATIONS)
+                        .addExpand("latest_invoice.payment_intent")
+                        .build();
+            }
+            else {
+                throw new StripeServiceException("Unsupported subscription status: " + status);
+            }
+
+            subscription.update(updateParams);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+
+            return result;
+        } catch (StripeException e) {
+            logger.error("Error updating subscription: ", e);
+            throw new StripeServiceException("Failed to update subscription with Stripe.", e);
         }
     }
 
@@ -337,33 +367,64 @@ public class BillingService {
         }
     }
 
-    public ServiceResponse<Content> handleSubscriptionSuccess(PaymentRequest paymentRequest) {
-        String contentId = paymentRequest.getEntityId();
-        String paymentStatus = paymentRequest.getPaymentStatus();
+    public String handleSubscriptionSuccess(ConfirmSubscriptionRequest confirmSubscriptionRequest) {
+        String paymentStatus = confirmSubscriptionRequest.getPaymentStatus();
 
-        if (!paymentStatus.equals("succeeded")) {
-            logger.error("Payment not successful but it should have been when handling successful payment. Payment status: {} neighborServiceProfileId: {}", paymentStatus, paymentRequest.getEntityId());
-            return ServiceResponse.error("payment_not_successful");
+        if (!"succeeded".equals(paymentStatus)) {
+            throw new StripeServiceException("Payment intent shows failure");
         }
 
-        Optional<Content> optionalContent = contentRepository.findById(contentId);
+        Optional<Content> optionalContent = contentRepository.findById(confirmSubscriptionRequest.getContentId());
 
         if (optionalContent.isEmpty()) {
-            return ServiceResponse.error("content_not_found");
+            throw new StripeServiceException("Content not found when confirming subscription");
         }
 
         Content content = optionalContent.get();
+
+        UserProfile userProfile = userService.getUserProfile();
+
+        StripeSubscriptionRecord subscriptionRecord = new StripeSubscriptionRecord();
+        subscriptionRecord.setContentId(confirmSubscriptionRequest.getContentId());
+        subscriptionRecord.setContentType(confirmSubscriptionRequest.getContentType());
+        subscriptionRecord.setUserId(userProfile.getUserId());
+        subscriptionRecord.setStripeCustomerId(userProfile.getStripeCustomerId());
+        subscriptionRecord.setSubscriptionId(confirmSubscriptionRequest.getSubscriptionId());
+        subscriptionRecord.setPriceId(confirmSubscriptionRequest.getPriceId());
+        subscriptionRecord.setStatus(paymentStatus);
+        subscriptionRecord.setCreatedAt(LocalDateTime.now());
+
+        billingRepository.save(subscriptionRecord);
+
         content.setStatus(ContentStatus.ACTIVE.getStatus());
         content.setVisibility(ContentVisibility.PUBLIC.getVisibility());
 
-        try {
-            Content savedContent = contentRepository.save(content);
+        Content savedContent = contentRepository.save(content);
 
-            return ServiceResponse.value(savedContent);
-        } catch (Exception e) {
-            logger.error("Error saving content after handling successful payment: ", e);
-            return ServiceResponse.error("content_save_error");
+        return savedContent.getPathname();
+    }
+
+    public Map<String, Object> getPricing(String contentType) {
+        Map<String, Object> pricingData = new HashMap<>();
+
+        if (contentType.equalsIgnoreCase("neighbor-services-profile")) {
+            Map<String, Object> monthlyPlan = new HashMap<>();
+            monthlyPlan.put("priceId", monthlyNeighborServicePriceId);
+            monthlyPlan.put("displayPrice", monthlyNeighborServiceDisplayPrice);
+            monthlyPlan.put("displayName", monthlyNeighborServiceDisplayName);
+
+            Map<String, Object> annualPlan = new HashMap<>();
+            annualPlan.put("priceId", annualNeighborServicePriceId);
+            annualPlan.put("displayPrice", annualNeighborServiceDisplayPrice);
+            annualPlan.put("displayName", annualNeighborServiceDisplayName);
+
+            pricingData.put("monthly", monthlyPlan);
+            pricingData.put("annual", annualPlan);
+        } else {
+            throw new IllegalArgumentException("Unsupported content type: " + contentType);
         }
+
+        return pricingData;
     }
 }
 

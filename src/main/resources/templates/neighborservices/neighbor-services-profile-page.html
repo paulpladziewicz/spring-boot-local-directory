@@ -13,10 +13,16 @@
 
 <main>
     <div class="container">
-        <div class="row mb-2">
+        <div class="row">
             <div class="col-lg-8 mx-auto">
+
+                <div th:if="${neighborServicesProfile.status == 'requires_active_subscription'}" class="alert d-flex alert-light" role="alert">
+                    <i class="ai-circle-info fs-xl pe-1 me-2"></i>
+                    <div></div>
+                </div>
+
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
+                    <ol class="breadcrumb mb-2">
                         <li class="breadcrumb-item"><a href="/neighbor-services">NeighborServices™</a></li>
                         <li class="breadcrumb-item active" aria-current="page" th:text="${neighborServicesProfile.name}"></li>
                     </ol>
@@ -28,11 +34,8 @@
                     </a>
 
                 </div>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
+
                 <div class="d-flex justify-content-center">
                     <div class="dropdown">
                         <a th:if="${neighborServicesProfile.profileImageUrl != null}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" th:style="'width: 200px; height: 200px; background-image: url(' + ${neighborServicesProfile.profileImageUrl} + ');'" aria-label="Upload picture">
@@ -71,14 +74,15 @@
                     </div>
                 </div>
 
-                <div class="row mt-4">
-                    <h2 class="mb-3 display-6">NeighborServices™</h2>
+                <div class="mt-4 mb-5">
                     <div th:if="${neighborServicesProfile.neighborServices.size() > 0}">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item" th:each="service : ${neighborServicesProfile.neighborServices}">
-                                <h3 th:text="${service.name}"></h3>
-                                <p th:text="${service.description}"></p>
-                                <p th:text="${service.price}"></p>
+                        <ul class="list-unstyled">
+                            <li th:each="service : ${neighborServicesProfile.neighborServices}">
+                                <div class="d-flex align-items-center">
+                                    <h3 class="h3 w-75 pe-2 mb-2" th:text="${service.name}"></h3>
+                                    <p class="h5 w-25 ps-2 text-center mb-2" th:text="${service.price}"></p>
+                                </div>
+                                <p class="fs-xl" th:text="${service.description}"></p>
                             </li>
                         </ul>
                     </div>
@@ -92,8 +96,8 @@
     </div>
 
     <section class="bg-secondary">
-        <div class="container pt-5 pb-3 pb-xl-4 py-xxl-5 my-5">
-            <div class="row pb-1 pb-sm-3 pb-lg-4">
+        <div class="container pt-5">
+            <div class="row pb-4">
                 <div class="col-lg-8 col-xl-7 offset-xl-1 mx-auto">
                     <h1 class="display-6 text-center" th:text="'Contact ' + ${neighborServicesProfile.name}">Contact Us</h1>
                     <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">If you have any questions, inquiries, or would like more information about
@@ -192,83 +196,59 @@
     });
 </script>
 
-<!--<script>-->
-<!--    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');-->
-<!--    const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');-->
-
-<!--    function uploadPhoto() {-->
-<!--        const form = document.getElementById('uploadForm');-->
-<!--        const formData = new FormData(form);-->
-<!--        formData.append(csrfHeader, csrfToken);-->
-
-<!--        fetch('/api/upload', {-->
-<!--            method: 'POST',-->
-<!--            body: formData-->
-<!--        })-->
-<!--            .then(response => {-->
-<!--                if (!response.ok) {-->
-<!--                    throw new Error('Upload failed');-->
-<!--                }-->
-<!--                return response.text();-->
-<!--            })-->
-<!--            .then(data => {-->
-<!--                const uploadPhotoModal = new bootstrap.Modal(document.getElementById('uploadPhotoModal'));-->
-<!--                uploadPhotoModal.hide();-->
-<!--            })-->
-<!--            .catch(error => {-->
-<!--                console.error('Error uploading photo:', error);-->
-<!--                alert('Failed to upload photo. Please try again.');-->
-<!--            });-->
-<!--    }-->
-<!--</script>-->
-
-<script th:inline="javascript">
-    function submitContactForm() {
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const message = document.getElementById('message').value;
-        const slug = /*[[${neighborServicesProfile.slug}]]*/ '';
+<script>
+    async function submitContactForm() {
+        const form = document.getElementById('contactForm');
+        const submitButton = document.getElementById('submit-button');
+        const loadingButton = document.getElementById('loading-button');
+        const formMessage = document.getElementById('form-message');
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
 
-        if (!name || !email || !message) {
-            alert("All fields are required.");
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
             return;
         }
 
-        document.getElementById('submit-button').style.display = 'none';
-        document.getElementById('loading-button').style.display = 'inline-block';
+        const formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            message: document.getElementById('message').value
+        };
 
-        fetch('/contact/neighbor-services-profile', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken
-            },
-            body: JSON.stringify({ slug, name, email, message })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const formElement = document.querySelector('.needs-validation');
-                    formElement.innerHTML = `
-                <div class="alert alert-primary" role="alert">
-                <i class="ai-mail fs-xl pe-1 me-2"></i>
-                ${data.message}
-            </div>
-            `;
-                } else {
-                    alert('An error occurred while trying to send your message. Please try again later.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again later.');
-            })
-            .finally(() => {
-                document.getElementById('submit-button').style.display = 'inline-block';
-                document.getElementById('loading-button').style.display = 'none';
+        submitButton.style.display = 'none';
+        loadingButton.style.display = 'block';
+
+        try {
+            const response = await fetch('/taqueria', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(formData)
             });
+
+            if (response.ok) {
+                formMessage.style.display = 'block';
+                formMessage.classList.remove('alert-danger');
+                formMessage.classList.add('alert-primary');
+                formMessage.innerText = 'Thank you for your feedback! We have received your message.';
+
+                form.reset();
+                form.classList.remove('was-validated');
+            } else {
+                throw new Error('Submission failed');
+            }
+        } catch (error) {
+            formMessage.style.display = 'block';
+            formMessage.classList.remove('alert-success');
+            formMessage.classList.add('alert-danger');
+            formMessage.innerText = 'Failed to submit the form. Please try again later.';
+        } finally {
+            loadingButton.style.display = 'none';
+            submitButton.style.display = 'block';
+        }
     }
 </script>
 

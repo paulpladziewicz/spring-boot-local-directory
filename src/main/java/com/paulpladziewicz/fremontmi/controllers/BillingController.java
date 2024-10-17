@@ -1,27 +1,24 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
+import com.paulpladziewicz.fremontmi.exceptions.StripeServiceException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.BillingService;
 import com.stripe.model.Invoice;
 import com.stripe.model.Subscription;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/stripe")
 public class BillingController {
-
-    @Value("${stripe.publishable.key}")
-    private String stripePublicKey;
 
     private final BillingService billingService;
 
@@ -33,26 +30,35 @@ public class BillingController {
         public String subscriptionId;
     }
 
-    @GetMapping("/pay/subscription")
-    public String paySubscription(Model model) {
-        model.addAttribute("stripePublicKey", stripePublicKey);
-        return "stripe/pay-subscription";
+    @GetMapping("/pricing")
+    public ResponseEntity<Map<String, Object>> getPricing(@RequestParam String contentType) {
+        return ResponseEntity.ok(billingService.getPricing(contentType));
     }
 
-    @PostMapping("/subscription-payment-success")
-    @ResponseBody
-    public ResponseEntity<String> subscriptionPaymentSuccess(@RequestBody PaymentRequest paymentRequest) {
-        ServiceResponse<Content> serviceResponse = billingService.handleSubscriptionSuccess(paymentRequest);
+    @PostMapping("/create/subscription")
+    public ResponseEntity<Map<String, Object>> createSubscription(@RequestBody Map<String, String> requestBody) {
+        String priceId = requestBody.get("priceId");
+        return ResponseEntity.ok(billingService.createSubscription(priceId));
+    }
 
-        if (serviceResponse.hasError()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    @PostMapping("/update/subscription")
+    public ResponseEntity<Map<String, Object>> updateSubscription(@RequestBody Map<String, String> requestBody) {
+        String subscriptionId = requestBody.get("subscriptionId");
+        String priceId = requestBody.get("priceId");
+        return ResponseEntity.ok(billingService.updateSubscription(subscriptionId, priceId));
+    }
+
+    @PostMapping("/confirm/subscription")
+    public ResponseEntity<String> subscriptionPaymentSuccess(@RequestBody ConfirmSubscriptionRequest confirmSubscriptionRequest) {
+        try {
+            String contentPathname = billingService.handleSubscriptionSuccess(confirmSubscriptionRequest);
+            String redirectUrl = contentPathname + "?subscribed=true";
+            return ResponseEntity.ok("{\"redirectUrl\": \"" + redirectUrl + "\"}");
+        } catch (StripeServiceException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"An unexpected error occurred.\"}");
         }
-
-        Content content = serviceResponse.value();
-
-        String redirectUrl = content.getPathname() + "?subscribed=true";
-
-        return ResponseEntity.ok("{\"redirectUrl\": \"" + redirectUrl + "\"}");
     }
 
     @GetMapping("/subscriptions")

@@ -8,28 +8,22 @@ import java.time.LocalDateTime;
 
 @Data
 @Document(collection = "stripe_transaction_records")
-public class StripeTransactionRecord {
+public class StripeSubscriptionRecord {
 
     @Id
-    private String id;
+    private String contentId;
 
-    private String status = "incomplete";
+    private String contentType;
 
-    private String customerId;
+    private String userId;
+
+    private String stripeCustomerId;
 
     private String subscriptionId;
 
     private String priceId;
 
-    private String displayName;
-
-    private String displayPrice;
-
-    private String clientSecret;
-
-    private String entityId;
-
-    private String entityCollection;
+    private String status;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

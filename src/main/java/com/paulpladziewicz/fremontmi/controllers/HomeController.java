@@ -3,6 +3,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 import com.paulpladziewicz.fremontmi.services.EmailService;
 import com.paulpladziewicz.fremontmi.services.SubscribeService;
 import jakarta.validation.constraints.Email;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,9 @@ public class HomeController {
     private final EmailService emailService;
 
     private final SubscribeService subscribeService;
+
+    @Value("${stripe.publishable.key}")
+    private String stripePublicKey;
 
     public HomeController(EmailService emailService, SubscribeService subscribeService) {
         this.emailService = emailService;
@@ -63,8 +67,9 @@ public class HomeController {
         return "redirect:/#subscribe";
     }
 
-    @GetMapping("/test")
-    public String test () {
-        return "test";
+    @GetMapping("/pay/subscription")
+    public String paySubscription(Model model) {
+        model.addAttribute("stripePublicKey", stripePublicKey);
+        return "stripe/pay-subscription";
     }
 }
