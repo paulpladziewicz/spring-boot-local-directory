@@ -137,7 +137,7 @@ public class BillingService {
         }
     }
 
-    public Map<String, Object> updateSubscription(String subscriptionId, String newPriceId) {
+    public Map<String, Object> updateActiveSubscription(String subscriptionId, String newPriceId) {
         try {
             Subscription subscription = Subscription.retrieve(subscriptionId);
 
@@ -145,33 +145,16 @@ public class BillingService {
                 throw new StripeServiceException("Subscription not found for ID: " + subscriptionId);
             }
 
-            String status = subscription.getStatus();
-
             SubscriptionUpdateParams updateParams;
 
-            if ("incomplete".equals(status)) {
-                updateParams = SubscriptionUpdateParams.builder()
-                        .addItem(Item.builder()
-                                .setId(subscription.getItems().getData().getFirst().getId())
-                                .setPrice(newPriceId)
-                                .build())
-                        .setPaymentBehavior(SubscriptionUpdateParams.PaymentBehavior.DEFAULT_INCOMPLETE)
-                        .addExpand("latest_invoice.payment_intent")
-                        .build();
-            }
-            else if ("active".equals(status)) {
-                updateParams = SubscriptionUpdateParams.builder()
-                        .addItem(Item.builder()
-                                .setId(subscription.getItems().getData().getFirst().getId())
-                                .setPrice(newPriceId)
-                                .build())
-                        .setProrationBehavior(SubscriptionUpdateParams.ProrationBehavior.CREATE_PRORATIONS)
-                        .addExpand("latest_invoice.payment_intent")
-                        .build();
-            }
-            else {
-                throw new StripeServiceException("Unsupported subscription status: " + status);
-            }
+            updateParams = SubscriptionUpdateParams.builder()
+                    .addItem(Item.builder()
+                            .setId(subscription.getItems().getData().getFirst().getId())
+                            .setPrice(newPriceId)
+                            .build())
+                    .setProrationBehavior(SubscriptionUpdateParams.ProrationBehavior.CREATE_PRORATIONS)
+                    .addExpand("latest_invoice.payment_intent")
+                    .build();
 
             subscription.update(updateParams);
 

@@ -36,7 +36,7 @@
                                     <div class="display-2 text-primary" x-text="formatPrice(subscriptionDetails.monthly.displayPrice)"></div>
                                     <div class="mb-4">per month</div>
                                     <p class="mb-4 pb-4">Perfect for those who want flexibility without a long-term commitment.</p>
-                                    <button class="btn btn-primary w-100" type="submit" x-on:click="handleSelectSubscription(subscriptionDetails.monthly.priceId)">Proceed with Monthly Subscription</button>
+                                    <button class="btn btn-primary w-100" type="submit" x-on:click="handleSelectSubscription('monthly', subscriptionDetails.monthly.priceId)">Proceed with Monthly Subscription</button>
                                 </div>
                             </div>
                         </div>
@@ -48,7 +48,7 @@
                                     <div class="display-2 text-light" x-text="formatPrice(subscriptionDetails.annual.displayPrice)"></div>
                                     <div class="text-light opacity-70 mb-4">per year</div>
                                     <p class="text-light opacity-70 mb-4 pb-4">Save money with the annual plan.</p>
-                                    <button class="btn btn-light w-100" type="submit" x-on:click="handleSelectSubscription(subscriptionDetails.annual.priceId)">Proceed with Annual Subscription</button>
+                                    <button class="btn btn-light w-100" type="submit" x-on:click="handleSelectSubscription('annual', subscriptionDetails.annual.priceId)">Proceed with Annual Subscription</button>
                                 </div>
                             </div>
                         </div>
@@ -57,7 +57,7 @@
 
                 <!-- Step 3: Payment Form -->
                 <div x-show="step === 'payment'" class="" x-cloak>
-                    <p class="mb-2">You are paying for a <strong x-text="subscriptionDetails.displayName"></strong> at <strong x-text="subscriptionDetails.displayPrice"></strong>. You can cancel your subscription at any time through your account settings. Subscription payments are non-refundable.</p>
+                    <p class="mb-2">You are paying for a <strong x-text="subscriptionDetails[reoccurrence].displayName"></strong> at <strong x-text="subscriptionDetails[reoccurrence].displayPrice"></strong>. You can cancel your subscription at any time through your account settings. Subscription payments are non-refundable.</p>
                     <button type="button" class="btn btn-link p-0" x-on:click="handleChangeSubscription()">Change Subscription</button>
 
                     <form id="payment-form" class="my-4" x-on:submit.prevent="submitPayment">
@@ -114,7 +114,7 @@
                 if (this.subscriptionDetails.priceId) {
                     if (this.subscriptionDetails.priceId !== priceId) {
                         this.subscriptionDetails.priceId = priceId;
-                        return await this.updateSubscription();
+                        return await this.createSubscription();
                     } else {
                         return this.step = 'payment';
                     }
@@ -159,40 +159,6 @@
                         this.step = 'payment';
                     } else {
                         throw new Error('Failed to create subscription');
-                    }
-                } catch (error) {
-                    this.errorMessage = error.message;
-                }
-            },
-
-            async updateSubscription() {
-                try {
-                    const response = await fetch(`/api/stripe/update/subscription`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            [csrfHeader]: csrfToken,
-                        },
-                        body: JSON.stringify({
-                            subscriptionId: this.subscriptionDetails.subscriptionId,
-                            priceId: this.subscriptionDetails.priceId
-                        })
-                    });
-
-                    if (response.ok) {
-                        const { success } = await response.json();
-
-                        if (success) {
-                            const stripe = Stripe(stripePublicKey);
-                            const elements = stripe.elements({ clientSecret: this.subscriptionDetails.clientSecret });
-                            const paymentElement = elements.create("payment");
-                            paymentElement.mount("#payment-element");
-                            this.step = "payment";
-                        } else {
-                            throw new Error('Failed to update subscription');
-                        }
-                    } else {
-                        throw new Error('Failed to update subscription');
                     }
                 } catch (error) {
                     this.errorMessage = error.message;
@@ -269,5 +235,6 @@
 </script>
 
 <footer th:replace="~{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
 </body>
 </html>

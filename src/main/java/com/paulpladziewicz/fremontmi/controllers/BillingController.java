@@ -45,7 +45,7 @@ public class BillingController {
     public ResponseEntity<Map<String, Object>> updateSubscription(@RequestBody Map<String, String> requestBody) {
         String subscriptionId = requestBody.get("subscriptionId");
         String priceId = requestBody.get("priceId");
-        return ResponseEntity.ok(billingService.updateSubscription(subscriptionId, priceId));
+        return ResponseEntity.ok(billingService.updateActiveSubscription(subscriptionId, priceId));
     }
 
     @PostMapping("/confirm/subscription")
