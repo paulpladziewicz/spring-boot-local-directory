@@ -104,21 +104,22 @@
                     <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">If you have any questions, inquiries, or would like more information about
                         <span th:text="${neighborServicesProfile.name}">our service</span>, please fill out the form below.</p>
 
-                    <form class="row g-4 needs-validation" novalidate="">
+                    <form class="row g-4 needs-validation" novalidate="" id="contactForm">
+                        <input type="hidden" id="id" name="id" th:value="${neighborServicesProfile.id}" />
                         <div class="col-sm-6">
                             <label class="form-label fs-base" for="name">Name</label>
                             <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
-                            <div class="invalid-feedback">Please enter your name!</div>
+                            <div class="invalid-feedback">Please enter your name.</div>
                         </div>
                         <div class="col-sm-6">
                             <label class="form-label fs-base" for="email">Email</label>
                             <input class="form-control form-control-lg" type="email" placeholder="Email address" required="" id="email">
-                            <div class="invalid-feedback">Please provide a valid email address!</div>
+                            <div class="invalid-feedback">Please provide a valid email address.</div>
                         </div>
                         <div class="col-sm-12">
-                            <label class="form-label fs-base" for="message">How can we help?</label>
+                            <label class="form-label fs-base" for="message">Message</label>
                             <textarea class="form-control form-control-lg" rows="5" placeholder="Enter your message here..." required="" id="message"></textarea>
-                            <div class="invalid-feedback">Please enter your message!</div>
+                            <div class="invalid-feedback">Please enter a message.</div>
                         </div>
                         <div class="col-sm-12 pt-2">
                             <button id="submit-button" class="btn btn-lg btn-primary" type="button" onclick="submitContactForm()">Send message</button>
@@ -168,8 +169,8 @@
             </div>
         </div>
     </div>
-</main>
 
+</main>
 
 <script>
     // Get the file input and the preview elements
@@ -212,6 +213,7 @@
         }
 
         const formData = {
+            id: document.getElementById('id').value,
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
             message: document.getElementById('message').value
@@ -221,7 +223,7 @@
         loadingButton.style.display = 'block';
 
         try {
-            const response = await fetch('/taqueria', {
+            const response = await fetch('/contact/neighbor-services-profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
