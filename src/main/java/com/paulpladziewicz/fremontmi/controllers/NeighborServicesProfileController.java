@@ -96,7 +96,7 @@ public class NeighborServicesProfileController {
         }
 
         if (Objects.equals(neighborServicesProfile.getVisibility(), ContentVisibility.RESTRICTED.getVisibility())) {
-            return "neighborservices/neighbor-services-profile-restricted-page";
+            return "restricted-visibility";
         }
 
         neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));

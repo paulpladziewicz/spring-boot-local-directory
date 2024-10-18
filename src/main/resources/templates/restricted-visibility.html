@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>Restricted Content - FremontMI</title>
+</head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<main class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="alert text-center" role="alert">
+                <h4 class="alert-heading">Content Restricted</h4>
+                <p>The page you tried to visit is currently not visible to the public.</p>
+                <p>If you believe this is an error, please <a href="/#contact-us" class="alert-link">contact us</a>.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>
