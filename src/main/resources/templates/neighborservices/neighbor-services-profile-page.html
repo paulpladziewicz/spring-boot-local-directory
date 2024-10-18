@@ -18,7 +18,8 @@
 
                 <div th:if="${neighborServicesProfile.status == 'requires_active_subscription'}" class="alert d-flex alert-light" role="alert">
                     <i class="ai-circle-info fs-xl pe-1 me-2"></i>
-                    <div></div>
+                    <p class="mb-0"><strong>Subscription Required:</strong> Profile will be visible to the community after you
+                        <a th:href="'/pay/subscription?contentId=' + ${neighborServicesProfile.id} + '&contentType=' + ${neighborServicesProfile.type}">select and pay for a subscription</a>.</p>
                 </div>
 
                 <nav aria-label="breadcrumb">
