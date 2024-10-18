@@ -156,11 +156,11 @@
                 <div class="modal-body">
                     <div class="container">
                         <div class="row">
-                            <div class="col-6 mx-auto">
+                            <div class="col-md-6 mx-auto">
 
                                 <!-- Image preview -->
-                                <div id="imagePreviewContainer" class="d-flex justify-content-center mb-3" style="display: none;">
-                                    <img id="imagePreview" src="" alt="Image Preview" class="img-fluid rounded" style="max-height: 300px;">
+                                <div id="imagePreviewContainer" class="d-flex justify-content-center mb-3">
+                                    <div id="imagePreview" class="rounded-circle d-none" style="width: 200px; height: 200px; background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
                                 </div>
 
                                 <form id="uploadForm" th:action="@{/upload}" method="post" enctype="multipart/form-data">
@@ -183,27 +183,21 @@
 </main>
 
 <script>
-    // Get the file input and the preview elements
     const formFileInput = document.getElementById('formFile');
-    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
     const imagePreview = document.getElementById('imagePreview');
 
-    // Add event listener to handle file selection
     formFileInput.addEventListener('change', function(event) {
-        const file = event.target.files[0]; // Get the selected file
+        const file = event.target.files[0];
 
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                // Show the image preview
-                imagePreview.src = e.target.result;
-                imagePreviewContainer.style.display = 'block';
+                imagePreview.style.backgroundImage = `url('${e.target.result}')`;
             };
-            reader.readAsDataURL(file); // Read the file and trigger onload
+            reader.readAsDataURL(file);
+            imagePreview.classList.remove('d-none');
         } else {
-            // Hide the preview if no file is selected
             imagePreview.src = '';
-            imagePreviewContainer.style.display = 'none';
         }
     });
 </script>
