@@ -374,8 +374,9 @@ public class BillingService {
         subscriptionRecord.setStripeCustomerId(userProfile.getStripeCustomerId());
         subscriptionRecord.setSubscriptionId(confirmSubscriptionRequest.getSubscriptionId());
         subscriptionRecord.setPriceId(confirmSubscriptionRequest.getPriceId());
+        subscriptionRecord.setDisplayName(confirmSubscriptionRequest.getDisplayName());
+        subscriptionRecord.setDisplayPrice(confirmSubscriptionRequest.getDisplayPrice());
         subscriptionRecord.setStatus(paymentStatus);
-        subscriptionRecord.setCreatedAt(LocalDateTime.now());
 
         billingRepository.save(subscriptionRecord);
 

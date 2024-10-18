@@ -8,6 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ContactFormRequest {
+
+    private String id;
+
     private String slug;
 
     @NotBlank

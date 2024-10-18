@@ -5,7 +5,9 @@ import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.NeighborServicesProfileService;
 import com.paulpladziewicz.fremontmi.services.TagService;
+import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,11 +25,18 @@ public class NeighborServicesProfileController {
     private final NeighborServicesProfileService neighborServicesProfileService;
 
     private final TagService tagService;
+    private final UserService userService;
 
-    public NeighborServicesProfileController(NeighborServicesProfileService neighborServicesProfileService, TagService tagService, HtmlSanitizationService htmlSanitizationService) {
+    public NeighborServicesProfileController(NeighborServicesProfileService neighborServicesProfileService, TagService tagService, HtmlSanitizationService htmlSanitizationService, UserService userService) {
         this.neighborServicesProfileService = neighborServicesProfileService;
         this.tagService = tagService;
         this.htmlSanitizationService = htmlSanitizationService;
+        this.userService = userService;
+    }
+
+    @GetMapping("/overview/neighbor-services")
+    public String getOverview(Model model) {
+        return "neighborservices/overview";
     }
 
     @GetMapping("/create/neighbor-services-profile")
@@ -78,12 +87,21 @@ public class NeighborServicesProfileController {
     @GetMapping("/neighbor-services/{slug}")
     public String viewNeighborService(@PathVariable String slug, Model model) {
         NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileBySlug(slug);
+        Boolean createdByUser;
+        try {
+            String userId = userService.getUserId();
+            createdByUser = Objects.equals(userId, neighborServicesProfile.getCreatedBy());
+        } catch (Exception e) {
+            createdByUser = false;
+        }
 
-        // check if the profile is publicly visible, redirect to another page after checking if the user is the user's profile
+        if (Objects.equals(neighborServicesProfile.getVisibility(), ContentVisibility.RESTRICTED.getVisibility())) {
+            return "neighborservices/neighbor-services-profile-restricted-page";
+        }
 
         neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));
-
         model.addAttribute("neighborServicesProfile", neighborServicesProfile);
+        model.addAttribute("myProfile", createdByUser);
 
         return "neighborservices/neighbor-services-profile-page";
     }
@@ -92,6 +110,7 @@ public class NeighborServicesProfileController {
     public String viewMyNeighborServiceProfile(Model model) {
         try {
             NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
+            neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));
             model.addAttribute("neighborServicesProfile", neighborServicesProfile);
             model.addAttribute("myProfile", true);
             return "neighborservices/neighbor-services-profile-page";
@@ -130,19 +149,19 @@ public class NeighborServicesProfileController {
     // TODO delete neighbor service profile
 
     @PostMapping("/contact/neighbor-services-profile")
-    public ResponseEntity<Map<String, Object>> handleContactForm(
-            @RequestBody ContactFormRequest contactFormRequest) {
+    public ResponseEntity<String> handleContactForm(@RequestBody @Valid ContactFormRequest contactFormRequest) {
 
-        neighborServicesProfileService.handleContactFormSubmission(
-                contactFormRequest.getSlug(),
-                contactFormRequest.getName(),
-                contactFormRequest.getEmail(),
-                contactFormRequest.getMessage()
-        );
+        try {
+            neighborServicesProfileService.handleContactFormSubmission(
+                    contactFormRequest.getId(),
+                    contactFormRequest.getName(),
+                    contactFormRequest.getEmail(),
+                    contactFormRequest.getMessage()
+            );
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "We've passed your message along! We hope you hear back soon.");
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok("Form submitted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit the form");
+        }
     }
 }

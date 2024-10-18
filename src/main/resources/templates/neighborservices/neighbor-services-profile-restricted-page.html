@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>[[${neighborServicesProfile.name}]] - NeighborServices™ Profile in Fremont, MI</title>
+</head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<main class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="alert alert-warning text-center" role="alert">
+                <h4 class="alert-heading">Access Restricted</h4>
+                <p>You do not have permission to view the full content of this profile. This profile is restricted and may only be visible to certain users.</p>
+                <hr>
+                <p class="mb-0">If you believe this is an error or need access, please <a href="#" class="alert-link">contact support</a> or <a href="/" class="alert-link">return to the homepage</a>.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>

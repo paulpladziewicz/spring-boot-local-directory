@@ -12,7 +12,15 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
                 <h1>Create NeighborServices™ Profile</h1>
-                <p>Please provide the details for your NeighborServices™ Profile. Please only create content that serve Fremont, MI. Content not related to Fremont, Michigan can be removed at any time.</p>
+                <div class="alert d-flex alert-danger" role="alert">
+                    <i class="ai-triangle-alert fs-xl pe-1 me-2"></i>
+                    <div>Content that does not serve Fremont, MI can be removed.</div>
+                </div>
+                <div class="alert d-flex alert-light" role="alert">
+                    <i class="ai-circle-info fs-xl pe-1 me-2"></i>
+                    <p class="mb-0">Requires a subscription to be visible to the community.
+                        <a href="#">Learn more</a></p>
+                </div>
 
                 <form id="create-business-form" th:action="@{/create/neighbor-services-profile}" th:object="${neighborServicesProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
 
@@ -61,7 +69,7 @@
                                 <span class="text-danger mt-1" th:if="${#fields.hasErrors('neighborServices[0].price')}" th:errors="*{neighborServices[0].price}"></span>
                             </div>
 
-                            <a href="javascript:void(0);" class="d-none text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)" style="display: none;">Remove</a>
+                            <a href="javascript:void(0);" class="d-none text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)" style="display: none;">Remove Service</a>
                         </div>
                     </div>
 
@@ -98,7 +106,7 @@
         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="neighborServices[${serviceIndex}].price">Service Price</label>
         <input type="text" class="form-control" name="neighborServices[${serviceIndex}].price" placeholder="Service price" required>
     </div>
-    <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)">Remove</a>
+    <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)">Remove Service</a>
     `;
         container.appendChild(newService);
         serviceIndex++;

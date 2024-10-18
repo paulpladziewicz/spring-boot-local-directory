@@ -8,6 +8,8 @@ public class ConfirmSubscriptionRequest {
     private String contentType;
     private String subscriptionId;
     private String priceId;
+    private String displayName;
+    private String displayPrice;
     private String paymentIntentId;
     private String paymentStatus;
 }

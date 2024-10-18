@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 public class StripeSubscriptionRecord {
 
     @Id
+    private String id;
+
     private String contentId;
 
     private String contentType;
@@ -23,9 +25,13 @@ public class StripeSubscriptionRecord {
 
     private String priceId;
 
+    private String displayName;
+
+    private String displayPrice;
+
     private String status;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
 }

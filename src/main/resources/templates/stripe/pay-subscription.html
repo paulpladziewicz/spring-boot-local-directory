@@ -86,6 +86,9 @@
             reoccurrence: '',
             errorMessage: '',
             isSubmitting: false,
+            stripe: null,
+            elements: null,
+            paymentElement: null,
 
             async init() {
                 try {
@@ -98,6 +101,7 @@
 
                     if (response.ok) {
                         this.subscriptionDetails = await response.json();
+                        this.stripe = Stripe(stripePublicKey);
                         this.step = 'select';
                     } else {
                         throw new Error('Failed to load prices');
@@ -151,10 +155,9 @@
                             ...data
                         };
 
-                        const stripe = Stripe(stripePublicKey);
-                        const elements = stripe.elements({ clientSecret: this.subscriptionDetails.clientSecret });
-                        const paymentElement = elements.create("payment");
-                        paymentElement.mount("#payment-element");
+                        this.elements = this.stripe.elements({ clientSecret: this.subscriptionDetails.clientSecret });
+                        this.paymentElement = this.elements.create("payment");
+                        this.paymentElement.mount("#payment-element");
 
                         this.step = 'payment';
                     } else {
@@ -169,20 +172,24 @@
                 this.isSubmitting = true;
                 this.errorMessage = '';
 
-                const stripe = Stripe(stripePublicKey);
+                try {
+                    const { error, paymentIntent } = await this.stripe.confirmPayment({
+                        elements: this.elements,
+                        confirmParams: {
+                            return_url: "https://fremontmi.com/payment-success",
+                        },
+                        redirect: "if_required"
+                    });
 
-                const { error, paymentIntent } = await stripe.confirmPayment({
-                    elements: stripe.elements(),
-                    confirmParams: {
-                        return_url: "https://fremontmi.com/error",
-                    },
-                });
-
-                if (error) {
+                    if (error) {
+                        this.errorMessage = error.message;
+                        this.isSubmitting = false;
+                    } else {
+                        await this.sendPaymentStatusToServer(paymentIntent);
+                    }
+                } catch (error) {
                     this.errorMessage = error.message;
                     this.isSubmitting = false;
-                } else {
-                    await this.sendPaymentStatusToServer(paymentIntent);
                 }
             },
 
@@ -199,6 +206,8 @@
                             contentType,
                             subscriptionId: this.subscriptionDetails.subscriptionId,
                             priceId: this.subscriptionDetails.priceId,
+                            displayName: this.subscriptionDetails[this.reoccurrence].displayName,
+                            displayPrice: this.subscriptionDetails[this.reoccurrence].displayPrice,
                             paymentIntentId: paymentIntent.id,
                             paymentStatus: paymentIntent.status,
                         })

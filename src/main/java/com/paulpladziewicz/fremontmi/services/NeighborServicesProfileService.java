@@ -36,8 +36,8 @@ public class NeighborServicesProfileService {
         neighborServicesProfile.setType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
         neighborServicesProfile.setSlug(slugService.createUniqueSlug(neighborServicesProfile.getName(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType()));
         neighborServicesProfile.setPathname("/neighbor-services/" + neighborServicesProfile.getSlug());
-        neighborServicesProfile.setVisibility(ContentVisibility.PUBLIC.getVisibility());
-        neighborServicesProfile.setStatus(ContentStatus.ACTIVE.getStatus());
+        neighborServicesProfile.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
+        neighborServicesProfile.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
         neighborServicesProfile.setCreatedBy(userProfile.getUserId());
 
         List<String> validatedTags = tagService.addTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
@@ -56,7 +56,7 @@ public class NeighborServicesProfileService {
 
     public NeighborServicesProfile findNeighborServiceProfileById(String id) {
             return contentRepository.findById(id, NeighborServicesProfile.class)
-                    .orElseThrow(() -> new ContentNotFoundException("Business with id '" + id + "' not found."));
+                    .orElseThrow(() -> new ContentNotFoundException("NeighborServiceProfile with id '" + id + "' not found."));
     }
 
     public NeighborServicesProfile findNeighborServiceProfileBySlug(String slug) {
@@ -140,8 +140,8 @@ public class NeighborServicesProfileService {
         existingProfile.setUpdatedAt(LocalDateTime.now());
     }
 
-    public void handleContactFormSubmission(String slug, String name, String email, String message) {
-        NeighborServicesProfile neighborServicesProfile = findNeighborServiceProfileBySlug(slug);
+    public void handleContactFormSubmission(String id, String name, String email, String message) {
+        NeighborServicesProfile neighborServicesProfile = findNeighborServiceProfileById(id);
 
         emailService.sendContactNeighborServiceProfileEmail(neighborServicesProfile.getEmail(), name, email, message);
     }

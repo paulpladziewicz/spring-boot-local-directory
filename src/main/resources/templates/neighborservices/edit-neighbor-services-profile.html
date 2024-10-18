@@ -59,7 +59,7 @@
                                 <span class="text-danger" th:if="${#fields.hasErrors('neighborServices[' + iterStat.index + '].price')}" th:errors="*{neighborServices[__${iterStat.index}__].price}"></span>
                             </div>
 
-                            <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)" style="display: block;">Remove</a>
+                            <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)" style="display: block;">Remove Service</a>
                         </div>
                     </div>
 
@@ -99,7 +99,7 @@
             <label for="neighborServices[${serviceIndex}].price">Service Price</label>
             <input type="text" class="form-control" name="neighborServices[${serviceIndex}].price" placeholder="Service price" required>
         </div>
-        <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)">Remove</a>
+        <a href="javascript:void(0);" class="d-block text-end btn btn-link text-danger p-0 remove-button" onclick="removeNeighborService(this)">Remove Service</a>
     `;
         container.appendChild(newService);
         serviceIndex++;
