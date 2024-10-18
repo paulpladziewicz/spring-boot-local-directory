@@ -38,7 +38,7 @@
 
 
                 <div class="d-flex justify-content-center">
-                    <div class="dropdown">
+                    <div th:if="${myProfile}" class="dropdown">
                         <a th:if="${neighborServicesProfile.profileImageUrl != null}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" th:style="'width: 200px; height: 200px; background-image: url(' + ${neighborServicesProfile.profileImageUrl} + ');'" aria-label="Upload picture">
                             <span class="d-block text-light text-center lh-1 pb-1" style="background-color: rgba(0,0,0,.5)">
                                 <i class="ai-camera"></i>
@@ -55,14 +55,22 @@
                                 <i class="ai-camera fs-base opacity-70 me-2"></i>
                                 Upload new photo
                             </a>
-                            <a class="dropdown-item text-danger fw-normal" href="#">
-                                <i class="ai-trash fs-base me-2"></i>
-                                Delete photo
-                            </a>
+<!--                            <a class="dropdown-item text-danger fw-normal" href="#">-->
+<!--                                <i class="ai-trash fs-base me-2"></i>-->
+<!--                                Delete photo-->
+<!--                            </a>-->
+                        </div>
+                    </div>
+
+                    <div th:if="${!myProfile}">
+                        <div th:if="${neighborServicesProfile.profileImageUrl}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0"
+                           th:style="'width: 200px; height: 200px; background-image: url(' + ${neighborServicesProfile.profileImageUrl} + ');'"
+                        >
                         </div>
                     </div>
 
                 </div>
+
                 <h1 th:text="${neighborServicesProfile.name}" class="display-4 mb-3 text-center">Fremont NeighborService Name</h1>
                 <p th:utext="${neighborServicesProfile.description}" class="fs-xl mb-3">Description about the service...</p>
 

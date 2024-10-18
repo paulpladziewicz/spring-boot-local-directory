@@ -31,12 +31,12 @@
 
                 <section class="pt-3">
                     <h2 class="display-6">How it works</h2>
-                    <p class="fs-xl"><strong>To find services</strong>, visit our <a href="/neighbor-services">NeighborServices™
+                    <p class="fs-xl"><strong>To find services</strong>, visit our <a href="/neighbor-services" data-analytics-event="How it works link - NeighborServices™ page">NeighborServices™
                         page</a> and filter individual profiles by the type of service you need. To contact an
                         individual, utilize the contact form on their profile page to start the conversation via email.
                     </p>
                     <p class="fs-xl"><strong>To offer services</strong>, visit our <a
-                            href="/create/neighbor-services-profile">Create NeighborServices™ Profile page</a>. Create a
+                            href="/create/neighbor-services-profile" data-analytics-event="How it works link - Create NeighborServices™ Profile page">Create NeighborServices™ Profile page</a>. Create a
                         profile, list the services you'd like to offer, and when everything looks good, select and pay
                         for a subscription. You're now ready to received inquiries via email.</p>
                 </section>
@@ -147,8 +147,8 @@
                     <div class="position-relative z-3 text-center px-3 px-sm-0 pb-2 py-sm-3 py-md-4 py-lg-5"
                          data-bs-theme="dark">
                         <h2 class="display-3 pt-xl-2">Get Started</h2>
-                            <a href="/neighbor-services" class="btn btn-lg btn-link p-0 mb-3 me-2">View NeighborServices™<i class="ai-arrow-right"></i></a>
-                            <a href="/create/neighbor-services-profile" class="btn btn-lg btn-link p-0 mb-3">Create Profile<i class="ai-arrow-right"></i></a>
+                            <a href="/neighbor-services" class="btn btn-lg btn-link p-0 mb-3 me-2" data-analytics-event="Bottom CTA Link - View NeighborServices™">View NeighborServices™<i class="ai-arrow-right"></i></a>
+                            <a href="/create/neighbor-services-profile" class="btn btn-lg btn-link p-0 mb-3" data-analytics-event="Bottom CTA Link - Create Profile">Create Profile<i class="ai-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -156,6 +156,15 @@
     </div>
 </main>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("[data-analytics-event]").forEach(function (element) {
+            element.addEventListener("click", function () {
+                plausible(element.getAttribute("data-analytics-event"));
+            });
+        });
+    });
+</script>
 <footer th:replace="~{partials/footer}"></footer>
 <script th:replace="~{partials/theme-js}"></script>
 </body>
