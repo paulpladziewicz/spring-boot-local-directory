@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Share the Joy: Give Toys, Spread Smiles | Fremont, MI</title>
+    <meta name="description" content="Explore the cozy coffee culture in Fremont, MI, as we highlight small town coffee shops and their fall favorites. From classic black coffee to seasonal specialties, find your perfect brew in Fremont this autumn.">
+    <meta name="keywords" content="Fremont MI, coffee shops, fall flavors, seasonal coffee, small town cafes, cozy cafes, autumn in Fremont, pumpkin spice latte, local coffee spots, Michigan coffee culture">
+
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+
+    <style>
+        .styled-first-letter::first-letter {
+            float: left;
+            font-size: 75px;
+            line-height: 60px;
+            padding-top: 4px;
+            padding-right: 8px;
+            padding-left: 3px;
+            color: #b35a1d; /* Autumn-like color */
+        }
+    </style>
+</head>
+
+
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<main class="pt-1">
+
+    <article class="container">
+        <div class="row">
+            <div class="col-lg-9 col-xl-8 mx-auto">
+
+                <img src="https://cdn.fremontmi.com/images/coffee-shop.webp" class="img-fluid rounded mb-4" alt="Coffee shop">
+
+                <h1>Cozy Cups: Exploring Small Town Coffee Shops' Fall Favorites</h1>
+                <p class="lead">Explore the cozy coffee culture in Fremont, MI, as we highlight small town coffee shops and their fall favorites.</p>
+                <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom mb-5">
+                    <div class="d-flex align-items-center mb-4 me-4">
+                    </div>
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="fs-sm me-2">Share article:</span>
+                        <div class="d-flex">
+                            <a class="nav-link me-2" id="share-facebook"
+                               href="https://www.facebook.com/sharer/sharer.php?u=https://fremontmi.com/articles/cozy-cups"
+                               data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Facebook"
+                               data-bs-original-title="Facebook" target="_blank">
+                                <i class="ai-facebook"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <section>
+                    <p class="fs-xl styled-first-letter">
+                        As the crisp air settles in and the leaves transform into a vibrant tapestry of reds, oranges,
+                        and yellows, fall brings a special kind of magic to small towns like Fremont. The allure of
+                        sweater weather invites us to don our favorite knitwear, wrap ourselves in warmth, and step out
+                        onto the town. There's something undeniably comforting about strolling through town, the crisp
+                        breeze greeting you while the rich colors of autumn foliage surround you.
+                    </p>
+                    <p class="fs-xl">
+                        Fremont, with its charming streets and welcoming atmosphere, is the perfect backdrop for this
+                        seasonal exploration. Each coffee shop you encounter offers a unique twist on fall flavors, from
+                        spiced pumpkin lattes to nutty maple brews. As you wander from one cozy café to another, the
+                        aroma of freshly brewed coffee fills the air, blending seamlessly with the scent of fallen
+                        leaves. It's an experience that engages all the senses—a warm cup in your hands, the gentle
+                        rustle of leaves underfoot, and the laughter of fellow patrons enjoying the season together.
+                    </p>
+                    <p class="fs-xl">
+                        Whether you're seeking a quiet corner to read or a lively spot to catch up with friends,
+                        Fremont's local coffee shops provide a delightful array of options. Each café showcases its own
+                        seasonal specialties, inviting you to sample new flavors that reflect the essence of autumn. So
+                        grab your favorite sweater, explore the picturesque streets, and indulge in a delicious cup of
+                        coffee that captures the spirit of fall.
+                    </p>
+                </section>
+
+                <th:block th:insert="~{ads/neighborservices :: article-card}"></th:block>
+
+                <section class="my-5">
+                    <h2 class="h1 text-center opacity-60">Simple Cups</h2>
+
+                    <h3 class="">The Lunch Pail</h3>
+                    <ul class="list-unstyled">
+                        <li>
+                            <strong>Classic Black Coffee</strong> (always available)
+                        </li>
+                        <li class="mt-2">
+                            <strong>Hours:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Monday – Saturday: 7 AM – 3 PM</li>
+                                <li>Sunday: 8 AM – 2 PM</li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Address:</strong> 14 W Main St, Fremont, MI 49412
+                        </li>
+                    </ul>
+
+                    <h3 class="">The Lumberjak Shak</h3>
+                    <ul class="list-unstyled">
+                        <li>
+                            <strong>Coffee Flavors</strong> (always available):
+                            <ul class="list-unstyled ms-3">
+                                <li>Hazelnut</li>
+                                <li>Michigan Cherry</li>
+                                <li>Vanilla Crème</li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Hours:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Monday – Saturday: 6 AM – 3 PM</li>
+                                <li>Sunday: 6 AM – 2 PM</li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Address:</strong> 820 S Stewart Ave, Fremont, MI 49412
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="my-5">
+                    <h2 class="h1 text-center opacity-60">Seasonal Cups</h2>
+
+                    <h3 class="">Koffee Kuppe Cafe</h3>
+                    <ul class="list-unstyled">
+                        <li>
+                            <strong>Seasonal & Specialty Options:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Pumpkin Bread: Pumpkin spice, gingerbread, vanilla</li>
+                                <li>Maple Magic: Maple syrup, brown sugar, cinnamon</li>
+                                <li>Autumn Spice: Caramel, apple, cinnamon</li>
+                                <li>Fall in Love: Chocolate, caramel, blackberry</li>
+                                <li>Witches Brew (customer favorite): Chocolate, white chocolate, vanilla, pumpkin
+                                    spice
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Beverage Options:</strong> Available hot, iced, blended, or as a cold brew with
+                            sweet foam.
+                        </li>
+                        <li class="mt-2">
+                            <strong>Additional Information:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Flavors change monthly, and they offer flights for all latte flavors.</li>
+                                <li>Coffee alternative: Lotus, a sparkling energy drink with rotating specialty
+                                    flavors.
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Hours:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Monday – Friday: 6:30 AM – 7 PM</li>
+                                <li>Saturday: 7 AM – 6 PM</li>
+                                <li>Sunday: 8 AM – 5 PM</li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Address:</strong> 46 W Main St, Fremont, MI 49412
+                        </li>
+                    </ul>
+
+                    <h3 class="">Moon Dance Cafe</h3>
+                    <ul class="list-unstyled">
+                        <li>
+                            <strong>Seasonal Highlights:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Pumpkin Spice Latte (staff/customer favorite)</li>
+                                <li>German Chocolate Mocha</li>
+                                <li>Butterscotch Toffee</li>
+                                <li>Pumpkin Spice White Mocha</li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Current Seasonal Flights:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Fall/Holiday Flight: Firefly, Pumpkin Spice, Sweater Weather, and Golden Leaves
+                                    Latte.
+                                </li>
+                                <li>Wizardly World Flight: Griffinsmore, Craven Claw, Slythermint, Truffle Puff
+                                    (includes a wand, glasses, and tattoo for the full experience).
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Additional Information:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Menu changes seasonally, with new flavors introduced every three months.</li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Hours:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Monday – Wednesday: 7 AM – 4 PM</li>
+                                <li>Thursday - Saturday: 7 AM – 7 PM</li>
+                                <li>Sunday: 7 AM – 4 PM</li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Address:</strong> 7143 West 48 Street, Fremont, MI 49412
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="my-5">
+                    <h2 class="h1 text-center opacity-60">Cups Coming Soon</h2>
+
+                    <h3 class="">Sinfully Sweet Bakery and Coffee Shop</h3>
+                    <ul class="list-unstyled">
+                        <li>
+                            <strong>Seasonal Coffee & Dessert Options:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Seasonal flavor coffee/lattes.</li>
+                                <li>Muffins, scones, cookies, and other desserts</li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Additional Information:</strong>
+                            <ul class="list-unstyled ms-3">
+                                <li>Menu changes seasonally, with new flavors introduced every three months.</li>
+                            </ul>
+                        </li>
+                        <li class="mt-2">
+                            <strong>Specialty:</strong> Homemade pumpkin syrup for coffee.
+                        </li>
+                        <li class="mt-2">
+                            <strong>Address:</strong> Opening Mid-November (Hours TBD)
+                        </li>
+                    </ul>
+                </section>
+
+                <p class="fs-xl">
+                    Whether you prefer the simplicity of a classic black coffee or enjoy exploring new and elaborate
+                    seasonal flavors, there’s something for everyone. From the straightforward, familiar brews at
+                    <strong>The Lunch Pail</strong> and <strong>The Lumberjak Shak</strong> to the inventive and
+                    seasonal specialties at <strong>Moon Dance Cafe</strong> and <strong>Koffee Kuppe Cafe</strong>,
+                    each café offers a cozy cup tailored to individual tastes. And with new options like <strong>Sinfully
+                    Sweet Bakery and Coffee Shop</strong> on the horizon, you’ll find the perfect brew to match your
+                    mood, ensuring a comforting coffee experience no matter the season.
+                </p>
+
+                <th:block th:insert="~{ads/neighborservices :: article-card}"></th:block>
+
+            </div>
+        </div>
+    </article>
+
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const shareButton = document.querySelector('#share-facebook');
+
+        if (navigator.share) {
+            shareButton.addEventListener('click', async () => {
+                try {
+                    await navigator.share({
+                        title: 'Cozy Cups: Exploring Small Town Coffee Shops\' Fall Favorites',
+                        text: 'Check out this article about fall coffee favorites in Fremont!',
+                        url: 'https://fremontmi.com/articles/cozy-cups'
+                    });
+                } catch (err) {
+                    console.error('Error sharing:', err);
+                }
+            });
+        } else {
+            // Fallback for devices or browsers that don't support the Web Share API
+            shareButton.addEventListener('click', () => {
+                window.open('https://www.facebook.com/sharer/sharer.php?u=https://fremontmi.com/articles/cozy-cups', '_blank');
+            });
+        }
+    });
+</script>
+
+<footer th:replace="~{partials/footer}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>

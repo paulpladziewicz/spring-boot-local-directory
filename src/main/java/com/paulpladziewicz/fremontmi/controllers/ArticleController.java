@@ -42,4 +42,9 @@ public class ArticleController {
     public String toyDrive(Model model) {
         return "articles/sharing-joy";
     }
+
+    @GetMapping("/articles/cozy-cups")
+    public String cozyCups(Model model) {
+        return "articles/seasonal-coffee";
+    }
 }

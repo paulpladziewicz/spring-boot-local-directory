@@ -36,6 +36,7 @@ public class SitemapController {
         writer.println("<url><loc>https://fremontmi.com/articles/prepare-to-vote</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>");
         writer.println("<url><loc>https://fremontmi.com/articles/coming-soon-taqueria-de-gallo</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>");
         writer.println("<url><loc>https://fremontmi.com/articles/share-the-joy-give-toys-spread-smiles</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>");
+        writer.println("<url><loc>https://fremontmi.com/articles/cozy-cups</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>");
 
         // Content entities
         for (String url : urls) {
