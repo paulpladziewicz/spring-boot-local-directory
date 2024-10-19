@@ -109,7 +109,7 @@
             <div class="row pb-4">
                 <div class="col-lg-8 col-xl-7 offset-xl-1 mx-auto">
                     <h1 class="display-6 text-center" th:text="'Contact ' + ${neighborServicesProfile.name}">Contact Us</h1>
-                    <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">If you have any questions, inquiries, or would like more information about
+                    <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">If you have any questions, inquiries, or would like more information from
                         <span th:text="${neighborServicesProfile.name}">our service</span>, please fill out the form below.</p>
 
                     <form class="row g-4 needs-validation" novalidate="" id="contactForm">
@@ -163,7 +163,7 @@
                                     <div id="imagePreview" class="rounded-circle d-none" style="width: 200px; height: 200px; background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
                                 </div>
 
-                                <form id="uploadForm" th:action="@{/upload}" method="post" enctype="multipart/form-data">
+                                <form id="uploadForm" th:action="@{/upload}" method="post" enctype="multipart/form-data" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                                     <input type="hidden" name="contentType" th:value="${neighborServicesProfile.type}">
                                     <input type="hidden" name="contentId" th:value="${neighborServicesProfile.id}">
                                     <div class="mb-3">

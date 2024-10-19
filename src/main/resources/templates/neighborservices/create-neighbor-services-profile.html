@@ -12,14 +12,11 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
                 <h1>Create NeighborServices™ Profile</h1>
-                <div class="alert d-flex alert-danger" role="alert">
-                    <i class="ai-triangle-alert fs-xl pe-1 me-2"></i>
-                    <div>Content that does not serve Fremont, MI can be removed.</div>
-                </div>
+
                 <div class="alert d-flex alert-light" role="alert">
                     <i class="ai-circle-info fs-xl pe-1 me-2"></i>
-                    <p class="mb-0">Requires a subscription to be visible to the community.
-                        <a href="#">Learn more</a></p>
+                    <p class="mb-0">Content that does not serve Fremont, MI can be removed. Requires a subscription to be visible to the community.
+                        <a href="/overview/neighbor-services" target="_blank">Learn more</a></p>
                 </div>
 
                 <form id="create-business-form" th:action="@{/create/neighbor-services-profile}" th:object="${neighborServicesProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
@@ -27,12 +24,14 @@
                     <div class="form-group mb-3">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="displayName">Display Name</label>
                         <input type="text" class="form-control" id="displayName" th:field="*{name}" placeholder="Display name" required>
+                        <small class="form-text text-muted">Enter your preferred name or how you would like others to address you along with your legal last name.</small>
                         <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="mt-1 text-danger"></div>
                     </div>
 
                     <div class="form-group mb-3">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="description">Description</label>
                         <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Business description" required></textarea>
+                        <small class="form-text text-muted">Briefly describe the services you offer and share some information about yourself.</small>
                         <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></div>
                     </div>
 
@@ -42,7 +41,7 @@
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="email">Email</label>
                         <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="Enter email" required>
                         <small class="form-text text-muted">
-                            Email is not publicly displayed. It's used when people reach out via a contact form.
+                            Your email address will remain private and will be used to receive inquiries.
                         </small>
                         <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="mt-1 text-danger"></div>
                     </div>
@@ -66,6 +65,9 @@
                             <div class="form-group mb-3">
                                 <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="neighborServices[0].price">Service Price</label>
                                 <input type="text" class="form-control" th:field="*{neighborServices[0].price}" placeholder="Service price" required>
+                                <small class="form-text text-muted">
+                                    Examples: $25, $25/hour, $100/week
+                                </small>
                                 <span class="text-danger mt-1" th:if="${#fields.hasErrors('neighborServices[0].price')}" th:errors="*{neighborServices[0].price}"></span>
                             </div>
 

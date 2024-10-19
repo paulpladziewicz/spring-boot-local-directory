@@ -46,7 +46,7 @@ public class UploadController {
                         try {
                             uploadService.uploadFile(file, fileName);
                             String cdnUrl = "https://cdn.fremontmi.com/" + fileName;
-                            neighborServicesProfileService.setProfileImageUrl(contentId, cdnUrl);
+                            neighborServicesProfileService.setProfileImageUrl(contentId, cdnUrl, fileName);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

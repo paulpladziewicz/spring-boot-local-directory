@@ -34,5 +34,5 @@ public class NeighborServicesProfile extends Content {
 
     private String profileImageUrl;
 
-    private List<String> profileImageUrls = new ArrayList<>();
+    private String profileImageFileName;
 }

@@ -148,26 +148,15 @@ public class NeighborServicesProfileService {
         emailService.sendContactNeighborServiceProfileEmail(neighborServicesProfile.getEmail(), name, email, message);
     }
 
-    public void setProfileImageUrl(String contentId, String cdnUrl) {
+    public void setProfileImageUrl(String contentId, String cdnUrl, String fileName) {
         NeighborServicesProfile existingProfile = findNeighborServiceProfileById(contentId);
 
-        if (existingProfile.getProfileImageUrl() != null) {
-            existingProfile.getProfileImageUrls().add(existingProfile.getProfileImageUrl());
+        if (existingProfile.getProfileImageFileName() != null) {
+            uploadService.deleteFile(existingProfile.getProfileImageFileName());
         }
 
+        existingProfile.setProfileImageFileName(fileName);
         existingProfile.setProfileImageUrl(cdnUrl);
         contentRepository.save(existingProfile);
-
-        removeOldImagesFromS3(existingProfile);
-    }
-
-    private void removeOldImagesFromS3(NeighborServicesProfile profile) {
-        List<String> imageUrls = profile.getProfileImageUrls();
-
-        for (String imageUrl : imageUrls) {
-            uploadService.deleteFile(imageUrl);
-        }
-
-        profile.getProfileImageUrls().clear();
     }
 }

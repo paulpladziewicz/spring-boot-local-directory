@@ -95,8 +95,10 @@ public class NeighborServicesProfileController {
             createdByUser = false;
         }
 
-        if (Objects.equals(neighborServicesProfile.getVisibility(), ContentVisibility.RESTRICTED.getVisibility())) {
-            return "restricted-visibility";
+        if (!createdByUser) {
+            if (Objects.equals(neighborServicesProfile.getVisibility(), ContentVisibility.RESTRICTED.getVisibility())) {
+                return "restricted-visibility";
+            }
         }
 
         neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));
