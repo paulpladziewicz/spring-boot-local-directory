@@ -214,7 +214,7 @@ public class EmailService {
             mimeMessage.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
             mimeMessage.setReplyTo(new Address[]{new InternetAddress(fromEmail)});
             mimeMessage.setRecipients(MimeMessage.RecipientType.TO, toEmail);
-            mimeMessage.setSubject("NeighborServices™ Contact Form Submission");
+            mimeMessage.setSubject("NeighborServices™ Inquiry");
             mimeMessage.setContent(html, "text/html; charset=utf-8");
 
             mailSender.send(mimeMessage);
