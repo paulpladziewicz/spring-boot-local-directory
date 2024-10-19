@@ -29,26 +29,26 @@
                 <div x-show="step === 'select'" class="mt-4" x-cloak>
                     <h3>Select a Subscription Plan</h3>
                     <div class="row">
-                        <div class="col-md-6 d-flex align-items-stretch">
+                        <div class="col-md-6">
                             <div class="card">
-                                <div class="card-body w-100 mx-auto text-center" style="max-width: 23rem;">
+                                <div class="card-body w-100 mx-auto text-center">
                                     <h3>Monthly</h3>
                                     <div class="display-2 text-primary" x-text="formatPrice(subscriptionDetails.monthly.displayPrice)"></div>
                                     <div class="mb-4">per month</div>
                                     <p class="mb-4 pb-4">Perfect for those who want flexibility without a long-term commitment.</p>
-                                    <button class="btn btn-primary w-100" type="submit" x-on:click="handleSelectSubscription('monthly', subscriptionDetails.monthly.priceId)">Proceed with Monthly Subscription</button>
+                                    <button class="btn btn-primary w-100" type="submit" x-on:click="handleSelectSubscription('monthly', subscriptionDetails.monthly.priceId)">Proceed with Monthly</button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-6 mt-4 mt-md-0 d-flex align-items-stretch">
+                        <div class="col-md-6 mt-4 mt-md-0">
                             <div class="card border-primary bg-primary">
-                                <div class="card-body w-100 mx-auto text-center" style="max-width: 23rem;">
+                                <div class="card-body w-100 mx-auto text-center">
                                     <h3 class="text-light">Annual</h3>
                                     <div class="display-2 text-light" x-text="formatPrice(subscriptionDetails.annual.displayPrice)"></div>
                                     <div class="text-light opacity-70 mb-4">per year</div>
                                     <p class="text-light opacity-70 mb-4 pb-4">Save money with the annual plan.</p>
-                                    <button class="btn btn-light w-100" type="submit" x-on:click="handleSelectSubscription('annual', subscriptionDetails.annual.priceId)">Proceed with Annual Subscription</button>
+                                    <button class="btn btn-light w-100" type="submit" x-on:click="handleSelectSubscription('annual', subscriptionDetails.annual.priceId)">Proceed with Annual</button>
                                 </div>
                             </div>
                         </div>
