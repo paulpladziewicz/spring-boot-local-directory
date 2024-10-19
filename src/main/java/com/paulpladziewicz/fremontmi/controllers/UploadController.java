@@ -3,17 +3,15 @@ package com.paulpladziewicz.fremontmi.controllers;
 import com.paulpladziewicz.fremontmi.exceptions.PermissionDeniedException;
 import com.paulpladziewicz.fremontmi.services.NeighborServicesProfileService;
 import com.paulpladziewicz.fremontmi.services.UploadService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Controller
@@ -42,7 +40,8 @@ public class UploadController {
         CompletableFuture<?>[] uploadFutures = files.stream()
                 .filter(file -> !file.isEmpty())
                 .map(file -> {
-                    String fileName = contentType + "_" + contentId + "_" + files.indexOf(file) + getFileExtension(file.getContentType());
+                    String uniqueId = UUID.randomUUID().toString();
+                    String fileName = contentType + "_" + contentId + "_" + uniqueId + getFileExtension(file.getContentType());
                     return CompletableFuture.runAsync(() -> {
                         try {
                             uploadService.uploadFile(file, fileName);

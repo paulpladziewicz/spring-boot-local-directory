@@ -21,13 +21,15 @@ public class NeighborServicesProfileService {
     private final TagService tagService;
     private final SlugService slugService;
     private final EmailService emailService;
+    private final UploadService uploadService;
 
-    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, SlugService slugService, TagService tagService, EmailService emailService) {
+    public NeighborServicesProfileService(ContentRepository contentRepository, UserService userService, SlugService slugService, TagService tagService, EmailService emailService, UploadService uploadService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.tagService = tagService;
         this.slugService = slugService;
         this.emailService = emailService;
+        this.uploadService = uploadService;
     }
 
     public NeighborServicesProfile createNeighborServiceProfile(NeighborServicesProfile neighborServicesProfile) {
@@ -148,7 +150,24 @@ public class NeighborServicesProfileService {
 
     public void setProfileImageUrl(String contentId, String cdnUrl) {
         NeighborServicesProfile existingProfile = findNeighborServiceProfileById(contentId);
+
+        if (existingProfile.getProfileImageUrl() != null) {
+            existingProfile.getProfileImageUrls().add(existingProfile.getProfileImageUrl());
+        }
+
         existingProfile.setProfileImageUrl(cdnUrl);
         contentRepository.save(existingProfile);
+
+        removeOldImagesFromS3(existingProfile);
+    }
+
+    private void removeOldImagesFromS3(NeighborServicesProfile profile) {
+        List<String> imageUrls = profile.getProfileImageUrls();
+
+        for (String imageUrl : imageUrls) {
+            uploadService.deleteFile(imageUrl);
+        }
+
+        profile.getProfileImageUrls().clear();
     }
 }

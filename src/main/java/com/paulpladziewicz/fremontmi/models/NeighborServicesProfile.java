@@ -33,4 +33,6 @@ public class NeighborServicesProfile extends Content {
     private List<NeighborService> neighborServices = new ArrayList<>();
 
     private String profileImageUrl;
+
+    private List<String> profileImageUrls = new ArrayList<>();
 }
