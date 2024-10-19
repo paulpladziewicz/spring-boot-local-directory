@@ -152,7 +152,6 @@ public class NeighborServicesProfileController {
 
     @PostMapping("/contact/neighbor-services-profile")
     public ResponseEntity<String> handleContactForm(@RequestBody @Valid ContactFormRequest contactFormRequest) {
-
         try {
             neighborServicesProfileService.handleContactFormSubmission(
                     contactFormRequest.getId(),
