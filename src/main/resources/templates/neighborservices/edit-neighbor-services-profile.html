@@ -18,13 +18,15 @@
 
                     <div class="form-group mb-3">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="displayName">Display name</label>
-                        <textarea class="form-control" id="displayName" th:field="*{name}" rows="3" placeholder="Display name"></textarea>
+                        <input type="text" class="form-control" id="displayName" th:field="*{name}" placeholder="Display name" required>
+                        <small class="form-text text-muted">Enter your preferred name or how you would like others to address you along with your legal last name.</small>
                         <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="alert alert-danger"></div>
                     </div>
 
                     <div class="form-group mb-3">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="description">Description</label>
-                        <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Business description"></textarea>
+                        <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Profile description"></textarea>
+                        <small class="form-text text-muted">Briefly describe the services you offer and share some information about yourself.</small>
                         <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="alert alert-danger"></div>
                     </div>
 
@@ -33,6 +35,9 @@
                     <div class="form-group mb-3">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="email">Email</label>
                         <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="Enter email">
+                        <small class="form-text text-muted">
+                            Your email address will remain private and will be used to receive inquiries.
+                        </small>
                         <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="alert alert-danger"></div>
                     </div>
 
@@ -56,6 +61,9 @@
                             <div class="form-group mb-2">
                                 <label th:for="'neighborServices.' + iterStat.index + '.price'">Service Price</label>
                                 <input type="text" class="form-control" th:field="*{neighborServices[__${iterStat.index}__].price}" placeholder="Service price" required>
+                                <small class="form-text text-muted">
+                                    Examples: $25, $25/hour, $100/week
+                                </small>
                                 <span class="text-danger" th:if="${#fields.hasErrors('neighborServices[' + iterStat.index + '].price')}" th:errors="*{neighborServices[__${iterStat.index}__].price}"></span>
                             </div>
 
