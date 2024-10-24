@@ -35,14 +35,14 @@ public class NeighborServicesProfileService {
     public NeighborServicesProfile createNeighborServiceProfile(NeighborServicesProfile neighborServicesProfile) {
         UserProfile userProfile = userService.getUserProfile();
 
-        neighborServicesProfile.setType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
-        neighborServicesProfile.setSlug(slugService.createUniqueSlug(neighborServicesProfile.getName(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType()));
+        neighborServicesProfile.setType(ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType());
+        neighborServicesProfile.setSlug(slugService.createUniqueSlug(neighborServicesProfile.getName(), ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType()));
         neighborServicesProfile.setPathname("/neighbor-services/" + neighborServicesProfile.getSlug());
         neighborServicesProfile.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
         neighborServicesProfile.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
         neighborServicesProfile.setCreatedBy(userProfile.getUserId());
 
-        List<String> validatedTags = tagService.addTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+        List<String> validatedTags = tagService.addTags(neighborServicesProfile.getTags(), ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType());
         neighborServicesProfile.setTags(validatedTags);
 
         return contentRepository.save(neighborServicesProfile);
@@ -50,9 +50,9 @@ public class NeighborServicesProfileService {
 
     public List<NeighborServicesProfile> findAllActiveNeighborServices(String tag) {
         if (tag != null && !tag.isEmpty()) {
-            return contentRepository.findByTagAndType(tag, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType(), NeighborServicesProfile.class);
+            return contentRepository.findByTagAndType(tag, ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType(), NeighborServicesProfile.class);
         } else {
-            return contentRepository.findAllByType(ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType(), NeighborServicesProfile.class);
+            return contentRepository.findAllByType(ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType(), NeighborServicesProfile.class);
         }
     }
 
@@ -62,7 +62,7 @@ public class NeighborServicesProfileService {
     }
 
     public NeighborServicesProfile findNeighborServiceProfileBySlug(String slug) {
-            return contentRepository.findBySlugAndType(slug, ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType(), NeighborServicesProfile.class)
+            return contentRepository.findBySlugAndType(slug, ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType(), NeighborServicesProfile.class)
                     .orElseThrow(() -> new ContentNotFoundException("Business with slug '" + slug + "' not found."));
     }
 
@@ -85,11 +85,11 @@ public class NeighborServicesProfileService {
         List<String> newTags = updatedProfile.getTags();
 
         if (newTags != null) {
-            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType());
         }
 
         if (!existingProfile.getName().equals(updatedProfile.getName())) {
-            String newSlug = slugService.createUniqueSlug(updatedProfile.getName(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+            String newSlug = slugService.createUniqueSlug(updatedProfile.getName(), ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType());
             existingProfile.setSlug(newSlug);
             existingProfile.setPathname("/neighbor-services/" + newSlug);
         }
@@ -107,7 +107,7 @@ public class NeighborServicesProfileService {
 
         checkPermission(userId, neighborServicesProfile);
 
-        tagService.removeTags(neighborServicesProfile.getTags(), ContentTypes.NEIGHBOR_SERVICES_PROFILE.getContentType());
+        tagService.removeTags(neighborServicesProfile.getTags(), ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType());
 
         contentRepository.deleteById(neighborServiceId);
     }

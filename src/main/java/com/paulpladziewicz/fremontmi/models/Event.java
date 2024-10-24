@@ -3,7 +3,6 @@ package com.paulpladziewicz.fremontmi.models;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -11,11 +10,11 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
-@EqualsAndHashCode(callSuper=true)
 @TypeAlias("Event")
-public class Event extends Content {
+public class Event implements ContentDetail {
 
     @NotBlank(message = "Please provide an event name")
     @Size(min = 3, max = 100, message = "Event name must be between 3 and 100 characters")
@@ -49,5 +48,13 @@ public class Event extends Content {
 
     @Transient
     private int moreDayEventsCount;
+
+    @Override
+    public void update(ContentDetail newDetail, Content parentContent) {
+    }
+
+    @Override
+    public void update(UpdateType updateType, Map<String, Object> updateData) {
+    }
 }
 

@@ -4,16 +4,15 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.TypeAlias;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
-@EqualsAndHashCode(callSuper=true)
 @TypeAlias("NeighborServicesProfile")
-public class NeighborServicesProfile extends Content {
+public class NeighborServicesProfile implements ContentDetail {
 
     @NotBlank(message = "Display name is required.")
     @Size(max = 100, message = "Display name should be less than 100 characters.")
@@ -35,4 +34,23 @@ public class NeighborServicesProfile extends Content {
     private String profileImageUrl;
 
     private String profileImageFileName;
+
+    @Override
+    public void update(ContentDetail newDetail, Content parentContent) {
+    }
+
+    @Override
+    public void update(UpdateType updateType, Map<String, Object> updateData) {
+        switch (updateType) {
+            case PROFILE_IMAGE:
+                String profileImageUrl = (String) updateData.get("profileImageUrl");
+                String profileImageFileName = (String) updateData.get("profileImageFileName");
+                this.profileImageUrl = profileImageUrl;
+                this.profileImageFileName = profileImageFileName;
+                break;
+            // Add more cases for other types of updates
+            default:
+                throw new IllegalArgumentException("Update type not supported: " + updateType);
+        }
+    }
 }

@@ -8,11 +8,11 @@ import org.springframework.data.annotation.TypeAlias;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
-@EqualsAndHashCode(callSuper=true)
 @TypeAlias("Group")
-public class Group extends Content {
+public class Group implements ContentDetail {
 
     @NotBlank(message = "Please provide a group name.")
     @Size(max = 100, message = "Name should not be longer than 100 characters.")
@@ -28,5 +28,11 @@ public class Group extends Content {
 
     private List<String> members = new ArrayList<>();
 
-    private List<String> administrators = new ArrayList<>();
+    @Override
+    public void update(ContentDetail newDetail, Content parentContent) {
+    }
+
+    @Override
+    public void update(UpdateType updateType, Map<String, Object> updateData) {
+    }
 }

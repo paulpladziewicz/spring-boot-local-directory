@@ -43,11 +43,11 @@ public class EventService {
 
         event.setCreatedBy(userId);
         populateFormattedTimes(event);
-        event.setType(ContentTypes.EVENT.getContentType());
-        event.setSlug(slugService.createUniqueSlug(event.getName(), ContentTypes.EVENT.getContentType()));
+        event.setType(ContentType.EVENT.getContentType());
+        event.setSlug(slugService.createUniqueSlug(event.getName(), ContentType.EVENT.getContentType()));
         event.setPathname("/events/" + event.getSlug());
 
-        List<String> validatedTags = tagService.addTags(event.getTags(), ContentTypes.EVENT.getContentType());
+        List<String> validatedTags = tagService.addTags(event.getTags(), ContentType.EVENT.getContentType());
         event.setTags(validatedTags);
 
         Event savedEvent = saveEvent(event);
@@ -79,7 +79,7 @@ public class EventService {
     }
 
     public Event findEventBySlug(String slug) {
-        return contentRepository.findBySlugAndType(slug, ContentTypes.EVENT.getContentType(), Event.class)
+        return contentRepository.findBySlugAndType(slug, ContentType.EVENT.getContentType(), Event.class)
                 .orElseThrow(() -> new ContentNotFoundException("Event with slug '" + slug + "' not found."));
     }
 
@@ -103,11 +103,11 @@ public class EventService {
         List<String> newTags = updatedEvent.getTags();
 
         if (newTags != null) {
-            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.EVENT.getContentType());
+            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentType.EVENT.getContentType());
         }
 
         if (!existingEvent.getName().equals(updatedEvent.getName())) {
-            String newSlug = slugService.createUniqueSlug(updatedEvent.getName(), ContentTypes.EVENT.getContentType());
+            String newSlug = slugService.createUniqueSlug(updatedEvent.getName(), ContentType.EVENT.getContentType());
             existingEvent.setSlug(newSlug);
             existingEvent.setPathname("/events/" + newSlug);
         }
@@ -125,7 +125,7 @@ public class EventService {
 
         checkPermission(userProfile.getUserId(), existingEvent);
 
-        tagService.removeTags(existingEvent.getTags(), ContentTypes.EVENT.getContentType());
+        tagService.removeTags(existingEvent.getTags(), ContentType.EVENT.getContentType());
 
         List<String> eventIds = userProfile.getEventIds();
         eventIds.remove(existingEvent.getId());

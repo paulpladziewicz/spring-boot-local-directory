@@ -38,12 +38,12 @@ public class GroupService {
 
         group.setMembers(List.of(userProfile.getUserId()));
         group.setAdministrators(List.of(userProfile.getUserId()));
-        group.setType(ContentTypes.GROUP.getContentType());
-        group.setSlug(slugService.createUniqueSlug(group.getName(), ContentTypes.GROUP.getContentType()));
+        group.setType(ContentType.GROUP.getContentType());
+        group.setSlug(slugService.createUniqueSlug(group.getName(), ContentType.GROUP.getContentType()));
         group.setPathname("/groups/" + group.getSlug());
         group.setCreatedBy(userProfile.getUserId());
 
-        List<String> validatedTags = tagService.addTags(group.getTags(), ContentTypes.GROUP.getContentType());
+        List<String> validatedTags = tagService.addTags(group.getTags(), ContentType.GROUP.getContentType());
         group.setTags(validatedTags);
 
         Group savedGroup = contentRepository.save(group);
@@ -56,14 +56,14 @@ public class GroupService {
 
     public List<Group> findAll(String tag) {
         if (tag != null && !tag.isEmpty()) {
-            return contentRepository.findByTagAndType(tag, ContentTypes.GROUP.getContentType(), Group.class);
+            return contentRepository.findByTagAndType(tag, ContentType.GROUP.getContentType(), Group.class);
         } else {
-            return contentRepository.findAllByType(ContentTypes.GROUP.getContentType(), Group.class);
+            return contentRepository.findAllByType(ContentType.GROUP.getContentType(), Group.class);
         }
     }
 
     public Group findBySlug(String slug) {
-        return contentRepository.findBySlugAndType(slug, ContentTypes.GROUP.getContentType(), Group.class)
+        return contentRepository.findBySlugAndType(slug, ContentType.GROUP.getContentType(), Group.class)
                 .orElseThrow(() -> new ContentNotFoundException("Group with slug '" + slug + "' not found."));
     }
 
@@ -89,10 +89,10 @@ public class GroupService {
 
         List<String> existingTags = existingGroup.getTags();
         List<String> newTags = updatedGroup.getTags();
-        tagService.updateTags(newTags, existingTags, ContentTypes.GROUP.getContentType());
+        tagService.updateTags(newTags, existingTags, ContentType.GROUP.getContentType());
 
         if (!existingGroup.getName().equals(updatedGroup.getName())) {
-            String newSlug = slugService.createUniqueSlug(updatedGroup.getName(), ContentTypes.GROUP.getContentType());
+            String newSlug = slugService.createUniqueSlug(updatedGroup.getName(), ContentType.GROUP.getContentType());
             existingGroup.setSlug(newSlug);
             existingGroup.setPathname("/groups/" + newSlug);
         }
@@ -114,7 +114,7 @@ public class GroupService {
             throw new PermissionDeniedException("User doesn't have permission to delete group.");
         }
 
-        tagService.removeTags(groupContent.getTags(), ContentTypes.GROUP.getContentType());
+        tagService.removeTags(groupContent.getTags(), ContentType.GROUP.getContentType());
 
         List<String> groupIds = userProfile.getGroupIds();
         groupIds.remove(groupId);

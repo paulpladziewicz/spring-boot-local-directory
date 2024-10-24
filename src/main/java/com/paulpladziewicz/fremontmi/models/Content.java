@@ -6,27 +6,39 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @Document(collection = "content")
-public class Content {
+public class Content <T extends ContentDetail<T>> {
     @Id
     private String id;
 
-    private String type;
+    private ContentType type;
+
+    private Boolean nearby;
+
+    private Boolean external;
+
+    private LocalDateTime expiresAt;
 
     private String pathname;
-
-    private String slug;
 
     private String visibility = ContentVisibility.PUBLIC.getVisibility();
 
     private String status = ContentStatus.ACTIVE.getStatus();
 
+    private T detail;
+
+    private List<String> administrators = new ArrayList<>();
+
+    private int heartCount = 0;
+
+    private Set<String> heartedUserIds = new HashSet<>();
+
     private List<String> relatedContentIds;
+
+    private String parentContentId;
 
     private String createdBy;
 
@@ -40,8 +52,4 @@ public class Content {
 
     @Version
     private Long version;
-
-    public List<String> getTags() {
-        return Collections.emptyList();
-    }
 }

@@ -5,10 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @Document(collection = "user_profiles")
@@ -29,6 +26,8 @@ public class UserProfile {
     private List<String> eventIds = new ArrayList<>();
 
     private List<String> businessIds = new ArrayList<>();
+
+    private Set<String> bookmarkedContentIds = new HashSet<>();
 
     private int emailSendCount;
 

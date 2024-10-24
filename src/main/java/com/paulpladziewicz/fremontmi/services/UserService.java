@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Collection;
 
 @Service
 public class UserService {
@@ -72,6 +74,16 @@ public class UserService {
         throw new UserNotAuthenticatedException("User is not authenticated.");
     }
 
+    public boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+            return authorities.stream()
+                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+        }
+
+        throw new UserNotAuthenticatedException("User is not authenticated.");
+    }
 
     public UserProfile getUserProfile() {
         String userId = getUserId();

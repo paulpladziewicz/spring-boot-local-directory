@@ -1,5 +1,8 @@
 package com.paulpladziewicz.fremontmi.models;
 
+import lombok.Getter;
+
+@Getter
 public enum ContentStatus {
     ACTIVE("active"),
     REQUIRES_ACTIVE_SUBSCRIPTION("requires_active_subscription"),
@@ -10,9 +13,5 @@ public enum ContentStatus {
 
     ContentStatus(String status) {
         this.status = status;
-    }
-
-    public String getStatus() {
-        return status;
     }
 }

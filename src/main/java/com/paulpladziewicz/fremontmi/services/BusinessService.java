@@ -34,15 +34,15 @@ public class BusinessService {
     public Business create(Business business) {
         UserProfile userProfile = userService.getUserProfile();
 
-        business.setType(ContentTypes.BUSINESS.getContentType());
-        business.setSlug(slugService.createUniqueSlug(business.getName(), ContentTypes.BUSINESS.getContentType()));
+        business.setType(ContentType.BUSINESS.getContentType());
+        business.setSlug(slugService.createUniqueSlug(business.getName(), ContentType.BUSINESS.getContentType()));
         business.setPathname("/businesses/" + business.getSlug());
         business.setVisibility(ContentVisibility.PUBLIC.getVisibility());
         business.setStatus(ContentStatus.ACTIVE.getStatus());
         business.setCreatedBy(userProfile.getUserId());
         business.setAdministrators(List.of(userProfile.getUserId()));
 
-        List<String> validatedTags = tagService.addTags(business.getTags(), ContentTypes.BUSINESS.getContentType());
+        List<String> validatedTags = tagService.addTags(business.getTags(), ContentType.BUSINESS.getContentType());
         business.setTags(validatedTags);
 
         Business savedBusiness = contentRepository.save(business);
@@ -56,20 +56,15 @@ public class BusinessService {
 
     public List<Business> findAll(String tag) {
         if (tag != null && !tag.isEmpty()) {
-            return contentRepository.findByTagAndType(tag, ContentTypes.BUSINESS.getContentType(), Business.class);
+            return contentRepository.findByTagAndType(tag, ContentType.BUSINESS.getContentType(), Business.class);
         } else {
-            return contentRepository.findAllByType(ContentTypes.BUSINESS.getContentType(), Business.class);
+            return contentRepository.findAllByType(ContentType.BUSINESS.getContentType(), Business.class);
         }
     }
 
-    public Business findById(String id) {
-        return contentRepository.findById(id, Business.class)
-                .orElseThrow(() -> new ContentNotFoundException("Business with id '" + id + "' not found."));
-
-    }
 
     public Business findBySlug(String slug) {
-        return contentRepository.findBySlugAndType(slug, ContentTypes.BUSINESS.getContentType(), Business.class)
+        return contentRepository.findBySlugAndType(slug, ContentType.BUSINESS.getContentType(), Business.class)
                 .orElseThrow(() -> new ContentNotFoundException("Business with slug '" + slug + "' not found."));
     }
 
@@ -91,11 +86,11 @@ public class BusinessService {
         List<String> newTags = updatedBusiness.getTags();
 
         if (newTags != null) {
-            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentTypes.BUSINESS.getContentType());
+            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), ContentType.BUSINESS.getContentType());
         }
 
         if (!existingBusiness.getName().equals(updatedBusiness.getName())) {
-            String newSlug = slugService.createUniqueSlug(updatedBusiness.getName(), ContentTypes.BUSINESS.getContentType());
+            String newSlug = slugService.createUniqueSlug(updatedBusiness.getName(), ContentType.BUSINESS.getContentType());
             existingBusiness.setSlug(newSlug);
             existingBusiness.setPathname("/businesses/" + newSlug);
         }
@@ -114,7 +109,7 @@ public class BusinessService {
 
         checkPermission(userProfile.getUserId(), business);
 
-        tagService.removeTags(business.getTags(), ContentTypes.BUSINESS.getContentType());
+        tagService.removeTags(business.getTags(), ContentType.BUSINESS.getContentType());
 
         List<String> businessIds = userProfile.getBusinessIds();
         businessIds.remove(business.getId());
@@ -133,7 +128,6 @@ public class BusinessService {
             existingBusiness.setTags(updatedBusiness.getTags());
         }
 
-        //existingBusiness.setAdministrators(updatedBusiness.getAdministrators());
         existingBusiness.setAddress(updatedBusiness.getAddress());
         existingBusiness.setPhoneNumber(updatedBusiness.getPhoneNumber());
         existingBusiness.setEmail(updatedBusiness.getEmail());
