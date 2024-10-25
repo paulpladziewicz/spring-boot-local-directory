@@ -37,8 +37,8 @@ public class Group implements ContentDetail {
         if (!(newDetail instanceof Business newGroupDetail)) {
             throw new IllegalArgumentException("Invalid content detail type for Business.");
         }
-        existingGroup.setName(newGroupDetail.getName());
-        existingGroup.setDescription(newGroupDetail.getDescription());
+        this.setName(newGroupDetail.getName());
+        this.setDescription(newGroupDetail.getDescription());
     }
 
     @Override

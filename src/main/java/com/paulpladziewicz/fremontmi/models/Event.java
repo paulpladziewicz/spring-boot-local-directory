@@ -8,9 +8,12 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @TypeAlias("Event")
@@ -54,11 +57,70 @@ public class Event implements ContentDetail {
     private Boolean external;
 
     @Override
-    public void update(ContentDetail newDetail, Content parentContent) {
+    public void update(Content parentContent, ContentDetail newDetail) {
+        if (!(newDetail instanceof Event newEventDetail)) {
+            throw new IllegalArgumentException("Invalid content detail type for Business.");
+        }
+
+        this.setName(newEventDetail.getName());
+        this.setDescription(newEventDetail.getDescription());
+        this.setLocationName(newEventDetail.getLocationName());
+        this.setAddress(newEventDetail.getAddress());
+        this.setDays(newEventDetail.getDays());
+
+        populateFormattedTimes(this);
     }
 
     @Override
     public void update(UpdateType updateType, Map<String, Object> updateData) {
+    }
+
+    private void validateEventTimes(Event event) {
+        LocalDateTime soonestStartTime = event.getDays().stream()
+                .map(DayEvent::getStartTime)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
+        event.setSoonestStartTime(soonestStartTime);
+
+        event.getDays().forEach(dayEvent -> {
+            if (dayEvent.getEndTime() != null && dayEvent.getEndTime().isBefore(dayEvent.getStartTime())) {
+                throw new IllegalArgumentException("End time(s) must be after the start time.");
+            }
+        });
+    }
+
+    public void populateFormattedTimes(Event event) {
+        List<String> formattedTimes = event.getDays().stream()
+                .flatMap(dayEvent -> Stream.of(
+                        formatDateTime(dayEvent.getStartTime()),
+                        formatDateTime(dayEvent.getEndTime())
+                ))
+                .collect(Collectors.toList());
+
+        event.setFormattedTimes(formattedTimes);
+    }
+
+    private String formatDateTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return "No End Time";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d h:mm a");
+        String formattedDate = dateTime.format(formatter);
+        int day = dateTime.getDayOfMonth();
+        String suffix = getDayOfMonthSuffix(day);
+        return formattedDate.replaceFirst("\\d+", day + suffix);
+    }
+
+    private String getDayOfMonthSuffix(int day) {
+        if (day >= 11 && day <= 13) {
+            return "th";
+        }
+        return switch (day % 10) {
+            case 1 -> "st";
+            case 2 -> "nd";
+            case 3 -> "rd";
+            default -> "th";
+        };
     }
 }
 
