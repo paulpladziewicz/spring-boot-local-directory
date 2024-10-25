@@ -32,9 +32,9 @@ public class ContentService {
         this.emailService = emailService;
     }
 
-    public <T extends ContentDetail<T>> Content<T> create(ContentType type, T detail) {
+    public Content create(ContentType type, ContentDetail<?> detail) {
         UserProfile userProfile = userService.getUserProfile();
-        Content<T> content = new Content<>();
+        Content content = new Content();
         content.setType(type);
         content.setDetail(detail);
         content.setPathname("");
@@ -45,93 +45,52 @@ public class ContentService {
         return contentRepository.save(content);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends ContentDetail<T>> Content<T> findById(String contentId) {
-        return (Content<T>) contentRepository.findById(contentId)
+    public Content findById(String contentId) {
+        return contentRepository.findById(contentId)
                 .orElseThrow(() -> new ContentNotFoundException("Content not found"));
     }
 
-    public Content<?> findByPathname(String pathname) {
-        return contentRepository.findByPathname(pathname)
-                .orElseThrow(() -> new ContentNotFoundException("Content with pathname '" + pathname + "' not found."));
-    }
-
-    public List<Content<?>> findByTag(String tag) {
-        return contentRepository.findByTag(tag);
-    }
-
-    public List<Content<?>> findByType(String type) {
-        return contentRepository.findByType(type);
-    }
-
-    public List<Content<?>> findByTagAndType(String tag, String type) {
-        return contentRepository.findByTagAndType(tag, type);
-    }
-
-    public List<Content<?>> findByUser() {
-        String userId = userService.getUserId();
-        return contentRepository.findByCreatedBy(userId);
-    }
-
-    public List<Content<?>> findByUserAndType(String type) {
-        String userId = userService.getUserId();
-        return contentRepository.findByCreatedByAndType(userId, type);
-    }
-
-    public List<Content<?>> findAll() {
-        return contentRepository.findAll();
-    }
-
-    public Content<?> update(String contentId, ContentDetail<?> updatedDetail) {
-        Content<?> content = findById(contentId);
+    public Content update(String contentId, ContentDetail<?> updatedDetail) {
+        Content content = findById(contentId);
         checkPermission(content);
-        content = castContent(content, updatedDetail);
+
+        // Determine logic based on the ContentType
+        switch (content.getType()) {
+            case BUSINESS:
+                if (updatedDetail instanceof Business) {
+                    Business businessDetail = (Business) content.getDetail();
+                    businessDetail.update(content, (Business) updatedDetail);
+                } else {
+                    throw new IllegalArgumentException("ContentDetail type mismatch for BUSINESS");
+                }
+                break;
+            case EVENT:
+                if (updatedDetail instanceof Event) {
+                    Event eventDetail = (Event) content.getDetail();
+                    eventDetail.update(content, (Event) updatedDetail);
+                } else {
+                    throw new IllegalArgumentException("ContentDetail type mismatch for EVENT");
+                }
+                break;
+            // Add more cases for other content types like ARTICLE, GUIDE, etc.
+            default:
+                throw new IllegalArgumentException("Unsupported content type: " + content.getType());
+        }
+
         updateMetadata(content, updatedDetail);
-        content.getDetail().update(content, updatedDetail);
-        content.setUpdatedBy(userService.getUserId());
-        content.setUpdatedAt(LocalDateTime.now());
-        return contentRepository.save(content);
-    }
-
-    public Content<?> update(String contentId, UpdateType updateType, Map<String, Object> updateData) {
-        Content<?> content = findById(contentId);
-        checkPermission(content);
-        content.getDetail().update(updateType, updateData);
         content.setUpdatedBy(userService.getUserId());
         content.setUpdatedAt(LocalDateTime.now());
         return contentRepository.save(content);
     }
 
     public void delete(String contentId) {
-        UserProfile userProfile = userService.getUserProfile();
-        Content<?> content = findById(contentId);
+        Content content = findById(contentId);
         checkPermission(content);
         tagService.removeTags(content.getDetail().getTags(), content.getType());
         contentRepository.deleteById(contentId);
     }
 
-    public void heart(String contentId) {
-        Content<?> content = findById(contentId);
-        String userId = userService.getUserId();
-        boolean alreadyHearted = content.getHeartedUserIds().contains(userId);
-
-        if (alreadyHearted) {
-            content.getHeartedUserIds().remove(userId);
-            content.setHeartCount(content.getHeartCount() - 1);
-        } else {
-            content.getHeartedUserIds().add(userId);
-            content.setHeartCount(content.getHeartCount() + 1);
-        }
-
-        contentRepository.save(content);
-    }
-
-    public void bookmark(String contentId) {
-        Content<?> content = findById(contentId);
-        //userService.bookmarkContent(contentId);
-    }
-
-    private void checkPermission(Content<?> content) {
+    private void checkPermission(Content content) {
         if (userService.isAdmin()) {
             return;
         }
@@ -142,7 +101,7 @@ public class ContentService {
         }
     }
 
-    public void updateMetadata(Content<?> content, ContentDetail<?> updatedDetail) {
+    public void updateMetadata(Content content, ContentDetail<?> updatedDetail) {
         List<String> oldTags = content.getDetail().getTags();
         List<String> newTags = updatedDetail.getTags();
 
@@ -163,15 +122,14 @@ public class ContentService {
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("^-|-$", "");
 
-        // Here, you might want to prepend the content type for structure, e.g., /events/music-festival
         basePathname = "/" + contentType.getContentType() + "/" + basePathname;
 
-        List<Content<?>> matchingPathnames = contentRepository.findByPathnameRegexAndType("^" + Pattern.quote(basePathname) + "(-\\d+)?$", contentType);
+        List<Content> matchingPathnames = contentRepository.findByPathnameRegexAndType("^" + Pattern.quote(basePathname) + "(-\\d+)?$", contentType);
 
         return generatePathnameFromMatches(basePathname, matchingPathnames);
     }
 
-    private String generatePathnameFromMatches(String basePathname, List<Content<?>> matchingPathnames) {
+    private String generatePathnameFromMatches(String basePathname, List<Content> matchingPathnames) {
         if (matchingPathnames.isEmpty()) {
             return basePathname;
         }
@@ -180,7 +138,7 @@ public class ContentService {
         int maxNumber = 0;
         boolean basePathnameExists = false;
 
-        for (Content<?> content : matchingPathnames) {
+        for (Content content : matchingPathnames) {
             String pathname = content.getPathname();
             if (pathname.equals(basePathname)) {
                 basePathnameExists = true;
@@ -198,10 +156,6 @@ public class ContentService {
 
         return basePathname;
     }
-
-    @SuppressWarnings("unchecked")
-    private <T extends ContentDetail<T>> Content<T> castContent(Content<?> content, T detail) {
-        return (Content<T>) content;
-    }
 }
+
 

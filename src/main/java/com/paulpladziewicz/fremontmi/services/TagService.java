@@ -1,9 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
-import com.paulpladziewicz.fremontmi.models.Content;
-import com.paulpladziewicz.fremontmi.models.NeighborServicesProfile;
-import com.paulpladziewicz.fremontmi.models.Tag;
-import com.paulpladziewicz.fremontmi.models.TagUsage;
+import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.TagAutocompleteRepository;
 import com.paulpladziewicz.fremontmi.repositories.TagRepository;
 import org.springframework.cache.annotation.Cacheable;
@@ -149,7 +146,7 @@ public class TagService {
     }
 
     @Transactional
-    public void updateTags(List<String> newDisplayNames, List<String> oldDisplayNames, String contentType) {
+    public void updateTags(List<String> newDisplayNames, List<String> oldDisplayNames, ContentType contentType) {
         // Generate canonical names for both old and new tags
         Set<String> newCanonicalTags = newDisplayNames.stream()
                 .map(this::generateCanonicalName)
@@ -186,7 +183,7 @@ public class TagService {
     }
 
     @Transactional
-    public void removeTags(List<String> displayNames, String contentType) {
+    public void removeTags(List<String> displayNames, ContentType contentType) {
         Set<String> processedCanonicalTags = new HashSet<>();  // Track processed canonical versions of tags
 
         for (String displayName : displayNames) {

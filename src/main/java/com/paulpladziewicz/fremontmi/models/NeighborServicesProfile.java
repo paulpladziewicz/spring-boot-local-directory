@@ -35,6 +35,10 @@ public class NeighborServicesProfile implements ContentDetail {
 
     private String profileImageFileName;
 
+    private Boolean nearby;
+
+    private Boolean external;
+
     @Override
     public void update(ContentDetail newDetail, Content parentContent) {
     }

@@ -49,6 +49,10 @@ public class Event implements ContentDetail {
     @Transient
     private int moreDayEventsCount;
 
+    private Boolean nearby;
+
+    private Boolean external;
+
     @Override
     public void update(ContentDetail newDetail, Content parentContent) {
     }

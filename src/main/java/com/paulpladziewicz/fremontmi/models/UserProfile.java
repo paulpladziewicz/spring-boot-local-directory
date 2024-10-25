@@ -21,12 +21,6 @@ public class UserProfile {
 
     private String email;
 
-    private List<String> groupIds = new ArrayList<>();
-
-    private List<String> eventIds = new ArrayList<>();
-
-    private List<String> businessIds = new ArrayList<>();
-
     private Set<String> bookmarkedContentIds = new HashSet<>();
 
     private int emailSendCount;

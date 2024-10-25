@@ -42,6 +42,10 @@ public class Business implements ContentDetail<Business> {
 
     private List<String> tags = new ArrayList<>();
 
+    private Boolean nearby;
+
+    private Boolean external;
+
     @Override
     public void update(Content<Business> parentContent, Business newDetail) {
         Business existingDetail = parentContent.getDetail();

@@ -16,10 +16,6 @@ public class Content <T extends ContentDetail<T>> {
 
     private ContentType type;
 
-    private Boolean nearby;
-
-    private Boolean external;
-
     private LocalDateTime expiresAt;
 
     private String pathname;

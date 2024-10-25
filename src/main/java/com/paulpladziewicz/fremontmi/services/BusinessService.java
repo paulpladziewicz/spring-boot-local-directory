@@ -119,22 +119,6 @@ public class BusinessService {
         contentRepository.deleteById(businessId);
     }
 
-    private void updateBusinessProperties(Business existingBusiness, Business updatedBusiness) {
-        existingBusiness.setName(updatedBusiness.getName());
-        existingBusiness.setHeadline(updatedBusiness.getHeadline());
-        existingBusiness.setDescription(updatedBusiness.getDescription());
-
-        if (updatedBusiness.getTags() != null && !updatedBusiness.getTags().isEmpty()) {
-            existingBusiness.setTags(updatedBusiness.getTags());
-        }
-
-        existingBusiness.setAddress(updatedBusiness.getAddress());
-        existingBusiness.setPhoneNumber(updatedBusiness.getPhoneNumber());
-        existingBusiness.setEmail(updatedBusiness.getEmail());
-        existingBusiness.setWebsite(updatedBusiness.getWebsite());
-        existingBusiness.setDisplayEmail(updatedBusiness.isDisplayEmail());
-    }
-
     public Boolean handleContactFormSubmission(String slug, String name, String email, String message) {
         Business business = findBySlug(slug);
 

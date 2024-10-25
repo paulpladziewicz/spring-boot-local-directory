@@ -28,6 +28,10 @@ public class Group implements ContentDetail {
 
     private List<String> members = new ArrayList<>();
 
+    private Boolean nearby;
+
+    private Boolean external;
+
     @Override
     public void update(ContentDetail newDetail, Content parentContent) {
     }
