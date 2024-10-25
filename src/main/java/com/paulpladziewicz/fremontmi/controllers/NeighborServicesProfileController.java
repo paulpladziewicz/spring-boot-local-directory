@@ -150,7 +150,7 @@ public class NeighborServicesProfileController {
         return "redirect:/my/neighbor-services/profile";
     }
 
-    @PostMapping("/delete/group")
+    @PostMapping("/delete/neighbor-services-profile")
     public String deleteGroup(@RequestParam(value = "contentId") String contentId) {
         contentService.delete(contentId);
 
