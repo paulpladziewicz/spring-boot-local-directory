@@ -57,6 +57,25 @@ public class ContentService {
                 .orElseThrow(() -> new ContentNotFoundException("Content not found with pathname:" + pathname));
     }
 
+    public List<Content> findByType(ContentType type) {
+        return contentRepository.findByType(type.getContentType());
+    }
+
+    public List<Content> findByTagAndType(String tag, ContentType type) {
+        return contentRepository.findByTagAndType(tag, type.getContentType());
+    }
+
+    public List<Content> findByUserAndType(ContentType contentType) {
+        UserProfile userProfile = userService.getUserProfile();
+        // TODO get array of content from user profile somehow
+        return contentRepository.findByIdIn(new ArrayList<>());
+
+    }
+
+    public List<String> getAllContentEntityUrls() {
+        return new ArrayList<>();
+    }
+
     public Content update(String contentId, ContentDetail updatedDetail) {
         Content content = findById(contentId);
         checkPermission(content);

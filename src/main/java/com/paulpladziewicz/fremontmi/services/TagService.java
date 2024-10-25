@@ -8,7 +8,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,7 +89,7 @@ public class TagService {
         Map<String, Integer> tagCountMap = new HashMap<>();
 
         for (Content content : contentList) {
-            List<String> tags = content.getTags();
+            List<String> tags = content.getDetail().getTags();
             if (tags != null) {
                 for (String tag : tags) {
                     tagCountMap.put(tag, tagCountMap.getOrDefault(tag, 0) + 1);
@@ -129,14 +128,14 @@ public class TagService {
             if (optionalTag.isPresent()) {
                 Tag existingTag = optionalTag.get();
                 validatedDisplayNames.add(existingTag.getDisplayName());  // Use existing display name from DB
-                existingTag.incrementCountForContentType(contentType);
+                existingTag.incrementCountForContentType(contentType.getContentType());
                 existingTag.setCount(existingTag.getCount() + 1);
                 tagRepository.save(existingTag);
             } else {
                 // Tag does not exist, create a new one
                 Tag newTag = new Tag(canonicalName, formattedDisplayName);
                 validatedDisplayNames.add(formattedDisplayName);  // Use the formatted display name
-                newTag.incrementCountForContentType(contentType);
+                newTag.incrementCountForContentType(contentType.getContentType());
                 newTag.setCount(1);
                 tagRepository.save(newTag);
             }
@@ -207,7 +206,7 @@ public class TagService {
                 existingTag.setCount(Math.max(0, updatedCount));  // Ensure count doesn't go below 0
 
                 // Decrement the count for the specific content type
-                existingTag.decrementCountForContentType(contentType);
+                existingTag.decrementCountForContentType(contentType.getContentType());
 
                 // Save changes if counts are updated
                 tagRepository.save(existingTag);

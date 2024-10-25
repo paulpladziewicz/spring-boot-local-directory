@@ -2,18 +2,15 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
 import com.paulpladziewicz.fremontmi.models.*;
+import com.paulpladziewicz.fremontmi.services.ContentService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
-import com.paulpladziewicz.fremontmi.services.NeighborServicesProfileService;
-import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
 
@@ -22,14 +19,12 @@ public class NeighborServicesProfileController {
 
     private final HtmlSanitizationService htmlSanitizationService;
 
-    private final NeighborServicesProfileService neighborServicesProfileService;
+    private final ContentService contentService;
 
-    private final TagService tagService;
     private final UserService userService;
 
-    public NeighborServicesProfileController(NeighborServicesProfileService neighborServicesProfileService, TagService tagService, HtmlSanitizationService htmlSanitizationService, UserService userService) {
-        this.neighborServicesProfileService = neighborServicesProfileService;
-        this.tagService = tagService;
+    public NeighborServicesProfileController(ContentService contentService, HtmlSanitizationService htmlSanitizationService, UserService userService) {
+        this.contentService = contentService;
         this.htmlSanitizationService = htmlSanitizationService;
         this.userService = userService;
     }
@@ -40,12 +35,10 @@ public class NeighborServicesProfileController {
     }
 
     @GetMapping("/create/neighbor-services-profile")
-    public String createNeighborServicesProfileForm(Model model, RedirectAttributes redirectAttributes) {
+    public String createNeighborServicesProfileForm(Model model) {
         try {
-            neighborServicesProfileService.findNeighborServiceProfileByUserId();
-            redirectAttributes.addFlashAttribute("errorMessage", "You already have a NeighborServices™ Profile. You can only have one profile at a time.");
+            contentService.findByUserAndType(ContentType.NEIGHBOR_SERVICES_PROFILE);
             return "redirect:/my/neighbor-services/profile";
-
         } catch (ContentNotFoundException e) {
             NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
             neighborServicesProfile.getNeighborServices().add(new NeighborService());
@@ -63,30 +56,33 @@ public class NeighborServicesProfileController {
             return "neighborservices/create-neighbor-services-profile";
         }
 
-        neighborServicesProfileService.createNeighborServiceProfile(neighborServicesProfile);
+        Content createdNeighborServicesProfile = contentService.create(ContentType.NEIGHBOR_SERVICES_PROFILE, neighborServicesProfile);
 
-        return "redirect:/my/neighbor-services/profile";
+        return "redirect:" + createdNeighborServicesProfile.getPathname();
     }
 
     @GetMapping("/neighbor-services")
     public String displayActiveNeighborServices(@RequestParam(value = "tag", required = false) String tag, Model model) {
-        List<NeighborServicesProfile> profiles = neighborServicesProfileService.findAllActiveNeighborServices(tag);
+        List<Content> profiles;
+        if (tag != null && !tag.isEmpty()) {
+            profiles = contentService.findByTagAndType(tag, ContentType.NEIGHBOR_SERVICES_PROFILE);
+
+        } else {
+            profiles = contentService.findByType(ContentType.NEIGHBOR_SERVICES_PROFILE);
+        }
 
         // TODO still displaying profiles that do not have any neighbor services
-
-        List<Content> contentList = new ArrayList<>(profiles);
-        List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 15);
-        model.addAttribute("popularTags", popularTags);
-        model.addAttribute("selectedTag", tag);
 
         model.addAttribute("profiles", profiles);
 
         return "neighborservices/neighbor-services";
     }
 
-    @GetMapping("/neighbor-services/{slug}")
+    @GetMapping("/neighbor-services-profile/{slug}")
     public String viewNeighborService(@PathVariable String slug, Model model) {
-        NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileBySlug(slug);
+        Content neighborServicesProfile = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType() + '/' + slug);
+        NeighborServicesProfile neighborServicesProfileDetail = (NeighborServicesProfile) neighborServicesProfile.getDetail();
+
         Boolean createdByUser;
         try {
             String userId = userService.getUserId();
@@ -101,18 +97,24 @@ public class NeighborServicesProfileController {
             }
         }
 
-        neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));
+        neighborServicesProfileDetail.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfileDetail.getDescription().replace("\n", "<br/>")));
+        neighborServicesProfile.setDetail(neighborServicesProfileDetail);
+
         model.addAttribute("neighborServicesProfile", neighborServicesProfile);
         model.addAttribute("myProfile", createdByUser);
 
         return "neighborservices/neighbor-services-profile-page";
     }
 
-    @GetMapping("/my/neighbor-services/profile")
+    @GetMapping("/my/neighbor-services-profile")
     public String viewMyNeighborServiceProfile(Model model) {
         try {
-            NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileByUserId();
-            neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));
+            List<Content> contentList = contentService.findByUserAndType(ContentType.NEIGHBOR_SERVICES_PROFILE);
+            Content neighborServicesProfile = contentList.getFirst();
+            NeighborServicesProfile neighborServicesProfileDetail = (NeighborServicesProfile) neighborServicesProfile.getDetail();
+
+            neighborServicesProfileDetail.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfileDetail.getDescription().replace("\n", "<br/>")));
+
             model.addAttribute("neighborServicesProfile", neighborServicesProfile);
             model.addAttribute("myProfile", true);
             return "neighborservices/neighbor-services-profile-page";
@@ -121,11 +123,11 @@ public class NeighborServicesProfileController {
         }
     }
 
-    @GetMapping("/edit/neighbor-service/profile/{slug}")
-    public String editNeighborServiceProfilePage(@PathVariable String slug, Model model) {
-        NeighborServicesProfile neighborServicesProfile = neighborServicesProfileService.findNeighborServiceProfileBySlug(slug);
+    @GetMapping("/edit/neighbor-services-profile")
+    public String editNeighborServiceProfilePage(@RequestParam(value = "contentId") String contentId, Model model) {
+        Content neighborServicesProfile = contentService.findById(contentId);
 
-        String tagsAsString = String.join(",", neighborServicesProfile.getTags());
+        String tagsAsString = String.join(",", neighborServicesProfile.getDetail().getTags());
         model.addAttribute("tagsAsString", tagsAsString);
 
         model.addAttribute("neighborServicesProfile", neighborServicesProfile);
@@ -134,35 +136,24 @@ public class NeighborServicesProfileController {
     }
 
 
-    @PostMapping("/edit/neighbor-service/profile")
-    public String editNeighborService(@Valid @ModelAttribute("neighborService") NeighborServicesProfile neighborServicesProfile, BindingResult bindingResult, Model model) {
+    @PostMapping("/edit/neighbor-services-profile")
+    public String editNeighborService(@NotNull @RequestParam("contentId") String contentId, @Valid @ModelAttribute("neighborService") NeighborServicesProfile neighborServicesProfile, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("tagsAsString", String.join(",", neighborServicesProfile.getTags()));
             return "neighborservices/edit-neighbor-services-profile";
         }
 
-        NeighborServicesProfile updatedNeighborServicesProfile = neighborServicesProfileService.updateNeighborServiceProfile(neighborServicesProfile);
+        Content updatedNeighborServicesProfile = contentService.update(contentId, neighborServicesProfile);
 
         model.addAttribute("neighborService", updatedNeighborServicesProfile);
 
         return "redirect:/my/neighbor-services/profile";
     }
 
-    // TODO delete neighbor service profile
+    @PostMapping("/delete/group")
+    public String deleteGroup(@RequestParam(value = "contentId") String contentId) {
+        contentService.delete(contentId);
 
-    @PostMapping("/contact/neighbor-services-profile")
-    public ResponseEntity<String> handleContactForm(@RequestBody @Valid ContactFormRequest contactFormRequest) {
-        try {
-            neighborServicesProfileService.handleContactFormSubmission(
-                    contactFormRequest.getId(),
-                    contactFormRequest.getName(),
-                    contactFormRequest.getEmail(),
-                    contactFormRequest.getMessage()
-            );
-
-            return ResponseEntity.ok("Form submitted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit the form");
-        }
+        return "redirect:/neighbor-services";
     }
 }

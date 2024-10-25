@@ -15,8 +15,7 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     @Query("{ 'id': ?0 }")
     <T extends Content> Optional<T> findById(String id, Class<T> clazz);
 
-    @Query("{ '_id': { $in: ?0 } }")
-    <T extends Content> List<T> findAllById(List<String> ids, Class<T> clazz);
+    List<Content> findByIdIn(List<String> contentIds);
 
     @Query("{ 'pathname': ?0, 'type': ?1 }")
     <T extends Content> Optional<T> findByPathname(String slug);
@@ -25,10 +24,10 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     List<Content> findByPathnameRegexAndType(String slugPattern, String contentType);
 
     @Query("{ 'type': ?0, 'visibility': 'public' }")
-    <T extends Content> List<T> findAllByType(String contentType, Class<T> clazz);
+    List<Content> findByType(String contentType);
 
     @Query("{ 'tags': ?0, 'type':  ?1, 'visibility': 'public' }")
-    <T extends Content> List<T> findByTagAndType(String tag, String contentType, Class<T> clazz);
+    List<Content> findByTagAndType(String tag, String contentType);
 
     @Query("{ 'type': 'neighbor-services-profile', 'createdBy': ?0 }")
     <T extends Content> Optional<T> findByCreatedBy(String createdBy, Class<T> clazz);

@@ -2,12 +2,11 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.exceptions.UserNotAuthenticatedException;
 import com.paulpladziewicz.fremontmi.models.*;
+import com.paulpladziewicz.fremontmi.services.ContentService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
-import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,14 +18,12 @@ import java.util.*;
 public class BusinessController {
 
     private final HtmlSanitizationService htmlSanitizationService;
-    private final BusinessService businessService;
-    private final TagService tagService;
+    private final ContentService contentService;
     private final UserService userService;
 
-    public BusinessController(HtmlSanitizationService htmlSanitizationService, BusinessService businessService, TagService tagService, UserService userService) {
+    public BusinessController(HtmlSanitizationService htmlSanitizationService, ContentService contentService, UserService userService) {
         this.htmlSanitizationService = htmlSanitizationService;
-        this.businessService = businessService;
-        this.tagService = tagService;
+        this.contentService = contentService;
         this.userService = userService;
     }
 
@@ -46,19 +43,20 @@ public class BusinessController {
             return "businesses/create-business";
         }
 
-        Business savedBusiness = businessService.create(business);
+        Content savedBusiness = contentService.create(ContentType.BUSINESS, business);
 
-        return "redirect:/businesses/" + savedBusiness.getSlug();
+        return "redirect:" + savedBusiness.getPathname();
     }
 
     @GetMapping("/businesses")
     public String displayActiveBusinesses(@RequestParam(value = "tag", required = false) String tag, Model model) {
-        List<Business> businesses = businessService.findAll(tag);
+        List<Content> businesses;
+        if (tag != null && !tag.isEmpty()) {
+            businesses = contentService.findByTagAndType(tag, ContentType.BUSINESS);
 
-        List<Content> contentList = new ArrayList<>(businesses);
-        List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 15);
-        model.addAttribute("popularTags", popularTags);
-        model.addAttribute("selectedTag", tag);
+        } else {
+            businesses = contentService.findByType(ContentType.BUSINESS);
+        }
 
         model.addAttribute("businesses", businesses);
 
@@ -67,12 +65,13 @@ public class BusinessController {
 
     @GetMapping("/businesses/{slug}")
     public String viewBusiness(@PathVariable String slug, Model model) {
-        Business business = businessService.findBySlug(slug);
+        Content business = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug);
+        Business businessDetail = (Business) business.getDetail();
 
-        business.setDescription(htmlSanitizationService.sanitizeHtml(business.getDescription().replace("\n", "<br/>")));
+        businessDetail.setDescription(htmlSanitizationService.sanitizeHtml(businessDetail.getDescription().replace("\n", "<br/>")));
+        business.setDetail(businessDetail);
 
         String userId;
-
         try {
            userId = userService.getUserId();
         } catch (UserNotAuthenticatedException e) {
@@ -91,18 +90,18 @@ public class BusinessController {
 
     @GetMapping("/my/businesses")
     public String getMyBusinesses(Model model) {
-        List<Business> businesses = businessService.findAllByUser();
+        List<Content> businesses = contentService.findByUserAndType(ContentType.BUSINESS);
 
         model.addAttribute("businesses", businesses);
 
         return "businesses/my-businesses";
     }
 
-    @GetMapping("/edit/business/{slug}")
-    public String editBusiness(@PathVariable String slug, Model model) {
-        Business business = businessService.findBySlug(slug);
+    @GetMapping("/edit/business")
+    public String editBusiness(@RequestParam(value = "contentId") String contentId, Model model) {
+        Content business = contentService.findById(contentId);
 
-        String tagsAsString = String.join(",", business.getTags());
+        String tagsAsString = String.join(",", business.getDetail().getTags());
         model.addAttribute("tagsAsString", tagsAsString);
 
         model.addAttribute("business", business);
@@ -111,47 +110,23 @@ public class BusinessController {
     }
 
     @PostMapping("/edit/business")
-    public String updateBusiness(@Valid @ModelAttribute("business") Business business, BindingResult result, Model model) {
+    public String updateBusiness(@NotNull @RequestParam("contentId") String contentId, @Valid @ModelAttribute("business") Business business, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("tagsAsString", String.join(",", business.getTags()));
             return "businesses/edit-business";
         }
 
-        Business updatedBusiness = businessService.update(business);
+        Content updatedBusiness = contentService.update(contentId, business);
 
         model.addAttribute("business", updatedBusiness);
 
-        return "redirect:/businesses/" + updatedBusiness.getSlug();
+        return "redirect:" + updatedBusiness.getPathname();
     }
 
     @PostMapping("/delete/business")
     public String deleteBusiness(@RequestParam("businessId") String businessId) {
-        businessService.delete(businessId);
+        contentService.delete(businessId);
 
         return "redirect:/my/businesses";
-    }
-
-    @PostMapping("/contact/business")
-    public ResponseEntity<Map<String, Object>> handleContactForm(
-            @RequestBody ContactFormRequest contactFormRequest) {
-
-        Boolean contactFormSuccess = businessService.handleContactFormSubmission(
-                contactFormRequest.getSlug(),
-                contactFormRequest.getName(),
-                contactFormRequest.getEmail(),
-                contactFormRequest.getMessage()
-        );
-
-        Map<String, Object> response = new HashMap<>();
-
-        if (!contactFormSuccess) {
-            response.put("success", false);
-            response.put("message", "An error occurred while trying to send your message. Please try again later.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-
-        response.put("success", true);
-        response.put("message", "We've passed your message along! We hope you hear back soon.");
-        return ResponseEntity.ok(response);
     }
 }

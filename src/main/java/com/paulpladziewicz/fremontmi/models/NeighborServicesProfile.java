@@ -40,7 +40,7 @@ public class NeighborServicesProfile implements ContentDetail {
     private Boolean external;
 
     @Override
-    public void update(ContentDetail newDetail, Content parentContent) {
+    public void update(Content parentContent, ContentDetail newDetail) {
     }
 
     @Override

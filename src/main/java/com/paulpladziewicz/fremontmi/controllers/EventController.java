@@ -2,8 +2,8 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.exceptions.UserNotAuthenticatedException;
 import com.paulpladziewicz.fremontmi.models.*;
+import com.paulpladziewicz.fremontmi.services.ContentService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
-import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +12,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,17 +20,14 @@ public class EventController {
 
     private final HtmlSanitizationService htmlSanitizationService;
 
-    private final EventService eventService;
+    private final ContentService contentService;
 
     private final UserService userService;
 
-    private final TagService tagService;
-
-    public EventController(HtmlSanitizationService htmlSanitizationService, EventService eventService, UserService userService, TagService tagService) {
+    public EventController(HtmlSanitizationService htmlSanitizationService, ContentService contentService, UserService userService) {
         this.htmlSanitizationService = htmlSanitizationService;
-        this.eventService = eventService;
+        this.contentService = contentService;
         this.userService = userService;
-        this.tagService = tagService;
     }
 
     @GetMapping("/create/event")
@@ -61,40 +57,22 @@ public class EventController {
             return "events/create-event";
         }
 
+        Content savedEvent = contentService.create(ContentType.GROUP, event);
 
-        Event savedEvent = eventService.createEvent(event);
-
-        return "redirect:/events/" + savedEvent.getSlug();
+        return "redirect:" + savedEvent.getPathname();
     }
 
     @GetMapping("/events")
     public String displayEvents(@RequestParam(value = "tag", required = false) String tag, Model model) {
-        List<Event> events = eventService.findAll(tag);
+        List<Content> events;
+        if (tag != null && !tag.isEmpty()) {
+            events = contentService.findByTagAndType(tag, ContentType.EVENT);
 
-        LocalDateTime now = LocalDateTime.now();
+        } else {
+            events = contentService.findByType(ContentType.EVENT);
+        }
 
-        // Process each event to find the next available day event and count future days
-        events.forEach(event -> {
-            // Filter future DayEvents
-            List<DayEvent> futureDayEvents = event.getDays().stream()
-                    .filter(dayEvent -> dayEvent.getStartTime().isAfter(now))
-                    .toList();
-
-            // Check if there's any future DayEvent
-            if (!futureDayEvents.isEmpty()) {
-                // Set the next available DayEvent as the first future day
-                event.setNextAvailableDayEvent(futureDayEvents.getFirst());
-                event.setMoreDayEventsCount(futureDayEvents.size() - 1); // count all future days except the next one
-            } else {
-                event.setNextAvailableDayEvent(null);
-                event.setMoreDayEventsCount(0);
-            }
-        });
-
-        List<Content> contentList = new ArrayList<>(events);
-        List<TagUsage> popularTags = tagService.getTagUsageFromContent(contentList, 15);
-        model.addAttribute("popularTags", popularTags);
-        model.addAttribute("selectedTag", tag);
+        // TODO correct logic for displaying events in the future or are not expired
 
         model.addAttribute("events", events);
 
@@ -103,9 +81,12 @@ public class EventController {
 
     @GetMapping("/events/{slug}")
     public String displayEvent(@PathVariable String slug, Model model) {
-        Event event = eventService.findEventBySlug(slug);
+        Content event = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug);
+        Event eventDetail = (Event) event.getDetail();
 
-        event.setDescription(htmlSanitizationService.sanitizeHtml(event.getDescription().replace("\n", "<br/>")));
+
+        eventDetail.setDescription(htmlSanitizationService.sanitizeHtml(eventDetail.getDescription().replace("\n", "<br/>")));
+        event.setDetail(eventDetail);
 
         if ("canceled".equals(event.getStatus())) {
             model.addAttribute("canceled", "This event has been canceled.");
@@ -123,11 +104,20 @@ public class EventController {
         return "events/event-page";
     }
 
-    @GetMapping("/edit/event/{slug}")
-    public String displayEditForm(@PathVariable String slug, Model model) {
-        Event event = eventService.findEventBySlug(slug);
+    @GetMapping("/my/events")
+    public String displayMyEvents(Model model) {
+        List<Content> events = contentService.findByUserAndType(ContentType.EVENT);
 
-        String tagsAsString = String.join(",", event.getTags());
+        model.addAttribute("events", events);
+
+        return "events/my-events";
+    }
+
+    @GetMapping("/edit/event/{slug}")
+    public String displayEditForm(@RequestParam(value = "contentId") String contentId, Model model) {
+        Content event = contentService.findById(contentId);
+
+        String tagsAsString = String.join(",", event.getDetail().getTags());
         model.addAttribute("tagsAsString", tagsAsString);
 
         model.addAttribute("event", event);
@@ -136,60 +126,37 @@ public class EventController {
     }
 
     @PostMapping("/edit/event")
-    public String updateEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
+    public String updateEvent(@NotNull @RequestParam("contentId") String contentId, @Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("tagsAsString", String.join(",", event.getTags()));
             return "events/edit-event";
         }
 
-        Event savedEvent = eventService.updateEvent(event);
+        Content savedEvent = contentService.update(contentId, event);
 
-        return "redirect:/events/" + savedEvent.getSlug();
+        return "redirect:" + savedEvent.getPathname();
     }
 
-    @GetMapping("/my/events")
-    public String displayMyEvents(Model model) {
-        List<Event> events = eventService.findEventsByUser();
+    @PostMapping("/delete/event")
+    public String deleteGroup(@NotNull @RequestParam("eventId") String eventId) {
+        contentService.delete(eventId);
 
-        model.addAttribute("events", events);
-
-        return "events/my-events";
+        return "redirect:/events";
     }
 
     @PostMapping("/create/event/add-day")
     public String addDayToCreateForm(@ModelAttribute("event") Event event, Model model) {
         event.getDays().add(new DayEvent());
         model.addAttribute("event", event);
-        return "events/htmx/adjust-day-events"; // Ensure this fragment only contains the "dayEvents" div content
+        return "events/htmx/adjust-day-events";
     }
 
     @PostMapping("/create/event/remove-day")
     public String removeDayToCreateForm(@ModelAttribute("event") Event event, Model model) {
         if (!event.getDays().isEmpty()) {
-            event.getDays().removeLast(); // Adjusted to avoid potential empty list exception
+            event.getDays().removeLast();
         }
         model.addAttribute("event", event);
-        return "events/htmx/adjust-day-events"; // Ensure this fragment only contains the "dayEvents" div content
-    }
-
-    @PostMapping("/cancel/event")
-    public String cancelEvent(@NotNull @RequestParam("slug") String slug) {
-        eventService.cancelEvent(slug);
-
-        return "redirect:/events/" + slug;
-    }
-
-    @PostMapping("/reactivate/event")
-    public String uncancelEvent(@NotNull @RequestParam("slug") String slug) {
-        eventService.reactivateEvent(slug);
-
-        return "redirect:/events/" + slug;
-    }
-
-    @PostMapping("/delete/event")
-    public String deleteGroup(@NotNull @RequestParam("eventId") String eventId) {
-        eventService.deleteEvent(eventId);
-
-        return "redirect:/events";
+        return "events/htmx/adjust-day-events";
     }
 }

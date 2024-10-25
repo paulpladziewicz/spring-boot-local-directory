@@ -10,13 +10,13 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class SubscribeService {
+public class NotificationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(SubscribeService.class);
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
     private final SubscriberRepository subscriberRepository;
 
-    public SubscribeService(SubscriberRepository subscriberRepository) {
+    public NotificationService(SubscriberRepository subscriberRepository) {
         this.subscriberRepository = subscriberRepository;
     }
 

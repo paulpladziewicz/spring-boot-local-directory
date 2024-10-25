@@ -1,4 +1,4 @@
 package com.paulpladziewicz.fremontmi.services;
 
-public class AnnouncementService {
+public class AdService {
 }
