@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Data
 @TypeAlias("Business")
-public class Business implements ContentDetail<Business> {
+public class Business implements ContentDetail {
 
     @NotBlank(message = "Event name must not be null")
     @Size(min = 3, max = 100, message = "Event name must be between 3 and 100 characters")
@@ -47,21 +47,24 @@ public class Business implements ContentDetail<Business> {
     private Boolean external;
 
     @Override
-    public void update(Content<Business> parentContent, Business newDetail) {
-        Business existingDetail = parentContent.getDetail();
-        existingDetail.setName(newDetail.getName());
-        existingDetail.setHeadline(newDetail.getHeadline());
-        existingDetail.setDescription(newDetail.getDescription());
-
-        if (newDetail.getTags() != null && !newDetail.getTags().isEmpty()) {
-            existingDetail.setTags(newDetail.getTags());
+    public void update(Content parentContent, ContentDetail newDetail) {
+        if (!(newDetail instanceof Business newBusinessDetail)) {
+            throw new IllegalArgumentException("Invalid content detail type for Business.");
         }
 
-        existingDetail.setAddress(newDetail.getAddress());
-        existingDetail.setPhoneNumber(newDetail.getPhoneNumber());
-        existingDetail.setEmail(newDetail.getEmail());
-        existingDetail.setWebsite(newDetail.getWebsite());
-        existingDetail.setDisplayEmail(newDetail.isDisplayEmail());
+        this.setName(newBusinessDetail.getName());
+        this.setHeadline(newBusinessDetail.getHeadline());
+        this.setDescription(newBusinessDetail.getDescription());
+
+        if (newBusinessDetail.getTags() != null && !newBusinessDetail.getTags().isEmpty()) {
+            this.setTags(newBusinessDetail.getTags());
+        }
+
+        this.setAddress(newBusinessDetail.getAddress());
+        this.setPhoneNumber(newBusinessDetail.getPhoneNumber());
+        this.setEmail(newBusinessDetail.getEmail());
+        this.setWebsite(newBusinessDetail.getWebsite());
+        this.setDisplayEmail(newBusinessDetail.isDisplayEmail());
     }
 
     @Override

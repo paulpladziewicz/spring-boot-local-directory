@@ -10,7 +10,8 @@ import java.util.*;
 
 @Data
 @Document(collection = "content")
-public class Content <T extends ContentDetail<T>> {
+public class Content {
+
     @Id
     private String id;
 
@@ -24,7 +25,7 @@ public class Content <T extends ContentDetail<T>> {
 
     private String status = ContentStatus.ACTIVE.getStatus();
 
-    private T detail;
+    private ContentDetail detail;
 
     private List<String> administrators = new ArrayList<>();
 

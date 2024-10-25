@@ -32,7 +32,7 @@ public class ContentService {
         this.emailService = emailService;
     }
 
-    public Content create(ContentType type, ContentDetail<?> detail) {
+    public Content create(ContentType type, ContentDetail detail) {
         UserProfile userProfile = userService.getUserProfile();
         Content content = new Content();
         content.setType(type);
@@ -50,16 +50,15 @@ public class ContentService {
                 .orElseThrow(() -> new ContentNotFoundException("Content not found"));
     }
 
-    public Content update(String contentId, ContentDetail<?> updatedDetail) {
+    public Content update(String contentId, ContentDetail updatedDetail) {
         Content content = findById(contentId);
         checkPermission(content);
 
-        // Determine logic based on the ContentType
         switch (content.getType()) {
             case BUSINESS:
                 if (updatedDetail instanceof Business) {
                     Business businessDetail = (Business) content.getDetail();
-                    businessDetail.update(content, (Business) updatedDetail);
+                    businessDetail.update(content, updatedDetail);
                 } else {
                     throw new IllegalArgumentException("ContentDetail type mismatch for BUSINESS");
                 }
@@ -67,12 +66,11 @@ public class ContentService {
             case EVENT:
                 if (updatedDetail instanceof Event) {
                     Event eventDetail = (Event) content.getDetail();
-                    eventDetail.update(content, (Event) updatedDetail);
+                    eventDetail.update(content, updatedDetail);
                 } else {
                     throw new IllegalArgumentException("ContentDetail type mismatch for EVENT");
                 }
                 break;
-            // Add more cases for other content types like ARTICLE, GUIDE, etc.
             default:
                 throw new IllegalArgumentException("Unsupported content type: " + content.getType());
         }
@@ -101,7 +99,7 @@ public class ContentService {
         }
     }
 
-    public void updateMetadata(Content content, ContentDetail<?> updatedDetail) {
+    public void updateMetadata(Content content, ContentDetail updatedDetail) {
         List<String> oldTags = content.getDetail().getTags();
         List<String> newTags = updatedDetail.getTags();
 
