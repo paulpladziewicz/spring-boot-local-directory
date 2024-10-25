@@ -106,7 +106,7 @@ public class TagService {
     }
 
     @Transactional
-    public List<String> addTags(List<String> displayNames, String contentType) {
+    public List<String> addTags(List<String> displayNames, ContentType contentType) {
         List<String> validatedDisplayNames = new ArrayList<>();
         Set<String> canonicalTagsSet = new HashSet<>();  // Track canonical versions of tags
 

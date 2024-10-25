@@ -36,8 +36,10 @@ public class ContentService {
         UserProfile userProfile = userService.getUserProfile();
         Content content = new Content();
         content.setType(type);
+        List<String> validatedTags = tagService.addTags(detail.getTags(), content.getType());
+        content.getDetail().setTags(validatedTags);
         content.setDetail(detail);
-        content.setPathname("");
+        content.setPathname(createUniquePathname(detail.getName(), type));
         content.setCreatedBy(userProfile.getUserId());
         content.setAdministrators(List.of(userProfile.getUserId()));
         content.setCreatedAt(LocalDateTime.now());
@@ -50,17 +52,22 @@ public class ContentService {
                 .orElseThrow(() -> new ContentNotFoundException("Content not found"));
     }
 
+    public Content findByPathname(String pathname) {
+        return contentRepository.findByPathname(pathname)
+                .orElseThrow(() -> new ContentNotFoundException("Content not found with pathname:" + pathname));
+    }
+
     public Content update(String contentId, ContentDetail updatedDetail) {
         Content content = findById(contentId);
         checkPermission(content);
 
         switch (content.getType()) {
-            case BUSINESS:
-                if (updatedDetail instanceof Business) {
-                    Business businessDetail = (Business) content.getDetail();
-                    businessDetail.update(content, updatedDetail);
+            case GROUP:
+                if (updatedDetail instanceof Group) {
+                    Group eventDetail = (Group) content.getDetail();
+                    eventDetail.update(content, updatedDetail);
                 } else {
-                    throw new IllegalArgumentException("ContentDetail type mismatch for BUSINESS");
+                    throw new IllegalArgumentException("ContentDetail type mismatch for EVENT");
                 }
                 break;
             case EVENT:
@@ -71,11 +78,36 @@ public class ContentService {
                     throw new IllegalArgumentException("ContentDetail type mismatch for EVENT");
                 }
                 break;
+            case BUSINESS:
+                if (updatedDetail instanceof Business) {
+                    Business businessDetail = (Business) content.getDetail();
+                    businessDetail.update(content, updatedDetail);
+                } else {
+                    throw new IllegalArgumentException("ContentDetail type mismatch for BUSINESS");
+                }
+                break;
+            case NEIGHBOR_SERVICES_PROFILE:
+                if (updatedDetail instanceof NeighborServicesProfile) {
+                    NeighborServicesProfile eventDetail = (NeighborServicesProfile) content.getDetail();
+                    eventDetail.update(content, updatedDetail);
+                } else {
+                    throw new IllegalArgumentException("ContentDetail type mismatch for EVENT");
+                }
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported content type: " + content.getType());
         }
 
         updateMetadata(content, updatedDetail);
+        content.setUpdatedBy(userService.getUserId());
+        content.setUpdatedAt(LocalDateTime.now());
+        return contentRepository.save(content);
+    }
+
+    public Content update(String contentId, UpdateType updateType, Map<String, Object> updateData) {
+        Content content = findById(contentId);
+        checkPermission(content);
+        content.getDetail().update(updateType, updateData);
         content.setUpdatedBy(userService.getUserId());
         content.setUpdatedAt(LocalDateTime.now());
         return contentRepository.save(content);
@@ -122,7 +154,7 @@ public class ContentService {
 
         basePathname = "/" + contentType.getContentType() + "/" + basePathname;
 
-        List<Content> matchingPathnames = contentRepository.findByPathnameRegexAndType("^" + Pattern.quote(basePathname) + "(-\\d+)?$", contentType);
+        List<Content> matchingPathnames = contentRepository.findByPathnameRegexAndType("^" + Pattern.quote(basePathname) + "(-\\d+)?$", contentType.getContentType());
 
         return generatePathnameFromMatches(basePathname, matchingPathnames);
     }

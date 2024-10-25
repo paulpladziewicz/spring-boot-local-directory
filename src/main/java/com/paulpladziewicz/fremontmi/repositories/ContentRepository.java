@@ -18,11 +18,11 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     @Query("{ '_id': { $in: ?0 } }")
     <T extends Content> List<T> findAllById(List<String> ids, Class<T> clazz);
 
-    @Query("{ 'slug': ?0, 'type': ?1 }")
-    <T extends Content> Optional<T> findBySlugAndType(String slug, String contentType, Class<T> clazz);
+    @Query("{ 'pathname': ?0, 'type': ?1 }")
+    <T extends Content> Optional<T> findByPathname(String slug);
 
-    @Query("{ 'slug': { $regex: ?0 }, 'type': ?1 }")
-    List<Content> findBySlugRegexAndType(String slugPattern, String contentType);
+    @Query("{ 'pathname': { $regex: ?0 }, 'type': ?1 }")
+    List<Content> findByPathnameRegexAndType(String slugPattern, String contentType);
 
     @Query("{ 'type': ?0, 'visibility': 'public' }")
     <T extends Content> List<T> findAllByType(String contentType, Class<T> clazz);

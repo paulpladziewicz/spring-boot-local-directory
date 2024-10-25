@@ -33,7 +33,12 @@ public class Group implements ContentDetail {
     private Boolean external;
 
     @Override
-    public void update(ContentDetail newDetail, Content parentContent) {
+    public void update(Content parentContent, ContentDetail newDetail) {
+        if (!(newDetail instanceof Business newGroupDetail)) {
+            throw new IllegalArgumentException("Invalid content detail type for Business.");
+        }
+        existingGroup.setName(newGroupDetail.getName());
+        existingGroup.setDescription(newGroupDetail.getDescription());
     }
 
     @Override
