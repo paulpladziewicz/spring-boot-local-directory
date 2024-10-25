@@ -16,8 +16,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Data
-@TypeAlias("Event")
 public class Event implements ContentDetail {
+
+    public Event() {
+        // Default constructor required for MongoDB deserialization
+    }
 
     @NotBlank(message = "Please provide an event name")
     @Size(min = 3, max = 100, message = "Event name must be between 3 and 100 characters")

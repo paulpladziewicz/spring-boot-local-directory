@@ -61,7 +61,7 @@ public class GroupController {
 
     @GetMapping("/group/{slug}")
     public String displayGroup(@PathVariable String slug, Model model) {
-        Content group = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug);
+        Content group = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug, ContentType.GROUP);
         Group groupDetail = (Group) group.getDetail();
 
         groupDetail.setDescription(htmlSanitizationService.sanitizeHtml(groupDetail.getDescription().replace("\n", "<br/>")));
@@ -92,9 +92,9 @@ public class GroupController {
         return "groups/my-groups";
     }
 
-    @GetMapping("/edit/group")
-    public String getEditGroupForm(@RequestParam(value = "contentId") String contentId, Model model) {
-        Content group = contentService.findById(contentId);
+    @GetMapping("/edit/group/{slug}")
+    public String getEditGroupForm(@PathVariable String slug, Model model) {
+        Content group = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug, ContentType.GROUP);
 
         String tagsAsString = String.join(",", group.getDetail().getTags());
         model.addAttribute("tagsAsString", tagsAsString);

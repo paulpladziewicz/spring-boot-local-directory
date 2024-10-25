@@ -14,6 +14,10 @@ import java.util.Map;
 @TypeAlias("NeighborServicesProfile")
 public class NeighborServicesProfile implements ContentDetail {
 
+    public NeighborServicesProfile() {
+        // Default constructor required for MongoDB deserialization
+    }
+
     @NotBlank(message = "Display name is required.")
     @Size(max = 100, message = "Display name should be less than 100 characters.")
     private String name;

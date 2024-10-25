@@ -11,8 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@TypeAlias("Business")
 public class Business implements ContentDetail {
+
+    public Business() {
+        // Default constructor required for MongoDB deserialization
+    }
 
     @NotBlank(message = "Event name must not be null")
     @Size(min = 3, max = 100, message = "Event name must be between 3 and 100 characters")

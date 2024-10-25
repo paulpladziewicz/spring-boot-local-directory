@@ -1,6 +1,7 @@
 package com.paulpladziewicz.fremontmi.repositories;
 
 import com.paulpladziewicz.fremontmi.models.Content;
+import com.paulpladziewicz.fremontmi.models.ContentType;
 import com.paulpladziewicz.fremontmi.models.Event;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -18,7 +19,7 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     List<Content> findByIdIn(List<String> contentIds);
 
     @Query("{ 'pathname': ?0, 'type': ?1 }")
-    <T extends Content> Optional<T> findByPathname(String slug);
+    Optional<Content> findByPathname(String pathname, String type);
 
     @Query("{ 'pathname': { $regex: ?0 }, 'type': ?1 }")
     List<Content> findByPathnameRegexAndType(String slugPattern, String contentType);

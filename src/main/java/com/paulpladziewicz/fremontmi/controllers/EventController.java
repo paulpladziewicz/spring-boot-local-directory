@@ -81,7 +81,7 @@ public class EventController {
 
     @GetMapping("/events/{slug}")
     public String displayEvent(@PathVariable String slug, Model model) {
-        Content event = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug);
+        Content event = contentService.findByPathname('/' + ContentType.EVENT.getContentType() + '/' + slug, ContentType.EVENT);
         Event eventDetail = (Event) event.getDetail();
 
 

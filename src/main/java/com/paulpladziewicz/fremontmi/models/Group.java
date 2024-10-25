@@ -11,8 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@TypeAlias("Group")
 public class Group implements ContentDetail {
+
+    public Group() {
+        // Default constructor required for MongoDB deserialization
+    }
 
     @NotBlank(message = "Please provide a group name.")
     @Size(max = 100, message = "Name should not be longer than 100 characters.")

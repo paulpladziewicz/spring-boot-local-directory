@@ -65,7 +65,7 @@ public class BusinessController {
 
     @GetMapping("/businesses/{slug}")
     public String viewBusiness(@PathVariable String slug, Model model) {
-        Content business = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug);
+        Content business = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug, ContentType.BUSINESS);
         Business businessDetail = (Business) business.getDetail();
 
         businessDetail.setDescription(htmlSanitizationService.sanitizeHtml(businessDetail.getDescription().replace("\n", "<br/>")));

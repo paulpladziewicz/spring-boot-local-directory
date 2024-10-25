@@ -36,9 +36,9 @@ public class ContentService {
         UserProfile userProfile = userService.getUserProfile();
         Content content = new Content();
         content.setType(type);
+        content.setDetail(detail);
         List<String> validatedTags = tagService.addTags(detail.getTags(), content.getType());
         content.getDetail().setTags(validatedTags);
-        content.setDetail(detail);
         content.setPathname(createUniquePathname(detail.getName(), type));
         content.setCreatedBy(userProfile.getUserId());
         content.setAdministrators(List.of(userProfile.getUserId()));
@@ -52,9 +52,9 @@ public class ContentService {
                 .orElseThrow(() -> new ContentNotFoundException("Content not found"));
     }
 
-    public Content findByPathname(String pathname) {
-        return contentRepository.findByPathname(pathname)
-                .orElseThrow(() -> new ContentNotFoundException("Content not found with pathname:" + pathname));
+    public Content findByPathname(String pathname, ContentType type) {
+        return contentRepository.findByPathname(pathname, String.valueOf(type))
+                .orElseThrow(() -> new ContentNotFoundException("Content not found with pathname: " + pathname + " and type: " + type));
     }
 
     public List<Content> findByType(ContentType type) {

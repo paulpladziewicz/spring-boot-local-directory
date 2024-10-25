@@ -80,7 +80,7 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/neighbor-services-profile/{slug}")
     public String viewNeighborService(@PathVariable String slug, Model model) {
-        Content neighborServicesProfile = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType() + '/' + slug);
+        Content neighborServicesProfile = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType() + '/' + slug, ContentType.NEIGHBOR_SERVICES_PROFILE);
         NeighborServicesProfile neighborServicesProfileDetail = (NeighborServicesProfile) neighborServicesProfile.getDetail();
 
         Boolean createdByUser;
