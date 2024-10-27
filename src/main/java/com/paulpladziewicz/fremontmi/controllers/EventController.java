@@ -7,6 +7,7 @@ import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -46,30 +47,30 @@ public class EventController {
     }
 
     @PostMapping("/create/event")
-    public String createEvent(@Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
+    public String createEvent(@Valid @ModelAttribute("event") EventDto eventDto, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            model.addAttribute("tagsAsString", String.join(",", event.getTags()));
+            model.addAttribute("tagsAsString", String.join(",", eventDto.getTags()));
             return "events/create-event";
         }
 
-        if (event.getDays() == null || event.getDays().isEmpty()) {
+        if (eventDto.getDays() == null || eventDto.getDays().isEmpty()) {
             result.rejectValue("days", "error.event", "Please provide at least one date and time for the event.");
             return "events/create-event";
         }
 
-        Content savedEvent = contentService.create(ContentType.GROUP, event);
+        Content savedEvent = contentService.create(ContentType.GROUP, eventDto);
 
         return "redirect:" + savedEvent.getPathname();
     }
 
     @GetMapping("/events")
-    public String displayEvents(@RequestParam(value = "tag", required = false) String tag, Model model) {
-        List<Content> events;
+    public String displayEvents(@RequestParam(value = "tag", required = false) String tag, @RequestParam(defaultValue = "0") int page,  Model model) {
+        Page<Content> events;
         if (tag != null && !tag.isEmpty()) {
-            events = contentService.findByTagAndType(tag, ContentType.EVENT);
+            events = contentService.findByTagAndType(tag, ContentType.EVENT, page);
 
         } else {
-            events = contentService.findByType(ContentType.EVENT);
+            events = contentService.findByType(ContentType.EVENT, page);
         }
 
         // TODO correct logic for displaying events in the future or are not expired
@@ -81,14 +82,13 @@ public class EventController {
 
     @GetMapping("/events/{slug}")
     public String displayEvent(@PathVariable String slug, Model model) {
-        Content event = contentService.findByPathname('/' + ContentType.EVENT.getContentType() + '/' + slug, ContentType.EVENT);
-        Event eventDetail = (Event) event.getDetail();
+        Content content = contentService.findByPathname('/' + ContentType.EVENT.getContentType() + '/' + slug, ContentType.EVENT);
+        EventDto event = createDto(content);
 
 
-        eventDetail.setDescription(htmlSanitizationService.sanitizeHtml(eventDetail.getDescription().replace("\n", "<br/>")));
-        event.setDetail(eventDetail);
+        event.setDescription(htmlSanitizationService.sanitizeHtml(event.getDescription().replace("\n", "<br/>")));
 
-        if ("canceled".equals(event.getStatus())) {
+        if ("canceled".equals(content.getStatus())) {
             model.addAttribute("canceled", "This event has been canceled.");
         }
 
@@ -96,7 +96,7 @@ public class EventController {
 
         try {
             String userId = userService.getUserId();
-            model.addAttribute("isAdmin", event.getCreatedBy().equals(userId));
+            model.addAttribute("isAdmin", content.getCreatedBy().equals(userId));
         } catch (UserNotAuthenticatedException e) {
             model.addAttribute("isAdmin", false);
         }
@@ -115,9 +115,10 @@ public class EventController {
 
     @GetMapping("/edit/event/{slug}")
     public String displayEditForm(@RequestParam(value = "contentId") String contentId, Model model) {
-        Content event = contentService.findById(contentId);
+        Content content = contentService.findById(contentId);
+        EventDto event = createDto(content);
 
-        String tagsAsString = String.join(",", event.getDetail().getTags());
+        String tagsAsString = String.join(",", event.getTags());
         model.addAttribute("tagsAsString", tagsAsString);
 
         model.addAttribute("event", event);
@@ -126,13 +127,13 @@ public class EventController {
     }
 
     @PostMapping("/edit/event")
-    public String updateEvent(@NotNull @RequestParam("contentId") String contentId, @Valid @ModelAttribute("event") Event event, BindingResult result, Model model) {
+    public String updateEvent(@NotNull @RequestParam("contentId") String contentId, @Valid @ModelAttribute("event") EventDto eventDto, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            model.addAttribute("tagsAsString", String.join(",", event.getTags()));
+            model.addAttribute("tagsAsString", String.join(",", eventDto.getTags()));
             return "events/edit-event";
         }
 
-        Content savedEvent = contentService.update(contentId, event);
+        Content savedEvent = contentService.update(contentId, eventDto);
 
         return "redirect:" + savedEvent.getPathname();
     }
@@ -158,5 +159,19 @@ public class EventController {
         }
         model.addAttribute("event", event);
         return "events/htmx/adjust-day-events";
+    }
+
+    private EventDto createDto(Content content) {
+        if (!(content.getDetail() instanceof Event eventDetail)) {
+            throw new IllegalArgumentException("ContentDto is not a EventDto");
+        }
+
+        EventDto dto = new EventDto();
+        dto.setContentId(content.getId());
+        dto.setPathname(content.getPathname());
+        dto.setTitle(eventDetail.getTitle());
+        dto.setDescription(eventDetail.getDescription());
+
+        return dto;
     }
 }

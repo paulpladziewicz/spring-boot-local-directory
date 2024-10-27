@@ -7,6 +7,7 @@ import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -50,7 +51,7 @@ public class NeighborServicesProfileController {
     }
 
     @PostMapping("/create/neighbor-services-profile")
-    public String createNeighborServiceSubscription(@Valid @ModelAttribute("neighborService") NeighborServicesProfile neighborServicesProfile, BindingResult bindingResult, Model model) {
+    public String createNeighborServiceSubscription(@Valid @ModelAttribute("neighborService") NeighborServicesProfileDto neighborServicesProfile, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("tagsAsString", String.join(",", neighborServicesProfile.getTags()));
             return "neighborservices/create-neighbor-services-profile";
@@ -62,13 +63,13 @@ public class NeighborServicesProfileController {
     }
 
     @GetMapping("/neighbor-services")
-    public String displayActiveNeighborServices(@RequestParam(value = "tag", required = false) String tag, Model model) {
-        List<Content> profiles;
+    public String displayActiveNeighborServices(@RequestParam(value = "tag", required = false) String tag, @RequestParam(defaultValue = "0") int page,  Model model) {
+        Page<Content> profiles;
         if (tag != null && !tag.isEmpty()) {
-            profiles = contentService.findByTagAndType(tag, ContentType.NEIGHBOR_SERVICES_PROFILE);
+            profiles = contentService.findByTagAndType(tag, ContentType.NEIGHBOR_SERVICES_PROFILE, page);
 
         } else {
-            profiles = contentService.findByType(ContentType.NEIGHBOR_SERVICES_PROFILE);
+            profiles = contentService.findByType(ContentType.NEIGHBOR_SERVICES_PROFILE, page);
         }
 
         // TODO still displaying profiles that do not have any neighbor services
@@ -80,25 +81,24 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/neighbor-services-profile/{slug}")
     public String viewNeighborService(@PathVariable String slug, Model model) {
-        Content neighborServicesProfile = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType() + '/' + slug, ContentType.NEIGHBOR_SERVICES_PROFILE);
-        NeighborServicesProfile neighborServicesProfileDetail = (NeighborServicesProfile) neighborServicesProfile.getDetail();
+        Content content = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType() + '/' + slug, ContentType.NEIGHBOR_SERVICES_PROFILE);
+        NeighborServicesProfileDto neighborServicesProfile = createDto(content);
 
-        Boolean createdByUser;
+        boolean createdByUser;
         try {
             String userId = userService.getUserId();
-            createdByUser = Objects.equals(userId, neighborServicesProfile.getCreatedBy());
+            createdByUser = Objects.equals(userId, content.getCreatedBy());
         } catch (Exception e) {
             createdByUser = false;
         }
 
         if (!createdByUser) {
-            if (Objects.equals(neighborServicesProfile.getVisibility(), ContentVisibility.RESTRICTED.getVisibility())) {
+            if (Objects.equals(content.getVisibility(), ContentVisibility.RESTRICTED.getVisibility())) {
                 return "restricted-visibility";
             }
         }
 
-        neighborServicesProfileDetail.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfileDetail.getDescription().replace("\n", "<br/>")));
-        neighborServicesProfile.setDetail(neighborServicesProfileDetail);
+        neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));
 
         model.addAttribute("neighborServicesProfile", neighborServicesProfile);
         model.addAttribute("myProfile", createdByUser);
@@ -125,9 +125,10 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/edit/neighbor-services-profile")
     public String editNeighborServiceProfilePage(@RequestParam(value = "contentId") String contentId, Model model) {
-        Content neighborServicesProfile = contentService.findById(contentId);
+        Content content = contentService.findById(contentId);
+        NeighborServicesProfileDto neighborServicesProfile = createDto(content);
 
-        String tagsAsString = String.join(",", neighborServicesProfile.getDetail().getTags());
+        String tagsAsString = String.join(",", neighborServicesProfile.getTags());
         model.addAttribute("tagsAsString", tagsAsString);
 
         model.addAttribute("neighborServicesProfile", neighborServicesProfile);
@@ -137,15 +138,16 @@ public class NeighborServicesProfileController {
 
 
     @PostMapping("/edit/neighbor-services-profile")
-    public String editNeighborService(@NotNull @RequestParam("contentId") String contentId, @Valid @ModelAttribute("neighborService") NeighborServicesProfile neighborServicesProfile, BindingResult bindingResult, Model model) {
+    public String editNeighborService(@NotNull @RequestParam("contentId") String contentId, @Valid @ModelAttribute("neighborService") NeighborServicesProfileDto neighborServicesProfileDto, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("tagsAsString", String.join(",", neighborServicesProfile.getTags()));
+            model.addAttribute("tagsAsString", String.join(",", neighborServicesProfileDto.getTags()));
             return "neighborservices/edit-neighbor-services-profile";
         }
 
-        Content updatedNeighborServicesProfile = contentService.update(contentId, neighborServicesProfile);
+        Content content = contentService.update(contentId, neighborServicesProfileDto);
+        NeighborServicesProfileDto neighborServicesProfile = createDto(content);
 
-        model.addAttribute("neighborService", updatedNeighborServicesProfile);
+        model.addAttribute("neighborService", neighborServicesProfile);
 
         return "redirect:/my/neighbor-services/profile";
     }
@@ -155,5 +157,19 @@ public class NeighborServicesProfileController {
         contentService.delete(contentId);
 
         return "redirect:/neighbor-services";
+    }
+
+    private NeighborServicesProfileDto createDto(Content content) {
+        if (!(content.getDetail() instanceof NeighborServicesProfile neighborServicesProfile)) {
+            throw new IllegalArgumentException("ContentDto is not a NeighborServicesProfileDto");
+        }
+
+        NeighborServicesProfileDto dto = new NeighborServicesProfileDto();
+        dto.setContentId(content.getId());
+        dto.setPathname(content.getPathname());
+        dto.setTitle(neighborServicesProfile.getTitle());
+        dto.setDescription(neighborServicesProfile.getDescription());
+
+        return dto;
     }
 }

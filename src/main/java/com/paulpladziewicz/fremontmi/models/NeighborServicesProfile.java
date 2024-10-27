@@ -14,17 +14,10 @@ import java.util.Map;
 @TypeAlias("NeighborServicesProfile")
 public class NeighborServicesProfile implements ContentDetail {
 
-    @NotBlank(message = "Display name is required.")
-    @Size(max = 100, message = "Display name should be less than 100 characters.")
     private String title;
 
-    @NotBlank(message = "Description should not be blank.")
-    @Size(max = 5000, message = "Description can't be longer than 5000 characters")
     private String description;
 
-    @NotBlank(message = "Email is required.")
-    @Email(message = "Invalid email format.")
-    @Size(max = 100, message = "Email must not be longer than 100 characters.")
     private String email;
 
     private List<NeighborService> neighborServices = new ArrayList<>();

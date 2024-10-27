@@ -62,7 +62,7 @@ public class GroupController {
     @GetMapping("/group/{slug}")
     public String displayGroup(@PathVariable String slug, Model model) {
         Content content = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug, ContentType.GROUP);
-        GroupDto group = createGroupDto(content);
+        GroupDto group = createDto(content);
 
         group.setDescription(htmlSanitizationService.sanitizeHtml(group.getDescription().replace("\n", "<br/>")));
 
@@ -94,7 +94,7 @@ public class GroupController {
     @GetMapping("/edit/group/{slug}")
     public String getEditGroupForm(@PathVariable String slug, Model model) {
         Content content = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug, ContentType.GROUP);
-        GroupDto group = createGroupDto(content);
+        GroupDto group = createDto(content);
 
         String tagsAsString = String.join(",", group.getTags());
         model.addAttribute("tagsAsString", tagsAsString);
@@ -123,7 +123,7 @@ public class GroupController {
         return "redirect:/my/groups";
     }
 
-    private GroupDto createGroupDto(Content content) {
+    private GroupDto createDto(Content content) {
         if (!(content.getDetail() instanceof Group groupDetail)) {
             throw new IllegalArgumentException("ContentDto is not a GroupDto");
         }
