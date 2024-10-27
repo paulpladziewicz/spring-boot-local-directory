@@ -21,7 +21,14 @@ public class UserProfile {
 
     private String email;
 
-    private Set<String> bookmarkedContentIds = new HashSet<>();
+    private Map<ContentType, ContentActions> contentActionsByType = new HashMap<>();
+
+    @Data
+    public static class ContentActions {
+        private Set<String> created = new HashSet<>();
+        private Set<String> bookmarked = new HashSet<>();
+        private Set<String> hearted = new HashSet<>();
+    }
 
     private int emailSendCount;
 

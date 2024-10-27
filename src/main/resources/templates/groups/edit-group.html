@@ -11,8 +11,7 @@
         <div class="col-12 col-md-8 col-lg-6">
             <h1 class="display-4">Edit Group</h1>
             <form th:action="@{/edit/group}" th:object="${group}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                <input type="hidden" name="id" th:value="${group.id}" />
-                <input type="hidden" name="slug" th:value="${group.slug}" />
+                <input type="hidden" name="contentId" th:value="${group.contentId}" />
 
                 <div class="form-group mb-2">
                     <label for="name" class="mb-1 form-label opacity-75 fw-medium fs-base">Group Name</label>
@@ -30,7 +29,7 @@
 
                 <div class="d-flex">
                     <button type="submit" class="btn btn-primary me-2">Save Changes</button>
-                    <a class="btn btn-secondary" th:href="'/groups/' + ${group.slug}">Cancel</a>
+                    <a class="btn btn-secondary" th:href="${group.pathname}">Cancel</a>
                 </div>
                 <p class="py-4">Please <a href="/#contact-us" class="alert-link">contact us</a> if you'd like to add
                     an administrator or change who will be administering this group.</p>
@@ -40,7 +39,7 @@
                 <h3>Delete Group</h3>
                 <p>Once deleted, this action cannot be undone, and all group data will be permanently lost.</p>
                 <form method="post" th:action="@{/delete/group}" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                    <input type="hidden" name="groupId" th:value="${group.id}" />
+                    <input type="hidden" name="groupId" th:value="${group.contentId}" />
                     <button type="submit" class="btn btn-danger">Delete Group</button>
                 </form>
             </section>

@@ -37,10 +37,14 @@
                         </p>
                         <p class="mb-3" th:text="${#strings.length(group.detail.description) > 120 ? #strings.substring(group.detail.description, 0, 120) + '...' : group.detail.description}"></p>
 
-                        <a th:href="${group.detail.pathname}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
+                        <a th:href="${group.pathname}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div th:if="${groups.hasNext()}" class="text-center mt-4">
+            <button class="btn btn-primary" id="load-more-btn" data-page="${groups.number + 1}">Load More</button>
         </div>
 
     </div>

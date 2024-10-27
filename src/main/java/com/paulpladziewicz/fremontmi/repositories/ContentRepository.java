@@ -3,6 +3,8 @@ package com.paulpladziewicz.fremontmi.repositories;
 import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.ContentType;
 import com.paulpladziewicz.fremontmi.models.Event;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -25,10 +27,10 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     List<Content> findByPathnameRegexAndType(String slugPattern, String contentType);
 
     @Query("{ 'type': ?0, 'visibility': 'public' }")
-    List<Content> findByType(String contentType);
+    Page<Content> findByTypeAndVisibility(ContentType contentType, Pageable pageable);
 
     @Query("{ 'tags': ?0, 'type':  ?1, 'visibility': 'public' }")
-    List<Content> findByTagAndType(String tag, String contentType);
+    Page<Content> findPublicContentByTagAndType(String tag, String contentType, Pageable pageable);
 
     @Query("{ 'type': 'neighbor-services-profile', 'createdBy': ?0 }")
     <T extends Content> Optional<T> findByCreatedBy(String createdBy, Class<T> clazz);

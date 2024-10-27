@@ -89,7 +89,7 @@ public class TagService {
         Map<String, Integer> tagCountMap = new HashMap<>();
 
         for (Content content : contentList) {
-            List<String> tags = content.getDetail().getTags();
+            List<String> tags = content.getTags();
             if (tags != null) {
                 for (String tag : tags) {
                     tagCountMap.put(tag, tagCountMap.getOrDefault(tag, 0) + 1);

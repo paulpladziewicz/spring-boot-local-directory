@@ -14,19 +14,13 @@ import java.util.Map;
 @TypeAlias("NeighborServicesProfile")
 public class NeighborServicesProfile implements ContentDetail {
 
-    public NeighborServicesProfile() {
-        // Default constructor required for MongoDB deserialization
-    }
-
     @NotBlank(message = "Display name is required.")
     @Size(max = 100, message = "Display name should be less than 100 characters.")
-    private String name;
+    private String title;
 
     @NotBlank(message = "Description should not be blank.")
     @Size(max = 5000, message = "Description can't be longer than 5000 characters")
     private String description;
-
-    private List<String> tags = new ArrayList<>();
 
     @NotBlank(message = "Email is required.")
     @Email(message = "Invalid email format.")
@@ -39,26 +33,7 @@ public class NeighborServicesProfile implements ContentDetail {
 
     private String profileImageFileName;
 
-    private Boolean nearby;
-
-    private Boolean external;
-
     @Override
-    public void update(Content parentContent, ContentDetail newDetail) {
-    }
-
-    @Override
-    public void update(UpdateType updateType, Map<String, Object> updateData) {
-        switch (updateType) {
-            case PROFILE_IMAGE:
-                String profileImageUrl = (String) updateData.get("profileImageUrl");
-                String profileImageFileName = (String) updateData.get("profileImageFileName");
-                this.profileImageUrl = profileImageUrl;
-                this.profileImageFileName = profileImageFileName;
-                break;
-            // Add more cases for other types of updates
-            default:
-                throw new IllegalArgumentException("Update type not supported: " + updateType);
-        }
+    public void update(Content parentContent, ContentDto newDetail) {
     }
 }

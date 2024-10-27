@@ -6,13 +6,15 @@ import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,18 +34,24 @@ public class ContentService {
         this.emailService = emailService;
     }
 
-    public Content create(ContentType type, ContentDetail detail) {
+    public Content create(ContentType type, ContentDto contentValues) {
         UserProfile userProfile = userService.getUserProfile();
         Content content = new Content();
         content.setType(type);
-        content.setDetail(detail);
-        List<String> validatedTags = tagService.addTags(detail.getTags(), content.getType());
-        content.getDetail().setTags(validatedTags);
-        content.setPathname(createUniquePathname(detail.getName(), type));
+        content.setDetail(type);
+        content.getDetail().update(content, contentValues);
+        // TODO what happens if the tags are not defined or null
+        List<String> validatedTags = tagService.addTags(content.getTags(), content.getType());
+        content.setTags(validatedTags);
+        content.setPathname(createUniquePathname(content.getDetail().getTitle(), type));
         content.setCreatedBy(userProfile.getUserId());
         content.setAdministrators(List.of(userProfile.getUserId()));
         content.setCreatedAt(LocalDateTime.now());
         content.setUpdatedAt(LocalDateTime.now());
+        return contentRepository.save(content);
+    }
+
+    public Content save(Content content) {
         return contentRepository.save(content);
     }
 
@@ -57,12 +65,14 @@ public class ContentService {
                 .orElseThrow(() -> new ContentNotFoundException("Content not found with pathname: " + pathname + " and type: " + type));
     }
 
-    public List<Content> findByType(ContentType type) {
-        return contentRepository.findByType(type.getContentType());
+    public Page<Content> findByType(ContentType type, int page) {
+        Pageable pageable = PageRequest.of(page, 15);
+        return contentRepository.findByTypeAndVisibility(type, pageable);
     }
 
-    public List<Content> findByTagAndType(String tag, ContentType type) {
-        return contentRepository.findByTagAndType(tag, type.getContentType());
+    public Page<Content> findByTagAndType(String tag, ContentType type, int page) {
+        Pageable pageable = PageRequest.of(page, 15);
+        return contentRepository.findPublicContentByTagAndType(tag, type.getContentType(), pageable);
     }
 
     public List<Content> findByUserAndType(ContentType contentType) {
@@ -76,57 +86,11 @@ public class ContentService {
         return new ArrayList<>();
     }
 
-    public Content update(String contentId, ContentDetail updatedDetail) {
+    public Content update(String contentId, ContentDto updatedContent) {
         Content content = findById(contentId);
         checkPermission(content);
-
-        switch (content.getType()) {
-            case GROUP:
-                if (updatedDetail instanceof Group) {
-                    Group eventDetail = (Group) content.getDetail();
-                    eventDetail.update(content, updatedDetail);
-                } else {
-                    throw new IllegalArgumentException("ContentDetail type mismatch for EVENT");
-                }
-                break;
-            case EVENT:
-                if (updatedDetail instanceof Event) {
-                    Event eventDetail = (Event) content.getDetail();
-                    eventDetail.update(content, updatedDetail);
-                } else {
-                    throw new IllegalArgumentException("ContentDetail type mismatch for EVENT");
-                }
-                break;
-            case BUSINESS:
-                if (updatedDetail instanceof Business) {
-                    Business businessDetail = (Business) content.getDetail();
-                    businessDetail.update(content, updatedDetail);
-                } else {
-                    throw new IllegalArgumentException("ContentDetail type mismatch for BUSINESS");
-                }
-                break;
-            case NEIGHBOR_SERVICES_PROFILE:
-                if (updatedDetail instanceof NeighborServicesProfile) {
-                    NeighborServicesProfile eventDetail = (NeighborServicesProfile) content.getDetail();
-                    eventDetail.update(content, updatedDetail);
-                } else {
-                    throw new IllegalArgumentException("ContentDetail type mismatch for EVENT");
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported content type: " + content.getType());
-        }
-
-        updateMetadata(content, updatedDetail);
-        content.setUpdatedBy(userService.getUserId());
-        content.setUpdatedAt(LocalDateTime.now());
-        return contentRepository.save(content);
-    }
-
-    public Content update(String contentId, UpdateType updateType, Map<String, Object> updateData) {
-        Content content = findById(contentId);
-        checkPermission(content);
-        content.getDetail().update(updateType, updateData);
+        updateMetadata(content, updatedContent);
+        content.getDetail().update(content, updatedContent);
         content.setUpdatedBy(userService.getUserId());
         content.setUpdatedAt(LocalDateTime.now());
         return contentRepository.save(content);
@@ -135,7 +99,7 @@ public class ContentService {
     public void delete(String contentId) {
         Content content = findById(contentId);
         checkPermission(content);
-        tagService.removeTags(content.getDetail().getTags(), content.getType());
+        tagService.removeTags(content.getTags(), content.getType());
         contentRepository.deleteById(contentId);
     }
 
@@ -150,16 +114,16 @@ public class ContentService {
         }
     }
 
-    public void updateMetadata(Content content, ContentDetail updatedDetail) {
-        List<String> oldTags = content.getDetail().getTags();
-        List<String> newTags = updatedDetail.getTags();
+    public void updateMetadata(Content content, ContentDto updatedContent) {
+        List<String> oldTags = content.getTags();
+        List<String> newTags = updatedContent.getTags();
 
         if (newTags != null) {
             tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), content.getType());
         }
 
-        if (!updatedDetail.getName().equals(content.getDetail().getName())) {
-            String newPathname = createUniquePathname(updatedDetail.getName(), content.getType());
+        if (!updatedContent.getTitle().equals(content.getDetail().getTitle())) {
+            String newPathname = createUniquePathname(updatedContent.getTitle(), content.getType());
             content.setPathname(newPathname);
         }
     }

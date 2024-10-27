@@ -4,27 +4,21 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Data
 public class Event implements ContentDetail {
 
-    public Event() {
-        // Default constructor required for MongoDB deserialization
-    }
-
     @NotBlank(message = "Please provide an event name")
     @Size(min = 3, max = 100, message = "Event name must be between 3 and 100 characters")
-    private String name;
+    private String title;
 
     @NotBlank(message = "Please provide a description")
     @Size(max = 5000, message = "Description can't be longer than 5000 characters")
@@ -55,27 +49,19 @@ public class Event implements ContentDetail {
     @Transient
     private int moreDayEventsCount;
 
-    private Boolean nearby;
-
-    private Boolean external;
-
     @Override
-    public void update(Content parentContent, ContentDetail newDetail) {
+    public void update(Content parentContent, ContentDto newDetail) {
         if (!(newDetail instanceof Event newEventDetail)) {
             throw new IllegalArgumentException("Invalid content detail type for Business.");
         }
 
-        this.setName(newEventDetail.getName());
+        this.setTitle(newEventDetail.getTitle());
         this.setDescription(newEventDetail.getDescription());
         this.setLocationName(newEventDetail.getLocationName());
         this.setAddress(newEventDetail.getAddress());
         this.setDays(newEventDetail.getDays());
 
         populateFormattedTimes(this);
-    }
-
-    @Override
-    public void update(UpdateType updateType, Map<String, Object> updateData) {
     }
 
     private void validateEventTimes(Event event) {

@@ -4,8 +4,6 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,7 +25,13 @@ public class Content {
 
     private String status = ContentStatus.ACTIVE.getStatus();
 
+    private Boolean nearby;
+
+    private Boolean external;
+
     private ContentDetail detail;
+
+    private List<String> tags = new ArrayList<>();
 
     private List<String> administrators = new ArrayList<>();
 
@@ -51,4 +55,23 @@ public class Content {
 
     @Version
     private Long version;
+
+    public void setDetail(ContentType type) {
+        switch (type) {
+            case GROUP:
+                this.detail = new Group();
+                break;
+            case EVENT:
+                this.detail = new Event();
+                break;
+            case BUSINESS:
+                this.detail = new Business();
+                break;
+            case NEIGHBOR_SERVICES_PROFILE:
+                this.detail = new NeighborServicesProfile();
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported content type: " + type);
+        }
+    }
 }
