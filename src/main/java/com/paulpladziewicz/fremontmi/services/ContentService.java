@@ -26,13 +26,11 @@ public class ContentService {
     private final ContentRepository contentRepository;
     private final UserService userService;
     private final TagService tagService;
-    private final EmailService emailService;
 
-    public ContentService(ContentRepository contentRepository, UserService userService, TagService tagService, EmailService emailService) {
+    public ContentService(ContentRepository contentRepository, UserService userService, TagService tagService) {
         this.contentRepository = contentRepository;
         this.userService = userService;
         this.tagService = tagService;
-        this.emailService = emailService;
     }
 
     public Content create(ContentType type, ContentDto contentValues) {
@@ -46,6 +44,7 @@ public class ContentService {
         content.setTags(validatedTags);
         content.setPathname(createUniquePathname(content.getDetail().getTitle(), type));
         content.setCreatedBy(userProfile.getUserId());
+        content.setParticipants(Set.of(userProfile.getUserId()));
         content.setAdministrators(Set.of(userProfile.getUserId()));
         content.setCreatedAt(LocalDateTime.now());
         content.setUpdatedAt(LocalDateTime.now());
