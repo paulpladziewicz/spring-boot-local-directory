@@ -69,19 +69,19 @@ public class GroupController {
 
     @GetMapping("/group/{slug}")
     public String displayGroup(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug, ContentType.GROUP);
-        GroupDto group = createDto(content);
+        Content group = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug, ContentType.GROUP);
+        Group detail = (Group) group.getDetail();
 
-        group.setDescription(htmlSanitizationService.sanitizeHtml(group.getDescription().replace("\n", "<br/>")));
+        detail.setDescription(htmlSanitizationService.sanitizeHtml(detail.getDescription().replace("\n", "<br/>")));
 
         model.addAttribute("group", group);
-        model.addAttribute("adminCount", content.getAdministrators().size());
-        model.addAttribute("memberCount", content.getParticipants().size());
+        model.addAttribute("adminCount", group.getAdministrators().size());
+        model.addAttribute("memberCount", group.getParticipants().size());
 
         try {
             String userId = userService.getUserId();
-            model.addAttribute("isMember", content.getParticipants().contains(userId));
-            model.addAttribute("isAdmin", content.getAdministrators().contains(userId));
+            model.addAttribute("isMember", group.getParticipants().contains(userId));
+            model.addAttribute("isAdmin", group.getAdministrators().contains(userId));
         } catch (UserNotAuthenticatedException e) {
             model.addAttribute("isMember", false);
             model.addAttribute("isAdmin", false);

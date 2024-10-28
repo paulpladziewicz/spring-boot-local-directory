@@ -48,7 +48,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers(HttpMethod.POST, "/api/upload","/register", "/contact", "/subscribe", "/api/stripe/**", "/article-contact", "/taqueria", "/contact/neighbor-services-profile").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/stripe/**").permitAll()
-                .requestMatchers("/overview/**","/articles/**","/groups/","/groups/**","/events","/events/**", "/register", "/forgot-password", "/reset-password", "/forgot-username", "/css/**", "/privacy-policy", "/terms-of-service", "/js/**", "/images/**", "/favicon.ico", "/error", "/login", "/login?error", "/login?error=*", "/login?logout", "/businesses", "/businesses/**", "/neighbor-services", "/neighbor-services/**", "/confirm", "/tagging-guidelines", "/create/neighbor-services-profile/overview", "/create/business/overview", "/", "/robots.txt", "/sitemap.xml", "/health").permitAll()
+                .requestMatchers("/overview/**","/articles/**","/groups/","/groups/**","/events","/events/**", "/register", "/forgot-password", "/reset-password", "/forgot-username", "/css/**", "/privacy-policy", "/terms-of-service", "/js/**", "/images/**", "/favicon.ico", "/error", "/login", "/login?error", "/login?error=*", "/login?logout", "/businesses", "/businesses/**", "/neighbor-services", "/neighbor-services/**", "/confirm", "/tagging-guidelines", "/create/neighbor-services-profile/overview", "/create/business/overview", "/", "/robots.txt", "/sitemap.xml", "/health", "/group/**", "/event/**", "/business/**", "/neighbor-services-profile/**").permitAll()
                 .anyRequest().authenticated()
         );
         http.formLogin(formLogin -> formLogin

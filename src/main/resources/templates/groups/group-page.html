@@ -5,8 +5,8 @@
     <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
     <title>[[${group.detail.title}]] - Group in Fremont, MI</title>
     <meta name="description" th:content="${#strings.length(group.detail.description) > 160 ? #strings.substring(group.detail.description, 0, 157) + '...' : group.detail.description}" />
-    <th:block th:if="${group.detail.tags != null and #lists.size(group.detail.tags) > 0}">
-        <meta name="keywords" th:content="${#strings.arrayJoin(group.detail.tags, ', ')}" />
+    <th:block th:if="${group.tags != null and #lists.size(group.tags) > 0}">
+        <meta name="keywords" th:content="${#strings.arrayJoin(group.tags, ', ')}" />
     </th:block>
 </head>
 <body>
@@ -35,12 +35,12 @@
                     <section sec:authorize="!isAuthenticated()">
                         <p><a class="link-primary" href="/register">Register</a> or <a href="/login">Login</a> to join.</p>
                     </section>
-                    <form sec:authorize="isAuthenticated()" th:if="${!isMember}" th:action="@{/groups/join}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                    <form sec:authorize="isAuthenticated()" th:if="${!isMember}" th:action="@{/join/group}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <button type="submit" class="btn btn-link p-0">Join Group</button>
                     </form>
                     <form sec:authorize="isAuthenticated()" th:if="${isMember && !isAdmin}"
-                          th:action="@{/groups/leave}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                          th:action="@{/leave/group}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                         <button type="submit" class="btn btn-link p-0">Leave Group</button>
                     </form>
                     <p class="fs-lg my-3" th:utext="${group.detail.description}">Group description here...</p>
