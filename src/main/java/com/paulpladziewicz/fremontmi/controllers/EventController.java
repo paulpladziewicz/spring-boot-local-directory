@@ -4,6 +4,7 @@ import com.paulpladziewicz.fremontmi.exceptions.UserNotAuthenticatedException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.ContentService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
+import com.paulpladziewicz.fremontmi.services.InteractionService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -25,10 +26,13 @@ public class EventController {
 
     private final UserService userService;
 
-    public EventController(HtmlSanitizationService htmlSanitizationService, ContentService contentService, UserService userService) {
+    private final InteractionService interactionService;
+
+    public EventController(HtmlSanitizationService htmlSanitizationService, ContentService contentService, UserService userService, InteractionService interactionService) {
         this.htmlSanitizationService = htmlSanitizationService;
         this.contentService = contentService;
         this.userService = userService;
+        this.interactionService = interactionService;
     }
 
     @GetMapping("/create/event")
@@ -159,6 +163,20 @@ public class EventController {
         }
         model.addAttribute("event", event);
         return "events/htmx/adjust-day-events";
+    }
+
+    @PostMapping("/cancel/event")
+    public String cancelEvent(@NotNull @RequestParam("slug") String slug) {
+        interactionService.cancel(slug);
+
+        return "redirect:/events/" + slug;
+    }
+
+    @PostMapping("/reactivate/event")
+    public String reactivateEvent(@NotNull @RequestParam("slug") String slug) {
+        interactionService.reactivate(slug);
+
+        return "redirect:/events/" + slug;
     }
 
     private EventDto createDto(Content content) {

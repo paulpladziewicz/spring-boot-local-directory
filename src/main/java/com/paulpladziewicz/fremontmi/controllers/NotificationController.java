@@ -5,6 +5,7 @@ import com.paulpladziewicz.fremontmi.models.ContactFormRequest;
 import com.paulpladziewicz.fremontmi.models.EmailGroupRequest;
 import com.paulpladziewicz.fremontmi.models.Group;
 import com.paulpladziewicz.fremontmi.services.EmailService;
+import com.paulpladziewicz.fremontmi.services.NotificationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
@@ -19,10 +20,10 @@ import java.util.Map;
 @RestController
 public class NotificationController {
 
-    private final EmailService emailService;
+    NotificationService notificationService;
 
-    public NotificationController(EmailService emailService) {
-        this.emailService = emailService;
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
     }
 
 //    @PostMapping("/article-contact")
@@ -50,21 +51,7 @@ public class NotificationController {
 //        }
 //    }
 //
-//    @PostMapping("/email/group")
-//    @ResponseBody
-//    public ResponseEntity<String> handleEmailGroup(@RequestBody EmailGroupRequest emailGroupRequest) {
-//        Boolean response = contentService.emailGroup(
-//                emailGroupRequest.getSlug(),
-//                emailGroupRequest.getSubject(),
-//                emailGroupRequest.getMessage()
-//        );
 //
-//        if (response) {
-//            return ResponseEntity.ok("Email sent successfully!");
-//        } else {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email. Please try again.");
-//        }
-//    }
 //
 //
 //    @PostMapping("/contact/business")
@@ -106,40 +93,28 @@ public class NotificationController {
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit the form");
 //        }
 //    }
-//
-//
-//    @GetMapping("/announcements/group/{groupId}")
-//    public String getGroupAnnouncementHtml(@NotNull @PathVariable String groupId, Model model) {
-//        Group group = contentService.findGroupById(groupId);
-//
-//        model.addAttribute("group", group);
-//
-//        return "groups/htmx/group-announcements";
-//    }
-//
-//    @GetMapping("/announcements/group/form/{groupId}")
-//    public String getGroupAnnouncementForm(@NotNull @PathVariable String groupId, Model model) {
-//        model.addAttribute("groupId", groupId);
-//        model.addAttribute("announcement", new Announcement());
-//        return "groups/htmx/group-announcements-form";
-//    }
-//
-//    @PostMapping("/announcements/group/{groupId}")
-//    public String addGroupAnnouncement(@NotNull @PathVariable String groupId, @Valid Announcement announcement, Model model) {
-//        announcement.setCreationDate(Instant.now());
-//
-//        contentService.addAnnouncement(groupId, announcement);
-//        // TODO not performant
-//        Group group = contentService.findGroupById(groupId);
-//
-//        model.addAttribute("group", group);
-//        return "groups/htmx/group-announcements";
-//    }
-//
-//    @PostMapping("/delete/group/announcement")
-//    public String deleteGroupAnnouncement(@NotNull @RequestParam("groupId") String groupId, @NotNull @RequestParam("announcementId") String announcementId) {
-//        contentService.deleteAnnouncement(groupId, Integer.parseInt(announcementId));
-//
-//        return "groups/htmx/delete";
-//    }
+
+    @GetMapping("/create/announcement")
+    public String getGroupAnnouncementForm(@NotNull @PathVariable String groupId, Model model) {
+        model.addAttribute("groupId", groupId);
+        model.addAttribute("announcement", new Announcement());
+        return "groups/htmx/group-announcements-form";
+    }
+
+    @PostMapping("/create/announcement")
+    public String addGroupAnnouncement(@NotNull @PathVariable String contentId, @Valid Announcement announcement, Model model) {
+        announcement.setCreationDate(Instant.now());
+
+        Announcement createdAnnouncement = notificationService.createAnnouncement(contentId, announcement);
+
+        model.addAttribute("announcement", createdAnnouncement);
+        return "groups/htmx/group-announcements";
+    }
+
+    @PostMapping("/delete/announcement")
+    public String deleteGroupAnnouncement(@NotNull @RequestParam("contentId") String contentId, @NotNull @RequestParam("announcementId") String announcementId) {
+        notificationService.deleteAnnouncement(contentId, Integer.parseInt(announcementId));
+
+        return "";
+    }
 }

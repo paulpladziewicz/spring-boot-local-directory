@@ -1,14 +1,11 @@
 package com.paulpladziewicz.fremontmi.models;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

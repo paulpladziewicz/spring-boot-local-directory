@@ -6,6 +6,8 @@ import com.paulpladziewicz.fremontmi.services.*;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,13 +21,19 @@ public class GroupController {
     private final HtmlSanitizationService htmlSanitizationService;
 
     private final ContentService contentService;
+    private final NotificationService notificationService;
+
+    InteractionService interactionService;
 
     private final UserService userService;
 
-    public GroupController(HtmlSanitizationService htmlSanitizationService, ContentService contentService, InteractionService interactionService, NotificationService notificationService, UserService userService) {
+
+    public GroupController(HtmlSanitizationService htmlSanitizationService, ContentService contentService, UserService userService, InteractionService interactionService, NotificationService notificationService) {
         this.htmlSanitizationService = htmlSanitizationService;
         this.contentService = contentService;
         this.userService = userService;
+        this.interactionService = interactionService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/create/group")
@@ -68,11 +76,11 @@ public class GroupController {
 
         model.addAttribute("group", group);
         model.addAttribute("adminCount", content.getAdministrators().size());
-        model.addAttribute("memberCount", group.getMembers().size());
+        model.addAttribute("memberCount", content.getParticipants().size());
 
         try {
             String userId = userService.getUserId();
-            model.addAttribute("isMember", group.getMembers().contains(userId));
+            model.addAttribute("isMember", content.getParticipants().contains(userId));
             model.addAttribute("isAdmin", content.getAdministrators().contains(userId));
         } catch (UserNotAuthenticatedException e) {
             model.addAttribute("isMember", false);
@@ -121,6 +129,32 @@ public class GroupController {
         contentService.delete(contentId);
 
         return "redirect:/my/groups";
+    }
+
+    @PostMapping("/join/group")
+    public String joinGroup(@RequestParam("contentId") String contentId) {
+        interactionService.addParticipant(contentId);
+        // start with json
+        return "redirect:/groups";
+    }
+
+    @PostMapping("/leave/group")
+    public String leaveGroup(@RequestParam("contentId") String contentId) {
+        interactionService.removeParticipant(contentId);
+        // start with json
+        return "redirect:/groups";
+    }
+
+    @PostMapping("/email/group")
+    @ResponseBody
+    public ResponseEntity<String> handleEmailGroup(@RequestBody EmailGroupRequest emailGroupRequest) {
+        boolean response = notificationService.emailParticipants(emailGroupRequest);
+
+        if (response) {
+            return ResponseEntity.ok("Email sent successfully!");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email. Please try again.");
+        }
     }
 
     private GroupDto createDto(Content content) {

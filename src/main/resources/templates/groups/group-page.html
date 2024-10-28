@@ -3,7 +3,7 @@
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
-    <title>[[${group.detail.name}]] - Group in Fremont, MI</title>
+    <title>[[${group.detail.title}]] - Group in Fremont, MI</title>
     <meta name="description" th:content="${#strings.length(group.detail.description) > 160 ? #strings.substring(group.detail.description, 0, 157) + '...' : group.detail.description}" />
     <th:block th:if="${group.detail.tags != null and #lists.size(group.detail.tags) > 0}">
         <meta name="keywords" th:content="${#strings.arrayJoin(group.detail.tags, ', ')}" />
@@ -18,14 +18,14 @@
             <nav aria-label="breadcrumb">
                 <ol class="pt-lg-3 pb-lg-4 pb-2 breadcrumb">
                     <li class="breadcrumb-item"><a href="/groups">Groups</a></li>
-                    <li class="breadcrumb-item active" aria-current="page" th:text="${group.detail.name}"></li>
+                    <li class="breadcrumb-item active" aria-current="page" th:text="${group.detail.title}"></li>
                 </ol>
             </nav>
         </div>
         <div class="row">
             <div class="col-md-10 col-lg-8 mx-auto">
                 <section>
-                    <h1 class="display-4 mb-0" th:text="${group.detail.name}">Group Name</h1>
+                    <h1 class="display-4 mb-0" th:text="${group.detail.title}">Group Name</h1>
                     <p class="text-muted fw-semibold mt-3 mb-1">
                         <span th:text="${adminCount}"></span>
                         <span th:text="${adminCount == 1 ? 'Administrator' : 'Administrators'}"></span> -

@@ -30,7 +30,7 @@
             <div th:each="group : ${groups}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="h3 mb-1" th:text="${group.detail.name}">Card title</h4>
+                        <h4 class="h3 mb-1" th:text="${group.detail.title}">Card title</h4>
                         <p class="text-muted fw-semibold mb-2">
                             <span th:text="${group.detail.members.size()}"></span>
                             <span th:text="${group.detail.members.size() == 1 ? 'Member' : 'Members'}"></span>

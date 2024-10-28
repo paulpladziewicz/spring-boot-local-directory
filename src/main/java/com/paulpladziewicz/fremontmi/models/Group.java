@@ -16,8 +16,6 @@ public class Group implements ContentDetail {
 
     private List<Announcement> announcements = new ArrayList<>();
 
-    private List<String> members = new ArrayList<>();
-
     @Override
     public void update(Content content, ContentDto contentDto) {
         if (!(contentDto instanceof GroupDto updatedGroup)) {

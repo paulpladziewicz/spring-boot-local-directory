@@ -15,6 +15,7 @@ import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,7 +46,7 @@ public class ContentService {
         content.setTags(validatedTags);
         content.setPathname(createUniquePathname(content.getDetail().getTitle(), type));
         content.setCreatedBy(userProfile.getUserId());
-        content.setAdministrators(List.of(userProfile.getUserId()));
+        content.setAdministrators(Set.of(userProfile.getUserId()));
         content.setCreatedAt(LocalDateTime.now());
         content.setUpdatedAt(LocalDateTime.now());
         return contentRepository.save(content);

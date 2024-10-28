@@ -54,45 +54,35 @@ public class InteractionService {
         }
     }
 
-    public void join(String contentId) {
+    public void addParticipant(String contentId) {
         UserProfile userProfile = userService.getUserProfile();
         Content content = contentService.findById(contentId);
 
-        if (content.getDetail() instanceof Group group) {
-            List<String> members = group.getMembers();
-            if (!members.contains(userProfile.getUserId())) {
-                members.add(userProfile.getUserId());
-                group.setMembers(members);
-            } else {
-                return;
-            }
-        }
+        Set<String> participants = content.getParticipants();
+        boolean participantAdded = participants.add(userProfile.getUserId());
 
-        contentService.save(content);
+        if (participantAdded) {
+            contentService.save(content);
+        }
     }
 
-    public void leave(String contentId) {
+    public void removeParticipant(String contentId) {
         UserProfile userProfile = userService.getUserProfile();
         Content content = contentService.findById(contentId);
 
-        if (content.getDetail() instanceof Group group) {
-            List<String> members = group.getMembers();
-            if (members.contains(userProfile.getUserId())) {
-                members.remove(userProfile.getUserId());
-                group.setMembers(members);
-            } else {
-                return;
-            }
-        }
+        Set<String> participants = content.getParticipants();
+        boolean participantRemoved = participants.remove(userProfile.getUserId());
 
-        contentService.save(content);
+        if (participantRemoved) {
+            contentService.save(content);
+        }
     }
 
     public void cancel(String contentId) {
 
     }
 
-    public void reverseCancel(String contentId) {
+    public void reactivate(String contentId) {
 
     }
 }

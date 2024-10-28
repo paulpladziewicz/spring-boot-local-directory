@@ -33,13 +33,15 @@ public class Content {
 
     private List<String> tags = new ArrayList<>();
 
-    private List<String> administrators = new ArrayList<>();
+    private List<String> relatedContentIds;
+
+    private Set<String> participants = new HashSet<>();
+
+    private Set<String> administrators = new HashSet<>();
 
     private int heartCount = 0;
 
     private Set<String> heartedUserIds = new HashSet<>();
-
-    private List<String> relatedContentIds;
 
     private String parentContentId;
 
