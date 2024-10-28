@@ -34,80 +34,15 @@ public class NotificationController {
         return "redirect:/#subscribe";
     }
 
-
-
-//    @PostMapping("/article-contact")
-//    public ResponseEntity<String> submitContactForm(@RequestBody @Valid SimpleContactFormSubmission request) {
-//        try {
-//            emailService.sendContactUsEmailAsync(request.getName(), request.getEmail(), "Parks article submission: " + request.getMessage());
-//
-//            return ResponseEntity.ok("Form submitted successfully");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit the form");
-//        }
-//    }
-//
-//    @PostMapping("/taqueria")
-//    public ResponseEntity<String> taqueriaContactForm(@RequestBody @Valid SimpleContactFormSubmission contactFormRequest) {
-//        try {
-//            emailService.generalContactForm("ppladziewicz@gmail.com",
-//                    contactFormRequest.getName(),
-//                    contactFormRequest.getEmail(),
-//                    contactFormRequest.getMessage());
-//
-//            return ResponseEntity.ok("Form submitted successfully");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit the form");
-//        }
-//    }
-//
-//
-//
-//
-//    @PostMapping("/contact/business")
-//    public ResponseEntity<Map<String, Object>> handleContactForm(
-//            @RequestBody SimpleContactFormSubmission contactFormRequest) {
-//
-//        Boolean contactFormSuccess = contentService.handleContactFormSubmission(
-//                contactFormRequest.getSlug(),
-//                contactFormRequest.getName(),
-//                contactFormRequest.getEmail(),
-//                contactFormRequest.getMessage()
-//        );
-//
-//        Map<String, Object> response = new HashMap<>();
-//
-//        if (!contactFormSuccess) {
-//            response.put("success", false);
-//            response.put("message", "An error occurred while trying to send your message. Please try again later.");
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-//        }
-//
-//        response.put("success", true);
-//        response.put("message", "We've passed your message along! We hope you hear back soon.");
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    @PostMapping("/contact/neighbor-services-profile")
-//    public ResponseEntity<String> handleContactForm(@RequestBody @Valid SimpleContactFormSubmission contactFormRequest) {
-//        try {
-//            contentService.handleContactFormSubmission(
-//                    contactFormRequest.getId(),
-//                    contactFormRequest.getName(),
-//                    contactFormRequest.getEmail(),
-//                    contactFormRequest.getMessage()
-//            );
-//
-//            return ResponseEntity.ok("Form submitted successfully");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit the form");
-//        }
-//    }
-
     @PostMapping("/contact")
     public ResponseEntity<String> handleContactForm(SimpleContactFormSubmission submission) {
-        notificationService.handleContactFormSubmission(submission);
-        return ResponseEntity.ok("Success");
+        try {
+            notificationService.handleContactFormSubmission(submission);
+            return ResponseEntity.ok("Success");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+
     }
 
     @GetMapping("/create/announcement")
