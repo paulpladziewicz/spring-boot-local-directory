@@ -82,43 +82,6 @@ public class UserController {
         return "redirect:/login";
     }
 
-    @GetMapping("/my/settings")
-    public String settings(Model model) {
-        model.addAttribute("userProfile", userService.getUserProfile());
-
-        return "settings/profile";
-    }
-
-    @PostMapping("/my/settings")
-    public String updateSettings(@ModelAttribute("userProfile") @Valid UserProfile userProfile, BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("userProfile", userProfile);
-            return "settings/profile";
-        }
-        ServiceResponse<UserProfile> serviceResponse = userService.updateUserProfile(userProfile);
-
-        if (serviceResponse.hasError()) {
-            model.addAttribute("isSuccess", false);
-            model.addAttribute("userProfile", userProfile);
-            return "settings/profile";
-        }
-
-        model.addAttribute("isSuccess", true);
-        model.addAttribute("userProfile", serviceResponse.value());
-
-        return "settings/profile";
-    }
-
-    @GetMapping("/my/settings/subscriptions")
-    public String subscriptionSettings() {
-        return "settings/subscriptions";
-    }
-
-    @GetMapping("/my/settings/billing")
-    public String billingSettings() {
-        return "settings/billing";
-    }
-
     @GetMapping("/forgot-password")
     public String forgotPassword(Model model) {
         model.addAttribute("emailDto", new EmailDto());
