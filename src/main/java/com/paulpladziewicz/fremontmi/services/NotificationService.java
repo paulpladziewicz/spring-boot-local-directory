@@ -1,9 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
-import com.paulpladziewicz.fremontmi.models.Announcement;
-import com.paulpladziewicz.fremontmi.models.EmailGroupRequest;
-import com.paulpladziewicz.fremontmi.models.ServiceResponse;
-import com.paulpladziewicz.fremontmi.models.Subscriber;
+import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.SubscriberRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +39,27 @@ public class NotificationService {
 
     }
 
-    public boolean emailParticipants(EmailGroupRequest email) {
+    public void unsubscribe(String email) {}
+
+    public void handleContactFormSubmission(SimpleContactFormSubmission submission) {
+        String recipient = "ppladziewicz@gmail.com";
+        if (submission.getContentId() != null) {
+            Content content = contentService.findById(submission.getContentId());
+            String contentEmail = content.getDetail().getEmail();
+            if (contentEmail != null) {
+                recipient = contentEmail;
+            }
+        }
+
+        emailService.simpleContactFormSubmission(recipient, submission);
+    }
+
+
+    public boolean emailParticipants(EmailRequest email) {
         return true;
     }
 
-    public boolean emailAdministrators(EmailGroupRequest email) {
+    public boolean emailAdministrators(EmailRequest email) {
         return true;
     }
 

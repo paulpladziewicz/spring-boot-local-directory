@@ -147,8 +147,17 @@ public class GroupController {
 
     @PostMapping("/email/group")
     @ResponseBody
-    public ResponseEntity<String> handleEmailGroup(@RequestBody EmailGroupRequest emailGroupRequest) {
-        boolean response = notificationService.emailParticipants(emailGroupRequest);
+    public ResponseEntity<String> emailGroup(@RequestBody EmailRequest emailRequest) {
+        Content content = contentService.findById(emailRequest.getContentId());
+        String userId = userService.getUserId();
+
+        boolean response;
+        if (content.getAdministrators().contains(userId)) {
+            response = notificationService.emailParticipants(emailRequest);
+
+        } else {
+            response = notificationService.emailAdministrators(emailRequest);
+        }
 
         if (response) {
             return ResponseEntity.ok("Email sent successfully!");

@@ -1,13 +1,11 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.models.SimpleContactFormSubmission;
 import com.stripe.model.Dispute;
 import jakarta.mail.Address;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
@@ -99,25 +97,25 @@ public class EmailService {
         }
     }
 
-    public void sendContactUsEmailAsync(String name, String email, String contactMessage) {
+    public void simpleContactFormSubmission(String to, SimpleContactFormSubmission submission) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessage msg = mailSender.createMimeMessage();
 
             Context context = new Context();
-            context.setVariable("name", name);
-            context.setVariable("email", email);
-            context.setVariable("message", contactMessage);
+            context.setVariable("name", submission.getName());
+            context.setVariable("email", submission.getEmail());
+            context.setVariable("message", submission.getMessage());
 
             String html = templateEngine.process("contact-us-email", context);
 
-            message.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
-            message.setRecipients(MimeMessage.RecipientType.TO, "ppladziewicz@gmail.com");
-            message.setSubject("Contact Form Submission");
-            message.setContent(html, "text/html; charset=utf-8");
+            msg.setFrom(new InternetAddress("no-reply@fremontmi.com", companyName));
+            msg.setRecipients(MimeMessage.RecipientType.TO, to);
+            msg.setSubject("Contact Form Submission");
+            msg.setContent(html, "text/html; charset=utf-8");
 
-            mailSender.send(message);
+            mailSender.send(msg);
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
-            logger.error("Failed to send contact us email from {} {} with a message of {}.", name, email, contactMessage, e);
+            logger.error("Failed to send contact us email from {} {} with a message of {}.", submission.getName(), submission.getEmail(), submission.getMessage(), e);
         }
     }
 

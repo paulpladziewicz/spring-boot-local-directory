@@ -1,21 +1,17 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.Announcement;
-import com.paulpladziewicz.fremontmi.models.ContactFormRequest;
-import com.paulpladziewicz.fremontmi.models.EmailGroupRequest;
-import com.paulpladziewicz.fremontmi.models.Group;
-import com.paulpladziewicz.fremontmi.services.EmailService;
+import com.paulpladziewicz.fremontmi.models.SimpleContactFormSubmission;
 import com.paulpladziewicz.fremontmi.services.NotificationService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 public class NotificationController {
@@ -26,8 +22,22 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
+    @PostMapping("/subscribe")
+    public String handleSubscribeForm(
+            @RequestParam("email") @Email String email,
+            RedirectAttributes redirectAttributes) {
+
+        notificationService.subscribe(email);
+
+        redirectAttributes.addFlashAttribute("subscribedMessage", "Thank you for subscribing to updates.");
+
+        return "redirect:/#subscribe";
+    }
+
+
+
 //    @PostMapping("/article-contact")
-//    public ResponseEntity<String> submitContactForm(@RequestBody @Valid ContactFormRequest request) {
+//    public ResponseEntity<String> submitContactForm(@RequestBody @Valid SimpleContactFormSubmission request) {
 //        try {
 //            emailService.sendContactUsEmailAsync(request.getName(), request.getEmail(), "Parks article submission: " + request.getMessage());
 //
@@ -38,7 +48,7 @@ public class NotificationController {
 //    }
 //
 //    @PostMapping("/taqueria")
-//    public ResponseEntity<String> taqueriaContactForm(@RequestBody @Valid ContactFormRequest contactFormRequest) {
+//    public ResponseEntity<String> taqueriaContactForm(@RequestBody @Valid SimpleContactFormSubmission contactFormRequest) {
 //        try {
 //            emailService.generalContactForm("ppladziewicz@gmail.com",
 //                    contactFormRequest.getName(),
@@ -56,7 +66,7 @@ public class NotificationController {
 //
 //    @PostMapping("/contact/business")
 //    public ResponseEntity<Map<String, Object>> handleContactForm(
-//            @RequestBody ContactFormRequest contactFormRequest) {
+//            @RequestBody SimpleContactFormSubmission contactFormRequest) {
 //
 //        Boolean contactFormSuccess = contentService.handleContactFormSubmission(
 //                contactFormRequest.getSlug(),
@@ -79,7 +89,7 @@ public class NotificationController {
 //    }
 //
 //    @PostMapping("/contact/neighbor-services-profile")
-//    public ResponseEntity<String> handleContactForm(@RequestBody @Valid ContactFormRequest contactFormRequest) {
+//    public ResponseEntity<String> handleContactForm(@RequestBody @Valid SimpleContactFormSubmission contactFormRequest) {
 //        try {
 //            contentService.handleContactFormSubmission(
 //                    contactFormRequest.getId(),
@@ -93,6 +103,12 @@ public class NotificationController {
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit the form");
 //        }
 //    }
+
+    @PostMapping("/contact")
+    public ResponseEntity<String> handleContactForm(SimpleContactFormSubmission submission) {
+        notificationService.handleContactFormSubmission(submission);
+        return ResponseEntity.ok("Success");
+    }
 
     @GetMapping("/create/announcement")
     public String getGroupAnnouncementForm(@NotNull @PathVariable String groupId, Model model) {

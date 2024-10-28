@@ -80,19 +80,19 @@ public class BillingController {
     }
 
     @PostMapping("/cancel-subscription")
-    public ResponseEntity<CustomResponse> cancelSubscription(@RequestBody CancelSubscriptionRequest request) {
+    public ResponseEntity<String> cancelSubscription(@RequestBody CancelSubscriptionRequest request) {
         String subscriptionId = request.subscriptionId;
         billingService.cancelSubscriptionAtPeriodEnd(subscriptionId);
 
-        return ResponseEntity.ok(new CustomResponse(true, "Subscription cancellation scheduled at period end."));
+        return ResponseEntity.ok("Subscription cancellation scheduled at period end.");
     }
 
     @PostMapping("/resume-subscription")
-    public ResponseEntity<CustomResponse> resumeSubscription(@RequestBody CancelSubscriptionRequest request) {
+    public ResponseEntity<String> resumeSubscription(@RequestBody CancelSubscriptionRequest request) {
         String subscriptionId = request.subscriptionId;
         billingService.resumeSubscription(subscriptionId);
 
-        return ResponseEntity.ok(new CustomResponse(true, "Subscription resumed successfully."));
+        return ResponseEntity.ok("Subscription resumed successfully.");
     }
 
     @PostMapping("/webhook")

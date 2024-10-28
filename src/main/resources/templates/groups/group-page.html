@@ -116,16 +116,13 @@
 </main>
 
 <script th:inline="javascript">
-    // Function to open the email form
     function openEmailForm(emailType) {
         document.getElementById('emailGroupFormTitle').textContent = emailType === 'administrators' ? 'Email Administrators' : 'Email Members';
         document.getElementById('emailType').value = emailType;
 
-        // Display the email form container
         const emailFormContainer = document.getElementById('emailGroupFormContainer');
         emailFormContainer.style.display = 'block';
 
-        // Hide the email links when the form is open
         const emailAdministratorsLink = document.getElementById('emailAdministratorsLink');
         const emailMembersLink = document.getElementById('emailMembersLink');
 
@@ -196,19 +193,15 @@
             });
 
             if (response.ok) {
-                // Close the email form
                 closeEmailForm();
 
-                // Display a success message
                 const successMessage = document.createElement('p');
                 successMessage.className = 'text-primary email-response-message mt-2';
                 successMessage.textContent = 'Email(s) successfully sent.';
                 document.getElementById('emailGroupFormContainer').parentNode.appendChild(successMessage);
 
-                // Hide the email links after successful submission
                 hideEmailLinks();
             } else {
-                // Display an error message
                 const errorMessageText = response.status === 400
                     ? 'You have reached the maximum number of emails you can send in one month, which is currently 5. Please contact us if you need to send more.'
                     : 'Failed to send email. Please try again.';
@@ -226,7 +219,6 @@
             errorMessage.textContent = 'An error occurred while sending the email. Please try again later.';
             document.getElementById('emailGroupFormContainer').parentNode.appendChild(errorMessage);
         } finally {
-            // Revert the submit button back to its original state
             submitButton.disabled = false;
             submitButton.innerHTML = 'Send Email';
         }
