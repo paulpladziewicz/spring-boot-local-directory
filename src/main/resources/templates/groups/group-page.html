@@ -35,14 +35,9 @@
                     <section sec:authorize="!isAuthenticated()">
                         <p><a class="link-primary" href="/register">Register</a> or <a href="/login">Login</a> to join.</p>
                     </section>
-                    <form sec:authorize="isAuthenticated()" th:if="${!isMember}" th:action="@{/join/group}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        <button type="submit" class="btn btn-link p-0">Join Group</button>
-                    </form>
-                    <form sec:authorize="isAuthenticated()" th:if="${isMember && !isAdmin}"
-                          th:action="@{/leave/group}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                        <button type="submit" class="btn btn-link p-0">Leave Group</button>
-                    </form>
+                    <div sec:authorize="isAuthenticated()" th:if="${!isAdmin}" x-data="participation()">
+                        <button class="btn btn-link p-0" @click="toggleParticipation()" th:text="${isMember ? 'Leave Group' : 'Join Group'}"  x-text="isParticipant ? 'Leave Group' : 'Join Group'"></button>
+                    </div>
                     <p class="fs-lg my-3" th:utext="${group.detail.description}">Group description here...</p>
                 </section>
                 <section class="mb-4">
@@ -243,6 +238,41 @@
 <footer th:replace="~{partials/footer}"></footer>
 <script th:replace="~{partials/theme-js}"></script>
 
+<script th:inline="javascript">
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+    function participation() {
+        return {
+            isParticipant: /*[[${isMember}]]*/ false,
+            contentId: /*[[${group.id}]]*/ undefined,
+            loading: false,
+            async toggleParticipation() {
+                if (this.loading) return;
+
+                this.loading = true;
+                this.isParticipant = !this.isParticipant;
+                const endpoint = this.isParticipant ? '/join/group' : '/leave/group';
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded', [csrfHeader]: csrfToken},
+                        body: new URLSearchParams({contentId: this.contentId})
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Request failed');
+                    }
+                } catch (error) {
+                    console.error('Failed to update participation:', error);
+                    this.isParticipant = !this.isParticipant;
+                } finally {
+                    this.loading = false;
+                }
+            }
+        };
+    }
+</script>
 
 <script th:inline="javascript">
     window.onload = function () {

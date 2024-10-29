@@ -1,9 +1,14 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{partials/head :: head('Groups in Fremont, MI')}"></head>
+<head>
+    <title>Groups in Fremont, MI</title>
+    <!-- TODO add metadata-->
+
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+</head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
-<main class="bg-secondary pt-4 pb-5">
+<main class="bg-secondary pt-4 pb-5" x-data="loadMore()">
 
     <div class="container">
         <div class="d-none d-sm-flex justify-content-between align-items-center mb-4">
@@ -21,35 +26,46 @@
             <a href="/my/groups" class="btn btn-link fw-semibold p-0">My Groups</a>
         </div>
 
-        <div class="row">
+        <div class="row" x-ref="groupContainer">
             <div th:if="${#lists.isEmpty(groups)}" class="my-4">
                 <div>
                     There are no groups available at the moment.
                 </div>
             </div>
-            <div th:each="group : ${groups}" class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="h3 mb-1" th:text="${group.detail.title}">Card title</h4>
-                        <p class="text-muted fw-semibold mb-2">
-                            <span th:text="${group.participants.size()}"></span>
-                            <span th:text="${group.participants.size() == 1 ? 'Member' : 'Members'}"></span>
-                        </p>
-                        <p class="mb-3" th:text="${#strings.length(group.detail.description) > 120 ? #strings.substring(group.detail.description, 0, 120) + '...' : group.detail.description}"></p>
-
-                        <a th:href="${group.pathname}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
-                    </div>
-                </div>
-            </div>
+            <th:block th:insert="~{groups/partials/list-groups :: listGroups}"></th:block>
         </div>
 
         <div th:if="${groups.hasNext()}" class="text-center mt-4">
-            <button class="btn btn-primary" id="load-more-btn" data-page="${groups.number + 1}">Load More</button>
+            <button class="btn btn-primary" id="load-more-btn" @click="loadMore()">Load More</button>
         </div>
 
     </div>
 </main>
+
 <footer th:replace="~{partials/footer}"></footer>
+<script>
+    function loadMore() {
+        return {
+            currentPage: 0,
+            async loadMore() {
+                console.log(this.currentPage);
+                const response = await fetch(`/groups/page/${this.currentPage}`);
+                if (response.ok) {
+                    const newContent = await response.text();
+                    this.$refs.groupContainer.insertAdjacentHTML('beforeend', newContent);
+                    this.currentPage += 1;
+
+                    if (!newContent.includes('hasNext')) {
+                        document.getElementById('load-more-btn').style.display = 'none';
+                    }
+                } else {
+                    console.error('Failed to load more groups');
+                }
+            }
+        };
+    }
+</script>
+
 <script th:replace="~{partials/theme-js}"></script>
 </body>
 </html>

@@ -67,6 +67,14 @@ public class GroupController {
         return "groups/groups";
     }
 
+    @GetMapping("/groups/page/{currentPage}")
+    public String displayNextGroups(@PathVariable int currentPage, Model model) {
+        Page<Content> groups = contentService.findByType(ContentType.GROUP, currentPage + 1);
+
+        model.addAttribute("groups", groups);
+        return "groups/partials/list-groups";
+    }
+
     @GetMapping("/group/{slug}")
     public String displayGroup(@PathVariable String slug, Model model) {
         Content group = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug, ContentType.GROUP);
@@ -132,17 +140,16 @@ public class GroupController {
     }
 
     @PostMapping("/join/group")
-    public String joinGroup(@RequestParam("contentId") String contentId) {
+    @ResponseBody
+    public ResponseEntity<String> joinGroup(@RequestParam("contentId") String contentId) {
         interactionService.addParticipant(contentId);
-        // start with json
-        return "redirect:/groups";
+        return ResponseEntity.ok("Success");
     }
 
     @PostMapping("/leave/group")
-    public String leaveGroup(@RequestParam("contentId") String contentId) {
+    public ResponseEntity<String> leaveGroup(@RequestParam("contentId") String contentId) {
         interactionService.removeParticipant(contentId);
-        // start with json
-        return "redirect:/groups";
+        return ResponseEntity.ok("Success");
     }
 
     @PostMapping("/email/group")
