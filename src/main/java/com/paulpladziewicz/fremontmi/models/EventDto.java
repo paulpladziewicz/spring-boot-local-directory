@@ -13,6 +13,8 @@ import java.util.List;
 public class EventDto implements ContentDto {
     private String contentId;
 
+    private String status;
+
     private String pathname;
 
     private List<String> tags = new ArrayList<>();

@@ -23,18 +23,18 @@ public class Business implements ContentDetail {
     private String website;
 
     @Override
-    public void update(Content parentContent, ContentDto newDetail) {
-        if (!(newDetail instanceof Business newBusinessDetail)) {
+    public void update(Content content, ContentDto contentDto) {
+        if (!(contentDto instanceof BusinessDto business)) {
             throw new IllegalArgumentException("Invalid content detail type for Business.");
         }
 
-        this.setTitle(newBusinessDetail.getTitle());
-        this.setHeadline(newBusinessDetail.getHeadline());
-        this.setDescription(newBusinessDetail.getDescription());
-        this.setAddress(newBusinessDetail.getAddress());
-        this.setPhoneNumber(newBusinessDetail.getPhoneNumber());
-        this.setEmail(newBusinessDetail.getEmail());
-        this.setWebsite(newBusinessDetail.getWebsite());
-        this.setDisplayEmail(newBusinessDetail.isDisplayEmail());
+        this.setTitle(business.getTitle());
+        this.setHeadline(business.getHeadline());
+        this.setDescription(business.getDescription());
+        this.setAddress(business.getAddress());
+        this.setPhoneNumber(business.getPhoneNumber());
+        this.setEmail(business.getEmail());
+        this.setWebsite(business.getWebsite());
+        this.setDisplayEmail(business.isDisplayEmail());
     }
 }

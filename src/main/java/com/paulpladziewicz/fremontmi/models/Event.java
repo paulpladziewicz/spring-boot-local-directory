@@ -35,16 +35,16 @@ public class Event implements ContentDetail {
     private int moreDayEventsCount;
 
     @Override
-    public void update(Content parentContent, ContentDto newDetail) {
-        if (!(newDetail instanceof Event newEventDetail)) {
+    public void update(Content content, ContentDto contentDto) {
+        if (!(contentDto instanceof EventDto event)) {
             throw new IllegalArgumentException("Invalid content detail type for Business.");
         }
 
-        this.setTitle(newEventDetail.getTitle());
-        this.setDescription(newEventDetail.getDescription());
-        this.setLocationName(newEventDetail.getLocationName());
-        this.setAddress(newEventDetail.getAddress());
-        this.setDays(newEventDetail.getDays());
+        this.setTitle(event.getTitle());
+        this.setDescription(event.getDescription());
+        this.setLocationName(event.getLocationName());
+        this.setAddress(event.getAddress());
+        this.setDays(event.getDays());
 
         populateFormattedTimes(this);
     }

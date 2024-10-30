@@ -27,6 +27,14 @@ public class NeighborServicesProfile implements ContentDetail {
     private String profileImageFileName;
 
     @Override
-    public void update(Content parentContent, ContentDto newDetail) {
+    public void update(Content content, ContentDto contentDto) {
+        if (!(contentDto instanceof NeighborServicesProfileDto profile)) {
+            throw new IllegalArgumentException("Invalid content detail type for Business.");
+        }
+
+        this.title = profile.getTitle();
+        this.description = profile.getDescription();
+        this.email = profile.getEmail();
+        this.neighborServices = profile.getNeighborServices();
     }
 }

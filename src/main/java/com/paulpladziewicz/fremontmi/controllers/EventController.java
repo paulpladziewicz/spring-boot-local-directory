@@ -62,7 +62,7 @@ public class EventController {
             return "events/create-event";
         }
 
-        Content savedEvent = contentService.create(ContentType.GROUP, eventDto);
+        Content savedEvent = contentService.create(ContentType.EVENT, eventDto);
 
         return "redirect:" + savedEvent.getPathname();
     }
@@ -77,26 +77,35 @@ public class EventController {
             events = contentService.findByType(ContentType.EVENT, page);
         }
 
-        // TODO correct logic for displaying events in the future or are not expired
-
         model.addAttribute("events", events);
+        model.addAttribute("eventsList", events.getContent());
 
         return "events/events";
     }
 
-    @GetMapping("/events/{slug}")
+
+    @GetMapping("/my/events")
+    public String displayMyEvents(Model model) {
+        List<Content> events = contentService.findByUserAndType(ContentType.EVENT);
+
+        model.addAttribute("events", events);
+
+        return "events/my-events";
+    }
+
+    @GetMapping("/event/{slug}")
     public String displayEvent(@PathVariable String slug, Model model) {
         Content content = contentService.findByPathname('/' + ContentType.EVENT.getContentType() + '/' + slug, ContentType.EVENT);
-        EventDto event = createDto(content);
+        Event detail = (Event) content.getDetail();
 
 
-        event.setDescription(htmlSanitizationService.sanitizeHtml(event.getDescription().replace("\n", "<br/>")));
+        detail.setDescription(htmlSanitizationService.sanitizeHtml(detail.getDescription().replace("\n", "<br/>")));
 
         if ("canceled".equals(content.getStatus())) {
             model.addAttribute("canceled", "This event has been canceled.");
         }
 
-        model.addAttribute("event", event);
+        model.addAttribute("event", content);
 
         try {
             String userId = userService.getUserId();
@@ -108,18 +117,9 @@ public class EventController {
         return "events/event-page";
     }
 
-    @GetMapping("/my/events")
-    public String displayMyEvents(Model model) {
-        List<Content> events = contentService.findByUserAndType(ContentType.EVENT);
-
-        model.addAttribute("events", events);
-
-        return "events/my-events";
-    }
-
     @GetMapping("/edit/event/{slug}")
-    public String displayEditForm(@RequestParam(value = "contentId") String contentId, Model model) {
-        Content content = contentService.findById(contentId);
+    public String displayEditForm(@PathVariable String slug, Model model) {
+        Content content = contentService.findByPathname('/' + ContentType.EVENT.getContentType() + '/' + slug, ContentType.EVENT);
         EventDto event = createDto(content);
 
         String tagsAsString = String.join(",", event.getTags());
@@ -131,13 +131,13 @@ public class EventController {
     }
 
     @PostMapping("/edit/event")
-    public String updateEvent(@NotNull @RequestParam("contentId") String contentId, @Valid @ModelAttribute("event") EventDto eventDto, BindingResult result, Model model) {
+    public String updateEvent(@ModelAttribute("event") @Valid EventDto eventDto, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("tagsAsString", String.join(",", eventDto.getTags()));
             return "events/edit-event";
         }
 
-        Content savedEvent = contentService.update(contentId, eventDto);
+        Content savedEvent = contentService.update(eventDto.getContentId(), eventDto);
 
         return "redirect:" + savedEvent.getPathname();
     }
@@ -186,9 +186,14 @@ public class EventController {
 
         EventDto dto = new EventDto();
         dto.setContentId(content.getId());
+        dto.setStatus(content.getStatus());
         dto.setPathname(content.getPathname());
+        dto.setTags(content.getTags());
         dto.setTitle(eventDetail.getTitle());
         dto.setDescription(eventDetail.getDescription());
+        dto.setLocationName(eventDetail.getLocationName());
+        dto.setAddress(eventDetail.getAddress());
+        dto.setDays(eventDetail.getDays());
 
         return dto;
     }

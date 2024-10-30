@@ -2,8 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
-    <title>[[${event.name}]] - Event in Fremont, MI</title>
-    <meta name="description" th:content="${#strings.length(event.description) > 160 ? #strings.substring(event.description, 0, 157) + '...' : event.description}" />
+    <title>[[${event.detail.title}]] - Event in Fremont, MI</title>
+    <meta name="description" th:content="${#strings.length(event.detail.description) > 160 ? #strings.substring(event.detail.description, 0, 157) + '...' : event.detail.description}" />
     <th:block th:if="${event.tags != null and #lists.size(event.tags) > 0}">
         <meta name="keywords" th:content="${#strings.arrayJoin(event.tags, ', ')}" />
     </th:block>
@@ -20,46 +20,40 @@
                 <nav aria-label="breadcrumb">
                     <ol class="pt-lg-3 pb-lg-4 pb-2 breadcrumb">
                         <li class="breadcrumb-item"><a href="/events">Events</a></li>
-                        <li class="breadcrumb-item active" aria-current="page" th:text="${event.name}"></li>
+                        <li class="breadcrumb-item active" aria-current="page" th:text="${event.detail.title}"></li>
                     </ol>
                 </nav>
             </div>
 
             <div class="col-md-10 col-lg-8 mx-auto">
-                <section th:if="${false}" class="alert alert-secondary" role="alert">
-                    <h4 class="mb-1">You're an administrator of this event.</h4>
-                    <p class="mb-1">Additional options to update the event are available.</p>
-                    <p class="mb-1">Please <a href="/contact-us" class="alert-link">contact us</a> if you'd like to add an
-                        administrator or change who will be administering this event.</p>
-                </section>
 
-                <section th:if="${event != null}">
+                <section>
 
                     <p class="fw-semibold text-danger" th:if="${canceled}">This event has been canceled.</p>
 
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h1 class="display-4 mb-0" th:text="${event.name}">Event Name</h1>
+                        <h1 class="display-4 mb-0" th:text="${event.detail.title}">Event Name</h1>
                     </div>
 
 
-                    <p th:utext="${event.description}">Event description here...</p>
+                    <p th:utext="${event.detail.description}">Event description here...</p>
 
-                    <div th:if="${event.locationName != null}">
-                        <p><strong>Location:</strong> <span th:text="${event.locationName}">Location Name</span></p>
+                    <div th:if="${event.detail.locationName != null}">
+                        <p><strong>Location:</strong> <span th:text="${event.detail.locationName}">Location Name</span></p>
                     </div>
 
-                    <div th:if="${event.address != null}">
-                        <p><strong>Address:</strong> <span th:text="${event.address}">Event Address</span></p>
+                    <div th:if="${event.detail.address != null}">
+                        <p><strong>Address:</strong> <span th:text="${event.detail.address}">Event Address</span></p>
                     </div>
 
                     <h3 class="mt-4">Event Dates and Times:</h3>
-                    <div th:if="${event.days != null && event.formattedTimes != null}">
-                        <div th:each="dayEvent, iterStat : ${event.days}">
+                    <div th:if="${event.detail.days != null && event.detail.formattedTimes != null}">
+                        <div th:each="dayEvent, iterStat : ${event.detail.days}">
                             <p>
-                                <span th:text="${event.formattedTimes[iterStat.index * 2]}"></span>
-                                <span th:if="${event.formattedTimes[iterStat.index * 2 + 1] != 'No End Time'}">
+                                <span th:text="${event.detail.formattedTimes[iterStat.index * 2]}"></span>
+                                <span th:if="${event.detail.formattedTimes[iterStat.index * 2 + 1] != 'No End Time'}">
                             <span th:text="' - '"></span>
-                            <span th:text="${event.formattedTimes[iterStat.index * 2 + 1]}"></span>
+                            <span th:text="${event.detail.formattedTimes[iterStat.index * 2 + 1]}"></span>
                         </span>
                             </p>
                         </div>
@@ -67,7 +61,7 @@
 
                 </section>
 
-                <a th:if="${isAdmin}" th:href="'/edit/event/' + ${event.slug}" class="btn btn-outline-primary">Edit Event</a>
+                <a th:if="${isAdmin}" th:href="'/edit' + ${event.pathname}" class="btn btn-outline-primary">Edit Event</a>
 
 
             </div>

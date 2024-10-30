@@ -59,6 +59,7 @@ public class Content {
     private Long version;
 
     public void setDetail(ContentType type) {
+        System.out.println(type);
         switch (type) {
             case GROUP:
                 this.detail = new Group();
