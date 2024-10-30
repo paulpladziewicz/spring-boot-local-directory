@@ -16,10 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.Collection;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -189,7 +186,7 @@ public class UserService {
         return ServiceResponse.error(errorCode);
     }
 
-    public List<UserProfile> getUserProfiles(List<String> members) {
+    public List<UserProfile> getUserProfiles(Set<String> members) {
         return userProfileRepository.findAllById(members);
     }
 

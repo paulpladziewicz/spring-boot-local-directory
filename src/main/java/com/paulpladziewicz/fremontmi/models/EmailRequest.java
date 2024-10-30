@@ -1,12 +1,12 @@
 package com.paulpladziewicz.fremontmi.models;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+
 import lombok.Data;
 
 @Data
 public class EmailRequest {
-    @NotNull
+    @NotBlank
     private String contentId;
 
     @NotBlank

@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.exceptions.ValidationException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.SubscriberRepository;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
@@ -58,13 +60,52 @@ public class NotificationService {
         emailService.simpleContactFormSubmission(recipient, submission);
     }
 
+    public boolean email(EmailRequest emailRequest) {
+        UserProfile senderUserProfile = userService.getUserProfile();
 
-    public boolean emailParticipants(EmailRequest email) {
-        return true;
+        if (senderUserProfile.getEmailSendCount() >= 5) {
+            throw new ValidationException("User has reached the email limit.");
+        }
+
+        senderUserProfile.setEmailSendCount(senderUserProfile.getEmailSendCount() + 1);
+
+        userService.saveUserProfile(senderUserProfile);
+
+        Content content = contentService.findById(emailRequest.getContentId());
+        String userId = senderUserProfile.getUserId();
+
+        boolean response;
+        if (content.getAdministrators().contains(userId)) {
+            response = emailParticipants(content, senderUserProfile, emailRequest);
+
+        } else {
+            response = emailAdministrators(content, senderUserProfile, emailRequest);
+        }
+
+        return response;
     }
 
-    public boolean emailAdministrators(EmailRequest email) {
-        return true;
+    public boolean emailParticipants(Content content, UserProfile userProfile, EmailRequest emailRequest) {
+        List<UserProfile> memberUserProfiles = userService.getUserProfiles(content.getParticipants());
+
+        List<String> emailAddresses = memberUserProfiles.stream()
+                .map(UserProfile::getEmail)
+                .filter(email -> email != null && !email.isEmpty())
+                .collect(Collectors.toList());
+
+        return emailService.sendGroupEmail(emailAddresses, userProfile.getEmail(), userProfile.getFirstName() + ' ' + userProfile.getLastName(), content.getDetail().getTitle(), emailRequest.getSubject(), emailRequest.getMessage());
+    }
+
+    public boolean emailAdministrators(Content content, UserProfile userProfile, EmailRequest emailRequest) {
+        List<UserProfile> memberUserProfiles = userService.getUserProfiles(content.getAdministrators());
+
+        List<String> emailAddresses = memberUserProfiles.stream()
+                .map(UserProfile::getEmail)
+                .filter(email -> email != null && !email.isEmpty())
+                .collect(Collectors.toList());
+
+        return emailService.sendGroupEmail(emailAddresses, userProfile.getEmail(), userProfile.getFirstName() + ' ' + userProfile.getLastName(), content.getDetail().getTitle(), emailRequest.getSubject(), emailRequest.getMessage());
+
     }
 
     public void createAnnouncement(AnnouncementDto announcementDto) {

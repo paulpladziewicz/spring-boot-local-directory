@@ -263,10 +263,8 @@
         const form = document.getElementById('emailGroupForm');
         const formData = new FormData(form);
 
-        const emailType = formData.get('emailType');
-
-        // Create the JSON payload
         const payload = {
+            contentId: /*[[${group.id}]]*/ undefined,
             subject: formData.get('subject'),
             message: formData.get('message')
         };
