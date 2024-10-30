@@ -48,7 +48,6 @@
         return {
             currentPage: 0,
             async loadMore() {
-                console.log(this.currentPage);
                 const response = await fetch(`/groups/page/${this.currentPage}`);
                 if (response.ok) {
                     const newContent = await response.text();

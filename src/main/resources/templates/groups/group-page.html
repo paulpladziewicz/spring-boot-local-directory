@@ -40,46 +40,150 @@
                     </div>
                     <p class="fs-lg my-3" th:utext="${group.detail.description}">Group description here...</p>
                 </section>
-                <section class="mb-4">
-                    <div class="d-flex align-items-center mb-2">
-                        <h2 class="h1 mb-0 me-2">Announcements</h2>
-                        <button th:if="${isAdmin}" class="btn btn-outline-primary btn-sm py-1 px-2"
-                                th:attr="hx-get='/announcements/group/form/' + ${group.id}"
-                                hx-target="#add-announcement-form"
-                                hx-swap="innerHTML"
-                        >
-                            Add
-                        </button>
-                    </div>
-                    <div id="add-announcement-form"></div>
-                    <ul id="announcementList" class="list-unstyled">
-                        <li th:if="${group.detail.announcements.isEmpty()}">
-                            <p class="my-3">
-                                There are no announcements at this time.
-                            </p>
-                        </li>
-                        <li class="my-4" th:each="announcement : ${group.detail.announcements}"
-                            th:id="'announcement-' + ${announcement.id}">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-1" th:text="${announcement.title}">Announcement Title</h5>
-                                    <p class="mb-1" th:text="${announcement.content}">Announcement Content</p>
-                                    <small class="text-muted" th:text="${announcement.getTimeAgo()}"></small>
+
+
+
+                <section class="mb-4" x-data="announcementsComponent()">
+                    <h2 class="h1 m-0">Announcements</h2>
+                    <button x-show="isAdmin && !showForm" @click="showForm = true" class="btn btn-link p-0" x-cloak>Add Announcement</button>
+
+                    <form x-show="showForm" @submit.prevent="add" class="my-3" x-cloak>
+                        <h4 class="mb-1">Add Announcement</h4>
+                        <div class="form-group mb-3">
+                            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="title">Announcement Title:</label>
+                            <input type="text" id="title" class="form-control" x-model="newAnnouncement.title" placeholder="Enter title" required/>
+                            <p class="mt-1 text-danger"></p>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="msg">Message:</label>
+                            <textarea id="msg" class="form-control" x-model="newAnnouncement.message" placeholder="Enter message" required></textarea>
+                            <p class="mt-1 text-danger"></p>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                        <button type="button" @click="showForm = false" class="btn btn-secondary">Cancel</button>
+                    </form>
+                    <ul class="list-unstyled">
+                        <template x-if="announcements.length === 0">
+                            <li>
+                                <p class="my-3">There are no announcements at this time.</p>
+                            </li>
+                        </template>
+
+                        <template x-for="announcement in announcements" :key="announcement.id">
+                            <li class="my-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1" x-text="announcement.title">Announcement Title</h5>
+                                        <p class="mb-1" x-text="announcement.content">Announcement Content</p>
+                                        <small class="text-muted" x-text="timeAgo(announcement.createdAt)">Time Ago</small>
+                                    </div>
+                                    <button x-show="isAdmin" @click="remove(announcement.id)" class="btn btn-danger btn-sm ms-4">
+                                        <i class="ai-trash"></i>
+                                    </button>
                                 </div>
-                                <div th:if="${isAdmin}">
-                                    <form onsubmit="disableSubmitButtonWhileSubmitting(this)" th:attr="hx-post='/delete/group/announcement', hx-swap='outerHTML', hx-target='#announcement-' + ${announcement.id}">
-                                        <input type="hidden" th:name="${_csrf.parameterName}"
-                                               th:value="${_csrf.token}"/>
-                                        <input type="hidden" name="groupId" th:value="${group.id}"/>
-                                        <input type="hidden" name="announcementId" th:value="${announcement.id}"/>
-                                        <button type="submit" class="btn btn-danger btn-sm ms-4"><i class="ai-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </li>
+                            </li>
+                        </template>
                     </ul>
                 </section>
+                <script th:inline="javascript">
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+
+                    function announcementsComponent() {
+                        return {
+                            announcements: /*[[${group.detail.announcements}]]*/ [],
+                            nextAnnouncementId: 0,
+                            isAdmin: /*[[${isAdmin}]]*/ false,
+                            contentId: /*[[${group.id}]]*/ undefined,
+                            showForm: false,
+                            newAnnouncement: {
+                                title: '',
+                                message: ''
+                            },
+                            currentTime: new Date(),
+
+                            timeAgo(createdAt) {
+                                const now = this.currentTime;
+                                const createdTime = new Date(createdAt);
+                                const seconds = Math.floor((now - createdTime) / 1000);
+
+                                if (seconds < 60) return `${seconds} seconds ago`;
+
+                                const minutes = Math.floor(seconds / 60);
+                                if (minutes < 60) return `${minutes} minutes ago`;
+
+                                const hours = Math.floor(minutes / 60);
+                                if (hours < 24) return `${hours} hours ago`;
+
+                                const days = Math.floor(hours / 24);
+                                return `${days} days ago`;
+                            },
+
+                            init() {
+                                if (this.announcements.length > 0) {
+                                    this.nextAnnouncementId = this.announcements[0].id + 1;
+                                }
+
+                                setInterval(() => {
+                                    this.currentTime = new Date();
+                                }, 1000);
+                            },
+
+                            async add() {
+                                const formData = { id: this.nextAnnouncementId, contentId: this.contentId, ...this.newAnnouncement, createdAt: this.currentTime };
+                                this.announcements.unshift(formData);
+                                this.nextAnnouncementId += 1;
+                                this.showForm = false;
+
+                                try {
+                                    const response = await fetch('/create/announcement', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            [csrfHeader]: csrfToken
+                                        },
+                                        body: JSON.stringify({contentId: this.contentId, ...this.newAnnouncement})
+                                    });
+
+                                    if (response.ok) {
+                                        this.showForm = false;
+                                        this.newAnnouncement = { title: '', message: '' };
+                                    } else {
+                                        console.error('Failed to add announcement');
+                                    }
+                                } catch (error) {
+                                    this.announcements.shift();
+                                    console.error('Error adding announcement:', error);
+                                }
+                            },
+
+                            async remove(announcementId) {
+
+                                this.announcements = this.announcements.filter(a => a.id !== announcementId);
+                                try {
+                                    const response = await fetch(`/delete/announcement`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            [csrfHeader]: csrfToken
+                                        },
+                                        body: JSON.stringify({ contentId: this.contentId, id: announcementId })
+                                    });
+
+                                    if (response.ok) {
+                                    } else {
+                                        console.error('Failed to delete announcement');
+                                    }
+                                } catch (error) {
+                                    console.error('Error deleting announcement:', error);
+                                }
+                            }
+                        };
+                    }
+                </script>
+
+
+
                 <div class="d-flex">
                     <div>
                         <a th:if="${isAdmin}" th:href="'/edit' + ${group.pathname}" class="btn btn-outline-primary me-2">Edit Group</a>
@@ -239,8 +343,8 @@
 <script th:replace="~{partials/theme-js}"></script>
 
 <script th:inline="javascript">
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+    // const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    // const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
     function participation() {
         return {
             isParticipant: /*[[${isMember}]]*/ false,

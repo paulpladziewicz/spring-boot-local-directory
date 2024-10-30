@@ -103,7 +103,7 @@ public class ContentService {
         contentRepository.deleteById(contentId);
     }
 
-    private void checkPermission(Content content) {
+    public void checkPermission(Content content) {
         if (userService.isAdmin()) {
             return;
         }

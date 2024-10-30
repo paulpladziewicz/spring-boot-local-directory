@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,11 +17,13 @@ public class NotificationService {
     private final SubscriberRepository subscriberRepository;
     private final EmailService emailService;
     private final ContentService contentService;
+    private final UserService userService;
 
-    public NotificationService(SubscriberRepository subscriberRepository, EmailService emailService, ContentService contentService) {
+    public NotificationService(SubscriberRepository subscriberRepository, EmailService emailService, ContentService contentService, UserService userService) {
         this.subscriberRepository = subscriberRepository;
         this.emailService = emailService;
         this.contentService = contentService;
+        this.userService = userService;
     }
 
     public void subscribe(String email) {
@@ -63,11 +67,38 @@ public class NotificationService {
         return true;
     }
 
-    public Announcement createAnnouncement(String contentId, Announcement announcement) {
-        return new Announcement();
+    public void createAnnouncement(AnnouncementDto announcementDto) {
+        Content content = contentService.findById(announcementDto.getContentId());
+        contentService.checkPermission(content);
+
+        if (content.getDetail() instanceof Group group) {
+            Announcement announcement = new Announcement();
+
+            int id = group.getAnnouncements().isEmpty() ? 1 : group.getAnnouncements().getFirst().getId() + 1;
+            announcement.setId(id);
+
+            announcement.setTitle(announcementDto.getTitle());
+            announcement.setMessage(announcementDto.getMessage());
+            announcement.setCreatedAt(Instant.now());
+
+            group.getAnnouncements().addFirst(announcement);
+
+            contentService.save(content);
+        } else {
+            throw new IllegalArgumentException("Invalid content");
+        }
     }
 
-    public void deleteAnnouncement(String contentId, int announcementId) {
+    public void deleteAnnouncement(AnnouncementDto announcementDto) {
+        Content content = contentService.findById(announcementDto.getContentId());
+        contentService.checkPermission(content);
 
+        if (content.getDetail() instanceof Group group) {
+            List<Announcement> announcements = group.getAnnouncements();
+            announcements.removeIf(announcement -> announcement.getId() == announcementDto.getId());
+            contentService.save(content);
+        } else {
+            throw new IllegalArgumentException("Invalid content");
+        }
     }
 }
