@@ -4,6 +4,7 @@ import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.services.ContentService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
+import com.paulpladziewicz.fremontmi.services.TagService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -22,11 +23,14 @@ public class NeighborServicesProfileController {
 
     private final ContentService contentService;
 
+    private final TagService tagService;
+
     private final UserService userService;
 
-    public NeighborServicesProfileController(ContentService contentService, HtmlSanitizationService htmlSanitizationService, UserService userService) {
-        this.contentService = contentService;
+    public NeighborServicesProfileController(HtmlSanitizationService htmlSanitizationService, ContentService contentService, TagService tagService, UserService userService) {
         this.htmlSanitizationService = htmlSanitizationService;
+        this.contentService = contentService;
+        this.tagService = tagService;
         this.userService = userService;
     }
 
@@ -71,6 +75,10 @@ public class NeighborServicesProfileController {
         } else {
             profiles = contentService.findByType(ContentType.NEIGHBOR_SERVICES_PROFILE, page);
         }
+
+        List<TagUsage> popularTags = tagService.getTagUsageFromContent(profiles, 15);
+        model.addAttribute("popularTags", popularTags);
+        model.addAttribute("selectedTag", tag);
 
         // TODO still displaying profiles that do not have any neighbor services
 

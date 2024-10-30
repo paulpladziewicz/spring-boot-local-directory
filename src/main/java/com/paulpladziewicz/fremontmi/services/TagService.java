@@ -4,6 +4,7 @@ import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.TagAutocompleteRepository;
 import com.paulpladziewicz.fremontmi.repositories.TagRepository;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
@@ -85,7 +86,7 @@ public class TagService {
         return results.getMappedResults();
     }
 
-    public List<TagUsage> getTagUsageFromContent(List<Content> contentList, int max) {
+    public List<TagUsage> getTagUsageFromContent(Page<Content> contentList, int max) {
         Map<String, Integer> tagCountMap = new HashMap<>();
 
         for (Content content : contentList) {
