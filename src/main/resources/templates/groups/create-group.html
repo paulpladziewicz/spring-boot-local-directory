@@ -9,10 +9,37 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-12 col-md-8 col-lg-6">
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/groups">Groups</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create Group</li>
+                </ol>
+            </nav>
+
             <h1>Create New Group</h1>
-            <p>Please only create groups that will organize in Fremont, MI. Content on this platform that does not relate to Fremont, Michigan can be removed at any time.</p>
 
             <form th:action="@{/create/group}" th:object="${group}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+
+                <div class="mb-3 mb-sm-0">
+                    <p class="form-label opacity-75 fw-medium fs-base mb-1">Average Meeting Distance</p>
+                    <p class="fs-sm mb-2">Only create groups that meet within a 15-mile radius from the center of Fremont, MI (Main St & Division Ave).</p>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <input type="radio" class="btn-check" id="weight1" name="weight" value="140 g" checked>
+                            <label for="weight1" class="w-100 btn btn-outline-secondary px-2">
+                                <span class="mx-1">Within 5 Miles</span>
+                            </label>
+                            <p></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="radio" class="btn-check" id="weight2" name="weight" value="260 g">
+                            <label for="weight2" class="w-100 btn btn-outline-secondary px-2">
+                                <span class="mx-1">Within 15 Miles</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="form-group mb-3">
                     <label for="name" class="mb-1 form-label opacity-75 fw-medium fs-base">Group Title</label>
@@ -28,7 +55,7 @@
 
                 <div th:replace="~{partials/tag-input}"></div>
 
-                <button type="submit" class="btn btn-primary">Create Group</button>
+                <button type="submit" class="btn btn-primary mt-2">Create Group</button>
 
             </form>
         </div>
