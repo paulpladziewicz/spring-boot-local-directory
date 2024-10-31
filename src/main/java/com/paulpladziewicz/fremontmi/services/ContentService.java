@@ -95,6 +95,10 @@ public class ContentService {
         return contentRepository.findByIdIn(contentIds);
     }
 
+    public Optional<Content> findByTypeAndUserCreatedBy(ContentType contentType) {
+        return contentRepository.findByTypeAndUserCreatedBy(contentType, userService.getUserId());
+    }
+
     public List<String> getAllContentEntityUrls() {
         return new ArrayList<>();
     }

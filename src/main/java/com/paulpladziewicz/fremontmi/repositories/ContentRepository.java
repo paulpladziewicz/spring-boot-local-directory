@@ -46,5 +46,8 @@ public interface ContentRepository extends MongoRepository<Content, String> {
 
     @Query("{ 'visibility': 'public', 'tags': { $in: [?0] }, 'days': { $elemMatch: { 'endTime': { $gt: ?1 } } }, 'status': { $in: ['active', 'canceled'] }}")
     List<Event> findByTagAndAnyFutureDayEventOrderBySoonestStartTimeAsc(String tag, LocalDateTime now, Sort sort);
+
+    @Query("{ 'type': ?0, 'createdBy': ?1 }")
+    Optional<Content> findByTypeAndUserCreatedBy(ContentType contentType, String userId);
 }
 

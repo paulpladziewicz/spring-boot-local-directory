@@ -64,6 +64,7 @@ public class GroupController {
         }
 
         model.addAttribute("groups", groups);
+        model.addAttribute("groups", groups);
         return "groups/groups";
     }
 

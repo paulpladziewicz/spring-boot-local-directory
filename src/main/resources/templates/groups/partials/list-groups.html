@@ -1,4 +1,4 @@
-<div th:each="group : ${groups}" class="col-md-4 mb-4" th:fragment="listGroups">
+<div th:each="group : ${groups.getContent()}" class="col-md-4 mb-4" th:fragment="listGroups">
     <div class="card">
         <div class="card-body">
             <h4 class="h3 mb-1" th:text="${group.detail.title}">Card title</h4>

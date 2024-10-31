@@ -27,7 +27,7 @@
         </div>
 
         <div class="row" x-ref="groupContainer">
-            <div th:if="${#lists.isEmpty(groups)}" class="my-4">
+            <div th:if="${#lists.isEmpty(groups.getContent())}" class="my-4">
                 <div>
                     There are no groups available at the moment.
                 </div>

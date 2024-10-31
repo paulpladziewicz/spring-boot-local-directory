@@ -128,18 +128,19 @@ public class NeighborServicesProfileController {
     @GetMapping("/my/neighbor-services-profile")
     public String viewMyNeighborServiceProfile(Model model) {
         try {
-            List<Content> contentList = contentService.findByUserAndType(ContentType.NEIGHBOR_SERVICES_PROFILE);
+            Optional<Content> optionalContent = contentService.findByTypeAndUserCreatedBy(ContentType.NEIGHBOR_SERVICES_PROFILE);
 
-            if (contentList.isEmpty()) {
+            if (optionalContent.isEmpty()) {
                 return "redirect:/create/neighbor-services-profile";
             }
 
-            Content neighborServicesProfile = contentList.getFirst();
-            NeighborServicesProfile neighborServicesProfileDetail = (NeighborServicesProfile) neighborServicesProfile.getDetail();
+            Content content = optionalContent.get();
 
-            neighborServicesProfileDetail.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfileDetail.getDescription().replace("\n", "<br/>")));
+            NeighborServicesProfile detail = (NeighborServicesProfile) content.getDetail();
 
-            model.addAttribute("neighborServicesProfile", neighborServicesProfile);
+            detail.setDescription(htmlSanitizationService.sanitizeHtml(detail.getDescription().replace("\n", "<br/>")));
+
+            model.addAttribute("neighborServicesProfile", content);
             model.addAttribute("myProfile", true);
             return "neighborservices/neighbor-services-profile-page";
         } catch (ContentNotFoundException e) {
