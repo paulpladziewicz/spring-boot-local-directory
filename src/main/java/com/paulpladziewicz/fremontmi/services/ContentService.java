@@ -75,12 +75,12 @@ public class ContentService {
 
     public Page<Content> findByType(ContentType type, int page) {
         Pageable pageable = PageRequest.of(page, 15);
-        return contentRepository.findByTypeAndVisibility(type, pageable);
+        return contentRepository.findByTypeAndVisibility(type, ContentVisibility.PUBLIC, pageable);
     }
 
     public Page<Content> findByTagAndType(String tag, ContentType type, int page) {
         Pageable pageable = PageRequest.of(page, 15);
-        return contentRepository.findPublicContentByTagAndType(tag, type, pageable);
+        return contentRepository.findByTypeVisibilityAndTag(type, ContentVisibility.PUBLIC, tag, pageable);
     }
 
     public List<Content> findByUserAndType(ContentType contentType) {

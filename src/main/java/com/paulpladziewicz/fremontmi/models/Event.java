@@ -1,8 +1,6 @@
 package com.paulpladziewicz.fremontmi.models;
 
 import lombok.Data;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,18 +19,11 @@ public class Event implements ContentDetail {
 
     private String address;
 
-    @Indexed
     private LocalDateTime soonestStartTime;
 
     private List<DayEvent> days;
 
     private List<String> formattedTimes;
-
-    @Transient
-    private DayEvent nextAvailableDayEvent;
-
-    @Transient
-    private int moreDayEventsCount;
 
     @Override
     public void update(Content content, ContentDto contentDto) {

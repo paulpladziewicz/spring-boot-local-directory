@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.repositories;
 
 import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.ContentType;
+import com.paulpladziewicz.fremontmi.models.ContentVisibility;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -20,11 +21,11 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     @Query("{ 'pathname': { $regex: ?0 }, 'type': ?1 }")
     List<Content> findByPathnameRegexAndType(String slugPattern, ContentType contentType);
 
-    @Query("{ 'type': ?0, 'visibility': 'public' }")
-    Page<Content> findByTypeAndVisibility(ContentType contentType, Pageable pageable);
+    @Query("{ 'type': ?0, 'visibility': ?1 }")
+    Page<Content> findByTypeAndVisibility(ContentType contentType, ContentVisibility visibility, Pageable pageable);
 
-    @Query("{ 'tags': ?0, 'type':  ?1, 'visibility': 'public' }")
-    Page<Content> findPublicContentByTagAndType(String tag, ContentType contentType, Pageable pageable);
+    @Query("{ 'type':  ?0, 'visibility': ?1, 'tags': ?2, }")
+    Page<Content> findByTypeVisibilityAndTag(ContentType contentType, ContentVisibility visibility, String tag, Pageable pageable);
 
     // TODO find by profile value here...
     @Query("{ 'type': ?0, 'createdBy': ?1 }")
