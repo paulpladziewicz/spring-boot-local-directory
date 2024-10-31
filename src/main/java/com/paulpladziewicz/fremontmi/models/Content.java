@@ -25,7 +25,7 @@ public class Content {
 
     private String status = ContentStatus.ACTIVE.getStatus();
 
-    private Boolean nearby;
+    private boolean nearby;
 
     private Boolean external;
 

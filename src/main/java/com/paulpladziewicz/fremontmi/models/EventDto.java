@@ -15,6 +15,8 @@ public class EventDto implements ContentDto {
 
     private String status;
 
+    private boolean nearby;
+
     private String pathname;
 
     private List<String> tags = new ArrayList<>();

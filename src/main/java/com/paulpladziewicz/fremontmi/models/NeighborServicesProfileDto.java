@@ -15,6 +15,8 @@ public class NeighborServicesProfileDto implements ContentDto {
 
     private String pathname;
 
+    private boolean nearby;
+
     private List<String> tags = new ArrayList<>();
 
     @NotBlank(message = "Display name is required.")

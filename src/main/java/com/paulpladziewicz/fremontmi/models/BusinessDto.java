@@ -13,6 +13,8 @@ public class BusinessDto implements ContentDto {
 
     private String pathname;
 
+    private boolean nearby;
+
     private List<String> tags = new ArrayList<>();
 
     @NotBlank(message = "Event name must not be null")

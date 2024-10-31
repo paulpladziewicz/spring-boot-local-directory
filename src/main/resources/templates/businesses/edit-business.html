@@ -13,6 +13,26 @@
             <form th:action="@{/edit/business}" th:object="${business}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                 <input type="hidden" name="contentId" th:value="${business.contentId}" />
 
+                <div class="my-3 mb-sm-0">
+                    <p class="form-label opacity-75 fw-medium fs-base mb-1">Average Distance</p>
+                    <p class="fs-sm mb-2">Only create business listings that are located within a 15-mile radius from the center of Fremont, MI (Main St & Division Ave).</p>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <input type="radio" class="btn-check" id="option1" name="nearby" value="false" checked>
+                            <label for="option1" class="w-100 btn btn-outline-secondary px-2">
+                                <span class="mx-1">Within 5 Miles</span>
+                            </label>
+                            <p></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="radio" class="btn-check" id="option2" name="nearby" value="true">
+                            <label for="option2" class="w-100 btn btn-outline-secondary px-2">
+                                <span class="mx-1">Within 15 Miles</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-business mb-2">
                     <label for="title" class="mb-1 form-label opacity-75 fw-medium fs-base">Business Title</label>
                     <input type="text" class="form-control" id="title" th:field="*{title}" placeholder="Enter business title">

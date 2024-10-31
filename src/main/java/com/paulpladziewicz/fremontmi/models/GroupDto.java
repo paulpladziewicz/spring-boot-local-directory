@@ -13,6 +13,8 @@ public class GroupDto implements ContentDto {
 
     private String pathname;
 
+    private boolean nearby;
+
     private List<String> tags = new ArrayList<>();
 
     @NotBlank(message = "Please provide a group name.")

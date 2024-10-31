@@ -40,6 +40,7 @@ public class ContentService {
         List<String> validatedTags = tagService.addTags(content.getTags(), content.getType());
         content.setTags(validatedTags);
         content.setPathname(createUniquePathname(content.getDetail().getTitle(), type));
+        content.setNearby(contentValues.isNearby());
         content.setCreatedBy(userProfile.getUserId());
         content.setParticipants(Set.of(userProfile.getUserId()));
         content.setAdministrators(Set.of(userProfile.getUserId()));
@@ -143,6 +144,8 @@ public class ContentService {
             String newPathname = createUniquePathname(updatedContent.getTitle(), content.getType());
             content.setPathname(newPathname);
         }
+
+        content.setNearby(updatedContent.isNearby());
     }
 
     public String createUniquePathname(String name, ContentType contentType) {
