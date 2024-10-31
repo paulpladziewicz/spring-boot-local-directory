@@ -7,11 +7,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
-@RestController
+@Controller
 public class NotificationController {
 
     NotificationService notificationService;
@@ -21,9 +22,7 @@ public class NotificationController {
     }
 
     @PostMapping("/subscribe")
-    public String handleSubscribeForm(
-            @RequestParam("email") @Email String email,
-            RedirectAttributes redirectAttributes) {
+    public String handleSubscribeForm(@RequestParam("email") @Email String email, RedirectAttributes redirectAttributes) {
 
         notificationService.subscribe(email);
 
@@ -56,6 +55,7 @@ public class NotificationController {
     }
 
     @PostMapping("/delete/announcement")
+    @ResponseBody
     public ResponseEntity<String> deleteGroupAnnouncement(@RequestBody AnnouncementDto announcementDto) {
         notificationService.deleteAnnouncement(announcementDto);
         return ResponseEntity.ok("Success");
