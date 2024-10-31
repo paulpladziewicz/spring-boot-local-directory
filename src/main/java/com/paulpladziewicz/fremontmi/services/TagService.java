@@ -1,7 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
 import com.paulpladziewicz.fremontmi.models.*;
-import com.paulpladziewicz.fremontmi.repositories.TagAutocompleteRepository;
 import com.paulpladziewicz.fremontmi.repositories.TagRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -20,18 +19,11 @@ public class TagService {
 
     private final TagRepository tagRepository;
 
-    private final TagAutocompleteRepository tagAutocompleteRepository;
-
     private final MongoTemplate mongoTemplate;
 
-    public TagService(TagRepository tagRepository, TagAutocompleteRepository tagAutocompleteRepository, MongoTemplate mongoTemplate) {
+    public TagService(TagRepository tagRepository, MongoTemplate mongoTemplate) {
         this.tagRepository = tagRepository;
-        this.tagAutocompleteRepository = tagAutocompleteRepository;
         this.mongoTemplate = mongoTemplate;
-    }
-
-    public List<String> autocompleteList(String text) {
-        return tagAutocompleteRepository.searchTagsByName(text);
     }
 
     public List<TagUsage> getTopTags(int limit) {
