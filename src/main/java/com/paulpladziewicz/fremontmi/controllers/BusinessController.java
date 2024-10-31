@@ -59,31 +59,31 @@ public class BusinessController {
             businesses = contentService.findByType(ContentType.BUSINESS, page);
         }
 
-        model.addAttribute("businesses", businesses);
+        model.addAttribute("businesses", businesses.getContent());
 
         return "businesses/businesses";
     }
 
-    @GetMapping("/businesses/{slug}")
+    @GetMapping("/business/{slug}")
     public String viewBusiness(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.GROUP.getContentType() + '/' + slug, ContentType.BUSINESS);
-        BusinessDto business = createDto(content);
+        Content content = contentService.findByPathname('/' + ContentType.BUSINESS.getContentType() + '/' + slug, ContentType.BUSINESS);
+        Business detail = (Business) content.getDetail();
 
-        business.setDescription(htmlSanitizationService.sanitizeHtml(business.getDescription().replace("\n", "<br/>")));
+        detail.setDescription(htmlSanitizationService.sanitizeHtml(detail.getDescription().replace("\n", "<br/>")));
 
         String userId;
         try {
            userId = userService.getUserId();
         } catch (UserNotAuthenticatedException e) {
             model.addAttribute("isAdmin", false);
-            model.addAttribute("business", business);
+            model.addAttribute("business", content);
             return "businesses/business-page";
         }
 
         boolean isAdmin = content.getAdministrators().contains(userId);
 
         model.addAttribute("isAdmin", isAdmin);
-        model.addAttribute("business", business);
+        model.addAttribute("business", content);
 
         return "businesses/business-page";
     }
@@ -97,9 +97,9 @@ public class BusinessController {
         return "businesses/my-businesses";
     }
 
-    @GetMapping("/edit/business")
-    public String editBusiness(@RequestParam(value = "contentId") String contentId, Model model) {
-        Content content = contentService.findById(contentId);
+    @GetMapping("/edit/business/{slug}")
+    public String editBusiness(@PathVariable String slug, Model model) {
+        Content content = contentService.findByPathname('/' + ContentType.BUSINESS.getContentType() + '/' + slug, ContentType.BUSINESS);
         BusinessDto business = createDto(content);
 
         String tagsAsString = String.join(",", business.getTags());
@@ -132,15 +132,24 @@ public class BusinessController {
     }
 
     private BusinessDto createDto(Content content) {
-        if (!(content.getDetail() instanceof Business businessDetail)) {
+        if (!(content.getDetail() instanceof Business business)) {
             throw new IllegalArgumentException("ContentDto is not a BusinessDto");
         }
 
         BusinessDto dto = new BusinessDto();
         dto.setContentId(content.getId());
         dto.setPathname(content.getPathname());
-        dto.setTitle(businessDetail.getTitle());
-        dto.setDescription(businessDetail.getDescription());
+        dto.setTitle(business.getTitle());
+        dto.setHeadline(business.getHeadline());
+        dto.setDescription(business.getDescription());
+        dto.setTags(content.getTags());
+        dto.setAddress(business.getAddress());
+        dto.setDisplayAddress(business.isDisplayAddress());
+        dto.setPhoneNumber(business.getPhoneNumber());
+        dto.setDisplayPhoneNumber(business.isDisplayPhoneNumber());
+        dto.setEmail(business.getEmail());
+        dto.setDisplayEmail(business.isDisplayEmail());
+        dto.setWebsite(business.getWebsite());
 
         return dto;
     }

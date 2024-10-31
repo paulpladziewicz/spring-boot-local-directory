@@ -21,19 +21,6 @@
             <a href="/my/businesses" class="btn btn-link fw-semibold p-0">My Business Listings</a>
         </div>
 
-        <div th:if="${popularTags.size() > 0}" class="mb-4">
-            <div class="d-flex flex-wrap">
-                <a th:each="tag : ${popularTags}"
-                   th:href="'/businesses?tag=' + ${tag.name}"
-                   th:classappend="${selectedTag == tag.name} ? 'badge bg-primary bg-opacity-10 text-primary fs-sm m-1' : 'badge bg-secondary fs-sm m-1'"
-                   th:text="${tag.name}">
-                </a>
-            </div>
-            <div th:if="${selectedTag}">
-                <a class="text-dark opacity-50 btn btn-link p-0" href="/businesses">Clear Filter</a>
-            </div>
-        </div>
-
         <div class="row">
             <div th:if="${#lists.isEmpty(businesses)}" class="my-4">
                 <div>
@@ -43,12 +30,12 @@
             <div th:each="business : ${businesses}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="h3 mb-1" th:text="${business.name}">Business Name</h4>
-                        <p class="mb-3" th:text="${#strings.length(business.headline) > 120 ? #strings.substring(business.headline, 0, 120) + '...' : business.headline}">
+                        <h4 class="h3 mb-1" th:text="${business.title}">Business Name</h4>
+                        <p class="mb-3" th:text="${#strings.length(business.detail.headline) > 120 ? #strings.substring(business.detail.headline, 0, 120) + '...' : business.detail.headline}">
                             Business Description
                         </p>
 
-                        <a th:href="'/businesses/' + ${business.slug}" class="btn btn-lg btn-link p-0">View Business<i class="ai-arrow-right ms-2"></i></a>
+                        <a th:href="${business.pathname}" class="btn btn-lg btn-link p-0">View Business<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>

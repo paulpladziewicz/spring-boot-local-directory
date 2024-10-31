@@ -10,7 +10,7 @@
             <div class="col-12 col-md-10 col-lg-8">
                 <h1 class="display-4">Edit Event</h1>
                 <form id="edit-event-form" th:action="@{/edit/event}" th:object="${event}" onsubmit="disableSubmitButtonWhileSubmitting(this)" method="post">
-                    <input type="hidden" name="id" th:value="${event.contentId}"/>
+                    <input type="hidden" name="contentId" th:value="${event.contentId}"/>
 
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="title">Event Title</label>

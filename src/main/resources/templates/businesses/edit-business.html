@@ -11,13 +11,12 @@
         <div class="col-12 col-md-8 col-lg-6">
             <h1>Edit Business Listing</h1>
             <form th:action="@{/edit/business}" th:object="${business}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                <input type="hidden" name="id" th:value="${business.id}" />
-                <input type="hidden" name="slug" th:value="${business.slug}"/>
+                <input type="hidden" name="contentId" th:value="${business.contentId}" />
 
                 <div class="form-business mb-2">
-                    <label for="name" class="mb-1 form-label opacity-75 fw-medium fs-base">Business Name</label>
-                    <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="Enter business name">
-                    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="mt-1 text-danger"></p>
+                    <label for="title" class="mb-1 form-label opacity-75 fw-medium fs-base">Business Title</label>
+                    <input type="text" class="form-control" id="title" th:field="*{title}" placeholder="Enter business title">
+                    <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="mt-1 text-danger"></p>
                 </div>
 
                 <div class="form-group mb-2">
@@ -62,7 +61,7 @@
                 </div>
                 <div class="d-flex">
                     <button type="submit" class="btn btn-primary me-2">Save Changes</button>
-                    <a class="btn btn-secondary" th:href="'/businesses/' + ${business.slug}">Cancel</a>
+                    <a class="btn btn-secondary" th:href="${business.pathname}">Cancel</a>
                 </div>
             </form>
 
@@ -70,7 +69,7 @@
                 <h3>Delete Business</h3>
                 <p>Once deleted, this action cannot be undone, and all business data will be permanently lost.</p>
                 <form method="post" th:action="@{/delete/business}" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                    <input type="hidden" name="businessId" th:value="${business.id}" />
+                    <input type="hidden" name="contentId" th:value="${business.contentId}" />
                     <button type="submit" class="btn btn-danger">Delete Business</button>
                 </form>
             </section>

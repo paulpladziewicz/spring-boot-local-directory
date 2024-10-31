@@ -2,8 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
-    <title>[[${business.name}]] - Business in Fremont, MI</title>
-    <meta name="description" th:content="${#strings.length(business.description) > 160 ? #strings.substring(business.description, 0, 157) + '...' : business.description}" />
+    <title>[[${business.detail.title}]] - Business in Fremont, MI</title>
+    <meta name="description" th:content="${#strings.length(business.detail.description) > 160 ? #strings.substring(business.detail.description, 0, 157) + '...' : business.detail.description}" />
     <th:block th:if="${business.tags != null and #lists.size(business.tags) > 0}">
         <meta name="keywords" th:content="${#strings.arrayJoin(business.tags, ', ')}" />
     </th:block>
@@ -17,14 +17,14 @@
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <div class="text-end mb-2" th:if="${isAdmin}">
-                    <a th:href="'/edit/business/' + ${business.slug}" class="btn btn-secondary btn-icon" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                    <a th:href="'/edit' + ${business.pathname}" class="btn btn-secondary btn-icon" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
                         <i class="ai-edit-alt"></i>
                     </a>
                 </div>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/businesses">Businesses</a></li>
-                        <li class="breadcrumb-item active" aria-current="page" th:text="${business.name}"></li>
+                        <li class="breadcrumb-item active" aria-current="page" th:text="${business.detail.title}"></li>
                     </ol>
                 </nav>
             </div>
@@ -32,26 +32,26 @@
 
         <div class="row">
             <div class="col-lg-8 mx-auto mb-4">
-                <h1 th:text="${business.name}" class="display-3 mb-3">Fremont Business Name</h1>
+                <h1 th:text="${business.detail.title}" class="display-3 mb-3">Fremont Business Name</h1>
 
                 <ul class="list-unstyled">
-                    <li class="nav flex-nowrap mb-3" th:if="${business.address} != null and !${#strings.isEmpty(business.address)}">
+                    <li class="nav flex-nowrap mb-3" th:if="${business.detail.address} != null and !${#strings.isEmpty(business.detail.address)}">
                         <i class="ai-map-pin lead text-primary me-2"></i>
-                        <span class="nav-link fw-normal p-0 mt-n1" th:text="${business.address}">514 S. Magnolia St. Orlando, FL 32806</span>
+                        <span class="nav-link fw-normal p-0 mt-n1" th:text="${business.detail.address}">514 S. Magnolia St. Orlando, FL 32806</span>
                     </li>
-                    <li class="nav flex-nowrap mb-3" th:if="${business.phoneNumber} != null and !${#strings.isEmpty(business.phoneNumber)}">
+                    <li class="nav flex-nowrap mb-3" th:if="${business.detail.phoneNumber} != null and !${#strings.isEmpty(business.detail.phoneNumber)}">
                         <i class="ai-phone lead text-primary me-2"></i>
-                        <a class="nav-link fw-normal p-0 mt-n1" th:href="'tel:'+${business.phoneNumber}" th:text="${business.phoneNumber}">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;40</a>
+                        <a class="nav-link fw-normal p-0 mt-n1" th:href="'tel:'+${business.detail.phoneNumber}" th:text="${business.detail.phoneNumber}">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;40</a>
                     </li>
-                    <li class="nav flex-nowrap mb-3" th:if="${business.displayEmail} and ${business.email} != null and !${#strings.isEmpty(business.email)}">
+                    <li class="nav flex-nowrap mb-3" th:if="${business.detail.displayEmail} and ${business.detail.email} != null and !${#strings.isEmpty(business.detail.email)}">
                         <i class="ai-mail lead text-primary me-2"></i>
-                        <a class="nav-link fw-normal p-0 mt-n1" th:href="'mailto:' + ${business.email}" th:text="${business.email}">orlando@example.com</a>
+                        <a class="nav-link fw-normal p-0 mt-n1" th:href="'mailto:' + ${business.detail.email}" th:text="${business.detail.email}">orlando@example.com</a>
                     </li>
-                    <li class="nav flex-nowrap mb-3" th:if="${business.website} != null and !${#strings.isEmpty(business.website)}">
+                    <li class="nav flex-nowrap mb-3" th:if="${business.detail.website} != null and !${#strings.isEmpty(business.detail.website)}">
                         <i class="ai-globe lead text-primary me-2"></i>
                         <a class="nav-link fw-normal p-0 mt-n1"
-                           th:href="${#strings.startsWith(business.website, 'http') ? business.website : 'https://' + business.website}"
-                           target="_blank" rel="noopener noreferrer" th:text="${business.website}">
+                           th:href="${#strings.startsWith(business.detail.website, 'http') ? business.detail.website : 'https://' + business.detail.website}"
+                           target="_blank" rel="noopener noreferrer" th:text="${business.detail.website}">
                             www.example.com
                         </a>
                     </li>
@@ -62,8 +62,8 @@
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <div class="fs-sm text-uppercase mb-3">What we do</div>
-                <h2 class="display-6" th:text="${business.headline}">We are a team who create marketing strategies</h2>
-                <p th:utext="${business.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
+                <h2 class="display-6" th:text="${business.detail.headline}">We are a team who create marketing strategies</h2>
+                <p th:utext="${business.detail.description}" class="fs-xl">Morbi et massa fames ac scelerisque sit commodo dignissim <strong>faucibus quisque proin</strong> lectus laoreet sem adipiscing sollicitudin erat massa tellus lorem enim aenean phasellus in hendrerit interdum lorem proin pretium dictum urna suspendisse quis risus et.</p>
             </div>
         </div>
 

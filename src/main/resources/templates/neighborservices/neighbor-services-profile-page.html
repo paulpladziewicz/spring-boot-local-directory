@@ -2,8 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
-    <title>[[${neighborServicesProfile.name}]] - NeighborServices™ Profile in Fremont, MI</title>
-    <meta name="description" th:content="${#strings.length(neighborServicesProfile.description) > 160 ? #strings.substring(neighborServicesProfile.description, 0, 157) + '...' : neighborServicesProfile.description}" />
+    <title>[[${neighborServicesProfile.detail.title}]] - NeighborServices™ Profile in Fremont, MI</title>
+    <meta name="description" th:content="${#strings.length(neighborServicesProfile.detail.description) > 160 ? #strings.substring(neighborServicesProfile.detail.description, 0, 157) + '...' : neighborServicesProfile.detail.description}" />
     <th:block th:if="${neighborServicesProfile.tags != null and #lists.size(neighborServicesProfile.tags) > 0}">
         <meta name="keywords" th:content="${#strings.arrayJoin(neighborServicesProfile.tags, ', ')}" />
     </th:block>
@@ -19,12 +19,12 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-2">
                         <li class="breadcrumb-item"><a href="/neighbor-services">NeighborServices™</a></li>
-                        <li class="breadcrumb-item active" aria-current="page" th:text="${neighborServicesProfile.name}"></li>
+                        <li class="breadcrumb-item active" aria-current="page" th:text="${neighborServicesProfile.detail.title}"></li>
                     </ol>
                 </nav>
                 <div class="d-flex justify-content-between align-items-center">
                     <a href="javascript:history.back()" class="btn btn-lg btn-link p-0"><i class="ai-arrow-left me-2"></i>Back</a>
-                    <a th:if="${myProfile}" th:href="'/edit/neighbor-service/profile/' + ${neighborServicesProfile.slug}" class="btn btn-secondary btn-icon" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                    <a th:if="${myProfile}" th:href="'/edit' + ${neighborServicesProfile.pathname}" class="btn btn-secondary btn-icon" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
                         <i class="ai-edit-alt"></i>
                     </a>
 
@@ -33,12 +33,12 @@
 
                 <div class="d-flex justify-content-center">
                     <div th:if="${myProfile}" class="dropdown">
-                        <a th:if="${neighborServicesProfile.profileImageUrl != null}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" th:style="'width: 200px; height: 200px; background-image: url(' + ${neighborServicesProfile.profileImageUrl} + ');'" aria-label="Upload picture">
+                        <a th:if="${neighborServicesProfile.detail.profileImageUrl != null}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" th:style="'width: 200px; height: 200px; background-image: url(' + ${neighborServicesProfile.detail.profileImageUrl} + ');'" aria-label="Upload picture">
                             <span class="d-block text-light text-center lh-1 pb-1" style="background-color: rgba(0,0,0,.5)">
                                 <i class="ai-camera"></i>
                             </span>
                         </a>
-                        <a th:if="${neighborServicesProfile.profileImageUrl == null}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="width: 160px; height: 160px; background-color: var(--ar-gray-100);" aria-label="Upload picture">
+                        <a th:if="${neighborServicesProfile.detail.detail.profileImageUrl == null}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="width: 160px; height: 160px; background-color: var(--ar-gray-100);" aria-label="Upload picture">
                           <span class="d-block text-light text-center lh-1 pb-1" style="background-color: rgba(0,0,0,.5)">
                             <i class="ai-camera"></i>
                           </span>
@@ -57,16 +57,16 @@
                     </div>
 
                     <div th:if="${!myProfile}">
-                        <div th:if="${neighborServicesProfile.profileImageUrl}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0"
-                           th:style="'width: 200px; height: 200px; background-image: url(' + ${neighborServicesProfile.profileImageUrl} + ');'"
+                        <div th:if="${neighborServicesProfile.detail.profileImageUrl}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0"
+                           th:style="'width: 200px; height: 200px; background-image: url(' + ${neighborServicesProfile.detail.profileImageUrl} + ');'"
                         >
                         </div>
                     </div>
 
                 </div>
 
-                <h1 th:text="${neighborServicesProfile.name}" class="display-4 mb-3 text-center">Fremont NeighborService Name</h1>
-                <p th:utext="${neighborServicesProfile.description}" class="fs-xl mb-3">Description about the service...</p>
+                <h1 th:text="${neighborServicesProfile.detail.title}" class="display-4 mb-3 text-center">Fremont NeighborService Name</h1>
+                <p th:utext="${neighborServicesProfile.detail.description}" class="fs-xl mb-3">Description about the service...</p>
 
                 <div th:if="${!#lists.isEmpty(neighborServicesProfile.tags)}">
                     <div class="d-flex flex-wrap">
@@ -78,9 +78,9 @@
                 </div>
 
                 <div class="mt-4 mb-5">
-                    <div th:if="${neighborServicesProfile.neighborServices.size() > 0}">
+                    <div th:if="${neighborServicesProfile.detail.neighborServices.size() > 0}">
                         <ul class="list-unstyled">
-                            <li th:each="service : ${neighborServicesProfile.neighborServices}">
+                            <li th:each="service : ${neighborServicesProfile.detail.neighborServices}">
                                 <div class="d-flex align-items-center">
                                     <h3 class="h3 w-75 pe-2 mb-2" th:text="${service.name}"></h3>
                                     <p class="h5 w-25 ps-2 text-center mb-2" th:text="${service.price}"></p>
@@ -89,7 +89,7 @@
                             </li>
                         </ul>
                     </div>
-                    <div th:if="${neighborServicesProfile.neighborServices.size() == 0}">
+                    <div th:if="${neighborServicesProfile.detail.neighborServices.size() == 0}">
                         <p class="text-muted mb-3">No services available at this time.</p>
                     </div>
                 </div>
@@ -102,12 +102,12 @@
         <div class="container pt-5">
             <div class="row pb-4">
                 <div class="col-lg-8 col-xl-7 offset-xl-1 mx-auto">
-                    <h1 class="display-6 text-center" th:text="'Contact ' + ${neighborServicesProfile.name}">Contact Us</h1>
+                    <h1 class="display-6 text-center" th:text="'Contact ' + ${neighborServicesProfile.title}">Contact Us</h1>
                     <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">If you have any questions, inquiries, or would like more information from
-                        <span th:text="${neighborServicesProfile.name}">our service</span>, please fill out the form below.</p>
+                        <span th:text="${neighborServicesProfile.title}">our service</span>, please fill out the form below.</p>
 
                     <form class="row g-4 needs-validation" novalidate="" id="contactForm">
-                        <input type="hidden" id="id" name="id" th:value="${neighborServicesProfile.id}" />
+                        <input type="hidden" id="id" name="contentId" th:value="${neighborServicesProfile.id}" />
                         <div class="col-sm-6">
                             <label class="form-label fs-base" for="name">Name</label>
                             <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
@@ -158,7 +158,7 @@
                                 </div>
 
                                 <form id="uploadForm" th:action="@{/upload}" method="post" enctype="multipart/form-data" onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                                    <input type="hidden" name="contentType" th:value="${neighborServicesProfile.type}">
+                                    <input type="hidden" name="contentType" th:value="${neighborServicesProfile.id}">
                                     <input type="hidden" name="contentId" th:value="${neighborServicesProfile.id}">
                                     <div class="mb-3">
                                         <label for="formFile" class="form-label">Select Photo</label>

@@ -83,6 +83,7 @@ public class NeighborServicesProfileController {
         // TODO still displaying profiles that do not have any neighbor services
 
         model.addAttribute("profiles", profiles);
+        model.addAttribute("profilesList", profiles.getContent());
 
         return "neighborservices/neighbor-services";
     }
@@ -175,8 +176,13 @@ public class NeighborServicesProfileController {
         NeighborServicesProfileDto dto = new NeighborServicesProfileDto();
         dto.setContentId(content.getId());
         dto.setPathname(content.getPathname());
+        dto.setTags(content.getTags());
         dto.setTitle(neighborServicesProfile.getTitle());
         dto.setDescription(neighborServicesProfile.getDescription());
+        dto.setEmail(neighborServicesProfile.getEmail());
+        dto.setNeighborServices(neighborServicesProfile.getNeighborServices());
+        dto.setProfileImageUrl(neighborServicesProfile.getProfileImageUrl());
+        dto.setProfileImageFileName(neighborServicesProfile.getProfileImageFileName());
 
         return dto;
     }
