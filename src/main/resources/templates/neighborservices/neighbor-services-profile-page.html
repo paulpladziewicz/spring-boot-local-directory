@@ -107,21 +107,20 @@
                         <span th:text="${neighborServicesProfile.detail.title}">our service</span>, please fill out the form below.</p>
 
                     <form class="row g-4 needs-validation" novalidate="" id="contactForm">
-                        <input type="hidden" id="id" name="contentId" th:value="${neighborServicesProfile.id}" />
                         <div class="col-sm-6">
                             <label class="form-label fs-base" for="name">Name</label>
                             <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
-                            <div class="invalid-feedback">Please enter your name.</div>
+                            <div class="invalid-feedback">Please enter your name!</div>
                         </div>
                         <div class="col-sm-6">
                             <label class="form-label fs-base" for="email">Email</label>
                             <input class="form-control form-control-lg" type="email" placeholder="Email address" required="" id="email">
-                            <div class="invalid-feedback">Please provide a valid email address.</div>
+                            <div class="invalid-feedback">Please provide a valid email address!</div>
                         </div>
                         <div class="col-sm-12">
                             <label class="form-label fs-base" for="message">Message</label>
                             <textarea class="form-control form-control-lg" rows="5" placeholder="Enter your message here..." required="" id="message"></textarea>
-                            <div class="invalid-feedback">Please enter a message.</div>
+                            <div class="invalid-feedback">Please enter your message!</div>
                         </div>
                         <div class="col-sm-12 pt-2">
                             <button id="submit-button" class="btn btn-lg btn-primary" type="button" onclick="submitContactForm()">Send message</button>
@@ -130,9 +129,8 @@
                                 Loading...
                             </button>
                         </div>
+                        <div id="form-message" class="alert mt-4" style="display: none;"></div>
                     </form>
-
-                    <div id="form-message" class="alert mt-4" style="display: none;"></div>
 
                 </div>
             </div>
@@ -211,7 +209,7 @@
         }
 
         const formData = {
-            id: document.getElementById('id').value,
+            contentId: null,
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
             message: document.getElementById('message').value
@@ -221,7 +219,7 @@
         loadingButton.style.display = 'block';
 
         try {
-            const response = await fetch('/contact/neighbor-services-profile', {
+            const response = await fetch('/contact', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -234,7 +232,7 @@
                 formMessage.style.display = 'block';
                 formMessage.classList.remove('alert-danger');
                 formMessage.classList.add('alert-primary');
-                formMessage.innerText = 'Your message has been successfully sent. You\'ll now communicate directly via email. We appreciate your engagement with NeighborServices™ and hope you find the assistance you need.';
+                formMessage.innerText = 'Thank you for reaching out! You\'re message was sent.';
 
                 form.reset();
                 form.classList.remove('was-validated');

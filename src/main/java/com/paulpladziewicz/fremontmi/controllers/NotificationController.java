@@ -34,7 +34,7 @@ public class NotificationController {
 
     @PostMapping("/contact")
     @ResponseBody
-    public ResponseEntity<String> handleContactForm(SimpleContactFormSubmission submission) {
+    public ResponseEntity<String> handleContactForm(@RequestBody @Valid SimpleContactFormSubmission submission) {
         try {
             notificationService.handleContactFormSubmission(submission);
             return ResponseEntity.ok("Success");

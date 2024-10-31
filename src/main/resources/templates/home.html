@@ -289,31 +289,33 @@
                     <h2 class="h1" id="contact-us">Contact us</h2>
                     <p>We're here to help with any questions, suggestions, or feedback you might have. Whether you're
                         looking for more information or need assistance with our platform, feel free to reach out.</p>
-                    <div th:if="${successMessage}" class="alert alert-primary d-flex align-items-center" role="alert">
-                        <i class="ai-mail fs-xl pe-1 me-2"></i>
-                        <p class="m-0" th:text="${successMessage}"></p>
-                    </div>
-                    <form th:action="@{/contact}" method="post" class="row g-4"
-                          onsubmit="disableSubmitButtonWhileSubmitting(this)">
-                        <div class="col-lg-10">
-                            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="name">Name</label>
-                            <input class="form-control form-control-lg" type="text" placeholder="Your name" name="name"
-                                   required id="name">
+
+                    <form class="row g-4 needs-validation" novalidate="" id="contactForm">
+                        <div class="col-sm-6">
+                            <label class="form-label fs-base" for="name">Name</label>
+                            <input class="form-control form-control-lg" type="text" placeholder="Your name" required="" id="name">
+                            <div class="invalid-feedback">Please enter your name!</div>
                         </div>
-                        <div class="col-lg-10">
-                            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="email">Email</label>
-                            <input class="form-control form-control-lg" type="email" placeholder="Email address"
-                                   name="email" required id="email">
+                        <div class="col-sm-6">
+                            <label class="form-label fs-base" for="email">Email</label>
+                            <input class="form-control form-control-lg" type="email" placeholder="Email address" required="" id="email">
+                            <div class="invalid-feedback">Please provide a valid email address!</div>
                         </div>
-                        <div class="col-lg-10">
-                            <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="message">Message</label>
-                            <textarea class="form-control form-control-lg" placeholder="Your message" name="message"
-                                      rows="4" required id="message"></textarea>
+                        <div class="col-sm-12">
+                            <label class="form-label fs-base" for="message">Message</label>
+                            <textarea class="form-control form-control-lg" rows="5" placeholder="Enter your message here..." required="" id="message"></textarea>
+                            <div class="invalid-feedback">Please enter your message!</div>
                         </div>
-                        <div class="col-lg-10">
-                            <button class="btn btn-lg btn-dark rounded-pill mt-2" type="submit">Send message</button>
+                        <div class="col-sm-12 pt-2">
+                            <button id="submit-button" class="btn btn-lg btn-primary" type="button" onclick="submitContactForm()">Send message</button>
+                            <button id="loading-button" class="btn btn-lg btn-primary pe-none" type="button" style="display: none;">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Loading...
+                            </button>
                         </div>
+                        <div id="form-message" class="alert mt-4" style="display: none;"></div>
                     </form>
+
                 </div>
             </div>
         </div>
@@ -353,6 +355,62 @@
 
 </main>
 
+<script>
+    async function submitContactForm() {
+        const form = document.getElementById('contactForm');
+        const submitButton = document.getElementById('submit-button');
+        const loadingButton = document.getElementById('loading-button');
+        const formMessage = document.getElementById('form-message');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="csrf-header"]').getAttribute('content');
+
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+
+        const formData = {
+            contentId: null,
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            message: document.getElementById('message').value
+        };
+
+        submitButton.style.display = 'none';
+        loadingButton.style.display = 'block';
+
+        try {
+            const response = await fetch('/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                formMessage.style.display = 'block';
+                formMessage.classList.remove('alert-danger');
+                formMessage.classList.add('alert-primary');
+                formMessage.innerText = 'Thank you for reaching out! You\'re message was sent.';
+
+                form.reset();
+                form.classList.remove('was-validated');
+            } else {
+                throw new Error('Submission failed');
+            }
+        } catch (error) {
+            formMessage.style.display = 'block';
+            formMessage.classList.remove('alert-success');
+            formMessage.classList.add('alert-danger');
+            formMessage.innerText = 'Failed to submit the form. Please try again later.';
+        } finally {
+            loadingButton.style.display = 'none';
+            submitButton.style.display = 'block';
+        }
+    }
+</script>
 <script th:replace="~{partials/theme-js}"></script>
 <footer th:replace="~{partials/footer}"></footer>
 </body>

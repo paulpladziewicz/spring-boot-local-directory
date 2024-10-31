@@ -1,5 +1,6 @@
 package com.paulpladziewicz.fremontmi.services;
 
+import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
 import com.paulpladziewicz.fremontmi.exceptions.ValidationException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.SubscriberRepository;
@@ -50,11 +51,13 @@ public class NotificationService {
     public void handleContactFormSubmission(SimpleContactFormSubmission submission) {
         String recipient = "ppladziewicz@gmail.com";
         if (submission.getContentId() != null) {
-            Content content = contentService.findById(submission.getContentId());
-            String contentEmail = content.getDetail().getEmail();
-            if (contentEmail != null) {
-                recipient = contentEmail;
-            }
+            try {
+                Content content = contentService.findById(submission.getContentId());
+                String contentEmail = content.getDetail().getEmail();
+                if (contentEmail != null) {
+                    recipient = contentEmail;
+                }
+            } catch (ContentNotFoundException ignored) {}
         }
 
         emailService.simpleContactFormSubmission(recipient, submission);

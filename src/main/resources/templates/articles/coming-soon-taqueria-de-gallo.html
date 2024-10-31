@@ -93,9 +93,8 @@
                                 Loading...
                             </button>
                         </div>
+                        <div id="form-message" class="alert mt-4" style="display: none;"></div>
                     </form>
-
-                    <div id="form-message" class="alert mt-4" style="display: none;"></div>
 
                 </div>
             </div>
@@ -118,6 +117,7 @@
         }
 
         const formData = {
+            contentId: null,
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
             message: document.getElementById('message').value
@@ -127,7 +127,7 @@
         loadingButton.style.display = 'block';
 
         try {
-            const response = await fetch('/taqueria', {
+            const response = await fetch('/contact', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -140,7 +140,7 @@
                 formMessage.style.display = 'block';
                 formMessage.classList.remove('alert-danger');
                 formMessage.classList.add('alert-primary');
-                formMessage.innerText = 'Thank you for your feedback! We have received your message.';
+                formMessage.innerText = 'Thank you for reaching out! You\'re message was sent.';
 
                 form.reset();
                 form.classList.remove('was-validated');
@@ -158,7 +158,6 @@
         }
     }
 </script>
-
 <footer th:replace="~{partials/footer}"></footer>
 <script th:replace="~{partials/theme-js}"></script>
 </body>
