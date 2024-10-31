@@ -38,7 +38,7 @@
                                 <i class="ai-camera"></i>
                             </span>
                         </a>
-                        <a th:if="${neighborServicesProfile.detail.detail.profileImageUrl == null}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="width: 160px; height: 160px; background-color: var(--ar-gray-100);" aria-label="Upload picture">
+                        <a th:if="${neighborServicesProfile.detail.profileImageUrl == null}" class="d-flex flex-column justify-content-end position-relative overflow-hidden rounded-circle bg-size-cover bg-position-center flex-shrink-0" href="#" data-bs-toggle="dropdown" aria-expanded="false" style="width: 160px; height: 160px; background-color: var(--ar-gray-100);" aria-label="Upload picture">
                           <span class="d-block text-light text-center lh-1 pb-1" style="background-color: rgba(0,0,0,.5)">
                             <i class="ai-camera"></i>
                           </span>
@@ -102,9 +102,9 @@
         <div class="container pt-5">
             <div class="row pb-4">
                 <div class="col-lg-8 col-xl-7 offset-xl-1 mx-auto">
-                    <h1 class="display-6 text-center" th:text="'Contact ' + ${neighborServicesProfile.title}">Contact Us</h1>
+                    <h1 class="display-6 text-center" th:text="'Contact ' + ${neighborServicesProfile.detail.title}">Contact Us</h1>
                     <p class="fs-lg pb-4 mb-0 mb-sm-2 text-center">If you have any questions, inquiries, or would like more information from
-                        <span th:text="${neighborServicesProfile.title}">our service</span>, please fill out the form below.</p>
+                        <span th:text="${neighborServicesProfile.detail.title}">our service</span>, please fill out the form below.</p>
 
                     <form class="row g-4 needs-validation" novalidate="" id="contactForm">
                         <input type="hidden" id="id" name="contentId" th:value="${neighborServicesProfile.id}" />

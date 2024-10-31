@@ -12,6 +12,26 @@
                 <form id="edit-event-form" th:action="@{/edit/event}" th:object="${event}" onsubmit="disableSubmitButtonWhileSubmitting(this)" method="post">
                     <input type="hidden" name="contentId" th:value="${event.contentId}"/>
 
+                    <div class="my-3 mb-sm-0">
+                        <p class="form-label opacity-75 fw-medium fs-base mb-1">Average Travel Distance</p>
+                        <p class="fs-sm mb-2">Only create a profile if you live within a 15-mile radius from the center of Fremont, MI (Main St & Division Ave).</p>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <input type="radio" class="btn-check" id="weight1" name="weight" value="140 g" checked>
+                                <label for="weight1" class="w-100 btn btn-outline-secondary px-2">
+                                    <span class="mx-1">Within 5 Miles</span>
+                                </label>
+                                <p></p>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="radio" class="btn-check" id="weight2" name="weight" value="260 g">
+                                <label for="weight2" class="w-100 btn btn-outline-secondary px-2">
+                                    <span class="mx-1">Within 15 Miles</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group mb-2">
                         <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="title">Event Title</label>
                         <input type="text" class="form-control" id="title" th:field="*{title}" placeholder="Enter event title">

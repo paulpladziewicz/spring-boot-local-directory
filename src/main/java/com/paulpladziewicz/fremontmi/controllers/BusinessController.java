@@ -59,7 +59,8 @@ public class BusinessController {
             businesses = contentService.findByType(ContentType.BUSINESS, page);
         }
 
-        model.addAttribute("businesses", businesses.getContent());
+        model.addAttribute("businesses", businesses);
+        model.addAttribute("businessListings", businesses.getContent());
 
         return "businesses/businesses";
     }

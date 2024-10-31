@@ -42,8 +42,18 @@ public class NeighborServicesProfileController {
     @GetMapping("/create/neighbor-services-profile")
     public String createNeighborServicesProfileForm(Model model) {
         try {
-            contentService.findByUserAndType(ContentType.NEIGHBOR_SERVICES_PROFILE);
-            return "redirect:/my/neighbor-services/profile";
+            List<Content> contentList = contentService.findByUserAndType(ContentType.NEIGHBOR_SERVICES_PROFILE);
+
+            if (contentList.isEmpty()) {
+                NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
+                neighborServicesProfile.getNeighborServices().add(new NeighborService());
+
+                model.addAttribute("neighborServicesProfile", neighborServicesProfile);
+
+                return "neighborservices/create-neighbor-services-profile";
+            }
+
+            return "redirect:/my/neighbor-services-profile";
         } catch (ContentNotFoundException e) {
             NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
             neighborServicesProfile.getNeighborServices().add(new NeighborService());
@@ -91,7 +101,8 @@ public class NeighborServicesProfileController {
     @GetMapping("/neighbor-services-profile/{slug}")
     public String viewNeighborService(@PathVariable String slug, Model model) {
         Content content = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType() + '/' + slug, ContentType.NEIGHBOR_SERVICES_PROFILE);
-        NeighborServicesProfileDto neighborServicesProfile = createDto(content);
+        System.out.println(content);
+        NeighborServicesProfile  detail = (NeighborServicesProfile) content.getDetail();
 
         boolean createdByUser;
         try {
@@ -101,15 +112,15 @@ public class NeighborServicesProfileController {
             createdByUser = false;
         }
 
-        if (!createdByUser) {
-            if (Objects.equals(content.getVisibility(), ContentVisibility.RESTRICTED.getVisibility())) {
-                return "restricted-visibility";
-            }
-        }
+//        if (!createdByUser) {
+//            if (Objects.equals(content.getVisibility(), ContentVisibility.RESTRICTED.getVisibility())) {
+//                return "restricted-visibility";
+//            }
+//        }
 
-        neighborServicesProfile.setDescription(htmlSanitizationService.sanitizeHtml(neighborServicesProfile.getDescription().replace("\n", "<br/>")));
+        detail.setDescription(htmlSanitizationService.sanitizeHtml(detail.getDescription().replace("\n", "<br/>")));
 
-        model.addAttribute("neighborServicesProfile", neighborServicesProfile);
+        model.addAttribute("neighborServicesProfile", content);
         model.addAttribute("myProfile", createdByUser);
 
         return "neighborservices/neighbor-services-profile-page";
@@ -119,6 +130,11 @@ public class NeighborServicesProfileController {
     public String viewMyNeighborServiceProfile(Model model) {
         try {
             List<Content> contentList = contentService.findByUserAndType(ContentType.NEIGHBOR_SERVICES_PROFILE);
+
+            if (contentList.isEmpty()) {
+                return "redirect:/create/neighbor-services-profile";
+            }
+
             Content neighborServicesProfile = contentList.getFirst();
             NeighborServicesProfile neighborServicesProfileDetail = (NeighborServicesProfile) neighborServicesProfile.getDetail();
 
@@ -132,9 +148,9 @@ public class NeighborServicesProfileController {
         }
     }
 
-    @GetMapping("/edit/neighbor-services-profile")
-    public String editNeighborServiceProfilePage(@RequestParam(value = "contentId") String contentId, Model model) {
-        Content content = contentService.findById(contentId);
+    @GetMapping("/edit/neighbor-services-profile/{slug}")
+    public String editNeighborServiceProfilePage(@PathVariable String slug, Model model) {
+        Content content = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType() + '/' + slug, ContentType.NEIGHBOR_SERVICES_PROFILE);
         NeighborServicesProfileDto neighborServicesProfile = createDto(content);
 
         String tagsAsString = String.join(",", neighborServicesProfile.getTags());
@@ -158,7 +174,7 @@ public class NeighborServicesProfileController {
 
         model.addAttribute("neighborService", neighborServicesProfile);
 
-        return "redirect:/my/neighbor-services/profile";
+        return "redirect:/my/neighbor-services-profile";
     }
 
     @PostMapping("/delete/neighbor-services-profile")

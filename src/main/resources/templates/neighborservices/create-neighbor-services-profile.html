@@ -13,10 +13,24 @@
             <div class="col-12 col-md-8 col-lg-6">
                 <h1>Create NeighborServices™ Profile</h1>
 
-                <div class="alert d-flex alert-light" role="alert">
-                    <i class="ai-circle-info fs-xl pe-1 me-2"></i>
-                    <p class="mb-0">Content that does not serve Fremont, MI can be removed. Requires a subscription to be visible to the community.
-                        <a href="/overview/neighbor-services" target="_blank">Learn more</a></p>
+                <div class="my-3 mb-sm-0">
+                    <p class="form-label opacity-75 fw-medium fs-base mb-1">Average Travel Distance</p>
+                    <p class="fs-sm mb-2">Only create a profile if you live within a 15-mile radius from the center of Fremont, MI (Main St & Division Ave).</p>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <input type="radio" class="btn-check" id="weight1" name="weight" value="140 g" checked>
+                            <label for="weight1" class="w-100 btn btn-outline-secondary px-2">
+                                <span class="mx-1">Within 5 Miles</span>
+                            </label>
+                            <p></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="radio" class="btn-check" id="weight2" name="weight" value="260 g">
+                            <label for="weight2" class="w-100 btn btn-outline-secondary px-2">
+                                <span class="mx-1">Within 15 Miles</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <form id="create-business-form" th:action="@{/create/neighbor-services-profile}" th:object="${neighborServicesProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
