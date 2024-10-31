@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum ContentStatus {
     ACTIVE("active"),
     REQUIRES_ACTIVE_SUBSCRIPTION("requires_active_subscription"),
+    CANCELLED("cancelled"),
     PAYMENT_FAILED("payment_failed"),
     DELETED("deleted");
 

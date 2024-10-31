@@ -30,12 +30,12 @@
             <div th:each="event : ${events}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="h3 mb-1" th:text="${event.name}">Event Title</h4>
-                        <p class="text-muted fw-semibold mb-2" th:if="${event.formattedTimes != null and !event.formattedTimes.isEmpty()}" th:text="${event.formattedTimes[0]}">
+                        <h4 class="h3 mb-1" th:text="${event.detail.title}">Event Title</h4>
+                        <p class="text-muted fw-semibold mb-2" th:if="${event.detail.formattedTimes != null and !event.detail.formattedTimes.isEmpty()}" th:text="${event.detail.formattedTimes[0]}">
                             Event Start Time
                         </p>
-                        <p th:text="${#strings.length(event.description) > 120 ? #strings.substring(event.description, 0, 120) + '...' : event.description}">Event Description</p>
-                        <a th:href="'/events/' + ${event.slug}" class="btn btn-lg btn-link p-0">View Event<i class="ai-arrow-right ms-2"></i></a>
+                        <p th:text="${#strings.length(event.detail.description) > 120 ? #strings.substring(event.detail.description, 0, 120) + '...' : event.detail.description}">Event Description</p>
+                        <a th:href="${event.pathname}" class="btn btn-lg btn-link p-0">View Event<i class="ai-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>

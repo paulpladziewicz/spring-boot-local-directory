@@ -27,13 +27,13 @@
                 <div class="col-md-4 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="h3 mb-1" th:text="${group.name}">Card title</h4>
+                            <h4 class="h3 mb-1" th:text="${group.detail.title}">Card title</h4>
                             <p class="text-muted fw-semibold mb-2">
-                                <span th:text="${group.members.size()}"></span>
-                                <span th:text="${group.members.size() == 1 ? 'Member' : 'Members'}"></span>
+                                <span th:text="${group.participants.size()}"></span>
+                                <span th:text="${group.participants.size() == 1 ? 'Member' : 'Members'}"></span>
                             </p>
-                            <p th:text="${#strings.length(group.description) > 120 ? #strings.substring(group.description, 0, 120) + '...' : group.description}"></p>
-                            <a th:href="'/groups/' + ${group.slug}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
+                            <p th:text="${#strings.length(group.detail.description) > 120 ? #strings.substring(group.detail.description, 0, 120) + '...' : group.detail.description}"></p>
+                            <a th:href="${group.pathname}" class="btn btn-lg btn-link p-0">View Group<i class="ai-arrow-right ms-2"></i></a>
                         </div>
                     </div>
                 </div>

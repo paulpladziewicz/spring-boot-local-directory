@@ -4,8 +4,6 @@ import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
 import com.paulpladziewicz.fremontmi.exceptions.PermissionDeniedException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,16 +11,14 @@ import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class ContentService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ContentService.class);
     private final ContentRepository contentRepository;
     private final UserService userService;
     private final TagService tagService;
@@ -35,6 +31,7 @@ public class ContentService {
 
     public Content create(ContentType type, ContentDto contentValues) {
         UserProfile userProfile = userService.getUserProfile();
+
         Content content = new Content();
         content.setType(type);
         content.setDetail(type);
@@ -48,7 +45,17 @@ public class ContentService {
         content.setAdministrators(Set.of(userProfile.getUserId()));
         content.setCreatedAt(LocalDateTime.now());
         content.setUpdatedAt(LocalDateTime.now());
-        return contentRepository.save(content);
+
+        content = contentRepository.save(content);
+
+        userProfile.getContentActions()
+                .computeIfAbsent(type, k -> new HashMap<>())
+                .computeIfAbsent(ContentAction.CREATED, k -> new HashSet<>())
+                .add(content.getId());
+
+        userService.saveUserProfile(userProfile);
+
+        return content;
     }
 
     public Content save(Content content) {
@@ -77,9 +84,15 @@ public class ContentService {
 
     public List<Content> findByUserAndType(ContentType contentType) {
         UserProfile userProfile = userService.getUserProfile();
-        // TODO get array of content from user profile somehow
-        return contentRepository.findByIdIn(new ArrayList<>());
+        Map<ContentAction, Set<String>> contentActionsByType = userProfile.getContentActions().getOrDefault(contentType, new HashMap<>());
 
+        List<String> contentIds = contentActionsByType.values()
+                .stream()
+                .flatMap(Set::stream)
+                .distinct()
+                .collect(Collectors.toList());
+
+        return contentRepository.findByIdIn(contentIds);
     }
 
     public List<String> getAllContentEntityUrls() {
