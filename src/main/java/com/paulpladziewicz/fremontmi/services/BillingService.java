@@ -275,22 +275,22 @@ public class BillingService {
             EventDataObjectDeserializer dataObjectDeserializer = event.getDataObjectDeserializer();
 
             switch (event.getType()) {
-                case "invoice.payment_failed":
-                    Invoice failedInvoice = (Invoice) dataObjectDeserializer.getObject().orElse(null);
-                    if (failedInvoice != null) {
-                        handlePaymentFailed(failedInvoice);
-                        // there is subscription data within; may not need invoice is
-                        System.out.println("Payment failed");
-                    }
-                    break;
-
-                case "customer.subscription.deleted":
-                    Subscription subscription = (Subscription) dataObjectDeserializer.getObject().orElse(null);
-                    if (subscription != null) {
-                        handleSubscriptionCancellation(subscription);
-                        System.out.println("Subscription canceled");
-                    }
-                    break;
+//                case "invoice.payment_failed":
+//                    Invoice failedInvoice = (Invoice) dataObjectDeserializer.getObject().orElse(null);
+//                    if (failedInvoice != null) {
+//                        handlePaymentFailed(failedInvoice);
+//                        // there is subscription data within; may not need invoice is
+//                        System.out.println("Payment failed");
+//                    }
+//                    break;
+//
+//                case "customer.subscription.deleted":
+//                    Subscription subscription = (Subscription) dataObjectDeserializer.getObject().orElse(null);
+//                    if (subscription != null) {
+//                        handleSubscriptionCancellation(subscription);
+//                        System.out.println("Subscription canceled");
+//                    }
+//                    break;
 
                 case "charge.dispute.created":
                     Dispute dispute = (Dispute) dataObjectDeserializer.getObject().orElse(null);
@@ -313,42 +313,40 @@ public class BillingService {
         }
     }
 
-    private void handleSubscriptionCancellation(Subscription subscription) {
-        String subscriptionId = subscription.getId();
-
-        // Retrieve the content by subscriptionId from the repository
-        Optional<Content> optionalContent = contentRepository.findByStripeDetails_SubscriptionId(subscriptionId);
-
-        if (optionalContent.isPresent()) {
-            Content content = optionalContent.get();
-
-            // Mark the content or subscription as canceled, you can set a status field or similar
-            content.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION.getStatus());
-            content.setVisibility(ContentVisibility.RESTRICTED.getVisibility());
-            contentRepository.save(content);
-
-            logger.info("Subscription {} canceled and content updated.", subscriptionId);
-        } else {
-            logger.warn("Content not found for subscription ID {}", subscriptionId);
-        }
-    }
-
-    private void handlePaymentFailed(Invoice failedInvoice) {
-        String invoiceId = failedInvoice.getId();
-
-        Optional<Content> optionalContent = contentRepository.findByStripeDetails_InvoiceId(invoiceId);
-
-        if (optionalContent.isPresent()) {
-            Content content = optionalContent.get();
-
-            content.setStatus(ContentStatus.PAYMENT_FAILED.getStatus());
-            contentRepository.save(content);
-
-            logger.info("Payment failed for invoice {} and content updated.", invoiceId);
-        } else {
-            logger.warn("Content not found for invoice ID {}", invoiceId);
-        }
-    }
+//    private void handleSubscriptionCancellation(Subscription subscription) {
+//        String subscriptionId = subscription.getId();
+//
+//        Optional<Content> optionalContent = contentRepository.findByStripeDetails_SubscriptionId(subscriptionId);
+//
+//        if (optionalContent.isPresent()) {
+//            Content content = optionalContent.get();
+//
+//            content.setStatus(ContentStatus.REQUIRES_ACTIVE_SUBSCRIPTION);
+//            content.setVisibility(ContentVisibility.RESTRICTED);
+//            contentRepository.save(content);
+//
+//            logger.info("Subscription {} canceled and content updated.", subscriptionId);
+//        } else {
+//            logger.warn("Content not found for subscription ID {}", subscriptionId);
+//        }
+//    }
+//
+//    private void handlePaymentFailed(Invoice failedInvoice) {
+//        String invoiceId = failedInvoice.getId();
+//
+//        Optional<Content> optionalContent = contentRepository.findByStripeDetails_InvoiceId(invoiceId);
+//
+//        if (optionalContent.isPresent()) {
+//            Content content = optionalContent.get();
+//
+//            content.setStatus(ContentStatus.PAYMENT_FAILED);
+//            contentRepository.save(content);
+//
+//            logger.info("Payment failed for invoice {} and content updated.", invoiceId);
+//        } else {
+//            logger.warn("Content not found for invoice ID {}", invoiceId);
+//        }
+//    }
 
     public String handleSubscriptionSuccess(ConfirmSubscriptionRequest confirmSubscriptionRequest) {
         String paymentStatus = confirmSubscriptionRequest.getPaymentStatus();
@@ -380,8 +378,8 @@ public class BillingService {
 
         billingRepository.save(subscriptionRecord);
 
-        content.setStatus(ContentStatus.ACTIVE.getStatus());
-        content.setVisibility(ContentVisibility.PUBLIC.getVisibility());
+        content.setStatus(ContentStatus.ACTIVE);
+        content.setVisibility(ContentVisibility.PUBLIC);
 
         Content savedContent = contentRepository.save(content);
 

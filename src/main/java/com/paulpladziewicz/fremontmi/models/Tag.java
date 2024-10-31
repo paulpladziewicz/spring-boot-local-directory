@@ -21,18 +21,18 @@ public class Tag {
 
     private int count;
 
-    private Map<String, Integer> countByContentType = new HashMap<>();
+    private Map<ContentType, Integer> countByContentType = new HashMap<>();
 
     public Tag(String name, String displayName) {
         this.name = name;
         this.displayName = displayName;
     }
 
-    public void incrementCountForContentType(String contentType) {
+    public void incrementCountForContentType(ContentType contentType) {
         this.countByContentType.put(contentType, this.countByContentType.getOrDefault(contentType, 0) + 1);
     }
 
-    public void decrementCountForContentType(String contentType) {
+    public void decrementCountForContentType(ContentType contentType) {
         this.countByContentType.computeIfPresent(contentType, (key, count) -> Math.max(count - 1, 0));
     }
 }

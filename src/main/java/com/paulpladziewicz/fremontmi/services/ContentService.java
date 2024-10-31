@@ -69,7 +69,7 @@ public class ContentService {
     }
 
     public Content findByPathname(String pathname, ContentType type) {
-        return contentRepository.findByPathname(pathname, String.valueOf(type))
+        return contentRepository.findByPathname(pathname, type)
                 .orElseThrow(() -> new ContentNotFoundException("Content not found with pathname: " + pathname + " and type: " + type));
     }
 
@@ -80,7 +80,7 @@ public class ContentService {
 
     public Page<Content> findByTagAndType(String tag, ContentType type, int page) {
         Pageable pageable = PageRequest.of(page, 15);
-        return contentRepository.findPublicContentByTagAndType(tag, type.getContentType(), pageable);
+        return contentRepository.findPublicContentByTagAndType(tag, type, pageable);
     }
 
     public List<Content> findByUserAndType(ContentType contentType) {
@@ -155,9 +155,9 @@ public class ContentService {
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("^-|-$", "");
 
-        basePathname = "/" + contentType.getContentType() + "/" + basePathname;
+        basePathname = "/" + contentType.name().toLowerCase() + "/" + basePathname;
 
-        List<Content> matchingPathnames = contentRepository.findByPathnameRegexAndType("^" + Pattern.quote(basePathname) + "(-\\d+)?$", contentType.getContentType());
+        List<Content> matchingPathnames = contentRepository.findByPathnameRegexAndType("^" + Pattern.quote(basePathname) + "(-\\d+)?$", contentType);
 
         return generatePathnameFromMatches(basePathname, matchingPathnames);
     }

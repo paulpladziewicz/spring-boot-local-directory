@@ -21,9 +21,9 @@ public class Content {
 
     private String pathname;
 
-    private String visibility = ContentVisibility.PUBLIC.getVisibility();
+    private ContentVisibility visibility = ContentVisibility.PUBLIC;
 
-    private String status = ContentStatus.ACTIVE.getStatus();
+    private ContentStatus status = ContentStatus.ACTIVE;
 
     private boolean nearby;
 

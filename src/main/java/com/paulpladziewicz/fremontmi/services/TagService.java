@@ -129,14 +129,14 @@ public class TagService {
             if (optionalTag.isPresent()) {
                 Tag existingTag = optionalTag.get();
                 validatedDisplayNames.add(existingTag.getDisplayName());  // Use existing display name from DB
-                existingTag.incrementCountForContentType(contentType.getContentType());
+                existingTag.incrementCountForContentType(contentType);
                 existingTag.setCount(existingTag.getCount() + 1);
                 tagRepository.save(existingTag);
             } else {
                 // Tag does not exist, create a new one
                 Tag newTag = new Tag(canonicalName, formattedDisplayName);
                 validatedDisplayNames.add(formattedDisplayName);  // Use the formatted display name
-                newTag.incrementCountForContentType(contentType.getContentType());
+                newTag.incrementCountForContentType(contentType);
                 newTag.setCount(1);
                 tagRepository.save(newTag);
             }
@@ -207,8 +207,7 @@ public class TagService {
                 existingTag.setCount(Math.max(0, updatedCount));  // Ensure count doesn't go below 0
 
                 // Decrement the count for the specific content type
-                existingTag.decrementCountForContentType(contentType.getContentType());
-
+                existingTag.decrementCountForContentType(contentType);
                 // Save changes if counts are updated
                 tagRepository.save(existingTag);
             }

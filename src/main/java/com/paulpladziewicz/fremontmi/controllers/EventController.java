@@ -95,13 +95,13 @@ public class EventController {
 
     @GetMapping("/event/{slug}")
     public String displayEvent(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.EVENT.getContentType() + '/' + slug, ContentType.EVENT);
+        Content content = contentService.findByPathname('/' + ContentType.EVENT.name().toLowerCase() + '/' + slug, ContentType.EVENT);
         Event detail = (Event) content.getDetail();
 
 
         detail.setDescription(htmlSanitizationService.sanitizeHtml(detail.getDescription().replace("\n", "<br/>")));
 
-        if ("canceled".equals(content.getStatus())) {
+        if (content.getStatus() == ContentStatus.CANCELLED) {
             model.addAttribute("canceled", "This event has been canceled.");
         }
 
@@ -119,7 +119,7 @@ public class EventController {
 
     @GetMapping("/edit/event/{slug}")
     public String displayEditForm(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.EVENT.getContentType() + '/' + slug, ContentType.EVENT);
+        Content content = contentService.findByPathname('/' + ContentType.EVENT.name().toLowerCase() + '/' + slug, ContentType.EVENT);
         EventDto event = createDto(content);
 
         String tagsAsString = String.join(",", event.getTags());

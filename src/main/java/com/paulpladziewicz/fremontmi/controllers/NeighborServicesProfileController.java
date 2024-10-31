@@ -100,7 +100,7 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/neighbor-services-profile/{slug}")
     public String viewNeighborService(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType() + '/' + slug, ContentType.NEIGHBOR_SERVICES_PROFILE);
+        Content content = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.name().toLowerCase() + '/' + slug, ContentType.NEIGHBOR_SERVICES_PROFILE);
         NeighborServicesProfile  detail = (NeighborServicesProfile) content.getDetail();
 
         boolean createdByUser;
@@ -150,7 +150,7 @@ public class NeighborServicesProfileController {
 
     @GetMapping("/edit/neighbor-services-profile/{slug}")
     public String editNeighborServiceProfilePage(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.getContentType() + '/' + slug, ContentType.NEIGHBOR_SERVICES_PROFILE);
+        Content content = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.name().toLowerCase() + '/' + slug, ContentType.NEIGHBOR_SERVICES_PROFILE);
         NeighborServicesProfileDto neighborServicesProfile = createDto(content);
 
         String tagsAsString = String.join(",", neighborServicesProfile.getTags());

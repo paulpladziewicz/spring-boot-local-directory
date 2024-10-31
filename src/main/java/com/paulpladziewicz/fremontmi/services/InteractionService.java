@@ -85,13 +85,13 @@ public class InteractionService {
 
     public void cancel(String contentId) {
         Content content = contentService.findById(contentId);
-        content.setStatus(ContentStatus.CANCELLED.getStatus());
+        content.setStatus(ContentStatus.CANCELLED);
         contentService.save(content);
     }
 
     public void reactivate(String contentId) {
         Content content = contentService.findById(contentId);
-        content.setStatus(ContentStatus.ACTIVE.getStatus());
+        content.setStatus(ContentStatus.ACTIVE);
         contentService.save(content);
     }
 }

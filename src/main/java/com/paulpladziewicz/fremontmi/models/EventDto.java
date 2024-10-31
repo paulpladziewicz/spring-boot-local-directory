@@ -13,7 +13,7 @@ import java.util.List;
 public class EventDto implements ContentDto {
     private String contentId;
 
-    private String status;
+    private ContentStatus status;
 
     private boolean nearby;
 
