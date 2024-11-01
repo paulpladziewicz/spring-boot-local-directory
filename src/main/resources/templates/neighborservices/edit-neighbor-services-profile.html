@@ -103,7 +103,7 @@
                 <section class="my-5">
                     <h3>Delete NeighborServices™ Profile</h3>
                     <p>Once deleted, this action cannot be undone, and all data will be permanently lost.</p>
-                    <form method="post" th:action="@{/delete/business}" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                    <form method="post" th:action="@{/delete/neighbor-services-profile}" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                         <input type="hidden" name="contentId" th:value="${neighborServicesProfile.contentId}" />
                         <button type="submit" class="btn btn-danger">Delete NeighborServices™ Profile</button>
                     </form>
