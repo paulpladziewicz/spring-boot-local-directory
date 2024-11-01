@@ -26,9 +26,9 @@ public class NeighborServicesProfile implements ContentDetail {
             throw new IllegalArgumentException("Invalid content detail type for Business.");
         }
 
-        this.title = profile.getTitle();
-        this.description = profile.getDescription();
-        this.email = profile.getEmail();
-        this.neighborServices = profile.getNeighborServices();
+        setTitle(profile.getTitle());
+        setDescription(profile.getDescription());
+        setEmail(profile.getEmail());
+        setNeighborServices(profile.getNeighborServices());
     }
 }

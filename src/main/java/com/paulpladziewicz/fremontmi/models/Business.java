@@ -28,13 +28,13 @@ public class Business implements ContentDetail {
             throw new IllegalArgumentException("Invalid content detail type for Business.");
         }
 
-        this.setTitle(business.getTitle());
-        this.setHeadline(business.getHeadline());
-        this.setDescription(business.getDescription());
-        this.setAddress(business.getAddress());
-        this.setPhoneNumber(business.getPhoneNumber());
-        this.setEmail(business.getEmail());
-        this.setWebsite(business.getWebsite());
-        this.setDisplayEmail(business.isDisplayEmail());
+        setTitle(business.getTitle());
+        setHeadline(business.getHeadline());
+        setDescription(business.getDescription());
+        setAddress(business.getAddress());
+        setPhoneNumber(business.getPhoneNumber());
+        setEmail(business.getEmail());
+        setWebsite(business.getWebsite());
+        setDisplayEmail(business.isDisplayEmail());
     }
 }

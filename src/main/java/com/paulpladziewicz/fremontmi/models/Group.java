@@ -19,7 +19,8 @@ public class Group implements ContentDetail {
         if (!(contentDto instanceof GroupDto updatedGroup)) {
             throw new IllegalArgumentException("ContentDto is not a GroupDto");
         }
-        this.setTitle(updatedGroup.getTitle());
-        this.setDescription(updatedGroup.getDescription());
+
+        setTitle(updatedGroup.getTitle());
+        setDescription(updatedGroup.getDescription());
     }
 }

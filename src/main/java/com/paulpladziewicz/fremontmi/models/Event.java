@@ -25,17 +25,20 @@ public class Event implements ContentDetail {
 
     private List<String> formattedTimes;
 
+    private String externalUrl;
+
     @Override
     public void update(Content content, ContentDto contentDto) {
         if (!(contentDto instanceof EventDto event)) {
             throw new IllegalArgumentException("Invalid content detail type for Business.");
         }
 
-        this.setTitle(event.getTitle());
-        this.setDescription(event.getDescription());
-        this.setLocationName(event.getLocationName());
-        this.setAddress(event.getAddress());
-        this.setDays(event.getDays());
+        setTitle(event.getTitle());
+        setDescription(event.getDescription());
+        setLocationName(event.getLocationName());
+        setAddress(event.getAddress());
+        setDays(event.getDays());
+        setExternalUrl(event.getExternalUrl());
 
         populateFormattedTimes(this);
     }

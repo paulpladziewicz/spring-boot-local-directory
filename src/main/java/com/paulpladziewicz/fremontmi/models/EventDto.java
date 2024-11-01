@@ -43,4 +43,6 @@ public class EventDto implements ContentDto {
     @NotEmpty(message = "Event must have at least one date and time.")
     @Valid
     private List<DayEvent> days;
+
+    private String externalUrl;
 }
