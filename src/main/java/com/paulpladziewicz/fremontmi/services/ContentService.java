@@ -121,9 +121,11 @@ public class ContentService {
     }
 
     public void delete(String contentId) {
+        UserProfile userProfile = userService.getUserProfile();
         Content content = findById(contentId);
         checkPermission(content);
         tagService.removeTags(content.getTags(), content.getType());
+        removeContentFromUserProfile(userProfile, content.getType(), ContentAction.CREATED, contentId);
         contentRepository.deleteById(contentId);
     }
 
@@ -195,6 +197,21 @@ public class ContentService {
         }
 
         return basePathname;
+    }
+
+    private void removeContentFromUserProfile(UserProfile userProfile, ContentType contentType, ContentAction action, String contentId) {
+        Map<ContentAction, Set<String>> actions = userProfile.getContentActions().get(contentType);
+
+        if (actions != null && actions.containsKey(action)) {
+            Set<String> contentIds = actions.get(action);
+            contentIds.remove(contentId);
+
+            if (contentIds.isEmpty()) {
+                actions.remove(action);
+            }
+        }
+
+        userService.saveUserProfile(userProfile);
     }
 }
 
