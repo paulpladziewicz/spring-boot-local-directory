@@ -155,28 +155,23 @@ public class TagService {
 
         List<String> validatedDisplayNames = new ArrayList<>();
 
-        if (!tagsToAdd.isEmpty()) {
-            List<String> tagsToAddDisplayNames = newDisplayNames.stream()
-                    .filter(tag -> tagsToAdd.contains(generateCanonicalName(tag)))
-                    .collect(Collectors.toList());
+        for (String displayName : newDisplayNames) {
+            String canonicalName = generateCanonicalName(displayName);
 
-            validatedDisplayNames.addAll(addTags(tagsToAddDisplayNames, contentType));
+            if (tagsToAdd.contains(canonicalName)) {
+                validatedDisplayNames.addAll(addTags(List.of(displayName), contentType));
+            } else if (!tagsToRemove.contains(canonicalName)) {
+                Optional<Tag> existingTag = tagRepository.findByName(canonicalName);
+                validatedDisplayNames.add(existingTag.map(Tag::getDisplayName).orElse(formatDisplayName(displayName)));
+            }
         }
 
         if (!tagsToRemove.isEmpty()) {
             List<String> tagsToRemoveDisplayNames = oldDisplayNames.stream()
                     .filter(tag -> tagsToRemove.contains(generateCanonicalName(tag)))
                     .collect(Collectors.toList());
-
             removeTags(tagsToRemoveDisplayNames, contentType);
         }
-
-        List<String> existingValidatedDisplayNames = newDisplayNames.stream()
-                .filter(tag -> !tagsToAdd.contains(generateCanonicalName(tag)))
-                .map(this::formatDisplayName)
-                .toList();
-
-        validatedDisplayNames.addAll(existingValidatedDisplayNames);
 
         return validatedDisplayNames;
     }
