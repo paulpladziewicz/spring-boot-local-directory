@@ -102,7 +102,7 @@ public class ContentService {
 
     public Page<Content> findEvents(int page) {
         LocalDateTime startOfToday = LocalDateTime.now().with(LocalTime.MIDNIGHT);
-        Pageable pageable = PageRequest.of(page, 15);
+        Pageable pageable = PageRequest.of(page, 3);
         return contentRepository.findEventsAfterStartTime(startOfToday, pageable);
     }
 

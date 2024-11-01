@@ -7,7 +7,7 @@
 </head>
 <body>
 <header th:insert="~{partials/navbar}"></header>
-<main class="bg-secondary pt-4 pb-5">
+<main class="bg-secondary pt-4 pb-5" x-data="loadMore()">
 
     <div class="container">
 
@@ -26,48 +26,43 @@
             <a href="/my/events" class="btn btn-link fw-semibold p-0">My Events</a>
         </div>
 
-        <div class="row">
-
+        <div class="row" x-ref="eventContainer">
             <div th:if="${#lists.isEmpty(events.getContent())}" class="my-4">
                 <div>
                     There are no events available at the moment.
                 </div>
             </div>
-
-            <div th:each="event : ${events.getContent()}" class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="fw-semibold text-danger mt-0 mb-1" th:if="${event.status == 'CANCELED'}">Canceled</p>
-                        <h4 class="h3 mb-1" th:text="${event.detail.title}">Event Title</h4>
-
-                        <div th:if="${event.detail.nextAvailableDayEvent != null}">
-                            <p class="text-muted fw-semibold mb-2"
-                               th:text="${#temporals.format(event.detail.nextAvailableDayEvent.startTime, 'MMMM dd, yyyy h:mm a')}">
-                                Next Available Time
-                            </p>
-                            <p th:if="${event.detail.availableDayEventCount > 0}" class="text-muted">
-                                More dates and times available
-                            </p>
-                        </div>
-
-                        <p class="mb-3" th:text="${#strings.length(event.detail.description) > 120 ? #strings.substring(event.detail.description, 0, 120) + '...' : event.detail.description}">
-                            Event Description
-                        </p>
-
-                        <a th:href="${event.external} ? ${event.detail.externalUrl} : ${event.pathname}"
-                           th:attr="target=${event.external} ? '_blank' : '_self'"
-                           class="btn btn-lg btn-link p-0">
-                            View Event<i class="ai-arrow-right ms-2"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
+            <th:block th:insert="~{events/partials/list-events :: listEvents}"></th:block>
+        </div>
+        <div th:if="${events.hasNext()}" class="text-center mt-4">
+            <button class="btn btn-primary" id="load-more-btn" @click="loadMore()">Load More</button>
         </div>
 
     </div>
 
 </main>
+
+<script>
+    function loadMore() {
+        return {
+            currentPage: 0,
+            async loadMore() {
+                const response = await fetch(`/events/page/${this.currentPage}`);
+                if (response.ok) {
+                    const newContent = await response.text();
+                    this.$refs.eventContainer.insertAdjacentHTML('beforeend', newContent);
+                    this.currentPage += 1;
+
+                    if (!newContent.includes('hasNext')) {
+                        document.getElementById('load-more-btn').style.display = 'none';
+                    }
+                } else {
+                    console.error('Failed to load more events');
+                }
+            }
+        };
+    }
+</script>
 <script th:src="@{/js/theme.min.js}" th:fragment="themeScriptFragment"></script>
 <footer th:replace="~{partials/footer}"></footer>
 </body>

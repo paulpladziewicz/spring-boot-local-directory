@@ -122,6 +122,13 @@ public class EventController {
         return "events/events";
     }
 
+    @GetMapping("/events/page/{currentPage}")
+    public String displayNextEvents(@PathVariable int currentPage, Model model) {
+        Page<Content> events = contentService.findEvents(currentPage + 1);
+        model.addAttribute("events", events);
+        return "events/partials/list-events";
+    }
+
     @GetMapping("/my/events")
     public String displayMyEvents(Model model) {
         List<Content> events = contentService.findByUserAndType(ContentType.EVENT);
