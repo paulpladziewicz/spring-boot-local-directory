@@ -36,7 +36,7 @@ public class ContentService {
         content.setDetail(type);
         content.getDetail().update(content, contentValues);
         // TODO what happens if the tags are not defined or null
-        List<String> validatedTags = tagService.addTags(content.getTags(), content.getType());
+        List<String> validatedTags = tagService.addTags(contentValues.getTags(), content.getType());
         content.setTags(validatedTags);
         content.setPathname(createUniquePathname(content.getDetail().getTitle(), type));
         content.setExternal(contentValues.isExternal());
@@ -143,7 +143,8 @@ public class ContentService {
         List<String> newTags = updatedContent.getTags();
 
         if (newTags != null) {
-            tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), content.getType());
+            List<String> updatedTags = tagService.updateTags(newTags, oldTags != null ? oldTags : new ArrayList<>(), content.getType());
+            content.setTags(updatedTags);
         }
 
         if (!updatedContent.getTitle().equals(content.getDetail().getTitle())) {

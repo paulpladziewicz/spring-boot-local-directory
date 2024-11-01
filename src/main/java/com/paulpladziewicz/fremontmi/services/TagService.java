@@ -138,8 +138,7 @@ public class TagService {
     }
 
     @Transactional
-    public void updateTags(List<String> newDisplayNames, List<String> oldDisplayNames, ContentType contentType) {
-        // Generate canonical names for both old and new tags
+    public List<String> updateTags(List<String> newDisplayNames, List<String> oldDisplayNames, ContentType contentType) {
         Set<String> newCanonicalTags = newDisplayNames.stream()
                 .map(this::generateCanonicalName)
                 .collect(Collectors.toSet());
@@ -148,23 +147,22 @@ public class TagService {
                 .map(this::generateCanonicalName)
                 .collect(Collectors.toSet());
 
-        // Determine which tags need to be added and removed
         Set<String> tagsToAdd = new HashSet<>(newCanonicalTags);
-        tagsToAdd.removeAll(oldCanonicalTags); // Tags that exist in new but not in old
+        tagsToAdd.removeAll(oldCanonicalTags);
 
         Set<String> tagsToRemove = new HashSet<>(oldCanonicalTags);
-        tagsToRemove.removeAll(newCanonicalTags); // Tags that exist in old but not in new
+        tagsToRemove.removeAll(newCanonicalTags);
 
-        // Add new tags
+        List<String> validatedDisplayNames = new ArrayList<>();
+
         if (!tagsToAdd.isEmpty()) {
             List<String> tagsToAddDisplayNames = newDisplayNames.stream()
                     .filter(tag -> tagsToAdd.contains(generateCanonicalName(tag)))
                     .collect(Collectors.toList());
 
-            addTags(tagsToAddDisplayNames, contentType);
+            validatedDisplayNames.addAll(addTags(tagsToAddDisplayNames, contentType));
         }
 
-        // Remove old tags
         if (!tagsToRemove.isEmpty()) {
             List<String> tagsToRemoveDisplayNames = oldDisplayNames.stream()
                     .filter(tag -> tagsToRemove.contains(generateCanonicalName(tag)))
@@ -172,6 +170,15 @@ public class TagService {
 
             removeTags(tagsToRemoveDisplayNames, contentType);
         }
+
+        List<String> existingValidatedDisplayNames = newDisplayNames.stream()
+                .filter(tag -> !tagsToAdd.contains(generateCanonicalName(tag)))
+                .map(this::formatDisplayName)
+                .toList();
+
+        validatedDisplayNames.addAll(existingValidatedDisplayNames);
+
+        return validatedDisplayNames;
     }
 
     @Transactional

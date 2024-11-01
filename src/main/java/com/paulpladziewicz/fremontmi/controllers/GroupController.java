@@ -175,6 +175,7 @@ public class GroupController {
         group.setPathname(content.getPathname());
         group.setTitle(groupDetail.getTitle());
         group.setDescription(groupDetail.getDescription());
+        group.setTags(content.getTags());
 
         return group;
     }
