@@ -3,6 +3,7 @@ package com.paulpladziewicz.fremontmi.models;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
@@ -22,6 +23,7 @@ public class Content {
 
     private ContentType type;
 
+    @Indexed
     private String pathname;
 
     private ContentVisibility visibility = ContentVisibility.PUBLIC;
