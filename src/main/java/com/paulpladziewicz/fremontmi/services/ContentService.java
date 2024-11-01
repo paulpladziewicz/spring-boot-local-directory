@@ -161,7 +161,7 @@ public class ContentService {
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("^-|-$", "");
 
-        basePathname = "/" + contentType.name().toLowerCase() + "/" + basePathname;
+        basePathname = "/" + contentType.toHyphenatedString() + "/" + basePathname;
 
         List<Content> matchingPathnames = contentRepository.findByPathnameRegexAndType("^" + Pattern.quote(basePathname) + "(-\\d+)?$", contentType);
 
