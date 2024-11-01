@@ -8,7 +8,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,7 +18,6 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserRepository userRepository;
@@ -32,7 +30,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers(HttpMethod.POST, "/api/upload","/register", "/contact", "/subscribe", "/api/stripe/**", "/article-contact", "/taqueria", "/contact/neighbor-services-profile").permitAll()
-                .requestMatchers(HttpMethod.GET, "/admin/**").hasRole("ADMIN")
                 .requestMatchers("/overview/**","/articles/**","/groups/","/groups/**","/events","/events/**", "/register", "/forgot-password", "/reset-password", "/forgot-username", "/css/**", "/privacy-policy", "/terms-of-service", "/js/**", "/images/**", "/favicon.ico", "/error", "/login", "/login?error", "/login?error=*", "/login?logout", "/businesses", "/businesses/**", "/neighbor-services", "/neighbor-services/**", "/confirm", "/tagging-guidelines", "/create/neighbor-services-profile/overview", "/create/business/overview", "/", "/robots.txt", "/sitemap.xml", "/health", "/group/**", "/event/**", "/business/**", "/neighbor-services-profile/**").permitAll()
                 .anyRequest().authenticated()
         );

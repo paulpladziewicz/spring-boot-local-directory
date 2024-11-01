@@ -52,7 +52,6 @@ public class EventController {
     }
 
     @GetMapping("/admin/create/event")
-    @PreAuthorize("hasRole('ADMIN')")
     public String displayAdminForm(Model model) {
         Event event = new Event();
 
