@@ -75,6 +75,7 @@ public class EventController {
 
         if (eventDto.getDays() == null || eventDto.getDays().isEmpty()) {
             result.rejectValue("days", "error.event", "Please provide at least one date and time for the event.");
+            model.addAttribute("tagsAsString", String.join(",", eventDto.getTags()));
             return "events/create-event";
         }
 
@@ -90,6 +91,8 @@ public class EventController {
             } else {
                 result.rejectValue("days", "error.event", message);
             }
+
+            model.addAttribute("tagsAsString", String.join(",", eventDto.getTags()));
 
             return "events/create-event";
         }
@@ -140,7 +143,7 @@ public class EventController {
 
     @GetMapping("/event/{slug}")
     public String displayEvent(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.EVENT.name().toLowerCase() + '/' + slug, ContentType.EVENT);
+        Content content = contentService.findByPathname('/' + ContentType.EVENT.toHyphenatedString() + '/' + slug, ContentType.EVENT);
         Event detail = (Event) content.getDetail();
 
 
@@ -164,7 +167,7 @@ public class EventController {
 
     @GetMapping("/edit/event/{slug}")
     public String displayEditForm(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.EVENT.name().toLowerCase() + '/' + slug, ContentType.EVENT);
+        Content content = contentService.findByPathname('/' + ContentType.EVENT.toHyphenatedString() + '/' + slug, ContentType.EVENT);
         EventDto event = createDto(content);
 
         String tagsAsString = String.join(",", event.getTags());

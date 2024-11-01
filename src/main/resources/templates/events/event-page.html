@@ -15,6 +15,13 @@
 <main>
     <div class="container my-4">
         <div class="row">
+            <div class="col-md-10 col-lg-8 mx-auto">
+                <div class="d-flex justify-content-end align-items-center">
+                    <a th:if="${isAdmin}" th:href="'/edit'+${event.pathname}" class="btn btn-secondary btn-icon" aria-label="Edit" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                        <i class="ai-edit-alt"></i>
+                    </a>
+                </div>
+            </div>
 
             <div class="col-md-10 col-lg-8 mx-auto">
                 <nav aria-label="breadcrumb">
@@ -60,10 +67,6 @@
                     </div>
 
                 </section>
-
-                <a th:if="${isAdmin}" th:href="'/edit' + ${event.pathname}" class="btn btn-outline-primary">Edit Event</a>
-
-
             </div>
         </div>
     </div>
