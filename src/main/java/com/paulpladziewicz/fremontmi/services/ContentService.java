@@ -35,7 +35,6 @@ public class ContentService {
         content.setType(type);
         content.setDetail(type);
         content.getDetail().update(content, contentValues);
-        // TODO what happens if the tags are not defined or null
         List<String> validatedTags = tagService.addTags(contentValues.getTags(), content.getType());
         content.setTags(validatedTags);
         content.setPathname(createUniquePathname(content.getDetail().getTitle(), type));
