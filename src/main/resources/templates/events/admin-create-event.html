@@ -64,6 +64,12 @@
                         <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="mt-1 text-danger"></p>
                     </div>
 
+                    <div class="form-group mb-3">
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="url">External URL</label>
+                        <input type="text" class="form-control" id="url" th:field="*{externalUrl}" placeholder="Enter external URL">
+                        <div th:if="${#fields.hasErrors('externalUrl')}" th:errors="*{externalUrl}" class="alert alert-danger"></div>
+                    </div>
+
                     <div class="mt-4">
                         <h4>Event Dates and Times</h4>
                         <div id="dayEvents">

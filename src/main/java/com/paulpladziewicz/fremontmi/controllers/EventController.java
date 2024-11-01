@@ -203,6 +203,7 @@ public class EventController {
         dto.setDescription(eventDetail.getDescription());
         dto.setLocationName(eventDetail.getLocationName());
         dto.setAddress(eventDetail.getAddress());
+        dto.setExternalUrl(eventDetail.getExternalUrl());
         dto.setDays(eventDetail.getDays());
 
         return dto;
