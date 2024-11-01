@@ -68,14 +68,8 @@ public class EventController {
     }
 
     @GetMapping("/events")
-    public String displayEvents(@RequestParam(value = "tag", required = false) String tag, @RequestParam(defaultValue = "0") int page,  Model model) {
-        Page<Content> events;
-        if (tag != null && !tag.isEmpty()) {
-            events = contentService.findByTagAndType(tag, ContentType.EVENT, page);
-
-        } else {
-            events = contentService.findByType(ContentType.EVENT, page);
-        }
+    public String displayEvents(@RequestParam(defaultValue = "0") int page,  Model model) {
+        Page<Content> events = contentService.findEvents(page);
 
         model.addAttribute("events", events);
         model.addAttribute("eventsList", events.getContent());

@@ -2,8 +2,8 @@ package com.paulpladziewicz.fremontmi.models;
 
 public enum ContentStatus {
     ACTIVE,
-    REQUIRES_ACTIVE_SUBSCRIPTION,
+    EXPIRED,
     CANCELLED,
-    PAYMENT_FAILED,
-    DELETED
+    REQUIRES_ACTIVE_SUBSCRIPTION,
+    PAYMENT_FAILED
 }

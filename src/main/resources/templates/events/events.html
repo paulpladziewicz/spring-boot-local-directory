@@ -37,20 +37,8 @@
             <div th:each="event : ${eventsList}" class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <p class="fw-semibold text-danger mt-0 mb-1" th:if="${event.status == 'canceled'}">Canceled</p>
+                        <p class="fw-semibold text-danger mt-0 mb-1" th:if="${event.status == 'CANCELED'}">Canceled</p>
                         <h4 class="h3 mb-1" th:text="${event.detail.title}">Event Title</h4>
-
-                        <div th:if="${event.detail.nextAvailableDayEvent != null}">
-                            <p class="text-muted fw-semibold mb-2"
-                               th:text="${#temporals.format(event.detail.nextAvailableDayEvent.startTime, 'MMMM dd, yyyy h:mm a')}">
-                                Next Available Time
-                            </p>
-                            <p th:if="${event.detail.moreDayEventsCount > 0}" class="text-muted">
-                                and <span th:text="${event.detail.moreDayEventsCount}">0</span> more day(s) available
-                            </p>
-                        </div>
-
-                        <p th:if="${event.detail.nextAvailableDayEvent == null}" class="text-muted">No upcoming times available</p>
 
                         <p class="mb-3" th:text="${#strings.length(event.detail.description) > 120 ? #strings.substring(event.detail.description, 0, 120) + '...' : event.detail.description}">
                             Event Description

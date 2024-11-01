@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,5 +31,8 @@ public interface ContentRepository extends MongoRepository<Content, String> {
     // TODO find by profile value here...
     @Query("{ 'type': ?0, 'createdBy': ?1 }")
     Optional<Content> findByTypeAndUserCreatedBy(ContentType contentType, String userId);
+
+    @Query("{ 'detail.days.startTime': { $gte: ?0 } }")
+    Page<Content> findEventsAfterStartTime(LocalDateTime startTime, Pageable pageable);
 }
 

@@ -4,20 +4,23 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Data
 @Document(collection = "content")
+@CompoundIndexes({
+    @CompoundIndex(name = "event_start_time_idx", def = "{'detail.days.startTime': 1}")
+})
 public class Content {
 
     @Id
     private String id;
 
     private ContentType type;
-
-    private LocalDateTime expiresAt;
 
     private String pathname;
 
@@ -27,7 +30,7 @@ public class Content {
 
     private boolean nearby;
 
-    private Boolean external;
+    private boolean external;
 
     private ContentDetail detail;
 
@@ -53,27 +56,17 @@ public class Content {
 
     private LocalDateTime updatedAt;
 
-    private Boolean reviewed = false;
+    private boolean reviewed = false;
 
     @Version
     private Long version;
 
     public void setDetail(ContentType type) {
-        switch (type) {
-            case GROUP:
-                this.detail = new Group();
-                break;
-            case EVENT:
-                this.detail = new Event();
-                break;
-            case BUSINESS:
-                this.detail = new Business();
-                break;
-            case NEIGHBOR_SERVICES_PROFILE:
-                this.detail = new NeighborServicesProfile();
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported content type: " + type);
-        }
+        this.detail = switch (type) {
+            case GROUP -> new Group();
+            case EVENT -> new Event();
+            case BUSINESS -> new Business();
+            case NEIGHBOR_SERVICES_PROFILE -> new NeighborServicesProfile();
+        };
     }
 }

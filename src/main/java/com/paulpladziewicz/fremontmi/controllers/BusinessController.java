@@ -67,7 +67,7 @@ public class BusinessController {
 
     @GetMapping("/business/{slug}")
     public String viewBusiness(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.BUSINESS.name().toLowerCase() + '/' + slug, ContentType.BUSINESS);
+        Content content = contentService.findByPathname('/' + ContentType.BUSINESS.toHyphenatedString() + '/' + slug, ContentType.BUSINESS);
         Business detail = (Business) content.getDetail();
 
         detail.setDescription(htmlSanitizationService.sanitizeHtml(detail.getDescription().replace("\n", "<br/>")));
@@ -100,7 +100,7 @@ public class BusinessController {
 
     @GetMapping("/edit/business/{slug}")
     public String editBusiness(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.BUSINESS.name().toLowerCase() + '/' + slug, ContentType.BUSINESS);
+        Content content = contentService.findByPathname('/' + ContentType.BUSINESS.toHyphenatedString() + '/' + slug, ContentType.BUSINESS);
         BusinessDto business = createDto(content);
 
         String tagsAsString = String.join(",", business.getTags());

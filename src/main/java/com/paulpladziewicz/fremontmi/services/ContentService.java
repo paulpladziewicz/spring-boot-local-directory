@@ -4,13 +4,12 @@ import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
 import com.paulpladziewicz.fremontmi.exceptions.PermissionDeniedException;
 import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -98,6 +97,12 @@ public class ContentService {
 
     public Optional<Content> findByTypeAndUserCreatedBy(ContentType contentType) {
         return contentRepository.findByTypeAndUserCreatedBy(contentType, userService.getUserId());
+    }
+
+    public Page<Content> findEvents(int page) {
+        LocalDateTime startOfToday = LocalDateTime.now().with(LocalTime.MIDNIGHT);
+        Pageable pageable = PageRequest.of(page, 15);
+        return contentRepository.findEventsAfterStartTime(startOfToday, pageable);
     }
 
     public List<String> getAllContentEntityUrls() {

@@ -4,6 +4,9 @@ public enum ContentType {
     GROUP,
     EVENT,
     BUSINESS,
-    NEIGHBOR_SERVICES_PROFILE,
-    ARTICLE
+    NEIGHBOR_SERVICES_PROFILE;
+
+    public String toHyphenatedString() {
+        return this.name().toLowerCase().replace('_', '-');
+    }
 }
