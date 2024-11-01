@@ -126,8 +126,8 @@ public class BusinessController {
     }
 
     @PostMapping("/delete/business")
-    public String deleteBusiness(@RequestParam("businessId") String businessId) {
-        contentService.delete(businessId);
+    public String deleteBusiness(@RequestParam("contentId") String contentId) {
+        contentService.delete(contentId);
 
         return "redirect:/my/businesses";
     }

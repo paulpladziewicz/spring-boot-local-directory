@@ -191,8 +191,8 @@ public class EventController {
     }
 
     @PostMapping("/delete/event")
-    public String deleteGroup(@NotNull @RequestParam("eventId") String eventId) {
-        contentService.delete(eventId);
+    public String deleteGroup(@NotNull @RequestParam("contentId") String contentId) {
+        contentService.delete(contentId);
 
         return "redirect:/events";
     }
