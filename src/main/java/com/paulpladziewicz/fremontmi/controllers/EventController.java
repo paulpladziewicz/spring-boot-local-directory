@@ -9,12 +9,12 @@ import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,21 +78,49 @@ public class EventController {
             return "events/create-event";
         }
 
-        Content savedEvent = contentService.create(ContentType.EVENT, eventDto);
+        try {
+            Content savedEvent = contentService.create(ContentType.EVENT, eventDto);
+            return "redirect:" + savedEvent.getPathname();
+        } catch (IllegalArgumentException e) {
+            String message = e.getMessage();
 
-        return "redirect:" + savedEvent.getPathname();
+            int index = extractIndexFromMessage(message);
+            if (index >= 0) {
+                result.rejectValue("days[" + index + "].endTime", "error.event", "End time must be after start time.");
+            } else {
+                result.rejectValue("days", "error.event", message);
+            }
+
+            return "events/create-event";
+        }
     }
 
     @GetMapping("/events")
     public String displayEvents(@RequestParam(defaultValue = "0") int page,  Model model) {
         Page<Content> events = contentService.findEvents(page);
 
+        LocalDateTime now = LocalDateTime.now();
+
+        events.getContent().forEach(obj -> {
+            if (obj.getDetail() instanceof Event event) {
+                List<DayEvent> futureDayEvents = event.getDays().stream()
+                        .filter(dayEvent -> dayEvent.getStartTime().isAfter(now))
+                        .toList();
+
+                if (!futureDayEvents.isEmpty()) {
+                    event.setNextAvailableDayEvent(futureDayEvents.getFirst());
+                    event.setAvailableDayEventCount(futureDayEvents.size() - 1);
+                } else {
+                    event.setNextAvailableDayEvent(null);
+                    event.setAvailableDayEventCount(0);
+                }
+            }
+        });
+
         model.addAttribute("events", events);
-        model.addAttribute("eventsList", events.getContent());
 
         return "events/events";
     }
-
 
     @GetMapping("/my/events")
     public String displayMyEvents(Model model) {
@@ -207,5 +235,14 @@ public class EventController {
         dto.setDays(eventDetail.getDays());
 
         return dto;
+    }
+
+
+    private int extractIndexFromMessage(String message) {
+        try {
+            return Integer.parseInt(message.replaceAll("[^0-9]", "")) - 1;
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 }

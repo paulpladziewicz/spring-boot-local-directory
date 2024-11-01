@@ -1,6 +1,7 @@
 package com.paulpladziewicz.fremontmi.models;
 
 import lombok.Data;
+import org.springframework.data.annotation.Transient;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,9 +20,13 @@ public class Event implements ContentDetail {
 
     private String address;
 
-    private LocalDateTime soonestStartTime;
-
     private List<DayEvent> days;
+
+    @Transient
+    private DayEvent nextAvailableDayEvent;
+
+    @Transient
+    private int availableDayEventCount;
 
     private List<String> formattedTimes;
 
@@ -38,23 +43,19 @@ public class Event implements ContentDetail {
         setLocationName(event.getLocationName());
         setAddress(event.getAddress());
         setDays(event.getDays());
+        validateEventTimes(days);
         setExternalUrl(event.getExternalUrl());
 
         populateFormattedTimes(this);
     }
 
-    private void validateEventTimes(Event event) {
-        LocalDateTime soonestStartTime = event.getDays().stream()
-                .map(DayEvent::getStartTime)
-                .min(LocalDateTime::compareTo)
-                .orElse(null);
-        event.setSoonestStartTime(soonestStartTime);
-
-        event.getDays().forEach(dayEvent -> {
+    public void validateEventTimes(List<DayEvent> days) {
+        for (int i = 0; i < days.size(); i++) {
+            DayEvent dayEvent = days.get(i);
             if (dayEvent.getEndTime() != null && dayEvent.getEndTime().isBefore(dayEvent.getStartTime())) {
-                throw new IllegalArgumentException("End time(s) must be after the start time.");
+                throw new IllegalArgumentException("End time must be after start time for event date #" + (i + 1));
             }
-        });
+        }
     }
 
     public void populateFormattedTimes(Event event) {
