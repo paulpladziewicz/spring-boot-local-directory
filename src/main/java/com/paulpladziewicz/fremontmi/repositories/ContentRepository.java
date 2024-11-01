@@ -34,5 +34,8 @@ public interface ContentRepository extends MongoRepository<Content, String> {
 
     @Query("{ 'detail.days.startTime': { $gte: ?0 } }")
     Page<Content> findEventsAfterStartTime(LocalDateTime startTime, Pageable pageable);
+
+    @Query(value = "{ 'visibility': 'PUBLIC' }", fields = "{ 'pathname': 1 }")
+    List<Content> findAllPublicContentPathnames();
 }
 

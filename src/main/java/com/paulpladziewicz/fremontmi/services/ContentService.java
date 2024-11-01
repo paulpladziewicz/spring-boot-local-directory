@@ -107,7 +107,12 @@ public class ContentService {
     }
 
     public List<String> getAllContentEntityUrls() {
-        return new ArrayList<>();
+        List<Content> publicContent = contentRepository.findAllPublicContentPathnames();
+        String baseUrl = "https://fremontmi.com";
+
+        return publicContent.stream()
+                .map(content -> baseUrl + content.getPathname())
+                .collect(Collectors.toList());
     }
 
     public Content update(String contentId, ContentDto updatedContent) {

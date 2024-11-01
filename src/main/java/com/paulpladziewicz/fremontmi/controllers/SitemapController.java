@@ -22,7 +22,7 @@ public class SitemapController {
         List<String> urls = contentService.getAllContentEntityUrls();
 
         response.setContentType("application/xml");
-        response.setStatus(HttpServletResponse.SC_OK); // Optional: Explicitly set success status
+        response.setStatus(HttpServletResponse.SC_OK);
         PrintWriter writer = response.getWriter();
 
         writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
