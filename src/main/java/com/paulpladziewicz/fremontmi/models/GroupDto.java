@@ -9,9 +9,12 @@ import java.util.List;
 
 @Data
 public class GroupDto implements ContentDto {
+
     private String contentId;
 
     private String pathname;
+
+    private boolean external;
 
     private boolean nearby;
 

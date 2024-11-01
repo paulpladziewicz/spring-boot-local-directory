@@ -13,6 +13,8 @@ public class BusinessDto implements ContentDto {
 
     private String pathname;
 
+    private boolean external;
+
     private boolean nearby;
 
     private List<String> tags = new ArrayList<>();

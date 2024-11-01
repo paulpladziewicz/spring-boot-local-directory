@@ -9,6 +9,7 @@ import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -48,6 +49,22 @@ public class EventController {
         model.addAttribute("event", event);
 
         return "events/create-event";
+    }
+
+    @GetMapping("/admin/create/event")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String displayAdminForm(Model model) {
+        Event event = new Event();
+
+        if (event.getDays() == null || event.getDays().isEmpty()) {
+            List<DayEvent> days = new ArrayList<>();
+            days.add(new DayEvent());
+            event.setDays(days);
+        }
+
+        model.addAttribute("event", event);
+
+        return "events/admin-create-event";
     }
 
     @PostMapping("/create/event")

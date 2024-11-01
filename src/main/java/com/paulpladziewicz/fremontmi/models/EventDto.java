@@ -11,9 +11,12 @@ import java.util.List;
 
 @Data
 public class EventDto implements ContentDto {
+
     private String contentId;
 
     private ContentStatus status;
+
+    private boolean external;
 
     private boolean nearby;
 

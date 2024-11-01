@@ -15,6 +15,8 @@ public class NeighborServicesProfileDto implements ContentDto {
 
     private String pathname;
 
+    private boolean external;
+
     private boolean nearby;
 
     private List<String> tags = new ArrayList<>();

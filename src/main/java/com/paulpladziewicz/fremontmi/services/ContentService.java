@@ -39,6 +39,7 @@ public class ContentService {
         List<String> validatedTags = tagService.addTags(content.getTags(), content.getType());
         content.setTags(validatedTags);
         content.setPathname(createUniquePathname(content.getDetail().getTitle(), type));
+        content.setExternal(contentValues.isExternal());
         content.setNearby(contentValues.isNearby());
         content.setCreatedBy(userProfile.getUserId());
         content.setParticipants(Set.of(userProfile.getUserId()));

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>Create Event in Fremont, MI</title>
+    <meta name="description" content="Create a new event that is specific for Fremont, MI." />
+    <link th:href="@{/css/flatpickr.min.css}" rel="stylesheet">
+</head>
+<body>
+<header th:replace="~{partials/navbar}"></header>
+
+<main>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <h1>Create New Event</h1>
+
+                <form id="create-event-form" th:action="@{/create/event}" th:object="${event}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                    <input type="hidden" name="external" value="true"/>
+
+                    <div class="my-3 mb-sm-0">
+                        <p class="form-label opacity-75 fw-medium fs-base mb-1">Average Travel Distance</p>
+                        <p class="fs-sm mb-2">Only create a profile if you live within a 15-mile radius from the center of Fremont, MI (Main St & Division Ave).</p>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <input type="radio" class="btn-check" id="option1" name="nearby" value="false" checked>
+                                <label for="option1" class="w-100 btn btn-outline-secondary px-2">
+                                    <span class="mx-1">Within 5 Miles</span>
+                                </label>
+                                <p></p>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="radio" class="btn-check" id="option2" name="nearby" value="true">
+                                <label for="option2" class="w-100 btn btn-outline-secondary px-2">
+                                    <span class="mx-1">Within 15 Miles</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="title">Event Title</label>
+                        <input type="text" class="form-control" id="title" th:field="*{title}" placeholder="Enter event title">
+                        <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="mt-1 text-danger"></p>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="description">Description</label>
+                        <textarea class="form-control" id="description" th:field="*{description}" rows="3" placeholder="Event description"></textarea>
+                        <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="mt-1 text-danger"></p>
+                    </div>
+
+                    <div th:replace="~{partials/tag-input}"></div>
+
+                    <div class="form-group mb-2">
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="locationName">Location Name</label>
+                        <input type="text" class="form-control" id="locationName" th:field="*{locationName}" placeholder="Enter location name">
+                        <p th:if="${#fields.hasErrors('locationName')}" th:errors="*{locationName}" class="mt-1 text-danger"></p>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label class="mb-1 form-label opacity-75 fw-medium fs-base" for="address">Address</label>
+                        <input type="text" class="form-control" id="address" th:field="*{address}" placeholder="Enter address">
+                        <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="mt-1 text-danger"></p>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4>Event Dates and Times</h4>
+                        <div id="dayEvents">
+                            <div th:replace="~{events/htmx/adjust-day-events :: dayEvents}"></div>
+                        </div>
+                    </div>
+                    <p th:if="${#fields.hasErrors('days')}" th:errors="*{days}" class="mt-1 text-danger"></p>
+
+                    <div class="mt-3">
+                        <button class="btn btn-primary" type="submit">Create Event</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<section class="d-md-none py-5"></section>
+<section class="d-md-none py-4"></section>
+
+<script>
+    function reinitializeFlatpickr() {
+        // Destroy existing flatpickr instances
+        document.querySelectorAll('.date-picker').forEach(function (element) {
+            if (element._flatpickr) {
+                element._flatpickr.destroy();
+            }
+        });
+
+        // Reinitialize flatpickr on all date-picker elements
+        flatpickr('.date-picker', {
+            enableTime: true,
+            altInput: true,
+            altFormat: "F j, Y h:i K",
+            dateFormat: "Y-m-d H:i K"
+        });
+    }
+
+    // Listen to HTMX after swap events and reinitialize flatpickr
+    document.addEventListener('htmx:afterSwap', function(event) {
+        reinitializeFlatpickr();
+    });
+</script>
+
+<script th:src="@{/js/flatpickr.min.js}"></script>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>
