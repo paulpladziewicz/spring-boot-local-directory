@@ -54,7 +54,11 @@
                             Event Description
                         </p>
 
-                        <a th:href="${event.pathname}" class="btn btn-lg btn-link p-0">View Event<i class="ai-arrow-right ms-2"></i></a>
+                        <a th:href="${event.external} ? ${event.detail.externalUrl} : ${event.pathname}"
+                           th:attr="target=${event.external} ? '_blank' : '_self'"
+                           class="btn btn-lg btn-link p-0">
+                            View Event<i class="ai-arrow-right ms-2"></i>
+                        </a>
                     </div>
                 </div>
             </div>
