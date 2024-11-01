@@ -12,10 +12,10 @@ public class Business implements ContentDetail {
     private String description;
 
     private String address;
-    private boolean displayAddress = false;
+    private boolean displayAddress = true;
 
     private String phoneNumber;
-    private boolean displayPhoneNumber = false;
+    private boolean displayPhoneNumber = true;
 
     private String email;
     private boolean displayEmail = false;
