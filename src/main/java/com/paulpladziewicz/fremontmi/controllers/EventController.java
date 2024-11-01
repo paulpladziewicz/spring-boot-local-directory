@@ -185,7 +185,7 @@ public class EventController {
             return "events/edit-event";
         }
 
-        Content savedEvent = contentService.update(eventDto.getContentId(), eventDto);
+        Content savedEvent = contentService.update(eventDto);
 
         return "redirect:" + savedEvent.getPathname();
     }

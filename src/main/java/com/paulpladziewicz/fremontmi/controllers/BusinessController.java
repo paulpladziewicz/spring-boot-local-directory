@@ -112,13 +112,13 @@ public class BusinessController {
     }
 
     @PostMapping("/edit/business")
-    public String updateBusiness(@NotNull @RequestParam("contentId") String contentId, @Valid @ModelAttribute("business") BusinessDto businessDto, BindingResult result, Model model) {
+    public String updateBusiness(@Valid @ModelAttribute("business") BusinessDto businessDto, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("tagsAsString", String.join(",", businessDto.getTags()));
             return "businesses/edit-business";
         }
 
-        Content updatedBusiness = contentService.update(contentId, businessDto);
+        Content updatedBusiness = contentService.update(businessDto);
 
         model.addAttribute("business", updatedBusiness);
 

@@ -114,8 +114,8 @@ public class ContentService {
                 .collect(Collectors.toList());
     }
 
-    public Content update(String contentId, ContentDto updatedContent) {
-        Content content = findById(contentId);
+    public Content update(ContentDto updatedContent) {
+        Content content = findById(updatedContent.getContentId());
         checkPermission(content);
         updateMetadata(content, updatedContent);
         content.getDetail().update(content, updatedContent);

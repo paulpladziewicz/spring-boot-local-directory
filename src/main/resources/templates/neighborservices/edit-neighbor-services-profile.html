@@ -12,7 +12,7 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
                 <h1>Edit NeighborService™</h1>
-                <form id="edit-business-form" th:action="@{/edit/neighbor-service/profile}" th:object="${neighborServicesProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
+                <form id="edit-business-form" th:action="@{/edit/neighbor-services-profile}" th:object="${neighborServicesProfile}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                     <input type="hidden" name="contentId" th:value="*{contentId}">
 
                     <div class="mb-3 mb-sm-1">

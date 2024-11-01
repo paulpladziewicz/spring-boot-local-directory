@@ -128,7 +128,7 @@ public class GroupController {
             return "groups/edit-group";
         }
 
-        Content updatedGroup = contentService.update(group.getContentId(), group);
+        Content updatedGroup = contentService.update(group);
 
         return "redirect:" + updatedGroup.getPathname();
     }

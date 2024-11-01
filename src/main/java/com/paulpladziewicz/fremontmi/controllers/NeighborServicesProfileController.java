@@ -163,13 +163,13 @@ public class NeighborServicesProfileController {
 
 
     @PostMapping("/edit/neighbor-services-profile")
-    public String editNeighborService(@NotNull @RequestParam("contentId") String contentId, @Valid @ModelAttribute("neighborService") NeighborServicesProfileDto neighborServicesProfileDto, BindingResult bindingResult, Model model) {
+    public String editNeighborService(@Valid @ModelAttribute("neighborService") NeighborServicesProfileDto neighborServicesProfileDto, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("tagsAsString", String.join(",", neighborServicesProfileDto.getTags()));
             return "neighborservices/edit-neighbor-services-profile";
         }
 
-        Content content = contentService.update(contentId, neighborServicesProfileDto);
+        Content content = contentService.update(neighborServicesProfileDto);
         NeighborServicesProfileDto neighborServicesProfile = createDto(content);
 
         model.addAttribute("neighborService", neighborServicesProfile);
