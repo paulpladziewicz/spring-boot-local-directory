@@ -6,7 +6,6 @@ import com.paulpladziewicz.fremontmi.services.ContentService;
 import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
