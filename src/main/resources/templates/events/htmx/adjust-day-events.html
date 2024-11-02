@@ -5,7 +5,7 @@
                 <div class="form-group mb-2">
                     <label for="startTime" class="mb-1 form-label opacity-75 fw-medium fs-base">Start Day & Time</label>
                     <div class="position-relative">
-                        <input id="startTime" class="form-control date-picker pe-5" type="datetime-local"
+                        <input id="startTime" class="form-control date-picker pe-5" type="text"
                                th:field="*{days[__${iterStat.index}__].startTime}"
                                placeholder="Choose date and time"
                                data-datepicker-options='{"enableTime": true, "altInput": true, "altFormat": "F j, Y h:i K", "dateFormat": "Y-m-d h:i K"}'>
@@ -19,7 +19,7 @@
                 <div class="form-group mb-2">
                     <label for="endTime" class="mb-1 form-label opacity-75 fw-medium fs-base">End Day & Time</label>
                     <div class="position-relative">
-                        <input id="endTime" class="form-control date-picker pe-5" type="datetime-local"
+                        <input id="endTime" class="form-control date-picker pe-5" type="text"
                                th:field="*{days[__${iterStat.index}__].endTime}"
                                placeholder="Choose date and time"
                                data-datepicker-options='{"enableTime": true, "altInput": true, "altFormat": "F j, Y h:i K", "dateFormat": "Y-m-d h:i K"}'>
