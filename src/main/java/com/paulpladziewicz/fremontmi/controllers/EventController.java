@@ -128,6 +128,25 @@ public class EventController {
     @GetMapping("/events/page/{currentPage}")
     public String displayNextEvents(@PathVariable int currentPage, Model model) {
         Page<Content> events = contentService.findEvents(currentPage + 1);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        events.getContent().forEach(obj -> {
+            if (obj.getDetail() instanceof Event event) {
+                List<DayEvent> futureDayEvents = event.getDays().stream()
+                        .filter(dayEvent -> dayEvent.getStartTime().isAfter(now))
+                        .toList();
+
+                if (!futureDayEvents.isEmpty()) {
+                    event.setNextAvailableDayEvent(futureDayEvents.getFirst());
+                    event.setAvailableDayEventCount(futureDayEvents.size() - 1);
+                } else {
+                    event.setNextAvailableDayEvent(null);
+                    event.setAvailableDayEventCount(0);
+                }
+            }
+        });
+
         model.addAttribute("events", events);
         return "events/partials/list-events";
     }

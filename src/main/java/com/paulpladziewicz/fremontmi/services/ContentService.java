@@ -73,12 +73,12 @@ public class ContentService {
     }
 
     public Page<Content> findByType(ContentType type, int page) {
-        Pageable pageable = PageRequest.of(page, 15);
+        Pageable pageable = PageRequest.of(page, 9);
         return contentRepository.findByTypeAndVisibility(type, ContentVisibility.PUBLIC, pageable);
     }
 
     public Page<Content> findByTagAndType(String tag, ContentType type, int page) {
-        Pageable pageable = PageRequest.of(page, 15);
+        Pageable pageable = PageRequest.of(page, 9);
         return contentRepository.findByTypeVisibilityAndTag(type, ContentVisibility.PUBLIC, tag, pageable);
     }
 
@@ -101,7 +101,7 @@ public class ContentService {
 
     public Page<Content> findEvents(int page) {
         LocalDateTime startOfToday = LocalDateTime.now().with(LocalTime.MIDNIGHT);
-        Pageable pageable = PageRequest.of(page, 3);
+        Pageable pageable = PageRequest.of(page, 9);
         return contentRepository.findEventsAfterStartTime(startOfToday, pageable);
     }
 

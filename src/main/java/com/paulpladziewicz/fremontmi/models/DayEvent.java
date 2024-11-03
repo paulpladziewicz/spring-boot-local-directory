@@ -13,7 +13,6 @@ public class DayEvent {
     @DateTimeFormat(pattern = "yyyy-MM-dd h:mm a")
     private LocalDateTime startTime;
 
-    @NotNull(message = "Please provide an end date and time")
     @DateTimeFormat(pattern = "yyyy-MM-dd h:mm a")
     private LocalDateTime endTime;
 }
