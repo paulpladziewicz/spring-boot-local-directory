@@ -1,23 +1,15 @@
-<div th:each="event : ${events.getContent()}" class="col-md-4 mb-4" th:fragment="listEvents">
-    <div class="card">
-        <div class="card-body">
-            <p class="fw-semibold text-danger mt-0 mb-1" th:if="${event.status == 'CANCELED'}">Canceled</p>
-            <h4 class="h3 mb-1" th:text="${event.detail.title}">Event Title</h4>
-
-            <div th:if="${event.detail.nextAvailableDayEvent != null}">
-                <p class="text-muted fw-semibold mb-2"
-                   th:text="${#temporals.format(event.detail.nextAvailableDayEvent.startTime, 'MMMM dd, yyyy h:mm a')}">
-                    Next Available Time
-                </p>
-                <p th:if="${event.detail.availableDayEventCount > 0}" class="text-muted">
-                    More dates and times available
-                </p>
-            </div>
-
-            <p class="mb-3" th:text="${#strings.length(event.detail.description) > 120 ? #strings.substring(event.detail.description, 0, 120) + '...' : event.detail.description}">
-                Event Description
+<div th:each="event : ${events.getContent()}" th:fragment="listEvents">
+    <div class="row my-4" th:if="${event.detail.nextAvailableDayEvent != null}">
+        <div class="col-md-4">
+            <p class="fw-semibold text-danger mb-0" th:if="${event.status == 'CANCELED'}">Canceled</p>
+            <div class="h6 mb-0" th:text="${#temporals.format(event.detail.nextAvailableDayEvent.startTime, 'MMMM dd, yyyy h:mm a')}">9:30 - 10:30 am</div>
+            <p th:if="${event.detail.availableDayEventCount > 0}" class="text-muted mb-0">
+                More dates and times available
             </p>
-
+        </div>
+        <div class="mt-2 mt-md-0 col-md-8">
+            <h3 class="h4 mb-0" th:text="${event.detail.title}" style="line-height: 1;">Event Title</h3>
+            <p class="my-2" th:text="${#strings.length(event.detail.description) > 180 ? #strings.substring(event.detail.description, 0, 180) + '...' : event.detail.description}">Event Description</p>
             <a th:href="${event.external} ? ${event.detail.externalUrl} : ${event.pathname}"
                th:attr="target=${event.external} ? '_blank' : '_self'"
                class="btn btn-lg btn-link p-0">

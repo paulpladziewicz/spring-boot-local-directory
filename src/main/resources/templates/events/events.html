@@ -6,40 +6,37 @@
     <meta name="description" content="Discover upcoming events in Fremont, MI. Browse through events in chronological order and find something exciting to attend." />
 </head>
 <body>
-<header th:insert="~{partials/navbar}"></header>
-<main class="bg-secondary pt-4 pb-5" x-data="loadMore()">
+<header th:replace="~{partials/navbar}"></header>
+<main class="container mt-2 mt-lg-3" x-data="loadMore()">
+   <div class="row">
+       <div class="col-lg-10 mx-auto">
+           <nav aria-label="breadcrumb">
+               <ol class="breadcrumb mb-2">
+                   <li class="breadcrumb-item"><a href="/">Home</a></li>
+                   <li class="breadcrumb-item active" aria-current="page">Events</li>
+               </ol>
+           </nav>
+           <div class="d-sm-flex justify-content-between align-items-center">
+               <h1 class="display-3 mb-0">Events</h1>
+               <div class="d-flex justify-content-between align-items-center d-lg-block">
+                   <a href="/my/events" class="btn btn-sm btn-link fw-semibold fs-lg text-primary ps-0 ps-lg-2 py-2 px-3">My Events</a>
+                   <a href="/create/event" class="btn btn-sm fs-sm btn-primary py-2 px-3">Create</a>
+               </div>
+           </div>
 
-    <div class="container">
-
-        <div class="d-none d-sm-flex justify-content-between align-items-center mb-4">
-            <h1 class="display-3 mb-0">Events</h1>
-            <div>
-                <a href="/my/events" class="btn btn-link fw-semibold fs-lg text-primary">My Events</a>
-                <a href="/create/event" class="btn btn-primary">Create</a>
-            </div>
-        </div>
-        <div class="d-sm-none mb-4">
-            <div class="d-flex justify-content-end">
-                <a href="/create/event" class="btn btn-primary fw-semibold py-2 px-3">Create</a>
-            </div>
-            <h1 class="display-3 mb-0">Events</h1>
-            <a href="/my/events" class="btn btn-link fw-semibold p-0">My Events</a>
-        </div>
-
-        <div class="row" x-ref="eventContainer">
-            <div th:if="${#lists.isEmpty(events.getContent())}" class="my-4">
-                <div>
-                    There are no events available at the moment.
-                </div>
-            </div>
-            <th:block th:insert="~{events/partials/list-events :: listEvents}"></th:block>
-        </div>
-        <div th:if="${events.hasNext()}" class="text-center mt-4">
-            <button class="btn btn-primary" id="load-more-btn" @click="loadMore()">Load More</button>
-        </div>
-
-    </div>
-
+           <div class="row" x-ref="eventContainer">
+               <div th:if="${#lists.isEmpty(events.getContent())}" class="my-4">
+                   <div>
+                       There are no events available at the moment.
+                   </div>
+               </div>
+               <th:block th:insert="~{events/partials/list-events :: listEvents}"></th:block>
+           </div>
+           <div th:if="${events.hasNext()}" class="text-center mt-4">
+               <button class="btn btn-primary" id="load-more-btn" @click="loadMore()">Load More</button>
+           </div>
+       </div>
+   </div>
 </main>
 
 <script>
