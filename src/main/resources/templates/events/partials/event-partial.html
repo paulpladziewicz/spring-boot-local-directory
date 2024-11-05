@@ -32,9 +32,10 @@
                     <div th:each="dayEvent, iterStat : ${event.detail.days}">
                         <p class="fs-lg fw-bold mb-2">
                             <span th:text="${event.detail.formattedTimes[iterStat.index * 2]}"></span>
-                            <span th:if="${event.detail.formattedTimes[iterStat.index * 2 + 1] != 'No End Time'}"></span>
-                            <span th:text="' - '"></span>
-                            <span th:text="${event.detail.formattedTimes[iterStat.index * 2 + 1]}"></span>
+                            <span th:if="${event.detail.formattedTimes[iterStat.index * 2 + 1] != 'No End Time'}">
+                                <span th:text="' - '"></span>
+                                <span th:text="${event.detail.formattedTimes[iterStat.index * 2 + 1]}"></span>
+                            </span>
                         </p>
                     </div>
                 </div>
