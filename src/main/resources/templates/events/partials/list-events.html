@@ -10,11 +10,10 @@
         <div class="mt-2 mt-md-0 col-md-8">
             <h3 class="h4 mb-0" th:text="${event.detail.title}" style="line-height: 1;">Event Title</h3>
             <p class="my-2" th:text="${#strings.length(event.detail.description) > 180 ? #strings.substring(event.detail.description, 0, 180) + '...' : event.detail.description}">Event Description</p>
-            <a th:href="${event.external} ? ${event.detail.externalUrl} : ${event.pathname}"
-               th:attr="target=${event.external} ? '_blank' : '_self'"
-               class="btn btn-lg btn-link p-0">
-                View Event<i class="ai-arrow-right ms-2"></i>
-            </a>
+            <a href="javascript:void(0);"
+               th:attr="data-path=${event.pathname}"
+               @click="showEvent($event.target.getAttribute('data-path'))"
+               class="btn btn-lg btn-link p-0">View Event<i class="ai-arrow-right ms-2"></i></a>
         </div>
     </div>
 </div>

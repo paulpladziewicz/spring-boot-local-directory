@@ -1,0 +1,45 @@
+<main class="container my-4" th:fragment="eventPartial">
+    <div class="row">
+        <div class="col-md-10 col-lg-8 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li th:if="${partial}" class="breadcrumb-item"><a href="javascript:void(0);" @click="showEventList()">Events</a></li>
+                    <li th:if="${!partial}" class="breadcrumb-item"><a href="/events">Events</a></li>
+                    <li class="breadcrumb-item active" aria-current="page" th:text="${event.detail.title}"></li>
+                </ol>
+            </nav>
+            <a th:if="${isAdmin}" th:href="'/edit'+${event.pathname}" class="btn btn-link p-0 my-2" aria-label="Edit">
+                Edit Event
+            </a>
+        </div>
+
+        <div class="col-md-10 col-lg-8 mx-auto">
+
+            <section>
+
+                <p class="fw-semibold text-danger my-2" th:if="${canceled}">This event has been canceled.</p>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h1 class="display-4 mb-0" th:text="${event.detail.title}">Event Name</h1>
+                </div>
+
+                <p class="fs-xl mt-2 mb-4" th:utext="${event.detail.description}">Event description here...</p>
+
+                <h3 class="h5 mb-0" th:if="${event.detail.locationName != null}" th:text="${event.detail.locationName}"></h3>
+                <p th:if="${event.detail.address != null}" th:text="${event.detail.address}"></p>
+
+                <div class="mt-4" th:if="${event.detail.days != null && event.detail.formattedTimes != null}">
+                    <div th:each="dayEvent, iterStat : ${event.detail.days}">
+                        <p class="fs-lg fw-bold mb-2">
+                            <span th:text="${event.detail.formattedTimes[iterStat.index * 2]}"></span>
+                            <span th:if="${event.detail.formattedTimes[iterStat.index * 2 + 1] != 'No End Time'}"></span>
+                            <span th:text="' - '"></span>
+                            <span th:text="${event.detail.formattedTimes[iterStat.index * 2 + 1]}"></span>
+                        </p>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </div>
+</main>

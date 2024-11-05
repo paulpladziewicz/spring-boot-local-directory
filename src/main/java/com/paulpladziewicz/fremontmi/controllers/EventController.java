@@ -161,10 +161,9 @@ public class EventController {
     }
 
     @GetMapping("/event/{slug}")
-    public String displayEvent(@PathVariable String slug, Model model) {
+    public String displayEvent(@PathVariable String slug, @RequestParam(required = false, defaultValue = "false") boolean partial, Model model) {
         Content content = contentService.findByPathname('/' + ContentType.EVENT.toHyphenatedString() + '/' + slug, ContentType.EVENT);
         Event detail = (Event) content.getDetail();
-
 
         detail.setDescription(htmlSanitizationService.sanitizeHtml(detail.getDescription().replace("\n", "<br/>")));
 
@@ -181,7 +180,9 @@ public class EventController {
             model.addAttribute("isAdmin", false);
         }
 
-        return "events/event-page";
+        model.addAttribute("partial", partial);
+
+        return partial ? "events/partials/event-partial" : "events/event-page";
     }
 
     @GetMapping("/edit/event/{slug}")
