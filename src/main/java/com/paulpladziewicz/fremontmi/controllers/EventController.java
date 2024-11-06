@@ -9,6 +9,7 @@ import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class EventController {
@@ -123,6 +126,31 @@ public class EventController {
         model.addAttribute("events", events);
 
         return "events/events";
+    }
+
+    @GetMapping("/api/events")
+    public ResponseEntity<Page<Content>> getEvents(@RequestParam(defaultValue = "0") int page) {
+        Page<Content> events = contentService.findEvents(page);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        events.getContent().forEach(obj -> {
+            if (obj.getDetail() instanceof Event event) {
+                List<DayEvent> futureDayEvents = event.getDays().stream()
+                        .filter(dayEvent -> dayEvent.getStartTime().isAfter(now))
+                        .toList();
+
+                if (!futureDayEvents.isEmpty()) {
+                    event.setNextAvailableDayEvent(futureDayEvents.get(0));
+                    event.setAvailableDayEventCount(futureDayEvents.size() - 1);
+                } else {
+                    event.setNextAvailableDayEvent(null);
+                    event.setAvailableDayEventCount(0);
+                }
+            }
+        });
+
+        return ResponseEntity.ok(events);
     }
 
     @GetMapping("/events/page/{currentPage}")
