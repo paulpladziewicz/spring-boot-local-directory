@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Upcoming Events in Fremont, MI</title>
+    <meta name="description" content="Discover upcoming events in Fremont, MI. Browse through events in chronological order and find something exciting to attend." />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" th:if="${_csrf != null}" th:content="${_csrf.token}" />
+    <meta name="csrf-header" th:if="${_csrf != null}" th:content="${_csrf.headerName}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="icon" th:href="@{/images/home.svg}" type="image/svg">
+    <link th:href="@{/css/theme.min.css}" rel="stylesheet">
+</head>
+<body>
+<header th:replace="~{partials/navbar}"></header>
+
+<main id="root"></main>
+<script type="module" src="https://cdn.fremontmi.com/index-Di3TAnHm.js"></script>
+
+<footer th:replace="~{partials/footer}"></footer>
+<script th:src="@{/js/theme.min.js}" th:fragment="themeScriptFragment"></script>
+</body>
+</html>

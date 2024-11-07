@@ -102,30 +102,8 @@ public class EventController {
     }
 
     @GetMapping("/events")
-    public String displayEvents(@RequestParam(defaultValue = "0") int page,  Model model) {
-        Page<Content> events = contentService.findEvents(page);
-
-        LocalDateTime now = LocalDateTime.now();
-
-        events.getContent().forEach(obj -> {
-            if (obj.getDetail() instanceof Event event) {
-                List<DayEvent> futureDayEvents = event.getDays().stream()
-                        .filter(dayEvent -> dayEvent.getStartTime().isAfter(now))
-                        .toList();
-
-                if (!futureDayEvents.isEmpty()) {
-                    event.setNextAvailableDayEvent(futureDayEvents.getFirst());
-                    event.setAvailableDayEventCount(futureDayEvents.size() - 1);
-                } else {
-                    event.setNextAvailableDayEvent(null);
-                    event.setAvailableDayEventCount(0);
-                }
-            }
-        });
-
-        model.addAttribute("events", events);
-
-        return "events/events";
+    public String displayEvents(Model model) {
+        return "spa";
     }
 
     @GetMapping("/api/events")
