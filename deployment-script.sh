@@ -8,6 +8,7 @@ POM_FILE="pom.xml"
 USER_DATA_SCRIPT="ec2-user-data.sh"
 S3_BUCKET="s3://fremontmi/deployment"
 LATEST_JAR_NAME="fremontmi-latest.jar"
+LAUNCH_TEMPLATE_NAME="fremontmi"
 
 # Backup dev properties and swap to prod
 cp "$APP_PROPS_FILE" "$DEV_PROPS_FILE"
@@ -30,9 +31,13 @@ mvn clean package
 LATEST_JAR="target/fremontmi-${CURRENT_VERSION}.jar"
 aws s3 cp "$LATEST_JAR" "$S3_BUCKET/fremontmi-${CURRENT_VERSION}.jar"
 
+echo "Uploaded ${LATEST_JAR} to S3 as ${LATEST_JAR_NAME} and fremontmi-${CURRENT_VERSION}.jar"
+
 # Update EC2 user data with the latest version
 sed -i.bak "s/JAR_VERSION=\".*\"/JAR_VERSION=\"${CURRENT_VERSION}\"/" "$USER_DATA_SCRIPT"
 rm "$USER_DATA_SCRIPT.bak"
+
+echo "Updated EC2 user data script with version ${CURRENT_VERSION}"
 
 # Restore dev properties
 cp "$DEV_PROPS_FILE" "$APP_PROPS_FILE"
@@ -48,6 +53,27 @@ rm "$POM_FILE.bak"
 #git add "$POM_FILE" "$USER_DATA_SCRIPT"
 #git commit -m "Incrementing to $NEW_VERSION, updated EC2 user data, uploaded JAR to S3"
 
-# Confirm upload and EC2 update
-echo "Uploaded ${LATEST_JAR} to S3 as ${LATEST_JAR_NAME} and fremontmi-${CURRENT_VERSION}.jar"
-echo "Updated EC2 user data script with version ${CURRENT_VERSION}"
+# Encode user data script as Base64
+BASE64_USER_DATA=$(base64 -i "$USER_DATA_SCRIPT")
+
+# Create a new launch template version
+NEW_LAUNCH_TEMPLATE_VERSION=$(aws ec2 create-launch-template-version \
+    --launch-template-name "$LAUNCH_TEMPLATE_NAME" \
+    --version-description "Updated for version ${CURRENT_VERSION}" \
+    --launch-template-data "{
+        \"UserData\": \"$BASE64_USER_DATA\"
+    }" \
+    --query 'LaunchTemplateVersion.VersionNumber' \
+    --output text)
+
+# Set the new version as default
+if [ -n "$NEW_LAUNCH_TEMPLATE_VERSION" ]; then
+    aws ec2 modify-launch-template \
+        --launch-template-name "$LAUNCH_TEMPLATE_NAME" \
+        --default-version "$NEW_LAUNCH_TEMPLATE_VERSION"
+    echo "Set default version to $NEW_LAUNCH_TEMPLATE_VERSION"
+else
+    echo "Failed to set new version"
+fi
+
+echo "New launch template version $NEW_LAUNCH_TEMPLATE_VERSION set as default for $LAUNCH_TEMPLATE_NAME."
