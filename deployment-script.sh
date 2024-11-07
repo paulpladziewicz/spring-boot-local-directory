@@ -50,15 +50,22 @@ sed -i.bak "/<artifactId>fremontmi<\/artifactId>/,/<\/version>/ s/<version>.*<\/
 rm "$POM_FILE.bak"
 
 # Git commit changes
-#git add "$POM_FILE" "$USER_DATA_SCRIPT"
-#git commit -m "Incrementing to $NEW_VERSION, updated EC2 user data, uploaded JAR to S3"
+git add "$POM_FILE" "$USER_DATA_SCRIPT"
+git commit -m "Incrementing to $NEW_VERSION, updated EC2 user data, uploaded JAR to S3"
 
 # Encode user data script as Base64
 BASE64_USER_DATA=$(base64 -i "$USER_DATA_SCRIPT")
 
+# Get the latest launch template version
+LATEST_VERSION=$(aws ec2 describe-launch-templates \
+    --launch-template-names "$LAUNCH_TEMPLATE_NAME" \
+    --query "LaunchTemplates[0].LatestVersionNumber" \
+    --output text)
+
 # Create a new launch template version
 NEW_LAUNCH_TEMPLATE_VERSION=$(aws ec2 create-launch-template-version \
     --launch-template-name "$LAUNCH_TEMPLATE_NAME" \
+    --source-version "$LATEST_VERSION" \
     --version-description "Updated for version ${CURRENT_VERSION}" \
     --launch-template-data "{
         \"UserData\": \"$BASE64_USER_DATA\"
