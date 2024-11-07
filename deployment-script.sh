@@ -105,7 +105,12 @@ fi
 
 echo "Launched EC2 instance: $INSTANCE_ID"
 
-# Step 2: Register the instance with the UAT target group
+# Step 2: Wait for the instance to reach the 'running' state
+echo "Waiting for instance $INSTANCE_ID to reach 'running' state..."
+aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
+echo "Instance $INSTANCE_ID is now in 'running' state."
+
+# Step 3: Register the instance with the UAT target group
 TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups --names "$TARGET_GROUP_NAME" --query 'TargetGroups[0].TargetGroupArn' --output text)
 
 aws elbv2 register-targets \
@@ -114,10 +119,10 @@ aws elbv2 register-targets \
 
 echo "Registered instance $INSTANCE_ID with target group $TARGET_GROUP_NAME"
 
-# Step 3: Confirm instance is ready for prod
+# Step 4: Confirm instance is ready for prod
 read -p "Is the instance ready for production? (y/n): " CONFIRM
 
-# Step 4: Deregister the instance and terminate based on confirmation
+# Step 5: Deregister the instance and terminate based on confirmation
 if [[ "$CONFIRM" == "y" ]]; then
     echo "Preparing to refresh ASG $ASG_NAME..."
     aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
