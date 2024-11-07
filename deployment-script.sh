@@ -23,7 +23,11 @@ sed -i.bak "s/^JAR_VERSION=\".*\"/JAR_VERSION=\"${CURRENT_VERSION}\"/" "$USER_DA
 rm "$USER_DATA_SCRIPT.bak"
 
 # Build the package
-mvn clean package -Pprod
+# Set up environment variables
+JAVA_HOME="/Users/paulpladziewicz/Library/Java/JavaVirtualMachines/corretto-21.0.3/Contents/Home"
+MAVEN_HOME="/Users/paulpladziewicz/.m2/wrapper/dists/apache-maven-3.9.5-bin/2adeog8mj13csp1uusqnc1f2mo/apache-maven-3.9.5"
+export PATH="$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH"
+mvn clean package
 
 # Put application dev application properties back
 cp "$DEV_PROPS_FILE" "$APP_PROPS_FILE"
