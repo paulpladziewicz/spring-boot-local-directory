@@ -9,6 +9,10 @@ USER_DATA_SCRIPT="ec2-user-data.sh"
 S3_BUCKET="s3://fremontmi/deployment"
 LATEST_JAR_NAME="fremontmi-latest.jar"
 LAUNCH_TEMPLATE_NAME="fremontmi"
+TARGET_GROUP_NAME="uat-fremontmi"
+ASG_NAME="FremontMI"
+SUBNETS=("subnet-7dca8431" "subnet-2fc76f44" "subnet-f5c22488")  # Subnets for UAT
+SELECTED_SUBNET=${SUBNETS[$((RANDOM % ${#SUBNETS[@]}))]}  # Randomly select a subnet
 
 # Backup dev properties and swap to prod
 cp "$APP_PROPS_FILE" "$DEV_PROPS_FILE"
@@ -84,3 +88,54 @@ else
 fi
 
 echo "New launch template version $NEW_LAUNCH_TEMPLATE_VERSION set as default for $LAUNCH_TEMPLATE_NAME."
+
+echo "Launching instance in subnet: $SELECTED_SUBNET"
+
+# Step 1: Launch EC2 instance from the latest launch template with subnet override
+INSTANCE_ID=$(aws ec2 run-instances \
+    --launch-template "LaunchTemplateName=$LAUNCH_TEMPLATE_NAME" \
+    --network-interfaces "DeviceIndex=0,SubnetId=$SELECTED_SUBNET" \
+    --query 'Instances[0].InstanceId' \
+    --output text)
+
+if [ -z "$INSTANCE_ID" ]; then
+    echo "Failed to launch instance."
+    exit 1
+fi
+
+echo "Launched EC2 instance: $INSTANCE_ID"
+
+# Step 2: Register the instance with the UAT target group
+TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups --names "$TARGET_GROUP_NAME" --query 'TargetGroups[0].TargetGroupArn' --output text)
+
+aws elbv2 register-targets \
+    --target-group-arn "$TARGET_GROUP_ARN" \
+    --targets Id="$INSTANCE_ID"
+
+echo "Registered instance $INSTANCE_ID with target group $TARGET_GROUP_NAME"
+
+# Step 3: Confirm instance is ready for prod
+read -p "Is the instance ready for production? (y/n): " CONFIRM
+
+# Step 4: Deregister the instance and terminate based on confirmation
+if [[ "$CONFIRM" == "y" ]]; then
+    echo "Preparing to refresh ASG $ASG_NAME..."
+    aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
+
+    aws elbv2 deregister-targets \
+        --target-group-arn "$TARGET_GROUP_ARN" \
+        --targets Id="$INSTANCE_ID"
+
+    echo "Instance terminated and deregistered from UAT. Initiating ASG refresh..."
+    aws autoscaling start-instance-refresh --auto-scaling-group-name "$ASG_NAME"
+
+else
+    echo "Terminating UAT instance without refreshing ASG..."
+    aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
+
+    aws elbv2 deregister-targets \
+        --target-group-arn "$TARGET_GROUP_ARN" \
+        --targets Id="$INSTANCE_ID"
+
+    echo "UAT instance terminated and deregistered."
+fi
