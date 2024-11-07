@@ -2,8 +2,8 @@
 
 # Update dev application properties
 APP_PROPS_FILE="$HOME/Projects/fremontmi/src/main/resources/application.properties"
-DEV_PROPS_FILE="$HOME/Projects/config/prod/application.properties"
-cp "APP_PROPS_FILE" "DEV_PROPS_FILE"
+DEV_PROPS_FILE="$HOME/Projects/config/dev/application.properties"
+cp "$APP_PROPS_FILE" "$DEV_PROPS_FILE"
 
 # Swap application properties to prod
 PROD_PROPS_FILE="$HOME/Projects/config/prod/application.properties"
