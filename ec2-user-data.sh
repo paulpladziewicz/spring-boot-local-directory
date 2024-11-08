@@ -4,7 +4,7 @@
 exec > >(tee /var/log/user-data.log | logger -t user-data) 2>&1
 
 # Define the JAR version variable
-JAR_VERSION="2.0.19"
+JAR_VERSION="2.0.20"
 
 # Update the instance
 sudo yum update -y
