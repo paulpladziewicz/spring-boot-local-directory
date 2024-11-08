@@ -31,15 +31,12 @@ public class BusinessDto implements ContentDto {
     @Size(max = 5000, message = "Description can't be longer than 5000 characters")
     private String description;
 
-    @NotBlank(message = "Please provide an address")
     private String address;
     private boolean displayAddress = false;
 
-    @NotBlank(message = "Please provide a phone number")
     private String phoneNumber;
     private boolean displayPhoneNumber = false;
 
-    @NotBlank(message = "Please provide an email")
     private String email;
     private boolean displayEmail = false;
 
