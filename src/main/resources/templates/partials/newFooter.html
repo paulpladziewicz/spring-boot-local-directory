@@ -1,0 +1,99 @@
+<footer class="footer pb-2 pt-5" th:fragment="newFooter">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-lg-3">
+                <a href="/" class="navbar-brand" style="font-size: 32px; font-weight: bold;">
+                    <span>Fremont<span class="text-primary">MI</span></span>
+                </a>
+                <p class="fs-sm pb-2 pb-lg-3 mb-3">Connect with your local community through groups, events, businesses, and NeighborServices™ — all without distractions or privacy concerns.</p>
+            </div>
+
+            <div class="col-sm-5 col-lg-4 col-xl-3 offset-lg-1 mb-4 mb-sm-0">
+                <h3 class="h6 mb-2">Stay up to date</h3>
+                <p class="fs-sm">Subscribe to our newsletter and we'll keep you informed</p>
+                <div class="input-group input-group-sm">
+                    <input id="emailInput" class="form-control" type="email" placeholder="Your email" required>
+                    <button id="subscribeButton" class="btn btn-primary" type="button">Subscribe</button>
+                </div>
+                <div id="confirmationMessage" style="display:none;" class="mt-1 text-primary"></div>
+                <div id="errorMessage" style="display:none;" class="mt-1 text-danger">Test</div>
+            </div>
+            <div class="col-sm-3 col-lg-2 offset-xl-1 mb-3 mb-sm-0">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link py-1 px-0" href="/articles">Articles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link py-1 px-0" href="/groups">Groups</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link py-1 px-0" href="/events">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link py-1 px-0" href="/businesses">Businesses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link py-1 px-0" href="/neighbor-services">NeighborServices™</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-sm-4 col-lg-2 mb-3 mb-sm-0">
+                <ul class="nav flex-column">
+                    <li><a class="nav-link py-1 px-0" href="/about">About Us</a></li>
+                    <li><a class="nav-link py-1 px-0" href="/terms-of-service">Terms of Service</a></li>
+                    <li><a class="nav-link py-1 px-0" href="/privacy-policy">Privacy policy</a></li>
+                </ul>
+            </div>
+
+        </div>
+        <p class="nav fs-sm mb-0">
+            <span class="text-body-secondary">© All rights reserved. Made by</span>
+            <a class="nav-link fw-normal p-0 ms-1" href="https://www.facebook.com/profile.php?id=61566577582190" target="_blank" rel="noopener">West Michigan Software</a>
+        </p>
+    </div>
+</footer>
+<script>
+    document.getElementById('subscribeButton').addEventListener('click', async function() {
+        const emailInput = document.getElementById('emailInput');
+        const email = emailInput.value;
+        const confirmation = document.getElementById('confirmationMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        confirmation.style.display = 'none';
+        errorMessage.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    [document.querySelector('meta[name="csrf-header"]').getAttribute('content')]:
+                        document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ email })
+            });
+
+            if (response.ok) {
+                const message = await response.text();
+                confirmation.textContent = message;
+                confirmation.style.display = 'block';
+                emailInput.value = ''; // Clear input field
+            } else if (response.status === 400) {
+                const errors = await response.json();
+                // Remove "email: " prefix and display only the error messages
+                const cleanErrors = errors.map(err => err.replace(/^email:\s*/, ''));
+                errorMessage.textContent = cleanErrors.join(', ');
+                errorMessage.style.display = 'block';
+            } else {
+                errorMessage.textContent = 'An unexpected error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+        } catch (error) {
+            errorMessage.textContent = 'A network error occurred. Please try again later.';
+            errorMessage.style.display = 'block';
+            console.error('Error:', error);
+        }
+    });
+</script>

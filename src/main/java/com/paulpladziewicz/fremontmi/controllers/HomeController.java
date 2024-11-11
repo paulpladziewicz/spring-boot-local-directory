@@ -14,8 +14,13 @@ public class HomeController {
     private String stripePublicKey;
 
     @GetMapping("/")
-    public String home () {
+    public String home() {
         return "home";
+    }
+
+    @GetMapping("/about")
+    public String about() {
+        return "about";
     }
 
     @GetMapping("/tagging-guidelines")
@@ -24,7 +29,7 @@ public class HomeController {
     }
 
     @GetMapping("/error")
-    public String error () {
+    public String error() {
         return "error";
     }
 

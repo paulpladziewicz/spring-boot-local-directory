@@ -46,6 +46,17 @@ public class NotificationService {
 
     }
 
+    public void subscribe(Subscriber subscriber) {
+        Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmailIgnoreCase(subscriber.getEmail());
+
+        if (existingSubscriber.isPresent()) {
+            logger.info("Subscriber with email {} already exists.", subscriber.getEmail());
+            return; // No action needed, return success with no value
+        }
+
+        subscriberRepository.save(subscriber);
+    }
+
     public void unsubscribe(String email) {}
 
     public void handleContactFormSubmission(SimpleContactFormSubmission submission) {

@@ -2,6 +2,7 @@ package com.paulpladziewicz.fremontmi.controllers;
 
 import com.paulpladziewicz.fremontmi.models.AnnouncementDto;
 import com.paulpladziewicz.fremontmi.models.SimpleContactFormSubmission;
+import com.paulpladziewicz.fremontmi.models.Subscriber;
 import com.paulpladziewicz.fremontmi.services.NotificationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -29,6 +30,13 @@ public class NotificationController {
         redirectAttributes.addFlashAttribute("subscribedMessage", "Thank you for subscribing to updates.");
 
         return "redirect:/#subscribe";
+    }
+
+    @PostMapping("/api/subscribe")
+    @ResponseBody
+    public ResponseEntity<String> handleSubscribeForm(@RequestBody @Valid Subscriber subscriber) {
+        notificationService.subscribe(subscriber);
+        return ResponseEntity.ok("Thank you for subscribing to updates");
     }
 
     @PostMapping("/contact")

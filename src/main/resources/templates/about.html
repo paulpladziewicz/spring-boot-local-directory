@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
+    <title>About FremontMI - Local Community Platform</title>
+    <meta name="description"
+          content=""/>
+    <meta name="keywords"
+          content=""/>
+</head>
+<body>
+<header th:insert="~{partials/navbar}"></header>
+
+<main class="container mt-3">
+    <div class="row">
+        <div class="col-lg-10 col-xl-8 mx-auto">
+            <h1 class="display-4">Why We Built FremontMI.com</h1>
+            <p class="lead mb-4 mb-lg-5">While major platforms dominate their respective categories, they often fall short when it comes to serving smaller communities like Fremont, MI.</p>
+
+            <h2 class="h4">The Problem</h2>
+            <p class="fs-lg mb-4 mb-lg-5">How often do you find a local group or event in Fremont on Meetup or Eventbrite? Does Facebook truly help you connect with people in person nearby? Can Angi or Google reliably point you to a local tradesman? Are you frustrated with the fees and commissions on TaskRabbit or Care.com? Can you trust Craigslist?</p>
+
+            <h2 class="h4">Our Vision</h2>
+            <p class="fs-lg mb-3">Our goal is to create a community-first platform specifically for Fremont, MI, offering:</p>
+            <ul class="mb-4 mb-lg-5">
+                <li class="fs-lg"><span class="fw-bold">Moderated, High-Quality Content:</span> All content will be tailored to the community, ensuring relevance and value. For location-specific content, only posts within a 15-mile radius of the city center will be displayed. Even ads will be thoughtfully curated, featuring local businesses that matter to the community.</li>
+                <li class="fs-lg mt-3"><span class="fw-bold">Innovative Solutions:</span> Bringing new ideas for highlighting and finding things in the local community.</li>
+                <li class="fs-lg mt-3">
+                    <span class="fw-bold">Strengthening Community Bonds:</span> Our platform is designed to foster genuine connections by promoting events, groups, and initiatives that bring people together in real life.
+                </li>
+            </ul>
+
+            <h2 class="h4">Making An Impact</h2>
+            <p class="fs-lg mb-4 mb-lg-5">By increasing the visibility of what Fremont and nearby areas have to offer, the platform ensures that valuable resources and opportunities don't go unnoticed. The ripple effect of this interconnectedness can lead to a stronger, more prosperous community where everyone benefits. Together, we can ensure that no idea or effort is lost to obscurity, driving collective growth and sustainability.</p>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{partials/newFooter}"></footer>
+<script th:replace="~{partials/theme-js}"></script>
+</body>
+</html>

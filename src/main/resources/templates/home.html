@@ -16,9 +16,19 @@
 
     <section>
         <div class="container">
-            <div class="row justify-content-center text-center mt-4 mt-lg-5 mb-4">
-                <div class="col col-lg-8 mx-auto">
-                    <h1 class="display-3">A Dedicated Space Just For Fremont, MI</h1>
+            <div class="row my-3 my-md-5 pb-5">
+                <div class="col-md-5 d-flex align-items-center order-md-2">
+                    <img class="mb-3 mb-md-0" src="https://cdn.fremontmi.com/optimized-heart.png" alt="downtown fremont">
+                </div>
+                <div class="col-md-7 d-flex align-items-center order-md-1">
+                    <div>
+                        <h1 class="display-2 text-uppercase">Dedicated Space Just For Fremont</h1>
+                        <p class="fs-lg mb-3">Connect with your local community through groups, events, businesses, and NeighborServices™ — all without distractions or privacy concerns.</p>
+                        <a class="btn btn-lg btn-link p-0" href="/about">
+                            Why we built FremontMI.com
+                            <i class="ai-arrow-right ms-2"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -330,7 +340,7 @@
                 <div class="col-md-6 col-lg-5 col-xl-4 offset-lg-1">
                     <p class="text-body fs-xl pb-4 mb-2 mb-lg-3">Our platform is constantly evolving with new features
                         and improvements. Subscribe to our newsletter, and we'll keep you informed so you can make the
-                        most of the latest features as soon as they're available.</p>
+                        most of the latest updates as soon as they're available.</p>
                     <p class="text-body" th:if="${subscribedMessage}" th:text="${subscribedMessage}"></p>
                     <form th:action="@{/subscribe}" method="post" onsubmit="disableSubmitButtonWhileSubmitting(this)">
                         <div class="input-group">
@@ -412,6 +422,6 @@
     }
 </script>
 <script th:replace="~{partials/theme-js}"></script>
-<footer th:replace="~{partials/footer}"></footer>
+<footer th:replace="~{partials/newFooter}"></footer>
 </body>
 </html>
