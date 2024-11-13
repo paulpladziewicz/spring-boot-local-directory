@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:insert="~{partials/layout :: sharedHead}"></th:block>
-    <title>Announcements - FremontMI</title>
+    <title>FremontMI</title>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script>
@@ -30,57 +30,75 @@
 
 
 <script th:inline="javascript">
-    class StyledParagraph {
+
+    class Service {
         static get toolbox() {
             return {
-                title: 'Paragraph',
-                icon: '<svg>...</svg>' // You can add an icon for the tool
+                title: 'Service',
+                icon: '<svg width="17" height="15" viewBox="0 0 336 276" xmlns="http://www.w3.org/2000/svg"><path d="M291 150V79c0-19-15-34-34-34H79c-19 0-34 15-34 34v42l67-44 81 72 56-29 42 30zm0 52l-43-30-56 30-81-67-66 39v23c0 19 15 34 34 34h178c17 0 31-13 34-29zM79 0h178c44 0 79 35 79 79v118c0 44-35 79-79 79H79c-44 0-79-35-79-79V79C0 35 35 0 79 0z"/></svg>'
             };
         }
 
-        constructor({ data }) {
-            this.data = data;
-            this.wrapper = null;
-        }
+        render(data = {}) {
+            const container = document.createElement('div');
+            container.classList.add('service-block');
 
-        render() {
-            this.wrapper = document.createElement('div');
-            const paragraph = document.createElement('p');
-            paragraph.contentEditable = true;
-            paragraph.innerHTML = this.data.text || '';
-            if (this.data.isLead) {
-                paragraph.classList.add('lead'); // Add Bootstrap's lead class
-            }
-            this.wrapper.appendChild(paragraph);
+            const title = document.createElement('input');
+            title.type = 'text';
+            title.classList.add('service-title', 'h3', 'w-75', 'pe-2', 'mb-2');
+            title.placeholder = 'Title';
+            title.value = data.title || '';
 
-            // Create a button to toggle "lead" class
-            const toggleLeadBtn = document.createElement('button');
-            toggleLeadBtn.innerText = this.data.isLead ? 'Remove Lead' : 'Make Lead';
-            toggleLeadBtn.addEventListener('click', () => {
-                paragraph.classList.toggle('lead');
-                this.data.isLead = paragraph.classList.contains('lead');
-                toggleLeadBtn.innerText = this.data.isLead ? 'Remove Lead' : 'Make Lead';
-            });
+            const quote = document.createElement('input');
+            quote.type = 'text';
+            quote.classList.add('service-quote', 'h5', 'w-25', 'ps-2', 'text-center', 'mb-2', 'border-none');
+            quote.placeholder = 'Quote';
+            quote.value = data.quote || '';
 
-            this.wrapper.appendChild(toggleLeadBtn);
-            return this.wrapper;
+            const description = document.createElement('textarea');
+            description.classList.add('service-description', 'fs-lg');
+            description.placeholder = 'Description';
+            description.value = data.description || '';
+
+            const titleRow = document.createElement('div');
+            titleRow.classList.add('d-flex', 'align-items-center');
+            titleRow.appendChild(title);
+            titleRow.appendChild(quote);
+
+            container.appendChild(titleRow);
+            container.appendChild(description);
+
+            return container;
         }
 
         save(blockContent) {
+            const title = blockContent.querySelector('.service-title').value;
+            const quote = blockContent.querySelector('.service-quote').value;
+            const description = blockContent.querySelector('.service-description').value;
+
             return {
-                text: blockContent.querySelector('p').innerHTML,
-                isLead: blockContent.querySelector('p').classList.contains('lead')
+                title,
+                quote,
+                description
             };
         }
     }
 
+
+
     const editor = new EditorJS({
+        autofocus: true,
         holder: 'editorjs',
         tools: {
-            header: Header,
+            header: {
+                class: Header
+            },
             paragraph: {
-                class: StyledParagraph,
-                inlineToolbar: true,
+                class: Paragraph,
+                inlineToolbar: true
+            },
+            service: {
+                class: Service
             },
             list: {
                 class: List,
@@ -98,17 +116,24 @@
                         byUrl: 'http://localhost:8008/fetchUrl', // Your endpoint that provides uploading by Url
                     }
                 }
-            },
-            quote: Quote,
-            embed: {
-                class: Embed,
-                config: {
-                    services: {
-                        youtube: true,
-                        coub: true
+            }
+        },
+        data: {
+            blocks: [
+                {
+                    type: 'header',
+                    data: {
+                        text: 'Title',
+                        level: 1
+                    }
+                },
+                {
+                    type: 'paragraph',
+                    data: {
+                        text: 'Description'
                     }
                 }
-            },
+            ]
         }
     })
 
