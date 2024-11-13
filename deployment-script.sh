@@ -2,8 +2,8 @@
 
 # Define paths
 APP_PROPS_FILE="$HOME/Projects/fremontmi/src/main/resources/application.properties"
-DEV_PROPS_FILE="$HOME/Projects/config/dev/application.properties"
-PROD_PROPS_FILE="$HOME/Projects/config/prod/application.properties"
+DEV_PROPS_FILE="$HOME/Projects/westmichigansoftware/config/dev/application.properties"
+PROD_PROPS_FILE="$HOME/Projects/westmichigansoftware/config/prod/application.properties"
 POM_FILE="pom.xml"
 USER_DATA_SCRIPT="ec2-user-data.sh"
 S3_BUCKET="s3://fremontmi/deployment"
