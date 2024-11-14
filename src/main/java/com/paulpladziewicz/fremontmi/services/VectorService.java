@@ -6,6 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.search.FieldSearchPath;
 import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.ContentVector;
+import com.paulpladziewicz.fremontmi.models.ResultWithScore;
 import com.paulpladziewicz.fremontmi.models.SearchHistory;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import com.paulpladziewicz.fremontmi.repositories.ContentVectorRepository;
@@ -70,16 +71,18 @@ public class VectorService {
                 project(fields(include("_id"), metaVectorSearchScore("score")))
         );
 
-        Map<String, Double> allResultsWithScores = collection.aggregate(pipeline)
-                .map(doc -> Map.entry(doc.getObjectId("_id").toString(), doc.getDouble("score")))
-                .into(new ArrayList<>())
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, LinkedHashMap::new));
+        List<ResultWithScore> allResultsWithScores = collection.aggregate(pipeline)
+                .map(doc -> new ResultWithScore(doc.getObjectId("_id").toString(), doc.getDouble("score")))
+                .into(new ArrayList<>());
 
-        List<String> filteredResults = allResultsWithScores.entrySet().stream()
-                .filter(entry -> entry.getValue() > relevanceThreshold)
-                .map(Map.Entry::getKey)
+        System.out.println(allResultsWithScores);
+
+        List<String> filteredResults = allResultsWithScores.stream()
+                .filter(result -> result.getScore() > relevanceThreshold)
+                .map(ResultWithScore::getId)
                 .toList();
+
+        System.out.println(filteredResults);
 
         SearchHistory searchHistory = new SearchHistory();
         searchHistory.setPrompt(prompt);
@@ -88,7 +91,13 @@ public class VectorService {
 
         searchHistoryRepository.save(searchHistory);
 
-        return contentService.findByArrayOfIds(filteredResults);
+        List<Content> unorderedContent = contentService.findByArrayOfIds(filteredResults);
+        Map<String, Content> contentMap = unorderedContent.stream()
+                .collect(Collectors.toMap(Content::getId, content -> content));
+
+        return filteredResults.stream()
+                .map(contentMap::get)
+                .toList();
     }
 
     private List<Double> generateVectorForPrompt(String prompt) {
