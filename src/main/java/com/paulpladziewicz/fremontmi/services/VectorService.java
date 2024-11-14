@@ -6,7 +6,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.search.FieldSearchPath;
 import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.ContentVector;
-import com.paulpladziewicz.fremontmi.models.ResultWithScore;
 import com.paulpladziewicz.fremontmi.models.SearchHistory;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import com.paulpladziewicz.fremontmi.repositories.ContentVectorRepository;
@@ -18,13 +17,12 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Aggregates.project;
@@ -72,19 +70,21 @@ public class VectorService {
                 project(fields(include("_id"), metaVectorSearchScore("score")))
         );
 
-        List<ResultWithScore> allResultsWithScores = collection.aggregate(pipeline)
-                .map(doc -> new ResultWithScore(doc.getObjectId("_id").toString(), doc.getDouble("score")))
-                .into(new ArrayList<>());
+        Map<String, Double> allResultsWithScores = collection.aggregate(pipeline)
+                .map(doc -> Map.entry(doc.getObjectId("_id").toString(), doc.getDouble("score")))
+                .into(new ArrayList<>())
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, LinkedHashMap::new));
 
-        List<String> filteredResults = allResultsWithScores.stream()
-                .filter(result -> result.getScore() > relevanceThreshold)
-                .map(ResultWithScore::getId)
+        List<String> filteredResults = allResultsWithScores.entrySet().stream()
+                .filter(entry -> entry.getValue() > relevanceThreshold)
+                .map(Map.Entry::getKey)
                 .toList();
 
         SearchHistory searchHistory = new SearchHistory();
         searchHistory.setPrompt(prompt);
         searchHistory.setAllResultsWithScores(allResultsWithScores);
-        searchHistory.setTimestamp(ZonedDateTime.now(ZoneId.of("America/Detroit")));
+        searchHistory.setTimestamp(LocalDateTime.now(ZoneId.of("America/Detroit")));
 
         searchHistoryRepository.save(searchHistory);
 
