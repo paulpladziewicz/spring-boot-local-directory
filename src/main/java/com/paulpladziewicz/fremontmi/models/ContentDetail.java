@@ -4,6 +4,8 @@ public interface ContentDetail {
 
     String getTitle();
 
+    String getDescription();
+
     default String getEmail() {
         return null;
     }

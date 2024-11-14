@@ -67,6 +67,10 @@ public class ContentService {
                 .orElseThrow(() -> new ContentNotFoundException("Content not found"));
     }
 
+    public List<Content> findByArrayOfIds(List<String> contentIds) {
+        return contentRepository.findByIdIn(contentIds);
+    }
+
     public Content findByPathname(String pathname, ContentType type) {
         return contentRepository.findByPathname(pathname, type)
                 .orElseThrow(() -> new ContentNotFoundException("Content not found with pathname: " + pathname + " and type: " + type));
