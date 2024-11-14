@@ -6,6 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.search.FieldSearchPath;
 import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.ContentVector;
+import com.paulpladziewicz.fremontmi.models.ResultWithScore;
 import com.paulpladziewicz.fremontmi.models.SearchHistory;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import com.paulpladziewicz.fremontmi.repositories.ContentVectorRepository;
@@ -17,6 +18,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,43 +68,27 @@ public class VectorService {
         double relevanceThreshold = 0.67;
 
         List<Bson> pipeline = asList(
-                vectorSearch(
-                        fieldSearchPath,
-                        queryVector,
-                        indexName,
-                        limit,
-                        numCandidates),
-                project(
-                        fields(include("_id"), metaVectorSearchScore("score"))
-                )
+                vectorSearch(fieldSearchPath, queryVector, indexName, limit, numCandidates),
+                project(fields(include("_id"), metaVectorSearchScore("score")))
         );
 
-        Map<String, Double> resultsWithScores = collection.aggregate(pipeline)
-                .map(doc -> {
-                    System.out.println(doc.toJson());
-                    double score = doc.getDouble("score");
-                    if (score > relevanceThreshold) {
-                        return Map.entry(doc.getObjectId("_id").toString(), score);
-                    }
-                    return null;
-                })
-                .into(new ArrayList<>())
-                .stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        List<ResultWithScore> allResultsWithScores = collection.aggregate(pipeline)
+                .map(doc -> new ResultWithScore(doc.getObjectId("_id").toString(), doc.getDouble("score")))
+                .into(new ArrayList<>());
 
-        List<String> results = new ArrayList<>(resultsWithScores.keySet());
-        List<Content> returnedContent = contentService.findByArrayOfIds(results);
+        List<String> filteredResults = allResultsWithScores.stream()
+                .filter(result -> result.getScore() > relevanceThreshold)
+                .map(ResultWithScore::getId)
+                .toList();
 
         SearchHistory searchHistory = new SearchHistory();
         searchHistory.setPrompt(prompt);
-        searchHistory.setResultsWithScores(resultsWithScores);
-        searchHistory.setReturnedContent(returnedContent);
-        searchHistory.setTimestamp(System.currentTimeMillis());
+        searchHistory.setAllResultsWithScores(allResultsWithScores);
+        searchHistory.setTimestamp(ZonedDateTime.now(ZoneId.of("America/Detroit")));
 
         searchHistoryRepository.save(searchHistory);
 
-        return returnedContent;
+        return contentService.findByArrayOfIds(filteredResults);
     }
 
     private List<Double> generateVectorForPrompt(String prompt) {
