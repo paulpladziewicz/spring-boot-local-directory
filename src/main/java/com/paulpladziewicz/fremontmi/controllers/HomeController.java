@@ -23,6 +23,11 @@ public class HomeController {
         return "about";
     }
 
+    @GetMapping("/search")
+    public String search() {
+        return "spa";
+    }
+
     @GetMapping("/tagging-guidelines")
     public String getTags(Model model) {
         return "tagging-guidelines";
