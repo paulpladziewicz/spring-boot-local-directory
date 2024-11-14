@@ -32,11 +32,17 @@ public class VectorController {
         return ResponseEntity.ok(dtos);
     }
 
-    @PostMapping("/{id}/generate")
-    public ResponseEntity<List<Double>> generateVector(@PathVariable String id) {
-        List<Double> vector = vectorService.generateVector(id);
-        return ResponseEntity.ok(vector);
-    }
+//    @PostMapping("/{id}/generate")
+//    public ResponseEntity<List<Double>> generateVector(@PathVariable String id) {
+//        List<Double> vector = vectorService.generateVector(id);
+//        return ResponseEntity.ok(vector);
+//    }
+//
+//    @PostMapping("/generate")
+//    public ResponseEntity<String> generateVector() {
+//        vectorService.generateVectorsForAllContent();
+//        return ResponseEntity.ok("completed");
+//    }
 
     private VectorSearchDto convertToDTO(Content content) {
         return new VectorSearchDto(

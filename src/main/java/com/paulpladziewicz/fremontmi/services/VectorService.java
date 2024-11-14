@@ -6,8 +6,10 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.search.FieldSearchPath;
 import com.paulpladziewicz.fremontmi.models.Content;
 import com.paulpladziewicz.fremontmi.models.ContentVector;
+import com.paulpladziewicz.fremontmi.models.SearchHistory;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import com.paulpladziewicz.fremontmi.repositories.ContentVectorRepository;
+import com.paulpladziewicz.fremontmi.repositories.SearchHistoryRepository;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,12 +39,14 @@ public class VectorService {
 
     private final ContentRepository contentRepository;
     private final ContentVectorRepository contentVectorRepository;
+    private final SearchHistoryRepository searchHistoryRepository;
     private final RestTemplate restTemplate;
     private final MongoClient mongoClient;
 
-    public VectorService(ContentRepository contentRepository, ContentVectorRepository contentVectorRepository, RestTemplate restTemplate, MongoClient mongoClient, ContentService contentService) {
+    public VectorService(ContentRepository contentRepository, ContentVectorRepository contentVectorRepository, SearchHistoryRepository searchHistoryRepository, RestTemplate restTemplate, MongoClient mongoClient, ContentService contentService) {
         this.contentRepository = contentRepository;
         this.contentVectorRepository = contentVectorRepository;
+        this.searchHistoryRepository = searchHistoryRepository;
         this.restTemplate = restTemplate;
         this.mongoClient = mongoClient;
         this.contentService = contentService;
@@ -55,8 +59,8 @@ public class VectorService {
 
         String indexName = "vector_index";
         FieldSearchPath fieldSearchPath = fieldPath("vector");
-        int limit = 5;
         int numCandidates = 5;
+        int limit = 5;
         double relevanceThreshold = 0.67;
 
         List<Bson> pipeline = asList(
@@ -71,21 +75,32 @@ public class VectorService {
                 )
         );
 
-        List<String> results = collection.aggregate(pipeline)
+        Map<String, Double> resultsWithScores = collection.aggregate(pipeline)
                 .map(doc -> {
                     System.out.println(doc.toJson());
                     double score = doc.getDouble("score");
                     if (score > relevanceThreshold) {
-                        return doc.getObjectId("_id").toString();
+                        return Map.entry(doc.getObjectId("_id").toString(), score);
                     }
                     return null;
                 })
-                .into(new ArrayList<>())  // Collect all documents into a list
+                .into(new ArrayList<>())
                 .stream()
-                .filter(Objects::nonNull)  // Remove null values for irrelevant items
-                .collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        return contentService.findByArrayOfIds(results);
+        List<String> results = new ArrayList<>(resultsWithScores.keySet());
+        List<Content> returnedContent = contentService.findByArrayOfIds(results);
+
+        SearchHistory searchHistory = new SearchHistory();
+        searchHistory.setPrompt(prompt);
+        searchHistory.setResultsWithScores(resultsWithScores);
+        searchHistory.setReturnedContent(returnedContent);
+        searchHistory.setTimestamp(System.currentTimeMillis());
+
+        searchHistoryRepository.save(searchHistory);
+
+        return returnedContent;
     }
 
     private List<Double> generateVectorForPrompt(String prompt) {
@@ -112,6 +127,18 @@ public class VectorService {
         }
 
         return (List<Double>) ((Map<String, Object>) ((List<?>) response.getBody().get("data")).get(0)).get("embedding");
+    }
+
+    public void generateVectorsForAllContent() {
+        List<Content> allContent = contentRepository.findAll();
+
+        allContent.forEach(content -> {
+            try {
+                generateVector(content.getId());
+            } catch (Exception e) {
+                System.err.println("Failed to generate vector for content ID: " + content.getId() + ". Error: " + e.getMessage());
+            }
+        });
     }
 
     public List<Double> generateVector(String contentId) {
