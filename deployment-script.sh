@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define paths
-APP_PROPS_FILE="$HOME/Projects/fremontmi/src/main/resources/application.properties"
+APP_PROPS_FILE="$HOME/Projects/westmichigansoftware/fremontmi/src/main/resources/application.properties"
 DEV_PROPS_FILE="$HOME/Projects/westmichigansoftware/config/dev/application.properties"
 PROD_PROPS_FILE="$HOME/Projects/westmichigansoftware/config/prod/application.properties"
 POM_FILE="pom.xml"
@@ -71,9 +71,7 @@ NEW_LAUNCH_TEMPLATE_VERSION=$(aws ec2 create-launch-template-version \
     --launch-template-name "$LAUNCH_TEMPLATE_NAME" \
     --source-version "$LATEST_VERSION" \
     --version-description "Updated for version ${CURRENT_VERSION}" \
-    --launch-template-data "{
-        \"UserData\": \"$BASE64_USER_DATA\"
-    }" \
+    --launch-template-data "{ \"UserData\": \"$BASE64_USER_DATA\" }" \
     --query 'LaunchTemplateVersion.VersionNumber' \
     --output text)
 
