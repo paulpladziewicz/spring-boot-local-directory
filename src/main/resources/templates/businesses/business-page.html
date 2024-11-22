@@ -34,28 +34,40 @@
             <div class="col-lg-8 mx-auto mb-4">
                 <h1 th:text="${business.detail.title}" class="display-3 mb-3">Fremont Business Name</h1>
 
-                <ul class="list-unstyled">
-                    <li class="nav flex-nowrap mb-3" th:if="${business.detail.address} != null and !${#strings.isEmpty(business.detail.address)}">
-                        <i class="ai-map-pin lead text-primary me-2"></i>
-                        <span class="nav-link fw-normal p-0 mt-n1" th:text="${business.detail.address}">514 S. Magnolia St. Orlando, FL 32806</span>
-                    </li>
-                    <li class="nav flex-nowrap mb-3" th:if="${business.detail.phoneNumber} != null and !${#strings.isEmpty(business.detail.phoneNumber)}">
-                        <i class="ai-phone lead text-primary me-2"></i>
-                        <a class="nav-link fw-normal p-0 mt-n1" th:href="'tel:'+${business.detail.phoneNumber}" th:text="${business.detail.phoneNumber}">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;40</a>
-                    </li>
-                    <li class="nav flex-nowrap mb-3" th:if="${business.detail.displayEmail} and ${business.detail.email} != null and !${#strings.isEmpty(business.detail.email)}">
-                        <i class="ai-mail lead text-primary me-2"></i>
-                        <a class="nav-link fw-normal p-0 mt-n1" th:href="'mailto:' + ${business.detail.email}" th:text="${business.detail.email}">orlando@example.com</a>
-                    </li>
-                    <li class="nav flex-nowrap mb-3" th:if="${business.detail.website} != null and !${#strings.isEmpty(business.detail.website)}">
-                        <i class="ai-globe lead text-primary me-2"></i>
-                        <a class="nav-link fw-normal p-0 mt-n1"
-                           th:href="${#strings.startsWith(business.detail.website, 'http') ? business.detail.website : 'https://' + business.detail.website}"
-                           target="_blank" rel="noopener noreferrer" th:text="${business.detail.website}">
-                            www.example.com
-                        </a>
-                    </li>
-                </ul>
+                <div class="d-md-flex">
+                    <ul class="list-unstyled me-5">
+                        <li class="nav flex-nowrap mb-3" th:if="${business.detail.address} != null and !${#strings.isEmpty(business.detail.address)}">
+                            <i class="ai-map-pin lead text-primary me-2"></i>
+                            <span class="nav-link fw-normal p-0 mt-n1" th:text="${business.detail.address}">514 S. Magnolia St. Orlando, FL 32806</span>
+                        </li>
+                        <li class="nav flex-nowrap mb-3" th:if="${business.detail.phoneNumber} != null and !${#strings.isEmpty(business.detail.phoneNumber)}">
+                            <i class="ai-phone lead text-primary me-2"></i>
+                            <a class="nav-link fw-normal p-0 mt-n1" th:href="'tel:'+${business.detail.phoneNumber}" th:text="${business.detail.phoneNumber}">+1&nbsp;(786)&nbsp;322&nbsp;560&nbsp;40</a>
+                        </li>
+                        <li class="nav flex-nowrap mb-3" th:if="${business.detail.displayEmail} and ${business.detail.email} != null and !${#strings.isEmpty(business.detail.email)}">
+                            <i class="ai-mail lead text-primary me-2"></i>
+                            <a class="nav-link fw-normal p-0 mt-n1" th:href="'mailto:' + ${business.detail.email}" th:text="${business.detail.email}">orlando@example.com</a>
+                        </li>
+                        <li class="nav flex-nowrap mb-3" th:if="${business.detail.website} != null and !${#strings.isEmpty(business.detail.website)}">
+                            <i class="ai-globe lead text-primary me-2"></i>
+                            <a class="nav-link fw-normal p-0 mt-n1"
+                               th:href="${#strings.startsWith(business.detail.website, 'http') ? business.detail.website : 'https://' + business.detail.website}"
+                               target="_blank" rel="noopener noreferrer" th:text="${business.detail.website}">
+                                www.example.com
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div>
+                        <ul class="list-unstyled">
+                            <th:block th:if="${business.detail.businessHours != null}">
+                                <th:block th:each="entry : ${business.detail.businessHours}">
+                                    <li class="fw-medium mb-1"><span th:text="${entry.key}"></span>: <span th:text="${entry.value}"></span></li>
+                                </th:block>
+                            </th:block>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
