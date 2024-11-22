@@ -4,10 +4,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.search.FieldSearchPath;
-import com.paulpladziewicz.fremontmi.models.Content;
-import com.paulpladziewicz.fremontmi.models.ContentVector;
-import com.paulpladziewicz.fremontmi.models.ResultWithScore;
-import com.paulpladziewicz.fremontmi.models.SearchHistory;
+import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
 import com.paulpladziewicz.fremontmi.repositories.ContentVectorRepository;
 import com.paulpladziewicz.fremontmi.repositories.SearchHistoryRepository;
@@ -23,7 +20,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Aggregates.project;
@@ -142,7 +138,7 @@ public class VectorService {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new RuntimeException("Content not found"));
 
-        String inputText = content.getDetail().getTitle() + " " + content.getDetail().getDescription(); // Combine title and description
+        String inputText = buildInputText(content);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -162,6 +158,7 @@ public class VectorService {
 
             ContentVector contentVector = new ContentVector();
             contentVector.setContentId(contentId);
+            contentVector.setInputText(inputText);
             contentVector.setVector(vector);
 
             contentVectorRepository.save(contentVector);
@@ -169,6 +166,32 @@ public class VectorService {
         } else {
             throw new RuntimeException("Failed to generate vector: " + response.getStatusCode());
         }
+    }
+
+    private String buildInputText(Content content) {
+        ContentDetail detail = content.getDetail();
+        ContentType type = content.getType();
+
+        StringBuilder inputBuilder = new StringBuilder("Type: ").append(type.toHyphenatedString());
+
+        if (detail instanceof Group group) {
+            inputBuilder.append(" | Title: ").append(group.getTitle())
+                    .append(" | Description: ").append(group.getDescription());
+        } else if (detail instanceof Event event) {
+            inputBuilder.append(" | Title: ").append(event.getTitle())
+                    .append(" | Description: ").append(event.getDescription());
+        } else if (detail instanceof Business business) {
+            inputBuilder.append(" | Title: ").append(business.getTitle())
+                    .append(" | Description: ").append(business.getDescription());
+        } else if (detail instanceof NeighborServicesProfile profile) {
+            inputBuilder.append(" | Title: ").append(profile.getTitle()).append(" | Description: ").append(profile.getDescription());
+        }
+
+        if (!content.getTags().isEmpty()) {
+            inputBuilder.append(" | Tags: ").append(String.join(", ", content.getTags()));
+        }
+
+        return inputBuilder.toString();
     }
 }
 

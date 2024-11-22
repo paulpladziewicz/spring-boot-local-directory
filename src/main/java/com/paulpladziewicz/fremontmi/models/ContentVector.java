@@ -13,5 +13,7 @@ public class ContentVector {
     @Id
     private String contentId;
 
+    private String inputText;
+
     private List<Double> vector;
 }
