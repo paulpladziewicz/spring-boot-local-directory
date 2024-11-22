@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class Group implements ContentDetail {
@@ -11,6 +12,10 @@ public class Group implements ContentDetail {
     private String title;
 
     private String description;
+
+    private String externalUrl;
+
+    private Map<String, Object> images;
 
     private List<Announcement> announcements = new ArrayList<>();
 

@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Transient;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,6 +32,8 @@ public class Event implements ContentDetail {
     private List<String> formattedTimes;
 
     private String externalUrl;
+
+    private Map<String, Object> images;
 
     @Override
     public void update(Content content, ContentDto contentDto) {

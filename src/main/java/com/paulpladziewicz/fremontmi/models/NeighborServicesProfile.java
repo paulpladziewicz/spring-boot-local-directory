@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class NeighborServicesProfile implements ContentDetail {
@@ -19,6 +20,12 @@ public class NeighborServicesProfile implements ContentDetail {
     private String profileImageUrl;
 
     private String profileImageFileName;
+
+    private Map<String, Object> images;
+
+    private String externalUrl;
+
+    private Map<String, String> socialLinks;
 
     @Override
     public void update(Content content, ContentDto contentDto) {

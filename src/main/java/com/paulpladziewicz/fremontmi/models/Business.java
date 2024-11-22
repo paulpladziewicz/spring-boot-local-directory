@@ -2,6 +2,8 @@ package com.paulpladziewicz.fremontmi.models;
 
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 public class Business implements ContentDetail {
 
@@ -21,6 +23,14 @@ public class Business implements ContentDetail {
     private boolean displayEmail = false;
 
     private String website;
+
+    private Map<String, String> socialLinks;
+
+    private Map<String, String> businessHours;
+    private Map<String, String> seasonalHours;
+    private Map<String, String> holidayHours;
+
+    private Map<String, Object> images;
 
     @Override
     public void update(Content content, ContentDto contentDto) {
