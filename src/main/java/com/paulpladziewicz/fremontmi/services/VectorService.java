@@ -56,11 +56,11 @@ public class VectorService {
         MongoCollection<Document> collection = database.getCollection("content_vectors");
         List<Double> queryVector = generateVectorForPrompt(prompt);
 
-        String indexName = "vector_index";
+        String indexName = "vector_index_cosine";
         FieldSearchPath fieldSearchPath = fieldPath("vector");
         int numCandidates = 5;
         int limit = 5;
-        double relevanceThreshold = 0.67;
+        double relevanceThreshold = 0.65;
 
         List<Bson> pipeline = asList(
                 vectorSearch(fieldSearchPath, queryVector, indexName, limit, numCandidates),
@@ -102,7 +102,7 @@ public class VectorService {
         headers.setBearerAuth(apiKey);
 
         Map<String, Object> requestBody = Map.of(
-                "model", "text-embedding-ada-002",
+                "model", "text-embedding-3-large",
                 "input", prompt
         );
 
@@ -145,7 +145,7 @@ public class VectorService {
         headers.setBearerAuth(apiKey);
 
         Map<String, Object> requestBody = Map.of(
-                "model", "text-embedding-ada-002",
+                "model", "text-embedding-3-large",
                 "input", inputText
         );
 
