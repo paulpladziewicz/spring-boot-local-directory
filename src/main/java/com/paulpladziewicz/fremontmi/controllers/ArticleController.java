@@ -28,11 +28,6 @@ public class ArticleController {
         return "articles/parks";
     }
 
-    @GetMapping("/articles/prepare-to-vote")
-    public String registerToVote(Model model) {
-        return "articles/prepare-to-vote";
-    }
-
     @GetMapping("/articles/coming-soon-taqueria-de-gallo")
     public String ComingSoonTaqueriaDeGallo(Model model) {
         return "articles/coming-soon-taqueria-de-gallo";
