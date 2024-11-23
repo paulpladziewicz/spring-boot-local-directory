@@ -193,5 +193,9 @@ public class VectorService {
 
         return inputBuilder.toString();
     }
+
+    public void delete(String contentId) {
+        contentVectorRepository.deleteById(contentId);
+    }
 }
 

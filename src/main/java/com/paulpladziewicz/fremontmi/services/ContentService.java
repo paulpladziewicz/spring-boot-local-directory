@@ -3,7 +3,9 @@ package com.paulpladziewicz.fremontmi.services;
 import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
 import com.paulpladziewicz.fremontmi.exceptions.PermissionDeniedException;
 import com.paulpladziewicz.fremontmi.models.*;
+import com.paulpladziewicz.fremontmi.repositories.ContentArchiveRepository;
 import com.paulpladziewicz.fremontmi.repositories.ContentRepository;
+import com.paulpladziewicz.fremontmi.repositories.ContentVectorRepository;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +21,15 @@ import java.util.stream.Collectors;
 public class ContentService {
 
     private final ContentRepository contentRepository;
+    private final ContentArchiveRepository contentArchiveRepository;
+    private final ContentVectorRepository contentVectorRepository;
     private final UserService userService;
     private final TagService tagService;
 
-    public ContentService(ContentRepository contentRepository, UserService userService, TagService tagService) {
+    public ContentService(ContentRepository contentRepository, ContentArchiveRepository contentArchiveRepository, ContentVectorRepository contentVectorRepository, UserService userService, TagService tagService) {
         this.contentRepository = contentRepository;
+        this.contentArchiveRepository = contentArchiveRepository;
+        this.contentVectorRepository = contentVectorRepository;
         this.userService = userService;
         this.tagService = tagService;
     }
@@ -128,12 +134,24 @@ public class ContentService {
         return contentRepository.save(content);
     }
 
+    public void archive(String contentId) {
+        UserProfile userProfile = userService.getUserProfile();
+        Content content = findById(contentId);
+        checkPermission(content);
+        tagService.removeTags(content.getTags(), content.getType());
+        removeContentFromUserProfile(userProfile, content.getType(), ContentAction.CREATED, contentId);
+        contentArchiveRepository.save(content);
+        contentVectorRepository.deleteById(contentId);
+        contentRepository.deleteById(contentId);
+    }
+
     public void delete(String contentId) {
         UserProfile userProfile = userService.getUserProfile();
         Content content = findById(contentId);
         checkPermission(content);
         tagService.removeTags(content.getTags(), content.getType());
         removeContentFromUserProfile(userProfile, content.getType(), ContentAction.CREATED, contentId);
+        contentVectorRepository.deleteById(contentId);
         contentRepository.deleteById(contentId);
     }
 
