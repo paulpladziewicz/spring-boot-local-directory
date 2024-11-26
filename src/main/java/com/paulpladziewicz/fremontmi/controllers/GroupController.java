@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -66,6 +67,13 @@ public class GroupController {
         model.addAttribute("groups", groups);
         model.addAttribute("groups", groups);
         return "groups/groups";
+    }
+
+    @GetMapping("/api/groups")
+    public ResponseEntity<Page<Content>> getEvents(@RequestParam(defaultValue = "0") int page) {
+        Page<Content> groups = contentService.findByType(ContentType.GROUP, page);
+
+        return ResponseEntity.ok(groups);
     }
 
     @GetMapping("/groups/page/{currentPage}")
