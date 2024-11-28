@@ -23,14 +23,12 @@ public class NeighborServicesProfileController {
 
     private final ContentService contentService;
 
-    private final TagService tagService;
 
     private final UserService userService;
 
-    public NeighborServicesProfileController(HtmlSanitizationService htmlSanitizationService, ContentService contentService, TagService tagService, UserService userService) {
+    public NeighborServicesProfileController(HtmlSanitizationService htmlSanitizationService, ContentService contentService, UserService userService) {
         this.htmlSanitizationService = htmlSanitizationService;
         this.contentService = contentService;
-        this.tagService = tagService;
         this.userService = userService;
     }
 
@@ -39,63 +37,10 @@ public class NeighborServicesProfileController {
         return "neighborservices/overview";
     }
 
-    @GetMapping("/create/neighbor-services-profile")
-    public String createNeighborServicesProfileForm(Model model) {
-        try {
-            List<Content> contentList = contentService.findByUserAndType(ContentType.NEIGHBOR_SERVICES_PROFILE);
-
-            if (contentList.isEmpty()) {
-                NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
-                neighborServicesProfile.getNeighborServices().add(new NeighborService());
-
-                model.addAttribute("neighborServicesProfile", neighborServicesProfile);
-
-                return "neighborservices/create-neighbor-services-profile";
-            }
-
-            return "redirect:/my/neighbor-services-profile";
-        } catch (ContentNotFoundException e) {
-            NeighborServicesProfile neighborServicesProfile = new NeighborServicesProfile();
-            neighborServicesProfile.getNeighborServices().add(new NeighborService());
-
-            model.addAttribute("neighborServicesProfile", neighborServicesProfile);
-
-            return "neighborservices/create-neighbor-services-profile";
-        }
-    }
-
-    @PostMapping("/create/neighbor-services-profile")
-    public String createNeighborServiceSubscription(@Valid @ModelAttribute("neighborService") NeighborServicesProfileDto neighborServicesProfile, BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("tagsAsString", String.join(",", neighborServicesProfile.getTags()));
-            return "neighborservices/create-neighbor-services-profile";
-        }
-
-        Content createdNeighborServicesProfile = contentService.create(ContentType.NEIGHBOR_SERVICES_PROFILE, neighborServicesProfile);
-
-        return "redirect:" + createdNeighborServicesProfile.getPathname();
-    }
 
     @GetMapping("/neighbor-services")
-    public String displayActiveNeighborServices(@RequestParam(value = "tag", required = false) String tag, @RequestParam(defaultValue = "0") int page,  Model model) {
-        Page<Content> profiles;
-        if (tag != null && !tag.isEmpty()) {
-            profiles = contentService.findByTagAndType(tag, ContentType.NEIGHBOR_SERVICES_PROFILE, page);
-
-        } else {
-            profiles = contentService.findByType(ContentType.NEIGHBOR_SERVICES_PROFILE, page);
-        }
-
-        List<TagUsage> popularTags = tagService.getTagUsageFromContent(profiles, 15);
-        model.addAttribute("popularTags", popularTags);
-        model.addAttribute("selectedTag", tag);
-
-        // TODO still displaying profiles that do not have any neighbor services
-
-        model.addAttribute("profiles", profiles);
-        model.addAttribute("profilesList", profiles.getContent());
-
-        return "neighborservices/neighbor-services";
+    public String displayActiveNeighborServices() {
+        return "spa";
     }
 
     @GetMapping("/neighbor-services-profile/{slug}")
@@ -123,65 +68,6 @@ public class NeighborServicesProfileController {
         model.addAttribute("myProfile", createdByUser);
 
         return "neighborservices/neighbor-services-profile-page";
-    }
-
-    @GetMapping("/my/neighbor-services-profile")
-    public String viewMyNeighborServiceProfile(Model model) {
-        try {
-            Optional<Content> optionalContent = contentService.findByTypeAndUserCreatedBy(ContentType.NEIGHBOR_SERVICES_PROFILE);
-
-            if (optionalContent.isEmpty()) {
-                return "redirect:/create/neighbor-services-profile";
-            }
-
-            Content content = optionalContent.get();
-
-            NeighborServicesProfile detail = (NeighborServicesProfile) content.getDetail();
-
-            detail.setDescription(htmlSanitizationService.sanitizeHtml(detail.getDescription().replace("\n", "<br/>")));
-
-            model.addAttribute("neighborServicesProfile", content);
-            model.addAttribute("myProfile", true);
-            return "neighborservices/neighbor-services-profile-page";
-        } catch (ContentNotFoundException e) {
-            return "redirect:/create/neighbor-services-profile";
-        }
-    }
-
-    @GetMapping("/edit/neighbor-services-profile/{slug}")
-    public String editNeighborServiceProfilePage(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.NEIGHBOR_SERVICES_PROFILE.toHyphenatedString() + '/' + slug, ContentType.NEIGHBOR_SERVICES_PROFILE);
-        NeighborServicesProfileDto neighborServicesProfile = createDto(content);
-
-        String tagsAsString = String.join(",", neighborServicesProfile.getTags());
-        model.addAttribute("tagsAsString", tagsAsString);
-
-        model.addAttribute("neighborServicesProfile", neighborServicesProfile);
-
-        return "neighborservices/edit-neighbor-services-profile";
-    }
-
-
-    @PostMapping("/edit/neighbor-services-profile")
-    public String editNeighborService(@Valid @ModelAttribute("neighborService") NeighborServicesProfileDto neighborServicesProfileDto, BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("tagsAsString", String.join(",", neighborServicesProfileDto.getTags()));
-            return "neighborservices/edit-neighbor-services-profile";
-        }
-
-        Content content = contentService.update(neighborServicesProfileDto);
-        NeighborServicesProfileDto neighborServicesProfile = createDto(content);
-
-        model.addAttribute("neighborService", neighborServicesProfile);
-
-        return "redirect:/my/neighbor-services-profile";
-    }
-
-    @PostMapping("/delete/neighbor-services-profile")
-    public String deleteGroup(@RequestParam(value = "contentId") String contentId) {
-        contentService.delete(contentId);
-
-        return "redirect:/neighbor-services";
     }
 
     private NeighborServicesProfileDto createDto(Content content) {

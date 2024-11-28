@@ -37,51 +37,9 @@ public class GroupController {
         this.notificationService = notificationService;
     }
 
-    @GetMapping("/create/group")
-    public String displayCreateForm(Model model) {
-        model.addAttribute("group", new Group());
-        return "groups/create-group";
-    }
-
-    @PostMapping("/create/group")
-    public String createGroup(@ModelAttribute("group") @Valid GroupDto group, BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            return "groups/create-group";
-        }
-
-        Content createdGroup = contentService.create(ContentType.GROUP, group);
-
-        return "redirect:" + createdGroup.getPathname();
-    }
-
     @GetMapping("/groups")
-    public String displayGroups(@RequestParam(value = "tag", required = false) String tag, @RequestParam(defaultValue = "0") int page, Model model) {
-        Page<Content> groups;
-        if (tag != null && !tag.isEmpty()) {
-            groups = contentService.findByTagAndType(tag, ContentType.GROUP, page);
-
-        } else {
-            groups = contentService.findByType(ContentType.GROUP, page);
-        }
-
-        model.addAttribute("groups", groups);
-        model.addAttribute("groups", groups);
-        return "groups/groups";
-    }
-
-    @GetMapping("/api/groups")
-    public ResponseEntity<Page<Content>> getEvents(@RequestParam(defaultValue = "0") int page) {
-        Page<Content> groups = contentService.findByType(ContentType.GROUP, page);
-
-        return ResponseEntity.ok(groups);
-    }
-
-    @GetMapping("/groups/page/{currentPage}")
-    public String displayNextGroups(@PathVariable int currentPage, Model model) {
-        Page<Content> groups = contentService.findByType(ContentType.GROUP, currentPage + 1);
-
-        model.addAttribute("groups", groups);
-        return "groups/partials/list-groups";
+    public String displayGroups() {
+        return "spa";
     }
 
     @GetMapping("/group/{slug}")
@@ -105,47 +63,6 @@ public class GroupController {
         }
 
         return "groups/group-page";
-    }
-
-    @GetMapping("/my/groups")
-    public String groups(Model model) {
-        List<Content> groups = contentService.findByUserAndType(ContentType.GROUP);
-
-        model.addAttribute("groups", groups);
-
-        return "groups/my-groups";
-    }
-
-    @GetMapping("/edit/group/{slug}")
-    public String getEditGroupForm(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.GROUP.toHyphenatedString() + '/' + slug, ContentType.GROUP);
-        GroupDto group = createDto(content);
-
-        String tagsAsString = String.join(",", group.getTags());
-        model.addAttribute("tagsAsString", tagsAsString);
-
-        model.addAttribute("group", group);
-
-        return "groups/edit-group";
-    }
-
-    @PostMapping("/edit/group")
-    public String updateGroup(@ModelAttribute("group") @Valid GroupDto group, BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("tagsAsString", String.join(",", group.getTags()));
-            return "groups/edit-group";
-        }
-
-        Content updatedGroup = contentService.update(group);
-
-        return "redirect:" + updatedGroup.getPathname();
-    }
-
-    @PostMapping("/delete/group")
-    public String deleteGroup(@RequestParam(value = "contentId") String contentId) {
-        contentService.delete(contentId);
-
-        return "redirect:/my/groups";
     }
 
     @PostMapping("/join/group")

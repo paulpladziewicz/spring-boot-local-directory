@@ -115,6 +115,11 @@ public class ContentService {
         return contentRepository.findEventsAfterStartTime(startOfToday, pageable);
     }
 
+    public Page<Content> findLatestContent (int page) {
+        Pageable pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "_id"));
+        return contentRepository.findAll(pageable);
+    }
+
     public List<String> getAllContentEntityUrls() {
         List<Content> publicContent = contentRepository.findAllPublicContentPathnames();
         String baseUrl = "https://fremontmi.com";

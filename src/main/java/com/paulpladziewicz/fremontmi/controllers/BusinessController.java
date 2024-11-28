@@ -7,6 +7,7 @@ import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
 import com.paulpladziewicz.fremontmi.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,41 +28,9 @@ public class BusinessController {
         this.userService = userService;
     }
 
-    @GetMapping("/create/business")
-    public String createBusinessListingView(Model model) {
-        Business business = new Business();
-
-        model.addAttribute("business", business);
-
-        return "businesses/create-business";
-    }
-
-    @PostMapping("/create/business")
-    public String createBusinessListing(@Valid @ModelAttribute("business") BusinessDto businessDto, Model model, BindingResult result) {
-        if (result.hasErrors()) {
-            model.addAttribute("tagsAsString", String.join(",", businessDto.getTags()));
-            return "businesses/create-business";
-        }
-
-        Content savedBusiness = contentService.create(ContentType.BUSINESS, businessDto);
-
-        return "redirect:" + savedBusiness.getPathname();
-    }
-
     @GetMapping("/businesses")
-    public String displayActiveBusinesses(@RequestParam(value = "tag", required = false) String tag, @RequestParam(defaultValue = "0") int page,  Model model) {
-        Page<Content> businesses;
-        if (tag != null && !tag.isEmpty()) {
-            businesses = contentService.findByTagAndType(tag, ContentType.BUSINESS, page);
-
-        } else {
-            businesses = contentService.findByType(ContentType.BUSINESS, page);
-        }
-
-        model.addAttribute("businesses", businesses);
-        model.addAttribute("businessListings", businesses.getContent());
-
-        return "businesses/businesses";
+    public String displayActiveBusinesses() {
+        return "spa";
     }
 
     @GetMapping("/business/{slug}")
@@ -86,49 +55,6 @@ public class BusinessController {
         model.addAttribute("business", content);
 
         return "businesses/business-page";
-    }
-
-    @GetMapping("/my/businesses")
-    public String getMyBusinesses(Model model) {
-        List<Content> businesses = contentService.findByUserAndType(ContentType.BUSINESS);
-
-        model.addAttribute("businesses", businesses);
-
-        return "businesses/my-businesses";
-    }
-
-    @GetMapping("/edit/business/{slug}")
-    public String editBusiness(@PathVariable String slug, Model model) {
-        Content content = contentService.findByPathname('/' + ContentType.BUSINESS.toHyphenatedString() + '/' + slug, ContentType.BUSINESS);
-        BusinessDto business = createDto(content);
-
-        String tagsAsString = String.join(",", business.getTags());
-        model.addAttribute("tagsAsString", tagsAsString);
-
-        model.addAttribute("business", business);
-
-        return "businesses/edit-business";
-    }
-
-    @PostMapping("/edit/business")
-    public String updateBusiness(@Valid @ModelAttribute("business") BusinessDto businessDto, BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("tagsAsString", String.join(",", businessDto.getTags()));
-            return "businesses/edit-business";
-        }
-
-        Content updatedBusiness = contentService.update(businessDto);
-
-        model.addAttribute("business", updatedBusiness);
-
-        return "redirect:" + updatedBusiness.getPathname();
-    }
-
-    @PostMapping("/delete/business")
-    public String deleteBusiness(@RequestParam("contentId") String contentId) {
-        contentService.delete(contentId);
-
-        return "redirect:/my/businesses";
     }
 
     private BusinessDto createDto(Content content) {
