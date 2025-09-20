@@ -10,7 +10,6 @@ import com.paulpladziewicz.fremontmi.content.NeighborServicesProfile;
 import com.paulpladziewicz.fremontmi.content.NeighborServicesProfileDto;
 import com.paulpladziewicz.fremontmi.discovery.TagService;
 import com.paulpladziewicz.fremontmi.discovery.TagUsage;
-import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.user.UserService;
 
 import jakarta.validation.Valid;

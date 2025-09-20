@@ -8,10 +8,8 @@ import com.paulpladziewicz.fremontmi.content.ContentType;
 import com.paulpladziewicz.fremontmi.content.Group;
 import com.paulpladziewicz.fremontmi.content.GroupDto;
 import com.paulpladziewicz.fremontmi.content.InteractionService;
-import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.notification.EmailRequest;
 import com.paulpladziewicz.fremontmi.notification.NotificationService;
-import com.paulpladziewicz.fremontmi.services.*;
 import com.paulpladziewicz.fremontmi.user.UserService;
 
 import jakarta.validation.Valid;

@@ -4,7 +4,6 @@ import com.paulpladziewicz.fremontmi.app.exceptions.StripeServiceException;
 import com.paulpladziewicz.fremontmi.billing.BillingService;
 import com.paulpladziewicz.fremontmi.billing.InvoiceDTO;
 import com.paulpladziewicz.fremontmi.billing.SubscriptionDTO;
-import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.notification.ConfirmSubscriptionRequest;
 import com.stripe.model.Invoice;
 import com.stripe.model.Subscription;

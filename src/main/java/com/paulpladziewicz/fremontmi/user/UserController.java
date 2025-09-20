@@ -1,7 +1,6 @@
 package com.paulpladziewicz.fremontmi.user;
 
 import com.paulpladziewicz.fremontmi.app.ServiceResponse;
-import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.notification.EmailDto;
 
 import jakarta.validation.Valid;

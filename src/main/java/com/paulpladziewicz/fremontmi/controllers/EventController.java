@@ -10,7 +10,6 @@ import com.paulpladziewicz.fremontmi.content.DayEvent;
 import com.paulpladziewicz.fremontmi.content.Event;
 import com.paulpladziewicz.fremontmi.content.EventDto;
 import com.paulpladziewicz.fremontmi.content.InteractionService;
-import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.user.UserService;
 
 import jakarta.validation.Valid;

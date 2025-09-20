@@ -5,7 +5,6 @@ import com.paulpladziewicz.fremontmi.content.Content;
 import com.paulpladziewicz.fremontmi.content.ContentRepository;
 import com.paulpladziewicz.fremontmi.content.ContentStatus;
 import com.paulpladziewicz.fremontmi.content.ContentVisibility;
-import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.notification.ConfirmSubscriptionRequest;
 import com.paulpladziewicz.fremontmi.notification.EmailService;
 import com.paulpladziewicz.fremontmi.user.UserProfile;
@@ -25,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 

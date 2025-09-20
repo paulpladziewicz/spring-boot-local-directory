@@ -2,7 +2,6 @@ package com.paulpladziewicz.fremontmi.discovery;
 
 import com.paulpladziewicz.fremontmi.content.Content;
 import com.paulpladziewicz.fremontmi.content.ContentType;
-import com.paulpladziewicz.fremontmi.models.*;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;

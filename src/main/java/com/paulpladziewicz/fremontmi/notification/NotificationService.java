@@ -6,7 +6,6 @@ import com.paulpladziewicz.fremontmi.app.exceptions.ValidationException;
 import com.paulpladziewicz.fremontmi.content.Content;
 import com.paulpladziewicz.fremontmi.content.ContentService;
 import com.paulpladziewicz.fremontmi.content.Group;
-import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.user.UserProfile;
 import com.paulpladziewicz.fremontmi.user.UserService;
 

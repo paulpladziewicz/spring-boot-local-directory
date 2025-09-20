@@ -2,7 +2,6 @@ package com.paulpladziewicz.fremontmi.content;
 
 import org.springframework.stereotype.Service;
 
-import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.user.UserProfile;
 import com.paulpladziewicz.fremontmi.user.UserService;
 

@@ -7,7 +7,6 @@ import com.paulpladziewicz.fremontmi.content.BusinessDto;
 import com.paulpladziewicz.fremontmi.content.Content;
 import com.paulpladziewicz.fremontmi.content.ContentService;
 import com.paulpladziewicz.fremontmi.content.ContentType;
-import com.paulpladziewicz.fremontmi.models.*;
 import com.paulpladziewicz.fremontmi.user.UserService;
 
 import jakarta.validation.Valid;

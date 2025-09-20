@@ -15,7 +15,6 @@ import com.paulpladziewicz.fremontmi.content.ContentVectorRepository;
 import com.paulpladziewicz.fremontmi.content.Event;
 import com.paulpladziewicz.fremontmi.content.Group;
 import com.paulpladziewicz.fremontmi.content.NeighborServicesProfile;
-import com.paulpladziewicz.fremontmi.models.*;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
