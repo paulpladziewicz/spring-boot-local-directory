@@ -1,8 +1,9 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.models.Content;
-import com.paulpladziewicz.fremontmi.models.VectorSearchDto;
-import com.paulpladziewicz.fremontmi.services.VectorService;
+import com.paulpladziewicz.fremontmi.content.Content;
+import com.paulpladziewicz.fremontmi.discovery.VectorSearchDto;
+import com.paulpladziewicz.fremontmi.discovery.VectorService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

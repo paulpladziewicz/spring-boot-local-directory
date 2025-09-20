@@ -1,11 +1,18 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.exceptions.ContentNotFoundException;
+import com.paulpladziewicz.fremontmi.app.config.HtmlSanitizationService;
+import com.paulpladziewicz.fremontmi.app.exceptions.ContentNotFoundException;
+import com.paulpladziewicz.fremontmi.content.Content;
+import com.paulpladziewicz.fremontmi.content.ContentService;
+import com.paulpladziewicz.fremontmi.content.ContentType;
+import com.paulpladziewicz.fremontmi.content.NeighborService;
+import com.paulpladziewicz.fremontmi.content.NeighborServicesProfile;
+import com.paulpladziewicz.fremontmi.content.NeighborServicesProfileDto;
+import com.paulpladziewicz.fremontmi.discovery.TagService;
+import com.paulpladziewicz.fremontmi.discovery.TagUsage;
 import com.paulpladziewicz.fremontmi.models.*;
-import com.paulpladziewicz.fremontmi.services.ContentService;
-import com.paulpladziewicz.fremontmi.services.HtmlSanitizationService;
-import com.paulpladziewicz.fremontmi.services.TagService;
-import com.paulpladziewicz.fremontmi.services.UserService;
+import com.paulpladziewicz.fremontmi.user.UserService;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;

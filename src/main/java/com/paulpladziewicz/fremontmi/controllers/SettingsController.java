@@ -1,8 +1,9 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.models.ServiceResponse;
-import com.paulpladziewicz.fremontmi.models.UserProfile;
-import com.paulpladziewicz.fremontmi.services.UserService;
+import com.paulpladziewicz.fremontmi.app.ServiceResponse;
+import com.paulpladziewicz.fremontmi.user.UserProfile;
+import com.paulpladziewicz.fremontmi.user.UserService;
+
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

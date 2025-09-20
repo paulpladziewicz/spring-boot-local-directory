@@ -1,9 +1,10 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.models.Content;
-import com.paulpladziewicz.fremontmi.models.NeighborServicesProfile;
-import com.paulpladziewicz.fremontmi.services.ContentService;
-import com.paulpladziewicz.fremontmi.services.UploadService;
+import com.paulpladziewicz.fremontmi.content.Content;
+import com.paulpladziewicz.fremontmi.content.ContentService;
+import com.paulpladziewicz.fremontmi.content.NeighborServicesProfile;
+import com.paulpladziewicz.fremontmi.content.UploadService;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;

@@ -1,9 +1,10 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.models.AnnouncementDto;
-import com.paulpladziewicz.fremontmi.models.SimpleContactFormSubmission;
-import com.paulpladziewicz.fremontmi.models.Subscriber;
-import com.paulpladziewicz.fremontmi.services.NotificationService;
+import com.paulpladziewicz.fremontmi.notification.AnnouncementDto;
+import com.paulpladziewicz.fremontmi.notification.NotificationService;
+import com.paulpladziewicz.fremontmi.notification.SimpleContactFormSubmission;
+import com.paulpladziewicz.fremontmi.notification.Subscriber;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import org.springframework.http.HttpStatus;

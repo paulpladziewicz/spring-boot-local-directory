@@ -1,8 +1,19 @@
 package com.paulpladziewicz.fremontmi.controllers;
 
-import com.paulpladziewicz.fremontmi.exceptions.UserNotAuthenticatedException;
+import com.paulpladziewicz.fremontmi.app.config.HtmlSanitizationService;
+import com.paulpladziewicz.fremontmi.app.exceptions.UserNotAuthenticatedException;
+import com.paulpladziewicz.fremontmi.content.Content;
+import com.paulpladziewicz.fremontmi.content.ContentService;
+import com.paulpladziewicz.fremontmi.content.ContentType;
+import com.paulpladziewicz.fremontmi.content.Group;
+import com.paulpladziewicz.fremontmi.content.GroupDto;
+import com.paulpladziewicz.fremontmi.content.InteractionService;
 import com.paulpladziewicz.fremontmi.models.*;
+import com.paulpladziewicz.fremontmi.notification.EmailRequest;
+import com.paulpladziewicz.fremontmi.notification.NotificationService;
 import com.paulpladziewicz.fremontmi.services.*;
+import com.paulpladziewicz.fremontmi.user.UserService;
+
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
